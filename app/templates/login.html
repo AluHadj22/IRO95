@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Вход - ИРО ЧР{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient text-white text-center border-0">
+                    <h3 class="mb-0"><i class="bi bi-box-arrow-in-right"></i> Вход в систему</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-envelope"></i> Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-lock"></i> Пароль</label>
+                            <input type="password" class="form-control" id="password" placeholder="••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-gradient w-100 btn-lg">Войти</button>
+                    </form>
+                    <div class="mt-4 text-center">
+                        <p class="text-muted">Нет аккаунта? <a href="/register" class="text-primary">Зарегистрируйтесь</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new URLSearchParams();
+    formData.append('username', document.getElementById('email').value);
+    formData.append('password', document.getElementById('password').value);
+    
+    const response = await fetch('/api/auth/login', { method: 'POST', body: formData });
+    if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.access_token);
+        localStorage.setItem('role', data.role);
+        showToast('Вход выполнен успешно!', 'success');
+        setTimeout(() => {
+            window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
+        }, 1000);
+    } else {
+        showToast('Неверный email или пароль', 'danger');
+    }
+});
+</script>
+{% endblock %}

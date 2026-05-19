@@ -1,0 +1,958 @@
+{% extends "base.html" %}
+
+{% block title %}Админ панель - ГБУ ДПО «ИРО ЧР»{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #059669;
+        --primary-dark: #047857;
+        --primary-light: #34d399;
+        --primary-gradient: linear-gradient(135deg, #064e3b 0%, #059669 50%, #10b981 100%);
+        --secondary: #6366f1;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --white: #ffffff;
+        --border: #e5e7eb;
+    }
+    
+    .admin-sidebar {
+        background: var(--white);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .admin-sidebar .nav-link {
+        color: var(--gray);
+        padding: 12px 16px;
+        margin: 4px 0;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .admin-sidebar .nav-link i {
+        margin-right: 12px;
+        width: 20px;
+        font-size: 1.1rem;
+    }
+    
+    .admin-sidebar .nav-link:hover {
+        background: #ecfdf5;
+        color: var(--primary);
+    }
+    
+    .admin-sidebar .nav-link.active {
+        background: var(--primary-gradient);
+        color: white;
+    }
+    
+    .stat-card {
+        background: var(--white);
+        border-radius: 20px;
+        padding: 24px;
+        text-align: center;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary-light);
+        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card i {
+        font-size: 2.5rem;
+        color: var(--primary);
+    }
+    
+    .stat-card h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 12px 0 4px;
+        color: var(--dark);
+    }
+    
+    .stat-card p {
+        color: var(--gray);
+        margin: 0;
+    }
+    
+    .table-card {
+        background: var(--white);
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .table th {
+        font-weight: 600;
+        color: var(--gray);
+        padding: 16px;
+        background: var(--light);
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .table td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 12px;
+        padding: 10px 24px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+    }
+    
+    .btn-sm {
+        padding: 6px 12px;
+        border-radius: 10px;
+    }
+    
+    .badge-success {
+        background: #ecfdf5;
+        color: #059669;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .badge-danger {
+        background: #fef2f2;
+        color: #dc2626;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .badge-warning {
+        background: #fffbeb;
+        color: #d97706;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .badge-info {
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .modal-content {
+        border-radius: 24px;
+        border: none;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 20px 24px;
+    }
+    
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+    
+    .modal-body {
+        padding: 28px;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 12px 16px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+        outline: none;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: var(--dark);
+        font-size: 0.875rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #e2e8f0;
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .image-preview {
+        max-width: 150px;
+        max-height: 150px;
+        margin-top: 12px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+    }
+    
+    .speaker-item {
+        background: var(--light);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        border: 1px solid var(--border);
+        transition: all 0.2s ease;
+    }
+    
+    .speaker-item:hover {
+        border-color: var(--primary-light);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .speaker-photo-preview {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-top: 8px;
+        border: 2px solid var(--primary);
+        padding: 2px;
+    }
+    
+    .remove-speaker {
+        margin-top: 28px;
+    }
+    
+    .btn-outline-primary {
+        border: 1.5px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+        border-radius: 10px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 mb-4">
+            <div class="admin-sidebar">
+                <div class="text-center mb-4">
+                    <i class="bi bi-shield-lock-check fs-2" style="color: var(--primary);"></i>
+                    <h6 class="mt-2 fw-bold" style="color: var(--dark);">Админ панель</h6>
+                </div>
+                <hr class="my-3">
+                <div class="nav flex-column">
+                    <a class="nav-link" href="#" onclick="showSection('dashboard'); return false;">
+                        <i class="bi bi-speedometer2"></i> Дашборд
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('categories'); return false;">
+                        <i class="bi bi-folder"></i> Категории
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('courses'); return false;">
+                        <i class="bi bi-book"></i> Курсы
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('users'); return false;">
+                        <i class="bi bi-people"></i> Пользователи
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <!-- Дашборд -->
+            <div id="dashboardSection">
+                <h2 class="section-title">Панель управления</h2>
+                <p class="text-muted mb-4">Общая статистика платформы</p>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="bi bi-people"></i>
+                            <h3 id="totalUsers">0</h3>
+                            <p>Пользователей</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="bi bi-book"></i>
+                            <h3 id="totalCourses">0</h3>
+                            <p>Курсов</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="bi bi-journal-check"></i>
+                            <h3 id="totalRegistrations">0</h3>
+                            <p>Регистраций</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="bi bi-folder"></i>
+                            <h3 id="totalCategories">0</h3>
+                            <p>Категорий</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Категории -->
+            <div id="categoriesSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h2 class="section-title">Управление категориями</h2>
+                        <p class="text-muted">Создание и удаление категорий курсов</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showCreateCategoryModal()">
+                        <i class="bi bi-plus-circle me-2"></i>Создать категорию
+                    </button>
+                </div>
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr><th>ID</th><th>Название</th><th>Описание</th><th>Курсов</th><th>Действия</th></tr>
+                            </thead>
+                            <tbody id="categoriesList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Курсы -->
+            <div id="coursesSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h2 class="section-title">Управление курсами</h2>
+                        <p class="text-muted">Создание, редактирование и удаление курсов</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showCreateCourseModal()">
+                        <i class="bi bi-plus-circle me-2"></i>Создать курс
+                    </button>
+                </div>
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>Название</th><th>Категория</th><th>Цена</th>
+                                    <th>Участники</th><th>Статус</th><th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="coursesList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Пользователи -->
+            <div id="usersSection" style="display: none;">
+                <h2 class="section-title">Управление пользователями</h2>
+                <p class="text-muted mb-4">Блокировка и разблокировка пользователей</p>
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th><th>ФИО</th><th>Email</th><th>Роль</th>
+                                    <th>Курсов</th><th>Статус</th><th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно создания категории -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>Создать категорию</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createCategoryForm">
+                    <div class="mb-3">
+                        <label class="form-label">Название <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="cat_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Описание</label>
+                        <textarea class="form-control" id="cat_desc" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Создать категорию</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно создания курса -->
+<div class="modal fade" id="createCourseModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-book-plus me-2"></i>Создать курс</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createCourseForm">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Название <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="course_title" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Цена (руб)</label>
+                            <input type="number" class="form-control" id="course_price" value="0" step="100">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Краткое описание</label>
+                        <input type="text" class="form-control" id="course_short_desc">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Полное описание</label>
+                        <textarea class="form-control" id="course_desc" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Категория</label>
+                            <select class="form-select" id="course_category_id" required>
+                                <option value="">-- Выберите категорию --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Макс. участников</label>
+                            <input type="number" class="form-control" id="course_max" value="30">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Изображение курса</label>
+                        <input type="file" class="form-control" id="course_image_file" accept="image/*">
+                        <input type="hidden" id="course_image_url">
+                        <div id="course_image_preview"></div>
+                        <small class="text-muted">Загрузите изображение для карточки курса (JPG, PNG, WEBP)</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">URL видео</label>
+                            <input type="text" class="form-control" id="course_video" placeholder="https://youtu.be/...">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Хештеги</label>
+                            <input type="text" class="form-control" id="course_hashtags" placeholder="#образование">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Спикеры</label>
+                        <div id="speakersContainer"></div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addSpeaker()">
+                            <i class="bi bi-plus-circle me-1"></i>Добавить спикера
+                        </button>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Создать курс</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно просмотра регистраций -->
+<div class="modal fade" id="registrationsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-people me-2"></i>Регистрации на курс</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="registrationsContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+    
+    let currentSection = 'dashboard';
+    let speakersList = [];
+    
+    function showToast(message, type = 'success') {
+        const toastContainer = document.querySelector('.toast-container') || (() => {
+            const container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+            return container;
+        })();
+        
+        const toast = document.createElement('div');
+        toast.className = `toast show bg-${type === 'success' ? 'success' : 'danger'} text-white`;
+        toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    async function uploadFile(file, endpoint) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+        return await response.json();
+    }
+    
+    document.getElementById('course_image_file')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            const result = await uploadFile(file, '/api/admin/upload/course-image');
+            document.getElementById('course_image_url').value = result.url;
+            const preview = document.getElementById('course_image_preview');
+            preview.innerHTML = `<img src="${result.url}" class="image-preview" alt="Preview">`;
+            showToast('Изображение загружено', 'success');
+        } catch (error) {
+            showToast('Ошибка загрузки изображения', 'danger');
+        }
+    });
+    
+    async function uploadSpeakerPhoto(file, index) {
+        try {
+            const result = await uploadFile(file, '/api/admin/upload/speaker-photo');
+            speakersList[index].photo_url = result.url;
+            const previewDiv = document.getElementById(`speaker_photo_preview_${index}`);
+            if (previewDiv) {
+                previewDiv.innerHTML = `<img src="${result.url}" class="speaker-photo-preview" alt="Speaker photo">`;
+            }
+            showToast('Фото спикера загружено', 'success');
+        } catch (error) {
+            showToast('Ошибка загрузки фото', 'danger');
+        }
+    }
+    
+    function addSpeaker() {
+        const index = speakersList.length;
+        speakersList.push({ full_name: '', position: '', bio: '', photo_url: null });
+        
+        const container = document.getElementById('speakersContainer');
+        const speakerDiv = document.createElement('div');
+        speakerDiv.className = 'speaker-item';
+        speakerDiv.id = `speaker_${index}`;
+        speakerDiv.innerHTML = `
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">ФИО *</label>
+                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'full_name', this.value)" placeholder="Иванов Иван Иванович">
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label class="form-label">Должность</label>
+                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'position', this.value)" placeholder="Профессор">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="form-label">Фото</label>
+                    <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${index}, this.files[0])">
+                    <div id="speaker_photo_preview_${index}" class="mt-2"></div>
+                </div>
+                <div class="col-md-1 remove-speaker">
+                    <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${index})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Биография</label>
+                <textarea class="form-control" rows="2" onchange="updateSpeaker(${index}, 'bio', this.value)" placeholder="Краткая биография спикера..."></textarea>
+            </div>
+            <hr>
+        `;
+        container.appendChild(speakerDiv);
+    }
+    
+    function updateSpeaker(index, field, value) {
+        if (speakersList[index]) {
+            speakersList[index][field] = value;
+        }
+    }
+    
+    function removeSpeaker(index) {
+        speakersList.splice(index, 1);
+        renderSpeakers();
+    }
+    
+    function handleSpeakerPhoto(index, file) {
+        if (file) uploadSpeakerPhoto(file, index);
+    }
+    
+    function renderSpeakers() {
+        const container = document.getElementById('speakersContainer');
+        container.innerHTML = '';
+        speakersList.forEach((speaker, idx) => {
+            const speakerDiv = document.createElement('div');
+            speakerDiv.className = 'speaker-item';
+            speakerDiv.innerHTML = `
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">ФИО *</label>
+                        <input type="text" class="form-control" value="${escapeHtml(speaker.full_name || '')}" onchange="updateSpeaker(${idx}, 'full_name', this.value)" placeholder="Иванов Иван Иванович">
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Должность</label>
+                        <input type="text" class="form-control" value="${escapeHtml(speaker.position || '')}" onchange="updateSpeaker(${idx}, 'position', this.value)" placeholder="Профессор">
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label">Фото</label>
+                        <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${idx}, this.files[0])">
+                        <div id="speaker_photo_preview_${idx}" class="mt-2">${speaker.photo_url ? `<img src="${speaker.photo_url}" class="speaker-photo-preview">` : ''}</div>
+                    </div>
+                    <div class="col-md-1 remove-speaker">
+                        <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${idx})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Биография</label>
+                    <textarea class="form-control" rows="2" onchange="updateSpeaker(${idx}, 'bio', this.value)" placeholder="Краткая биография спикера...">${escapeHtml(speaker.bio || '')}</textarea>
+                </div>
+                <hr>
+            `;
+            container.appendChild(speakerDiv);
+        });
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    async function loadStats() {
+        const response = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+        const stats = await response.json();
+        document.getElementById('totalUsers').innerText = stats.total_users || 0;
+        document.getElementById('totalCourses').innerText = stats.total_courses || 0;
+        document.getElementById('totalRegistrations').innerText = stats.total_registrations || 0;
+        document.getElementById('totalCategories').innerText = stats.total_categories || 0;
+    }
+    
+    async function loadCategories() {
+        const response = await fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } });
+        const categories = await response.json();
+        const tbody = document.getElementById('categoriesList');
+        
+        if (!categories || categories.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Нет категорий</td></tr>';
+        } else {
+            tbody.innerHTML = categories.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>${c.name}</td>
+                    <td>${c.description || '-'}</td>
+                    <td><span class="badge-info">${c.courses_count || 0}</span></td>
+                    <td><button class="btn btn-sm btn-danger" onclick="deleteCategoryItem(${c.id})"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+        
+        const select = document.getElementById('course_category_id');
+        if (select && categories.length > 0) {
+            select.innerHTML = '<option value="">-- Выберите категорию --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+    }
+    
+    async function loadCourses() {
+        const response = await fetch('/api/admin/courses', { headers: { 'Authorization': 'Bearer ' + token } });
+        const courses = await response.json();
+        const tbody = document.getElementById('coursesList');
+        
+        if (!courses || courses.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Нет курсов</td></tr>';
+        } else {
+            tbody.innerHTML = courses.map(c => `
+                <tr>
+                    <td>${c.id}</td>
+                    <td><i class="bi bi-book me-2" style="color: var(--primary);"></i>${c.title}</td>
+                    <td>${c.category_name || '-'}</td>
+                    <td class="fw-bold" style="color: var(--primary);">${c.price === 0 ? 'Бесплатно' : c.price + ' ₽'}</td>
+                    <td>${c.current_participants}/${c.max_participants}</td>
+                    <td><span class="${c.is_active ? 'badge-success' : 'badge-danger'}">${c.is_active ? 'Активен' : 'Неактивен'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(${c.id})"><i class="bi bi-people"></i></button>
+                        <button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(${c.id}, ${!c.is_active})"><i class="bi bi-power"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteCourseItem(${c.id})"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
+    
+    async function loadUsers() {
+        const response = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
+        const users = await response.json();
+        const tbody = document.getElementById('usersList');
+        
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Нет пользователей</td></tr>';
+        } else {
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.id}</td>
+                    <td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>${u.full_name}</td>
+                    <td>${u.email}</td>
+                    <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Админ' : 'Учитель'}</span></td>
+                    <td><span class="badge-info">${u.registrations_count || 0}</span></td>
+                    <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
+                    <td>${!u.is_blocked ? 
+                        `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})"><i class="bi bi-lock"></i></button>` : 
+                        `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})"><i class="bi bi-unlock"></i></button>`}
+                    </td>
+                </tr>
+            `).join('');
+        }
+    }
+    
+    async function viewCourseRegistrations(courseId) {
+        const response = await fetch(`/api/admin/courses/${courseId}/registrations`, { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await response.json();
+        
+        let html = `<div class="mb-4"><h5>${data.course.title}</h5><p class="text-muted">Цена: <strong>${data.course.price === 0 ? 'Бесплатно' : data.course.price + ' ₽'}</strong></p></div>`;
+        
+        if (!data.registrations || data.registrations.length === 0) {
+            html += '<div class="text-center py-4 text-muted">Нет регистраций</div>';
+        } else {
+            html += `<div class="table-responsive"><table class="table table-striped"><thead><tr><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Оплата</th><th>Дата</th></tr></thead><tbody>`;
+            data.registrations.forEach(r => {
+                html += `<tr><td>${r.full_name}</td><td>${r.email}</td><td>${r.position || '-'}</td><td>${r.phone || '-'}</td><td>${r.organization || '-'}</td><td><span class="${r.is_paid ? 'badge-success' : 'badge-warning'}">${r.is_paid ? 'Оплачен' : 'Не оплачен'}</span></td><td>${new Date(r.registered_at).toLocaleDateString()}</td></tr>`;
+            });
+            html += `</tbody></table></div><div class="mt-3 text-center"><a href="/api/admin/courses/${courseId}/export" class="btn btn-primary"><i class="bi bi-download me-2"></i>Экспорт в Excel</a></div>`;
+        }
+        
+        document.getElementById('registrationsContent').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('registrationsModal')).show();
+    }
+    
+    async function deleteCategoryItem(id) {
+        if (!confirm('Удалить категорию?')) return;
+        const response = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        if (response.ok) {
+            showToast('Категория удалена', 'success');
+            await loadCategories();
+            await loadCourses();
+            await loadStats();
+        }
+    }
+    
+    async function deleteCourseItem(id) {
+        if (!confirm('Удалить курс?')) return;
+        const response = await fetch(`/api/admin/courses/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        if (response.ok) {
+            showToast('Курс удален', 'success');
+            await loadCourses();
+            await loadStats();
+        }
+    }
+    
+    async function toggleCourseStatusItem(id, isActive) {
+        const response = await fetch(`/api/courses/${id}`, {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_active: isActive })
+        });
+        if (response.ok) {
+            showToast(isActive ? 'Курс активирован' : 'Курс деактивирован', 'success');
+            await loadCourses();
+            await loadStats();
+        }
+    }
+    
+    async function blockUserItem(id) {
+        await fetch(`/api/admin/users/${id}/block`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        showToast('Пользователь заблокирован', 'success');
+        await loadUsers();
+    }
+    
+    async function unblockUserItem(id) {
+        await fetch(`/api/admin/users/${id}/unblock`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        showToast('Пользователь разблокирован', 'success');
+        await loadUsers();
+    }
+    
+    document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = { name: document.getElementById('cat_name').value, description: document.getElementById('cat_desc').value };
+        const response = await fetch('/api/admin/categories', {
+            method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (response.ok) {
+            showToast('Категория создана', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('createCategoryModal')).hide();
+            document.getElementById('createCategoryForm').reset();
+            await loadCategories();
+            await loadStats();
+        }
+    });
+    
+    document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const categoryId = document.getElementById('course_category_id').value;
+        if (!categoryId) {
+            showToast('Выберите категорию', 'danger');
+            return;
+        }
+        
+        const data = {
+            title: document.getElementById('course_title').value,
+            short_description: document.getElementById('course_short_desc').value,
+            description: document.getElementById('course_desc').value,
+            category_id: parseInt(categoryId),
+            price: parseFloat(document.getElementById('course_price').value) || 0,
+            max_participants: parseInt(document.getElementById('course_max').value) || 30,
+            image_url: document.getElementById('course_image_url').value || null,
+            video_url: document.getElementById('course_video').value || null,
+            hashtags: document.getElementById('course_hashtags').value || null,
+            speakers: speakersList.filter(s => s.full_name.trim())
+        };
+        
+        const response = await fetch('/api/courses/', {
+            method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            showToast('Курс создан', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
+            document.getElementById('createCourseForm').reset();
+            speakersList = [];
+            renderSpeakers();
+            await loadCourses();
+            await loadStats();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Ошибка при создании курса', 'danger');
+        }
+    });
+    
+    function showSection(section) {
+        currentSection = section;
+        document.getElementById('dashboardSection').style.display = 'none';
+        document.getElementById('categoriesSection').style.display = 'none';
+        document.getElementById('coursesSection').style.display = 'none';
+        document.getElementById('usersSection').style.display = 'none';
+        
+        if (section === 'dashboard') {
+            document.getElementById('dashboardSection').style.display = 'block';
+            loadStats();
+        } else if (section === 'categories') {
+            document.getElementById('categoriesSection').style.display = 'block';
+            loadCategories();
+        } else if (section === 'courses') {
+            document.getElementById('coursesSection').style.display = 'block';
+            loadCourses();
+        } else if (section === 'users') {
+            document.getElementById('usersSection').style.display = 'block';
+            loadUsers();
+        }
+    }
+    
+    function showCreateCategoryModal() {
+        document.getElementById('createCategoryForm').reset();
+        new bootstrap.Modal(document.getElementById('createCategoryModal')).show();
+    }
+    
+    function showCreateCourseModal() {
+        document.getElementById('createCourseForm').reset();
+        speakersList = [];
+        renderSpeakers();
+        document.getElementById('course_image_url').value = '';
+        document.getElementById('course_image_preview').innerHTML = '';
+        
+        fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } })
+            .then(res => res.json())
+            .then(categories => {
+                const select = document.getElementById('course_category_id');
+                if (categories && categories.length > 0) {
+                    select.innerHTML = '<option value="">-- Выберите категорию --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                }
+            });
+        
+        new bootstrap.Modal(document.getElementById('createCourseModal')).show();
+    }
+    
+    loadStats();
+</script>
+{% endblock %}

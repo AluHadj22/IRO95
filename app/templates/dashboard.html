@@ -1,0 +1,826 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет - ГБУ ДПО «ИРО ЧР»{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #059669;
+        --primary-dark: #047857;
+        --primary-light: #34d399;
+        --primary-gradient: linear-gradient(135deg, #064e3b 0%, #059669 50%, #10b981 100%);
+        --gold: #fbbf24;
+        --silver: #9ca3af;
+        --bronze: #d97706;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --white: #ffffff;
+        --border: #e5e7eb;
+    }
+    
+    /* Статистика */
+    .dashboard-stats {
+        background: var(--primary-gradient);
+        border-radius: 24px;
+        padding: 28px;
+        color: white;
+        margin-bottom: 28px;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 16px;
+        background: rgba(255,255,255,0.12);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-item:hover {
+        transform: translateY(-3px);
+        background: rgba(255,255,255,0.2);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        opacity: 0.9;
+    }
+    
+    /* Меню */
+    .nav-pills-custom {
+        background: white;
+        border-radius: 20px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        position: sticky;
+        top: 90px;
+    }
+    
+    .nav-pills-custom .nav-link {
+        border-radius: 12px;
+        padding: 12px 20px;
+        color: var(--gray);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 4px;
+    }
+    
+    .nav-pills-custom .nav-link i {
+        margin-right: 12px;
+        font-size: 1.1rem;
+        width: 24px;
+    }
+    
+    .nav-pills-custom .nav-link:hover {
+        background: #ecfdf5;
+        color: var(--primary);
+    }
+    
+    .nav-pills-custom .nav-link.active {
+        background: var(--primary-gradient);
+        color: white;
+    }
+    
+    /* Карточка профиля */
+    .profile-card {
+        background: white;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        padding: 32px;
+        text-align: center;
+        position: relative;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        box-shadow: 0 10px 25px rgba(5,150,105,0.3);
+        position: relative;
+    }
+    
+    .profile-avatar i {
+        font-size: 3.5rem;
+        color: white;
+    }
+    
+    .profile-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--dark);
+    }
+    
+    .profile-email {
+        color: var(--gray);
+        margin-bottom: 0;
+    }
+    
+    .info-row {
+        display: flex;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border);
+        transition: all 0.2s ease;
+    }
+    
+    .info-row:hover {
+        background: var(--light);
+    }
+    
+    .info-label {
+        width: 160px;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .info-value {
+        flex: 1;
+        color: var(--gray);
+    }
+    
+    /* Достижения */
+    .badges-section {
+        margin-bottom: 24px;
+    }
+    
+    .badge-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        padding: 20px;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .badge-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.15);
+        border-color: var(--primary-light);
+    }
+    
+    .badge-card.locked {
+        opacity: 0.6;
+        filter: grayscale(0.3);
+    }
+    
+    .badge-card.locked:hover {
+        opacity: 0.8;
+    }
+    
+    .badge-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+    
+    .badge-icon i {
+        font-size: 2rem;
+        color: var(--primary);
+    }
+    
+    .badge-card.gold .badge-icon {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    }
+    
+    .badge-card.gold .badge-icon i {
+        color: var(--gold);
+    }
+    
+    .badge-card.silver .badge-icon {
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    }
+    
+    .badge-card.silver .badge-icon i {
+        color: var(--silver);
+    }
+    
+    .badge-card.bronze .badge-icon {
+        background: linear-gradient(135deg, #fffbeb 0%, #fed7aa 100%);
+    }
+    
+    .badge-card.bronze .badge-icon i {
+        color: var(--bronze);
+    }
+    
+    .badge-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: var(--dark);
+    }
+    
+    .badge-desc {
+        font-size: 0.7rem;
+        color: var(--gray);
+    }
+    
+    .badge-progress {
+        margin-top: 12px;
+        font-size: 0.7rem;
+        color: var(--primary);
+        font-weight: 500;
+    }
+    
+    /* Карточки курсов */
+    .course-card {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        padding: 20px;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.12);
+        border-color: var(--primary-light);
+    }
+    
+    .course-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--dark);
+    }
+    
+    .course-meta {
+        font-size: 0.75rem;
+        color: var(--gray);
+        margin-bottom: 12px;
+    }
+    
+    .course-progress {
+        margin: 16px 0;
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 10px;
+        background: #e5e7eb;
+    }
+    
+    .progress-bar {
+        background: var(--primary-gradient);
+        border-radius: 10px;
+    }
+    
+    .course-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .status-completed {
+        background: #ecfdf5;
+        color: #059669;
+    }
+    
+    .status-in-progress {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+    
+    .status-not-started {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+    
+    /* Пустые состояния */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--gray);
+        opacity: 0.5;
+        margin-bottom: 16px;
+    }
+    
+    .empty-state h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--dark);
+    }
+    
+    .empty-state p {
+        color: var(--gray);
+        margin-bottom: 20px;
+    }
+    
+    /* Анимации */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-in {
+        animation: fadeInUp 0.4s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Статистика -->
+    <div class="dashboard-stats">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number" id="statCoursesCompleted">0</div>
+                    <div class="stat-label">Курсов завершено</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number" id="statCoursesInProgress">0</div>
+                    <div class="stat-label">В процессе</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number" id="statBadges">0</div>
+                    <div class="stat-label">Достижений</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number" id="statHours">0</div>
+                    <div class="stat-label">Часов обучения</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Боковое меню -->
+        <div class="col-lg-3">
+            <div class="nav nav-pills-custom flex-column">
+                <a class="nav-link active" href="#" onclick="showSection('profile'); return false;">
+                    <i class="bi bi-person"></i> Профиль
+                </a>
+                <a class="nav-link" href="#" onclick="showSection('badges'); return false;">
+                    <i class="bi bi-trophy"></i> Достижения
+                </a>
+                <a class="nav-link" href="#" onclick="showSection('courses'); return false;">
+                    <i class="bi bi-journal-bookmark-fill"></i> Мои курсы
+                </a>
+                <a class="nav-link" href="#" onclick="showSection('favorites'); return false;">
+                    <i class="bi bi-heart"></i> Избранное
+                </a>
+                <a class="nav-link" href="#" onclick="showSection('watchlater'); return false;">
+                    <i class="bi bi-clock-history"></i> Посмотреть позже
+                </a>
+            </div>
+        </div>
+        
+        <!-- Контент -->
+        <div class="col-lg-9">
+            <!-- Профиль -->
+            <div id="profileSection">
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+                        <h3 class="profile-name" id="profileName">Загрузка...</h3>
+                        <p class="profile-email" id="profileEmail">-</p>
+                    </div>
+                    <div class="profile-body" id="profileInfo">
+                        <div class="text-center p-5">
+                            <div class="spinner-border text-primary"></div>
+                            <p class="mt-3 text-muted">Загрузка данных...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Активность -->
+                <div class="profile-card mt-4">
+                    <div class="info-row">
+                        <div class="info-label"><i class="bi bi-calendar-check me-2"></i>Дата регистрации</div>
+                        <div class="info-value" id="registrationDate">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="bi bi-clock-history me-2"></i>Всего времени</div>
+                        <div class="info-value" id="totalHours">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="bi bi-graph-up me-2"></i>Уровень активности</div>
+                        <div class="info-value">
+                            <span class="badge bg-success" id="activityLevel">Начинающий</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Достижения -->
+            <div id="badgesSection" style="display: none;">
+                <div id="badgesList"></div>
+            </div>
+            
+            <!-- Мои курсы -->
+            <div id="coursesSection" style="display: none;">
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3">В процессе</h5>
+                    <div id="inProgressCourses"></div>
+                </div>
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-3">Завершённые</h5>
+                    <div id="completedCourses"></div>
+                </div>
+            </div>
+            
+            <!-- Избранное -->
+            <div id="favoritesSection" style="display: none;">
+                <div id="favoritesList"></div>
+            </div>
+            
+            <!-- Посмотреть позже -->
+            <div id="watchlaterSection" style="display: none;">
+                <div id="watchlaterList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/login';
+    
+    let userData = {};
+    let achievements = [];
+    let coursesData = [];
+    
+    // Достижения пользователя
+    const allAchievements = [
+        { id: 'first_course', title: 'Первый шаг', description: 'Завершён первый курс', icon: 'bi-stars', requirement: 1, level: 'bronze' },
+        { id: 'five_courses', title: 'Эрудит', description: 'Завершено 5 курсов', icon: 'bi-book-half', requirement: 5, level: 'silver' },
+        { id: 'ten_courses', title: 'Профессионал', description: 'Завершено 10 курсов', icon: 'bi-award', requirement: 10, level: 'gold' },
+        { id: 'twenty_courses', title: 'Эксперт', description: 'Завершено 20 курсов', icon: 'bi-trophy', requirement: 20, level: 'gold' },
+        { id: 'three_months', title: 'Постоянный ученик', description: '3 месяца активного обучения', icon: 'bi-calendar-heart', requirement: 3, level: 'silver' },
+        { id: 'six_months', title: 'Преданность', description: '6 месяцев активного обучения', icon: 'bi-calendar-check', requirement: 6, level: 'gold' },
+        { id: 'fifty_hours', title: 'Усердный ученик', description: '50 часов обучения', icon: 'bi-clock-fill', requirement: 50, level: 'bronze' },
+        { id: 'hundred_hours', title: 'Мастер', description: '100 часов обучения', icon: 'bi-hourglass-split', requirement: 100, level: 'silver' },
+        { id: 'two_hundred_hours', title: 'Легенда', description: '200 часов обучения', icon: 'bi-infinity', requirement: 200, level: 'gold' },
+        { id: 'favorite_three', title: 'Коллекционер', description: '3 курса в избранном', icon: 'bi-heart-fill', requirement: 3, level: 'bronze' },
+        { id: 'favorite_ten', title: 'Меломан', description: '10 курсов в избранном', icon: 'bi-hearts', requirement: 10, level: 'silver' }
+    ];
+    
+    function formatPrice(price) {
+        if (price === 0) return 'Бесплатно';
+        return price.toLocaleString() + ' ₽';
+    }
+    
+    async function loadProfile() {
+        try {
+            const response = await fetch('/api/auth/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            userData = await response.json();
+            
+            document.getElementById('profileName').innerText = userData.full_name;
+            document.getElementById('profileEmail').innerText = userData.email;
+            document.getElementById('registrationDate').innerText = new Date(userData.created_at).toLocaleDateString();
+            
+            document.getElementById('profileInfo').innerHTML = `
+                <div class="info-row">
+                    <div class="info-label"><i class="bi bi-briefcase me-2"></i>Должность</div>
+                    <div class="info-value">${escapeHtml(userData.position) || 'Не указана'}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label"><i class="bi bi-phone me-2"></i>Телефон</div>
+                    <div class="info-value">${escapeHtml(userData.phone) || 'Не указан'}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label"><i class="bi bi-building me-2"></i>Организация</div>
+                    <div class="info-value">${escapeHtml(userData.organization) || 'Не указана'}</div>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error loading profile:', error);
+        }
+    }
+    
+    async function loadCourses() {
+        try {
+            const response = await fetch('/api/courses/my/registrations', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            coursesData = await response.json();
+            
+            // Разделяем на в процессе и завершённые
+            const inProgress = coursesData.filter(c => !c.is_completed);
+            const completed = coursesData.filter(c => c.is_completed);
+            
+            // Обновляем статистику
+            document.getElementById('statCoursesCompleted').innerText = completed.length;
+            document.getElementById('statCoursesInProgress').innerText = inProgress.length;
+            
+            // Подсчёт часов (заглушка - позже будет из БД)
+            const totalHours = completed.length * 36;
+            document.getElementById('statHours').innerText = totalHours;
+            document.getElementById('totalHours').innerText = `${totalHours} часов`;
+            
+            // Уровень активности
+            let activityLevel = 'Начинающий';
+            if (completed.length >= 10) activityLevel = 'Эксперт';
+            else if (completed.length >= 5) activityLevel = 'Продвинутый';
+            else if (completed.length >= 2) activityLevel = 'Активный';
+            document.getElementById('activityLevel').innerHTML = `<span class="badge bg-success">${activityLevel}</span>`;
+            
+            // Рендерим курсы
+            renderCourses(inProgress, 'inProgressCourses', 'В процессе', false);
+            renderCourses(completed, 'completedCourses', 'Завершённые', true);
+            
+            // Обновляем достижения
+            updateAchievements(completed.length, totalHours);
+            
+        } catch (error) {
+            console.error('Error loading courses:', error);
+        }
+    }
+    
+    function renderCourses(courses, containerId, title, isCompleted) {
+        const container = document.getElementById(containerId);
+        
+        if (courses.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state py-4">
+                    <i class="bi bi-inbox"></i>
+                    <p class="mb-0">Нет курсов в этом разделе</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = `<div class="row g-3">`;
+        courses.forEach(course => {
+            const progress = course.progress || (isCompleted ? 100 : Math.floor(Math.random() * 60) + 20);
+            const statusClass = isCompleted ? 'status-completed' : 'status-in-progress';
+            const statusText = isCompleted ? 'Завершён' : 'В процессе';
+            
+            html += `
+                <div class="col-md-6">
+                    <div class="course-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="course-title mb-0">${escapeHtml(course.course_title)}</h6>
+                            <span class="course-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="course-meta">
+                            <i class="bi bi-calendar3 me-1"></i> Записан: ${new Date(course.registered_at).toLocaleDateString()}
+                        </div>
+                        ${!isCompleted ? `
+                            <div class="course-progress">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span>Прогресс</span>
+                                    <span>${progress}%</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="mt-3">
+                            <a href="/course/${course.course_id}" class="btn btn-outline-primary btn-sm">
+                                ${isCompleted ? 'Посмотреть сертификат' : 'Продолжить обучение'} <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+    
+    function updateAchievements(completedCourses, totalHours) {
+        const earnedAchievements = [];
+        
+        for (const ach of allAchievements) {
+            let earned = false;
+            if (ach.id === 'first_course' && completedCourses >= 1) earned = true;
+            else if (ach.id === 'five_courses' && completedCourses >= 5) earned = true;
+            else if (ach.id === 'ten_courses' && completedCourses >= 10) earned = true;
+            else if (ach.id === 'twenty_courses' && completedCourses >= 20) earned = true;
+            else if (ach.id === 'fifty_hours' && totalHours >= 50) earned = true;
+            else if (ach.id === 'hundred_hours' && totalHours >= 100) earned = true;
+            else if (ach.id === 'two_hundred_hours' && totalHours >= 200) earned = true;
+            else if (ach.id === 'three_months') earned = true; // Заглушка
+            else if (ach.id === 'six_months') earned = true; // Заглушка
+            else if (ach.id === 'favorite_three') earned = true; // Заглушка
+            else if (ach.id === 'favorite_ten') earned = true; // Заглушка
+            
+            if (earned) earnedAchievements.push({...ach, earned: true});
+        }
+        
+        achievements = earnedAchievements;
+        document.getElementById('statBadges').innerText = achievements.length;
+        renderBadges();
+    }
+    
+    function renderBadges() {
+        const container = document.getElementById('badgesList');
+        
+        let earnedHtml = '';
+        let lockedHtml = '';
+        
+        allAchievements.forEach(ach => {
+            const isEarned = achievements.some(a => a.id === ach.id);
+            const cardClass = isEarned ? ach.level : 'locked';
+            
+            const cardHtml = `
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="badge-card ${cardClass} ${!isEarned ? 'locked' : ''}">
+                        <div class="badge-icon">
+                            <i class="bi ${ach.icon}"></i>
+                        </div>
+                        <h6 class="badge-title">${ach.title}</h6>
+                        <p class="badge-desc">${ach.description}</p>
+                        ${!isEarned ? `<div class="badge-progress"><i class="bi bi-lock"></i> Ещё не получено</div>` : '<div class="badge-progress"><i class="bi bi-check-circle-fill"></i> Получено!</div>'}
+                    </div>
+                </div>
+            `;
+            
+            if (isEarned) earnedHtml += cardHtml;
+            else lockedHtml += cardHtml;
+        });
+        
+        container.innerHTML = `
+            ${earnedHtml ? `<h5 class="fw-bold mb-3">🏆 Полученные достижения</h5><div class="row g-3 mb-4">${earnedHtml}</div>` : ''}
+            ${lockedHtml ? `<h5 class="fw-bold mb-3">🔒 Следующие достижения</h5><div class="row g-3">${lockedHtml}</div>` : ''}
+        `;
+    }
+    
+    async function loadFavorites() {
+        try {
+            const response = await fetch('/api/courses/my/favorites', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            
+            const container = document.getElementById('favoritesList');
+            
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-heart"></i>
+                        <h5>Нет избранных курсов</h5>
+                        <p>Добавляйте курсы в избранное, чтобы не потерять их</p>
+                        <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
+                    </div>
+                `;
+            } else {
+                let html = `<div class="row g-3">`;
+                data.forEach(course => {
+                    html += `
+                        <div class="col-md-6">
+                            <div class="course-card">
+                                <h6 class="course-title">${escapeHtml(course.title)}</h6>
+                                ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height: 120px; object-fit: cover; width: 100%;">` : ''}
+                                <p class="course-meta">${escapeHtml(course.short_description || (course.description ? course.description.substring(0, 80) + '...' : 'Нет описания'))}</p>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="fw-bold" style="color: var(--primary);">${formatPrice(course.price)}</span>
+                                    <a href="/course/${course.id}" class="btn btn-primary btn-sm">
+                                        Подробнее <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading favorites:', error);
+        }
+    }
+    
+    async function loadWatchLater() {
+        try {
+            const response = await fetch('/api/courses/my/watch-later', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            
+            const container = document.getElementById('watchlaterList');
+            
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-clock-history"></i>
+                        <h5>Нет отложенных курсов</h5>
+                        <p>Добавляйте курсы в "Посмотреть позже", чтобы вернуться к ним</p>
+                        <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
+                    </div>
+                `;
+            } else {
+                let html = `<div class="row g-3">`;
+                data.forEach(course => {
+                    html += `
+                        <div class="col-md-6">
+                            <div class="course-card">
+                                <h6 class="course-title">${escapeHtml(course.title)}</h6>
+                                ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height: 120px; object-fit: cover; width: 100%;">` : ''}
+                                <p class="course-meta">${escapeHtml(course.short_description || (course.description ? course.description.substring(0, 80) + '...' : 'Нет описания'))}</p>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span class="fw-bold" style="color: var(--primary);">${formatPrice(course.price)}</span>
+                                    <a href="/course/${course.id}" class="btn btn-primary btn-sm">
+                                        Подробнее <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error loading watch later:', error);
+        }
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function showSection(section) {
+        document.getElementById('profileSection').style.display = 'none';
+        document.getElementById('badgesSection').style.display = 'none';
+        document.getElementById('coursesSection').style.display = 'none';
+        document.getElementById('favoritesSection').style.display = 'none';
+        document.getElementById('watchlaterSection').style.display = 'none';
+        
+        document.querySelectorAll('.nav-pills-custom .nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        if (section === 'profile') {
+            document.getElementById('profileSection').style.display = 'block';
+            document.querySelector('.nav-pills-custom .nav-link:nth-child(1)').classList.add('active');
+            loadProfile();
+        } else if (section === 'badges') {
+            document.getElementById('badgesSection').style.display = 'block';
+            document.querySelector('.nav-pills-custom .nav-link:nth-child(2)').classList.add('active');
+        } else if (section === 'courses') {
+            document.getElementById('coursesSection').style.display = 'block';
+            document.querySelector('.nav-pills-custom .nav-link:nth-child(3)').classList.add('active');
+            loadCourses();
+        } else if (section === 'favorites') {
+            document.getElementById('favoritesSection').style.display = 'block';
+            document.querySelector('.nav-pills-custom .nav-link:nth-child(4)').classList.add('active');
+            loadFavorites();
+        } else if (section === 'watchlater') {
+            document.getElementById('watchlaterSection').style.display = 'block';
+            document.querySelector('.nav-pills-custom .nav-link:nth-child(5)').classList.add('active');
+            loadWatchLater();
+        }
+    }
+    
+    loadProfile();
+    loadCourses();
+</script>
+{% endblock %}

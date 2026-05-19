@@ -11,12 +11,12 @@
 </div>
 
 <script>
-    const token = localStorage.getItem('token');
     const courseId = {{ course_id }};
+    let courseData = null;
     
     function formatPrice(price) {
-        if (price === 0) return 'Бесплатно';
-        return price.toLocaleString() + ' ₽';
+        if (price === 0 || price === "0") return 'Бесплатно';
+        return Number(price).toLocaleString() + ' ₽';
     }
     
     function escapeHtml(text) {
@@ -26,7 +26,16 @@
         return div.innerHTML;
     }
     
+    const formatMap = {
+        'full_time': 'Очный',
+        'part_time': 'Заочный',
+        'full_part_time': 'Очно-заочный',
+        'online': 'Онлайн'
+    };
+    
     async function loadCourse() {
+        // Получаем токен из localStorage
+        const token = localStorage.getItem('token');
         const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         
         try {
@@ -36,206 +45,8 @@
                 throw new Error('Курс не найден');
             }
             
-            const course = await response.json();
-            const container = document.getElementById('courseContainer');
-            
-            // Спикеры
-            let speakersHtml = '';
-            if (course.speakers && course.speakers.length > 0) {
-                speakersHtml = `
-                    <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white border-0 pt-4 pb-0">
-                            <h4 class="mb-0 fw-bold" style="color: var(--dark);">
-                                <i class="bi bi-people-fill me-2" style="color: var(--primary);"></i>
-                                Эксперты курса
-                            </h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-4">
-                `;
-                course.speakers.forEach(speaker => {
-                    speakersHtml += `
-                        <div class="col-md-6 col-lg-4">
-                            <div class="speaker-card h-100">
-                                <div class="text-center">
-                                    <img src="${speaker.photo_url || 'https://ui-avatars.com/api/?background=059669&color=fff&rounded=true&size=100&bold=true&name=' + encodeURIComponent(speaker.full_name.split(' ')[0])}" 
-                                         class="speaker-img" 
-                                         alt="${escapeHtml(speaker.full_name)}"
-                                         style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); padding: 3px;">
-                                </div>
-                                <div class="text-center mt-3">
-                                    <h5 class="fw-bold mb-1">${escapeHtml(speaker.full_name)}</h5>
-                                    <p class="text-muted small mb-2">${escapeHtml(speaker.position || 'Эксперт')}</p>
-                                    ${speaker.bio ? `<p class="small text-muted">${escapeHtml(speaker.bio.length > 100 ? speaker.bio.substring(0, 100) + '...' : speaker.bio)}</p>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                speakersHtml += `
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            const priceText = formatPrice(course.price);
-            const isFree = course.price === 0;
-            
-            const html = `
-                <div class="row g-4">
-                    <!-- Левая колонка - основной контент -->
-                    <div class="col-lg-8">
-                        <!-- Изображение и заголовок -->
-                        <div class="card border-0 shadow-sm mb-4 overflow-hidden">
-                            ${course.image_url ? 
-                                `<img src="${course.image_url}" class="card-img-top" alt="${escapeHtml(course.title)}" style="max-height: 400px; object-fit: cover; width: 100%;">` : 
-                                `<div class="bg-light text-center py-5" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
-                                    <i class="bi bi-image fs-1 text-muted"></i>
-                                    <p class="text-muted mt-2">Изображение отсутствует</p>
-                                </div>`
-                            }
-                            <div class="card-body p-4">
-                                <h1 class="fw-bold mb-3" style="color: var(--dark);">${escapeHtml(course.title)}</h1>
-                                
-                                <div class="d-flex gap-3 mb-4">
-                                    <button class="btn btn-outline-danger rounded-pill px-4" id="favoriteBtn" onclick="toggleFavorite()">
-                                        <i class="bi bi-heart me-1"></i> Избранное
-                                    </button>
-                                    <button class="btn btn-outline-warning rounded-pill px-4" id="watchLaterBtn" onclick="toggleWatchLater()">
-                                        <i class="bi bi-clock me-1"></i> Посмотреть позже
-                                    </button>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <span class="badge bg-success me-2">${escapeHtml(course.category_name || "Без категории")}</span>
-                                    ${course.hashtags ? course.hashtags.split(' ').map(tag => `<span class="badge bg-secondary me-1">${escapeHtml(tag)}</span>`).join('') : ''}
-                                </div>
-                                
-                                <h5 class="fw-bold mb-3" style="color: var(--dark);">Описание курса</h5>
-                                <p class="text-muted lh-lg">${escapeHtml(course.description || 'Нет описания')}</p>
-                                
-                                ${course.video_url ? `
-                                    <div class="mt-4">
-                                        <h5 class="fw-bold mb-3" style="color: var(--dark);">
-                                            <i class="bi bi-play-circle-fill me-2" style="color: var(--primary);"></i>
-                                            Видео-презентация
-                                        </h5>
-                                        <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm">
-                                            <iframe src="${course.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}" 
-                                                    allowfullscreen
-                                                    loading="lazy"></iframe>
-                                        </div>
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                        
-                        ${speakersHtml}
-                    </div>
-                    
-                    <!-- Правая колонка - информация о курсе -->
-                    <div class="col-lg-4">
-                        <div class="card border-0 shadow-sm sticky-top" style="top: 90px;">
-                            <div class="card-body p-4">
-                                <div class="text-center mb-4">
-                                    <div class="display-4 fw-bold" style="color: var(--primary);">${priceText}</div>
-                                    <p class="text-muted small mt-2">
-                                        <i class="bi bi-people me-1"></i> Мест: ${course.current_participants}/${course.max_participants}
-                                    </p>
-                                </div>
-                                
-                                <hr class="my-3">
-                                
-                                <div class="mb-4">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted"><i class="bi bi-calendar me-2"></i>Начало</span>
-                                        <span class="fw-medium">${course.start_date ? new Date(course.start_date).toLocaleDateString() : 'Скоро'}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span class="text-muted"><i class="bi bi-calendar-check me-2"></i>Окончание</span>
-                                        <span class="fw-medium">${course.end_date ? new Date(course.end_date).toLocaleDateString() : 'По набору'}</span>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted"><i class="bi bi-person-badge me-2"></i>Формат</span>
-                                        <span class="fw-medium">Очно-заочный</span>
-                                    </div>
-                                </div>
-                                
-                                <button class="btn w-100 btn-lg mb-3" id="registerBtn" onclick="handleRegistration()"
-                                        style="background: var(--primary-gradient); color: white; border: none; border-radius: 12px; font-weight: 600;">
-                                    <i class="bi bi-pencil-square me-2"></i>Записаться на курс
-                                </button>
-                                
-                                <div class="bg-light rounded-3 p-3 mt-3">
-                                    <p class="small text-muted mb-2"><i class="bi bi-info-circle me-1"></i> Информация</p>
-                                    <p class="small text-muted mb-1">После успешной записи вы получите уведомление на email.</p>
-                                    <p class="small text-muted mb-0">Все материалы курса будут доступны в личном кабинете.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Модальное окно оплаты -->
-                <div class="modal fade" id="paymentModal" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content rounded-4">
-                            <div class="modal-header border-0" style="background: var(--primary-gradient);">
-                                <h5 class="modal-title text-white"><i class="bi bi-credit-card me-2"></i>Оплата курса</h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body p-4">
-                                <div class="text-center mb-4">
-                                    <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
-                                        <i class="bi bi-calculator fs-1" style="color: var(--primary);"></i>
-                                    </div>
-                                    <h5>${escapeHtml(course.title)}</h5>
-                                    <p class="display-6 fw-bold mt-3" style="color: var(--primary);">${priceText}</p>
-                                </div>
-                                
-                                <div class="d-grid gap-2 mb-3">
-                                    <button class="btn btn-outline-primary py-2 rounded-pill" onclick="processPayment('card')">
-                                        <i class="bi bi-credit-card me-2"></i>Банковская карта
-                                    </button>
-                                    <button class="btn btn-outline-success py-2 rounded-pill" onclick="processPayment('sbp')">
-                                        <i class="bi bi-phone me-2"></i>СБП
-                                    </button>
-                                    <button class="btn btn-outline-warning py-2 rounded-pill" onclick="processPayment('cash')">
-                                        <i class="bi bi-cash me-2"></i>Наличные
-                                    </button>
-                                </div>
-                                
-                                <div class="alert alert-light small text-muted mb-0 rounded-3">
-                                    <i class="bi bi-shield-check me-1"></i>
-                                    Безопасная оплата. После подтверждения вы будете зачислены на курс.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML = html;
-            
-            // Обновляем состояние кнопок
-            const favBtn = document.getElementById('favoriteBtn');
-            const wlBtn = document.getElementById('watchLaterBtn');
-            
-            if (course.is_favorite) {
-                favBtn.classList.add('active');
-                favBtn.innerHTML = '<i class="bi bi-heart-fill me-1"></i> В избранном';
-                favBtn.style.backgroundColor = '#fee2e2';
-                favBtn.style.borderColor = '#ef4444';
-                favBtn.style.color = '#dc2626';
-            }
-            if (course.is_watch_later) {
-                wlBtn.classList.add('active');
-                wlBtn.innerHTML = '<i class="bi bi-clock-fill me-1"></i> В списке';
-                wlBtn.style.backgroundColor = '#fef3c7';
-                wlBtn.style.borderColor = '#f59e0b';
-                wlBtn.style.color = '#d97706';
-            }
+            courseData = await response.json();
+            renderCourse(courseData);
             
         } catch (error) {
             console.error('Error loading course:', error);
@@ -254,9 +65,219 @@
         }
     }
     
+    function renderCourse(course) {
+        const container = document.getElementById('courseContainer');
+        const courseFormat = formatMap[course.format_type] || 'Онлайн';
+        const priceText = formatPrice(course.price);
+        
+        // Получаем токен для проверки авторизации
+        const token = localStorage.getItem('token');
+        const isAuthenticated = !!token;
+        
+        // Спикеры
+        let speakersHtml = '';
+        if (course.speakers && course.speakers.length > 0) {
+            speakersHtml = `
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-4 pb-0">
+                        <h4 class="mb-0 fw-bold" style="color: var(--dark);">
+                            <i class="bi bi-people-fill me-2" style="color: var(--primary);"></i>
+                            Эксперты курса
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+            `;
+            course.speakers.forEach(speaker => {
+                speakersHtml += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="speaker-card h-100">
+                            <div class="text-center">
+                                <img src="${speaker.photo_url || 'https://ui-avatars.com/api/?background=059669&color=fff&rounded=true&size=100&bold=true&name=' + encodeURIComponent(speaker.full_name.split(' ')[0])}" 
+                                     class="speaker-img" 
+                                     alt="${escapeHtml(speaker.full_name)}"
+                                     style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary); padding: 3px;">
+                            </div>
+                            <div class="text-center mt-3">
+                                <h5 class="fw-bold mb-1">${escapeHtml(speaker.full_name)}</h5>
+                                <p class="text-muted small mb-2">${escapeHtml(speaker.position || 'Эксперт')}</p>
+                                ${speaker.bio ? `<p class="small text-muted">${escapeHtml(speaker.bio.length > 100 ? speaker.bio.substring(0, 100) + '...' : speaker.bio)}</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            speakersHtml += `
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        const html = `
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4 overflow-hidden">
+                        ${course.image_url ? 
+                            `<img src="${course.image_url}" class="card-img-top" alt="${escapeHtml(course.title)}" style="max-height: 400px; object-fit: cover; width: 100%;">` : 
+                            `<div class="bg-light text-center py-5" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);">
+                                <i class="bi bi-image fs-1 text-muted"></i>
+                                <p class="text-muted mt-2">Изображение отсутствует</p>
+                            </div>`
+                        }
+                        <div class="card-body p-4">
+                            <h1 class="fw-bold mb-3" style="color: var(--dark);">${escapeHtml(course.title)}</h1>
+                            
+                            <div class="d-flex gap-3 mb-4">
+                                <button class="btn btn-outline-danger rounded-pill px-4" id="favoriteBtn" onclick="toggleFavorite()" ${!isAuthenticated ? 'disabled' : ''}>
+                                    <i class="bi bi-heart me-1"></i> Избранное
+                                </button>
+                                <button class="btn btn-outline-warning rounded-pill px-4" id="watchLaterBtn" onclick="toggleWatchLater()" ${!isAuthenticated ? 'disabled' : ''}>
+                                    <i class="bi bi-clock me-1"></i> Посмотреть позже
+                                </button>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <span class="badge bg-success me-2">${escapeHtml(course.category_name || "Без категории")}</span>
+                                ${course.hashtags ? course.hashtags.split(' ').map(tag => `<span class="badge bg-secondary me-1">${escapeHtml(tag)}</span>`).join('') : ''}
+                            </div>
+                            
+                            <h5 class="fw-bold mb-3" style="color: var(--dark);">Описание курса</h5>
+                            <p class="text-muted lh-lg">${escapeHtml(course.description || 'Нет описания')}</p>
+                            
+                            ${course.video_url ? `
+                                <div class="mt-4">
+                                    <h5 class="fw-bold mb-3" style="color: var(--dark);">
+                                        <i class="bi bi-play-circle-fill me-2" style="color: var(--primary);"></i>
+                                        Видео-презентация
+                                    </h5>
+                                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow-sm">
+                                        <iframe src="${course.video_url.replace('watch?v=', 'embed/').replace('youtu.be/', 'www.youtube.com/embed/')}" 
+                                                allowfullscreen
+                                                loading="lazy"></iframe>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${speakersHtml}
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm sticky-top" style="top: 90px;">
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <div class="display-4 fw-bold" style="color: var(--primary);">${priceText}</div>
+                                <p class="text-muted small mt-2">
+                                    <i class="bi bi-people me-1"></i> Мест: ${course.current_participants}/${course.max_participants}
+                                </p>
+                            </div>
+                            
+                            <hr class="my-3">
+                            
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted"><i class="bi bi-calendar me-2"></i>Начало</span>
+                                    <span class="fw-medium">${course.start_date ? new Date(course.start_date).toLocaleDateString() : 'Скоро'}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted"><i class="bi bi-calendar-check me-2"></i>Окончание</span>
+                                    <span class="fw-medium">${course.end_date ? new Date(course.end_date).toLocaleDateString() : 'По набору'}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted"><i class="bi bi-person-badge me-2"></i>Формат</span>
+                                    <span class="fw-medium">${courseFormat}</span>
+                                </div>
+                            </div>
+                            
+                            <button class="btn w-100 btn-lg mb-3" id="registerBtn" onclick="handleRegistration()"
+                                    style="background: var(--primary-gradient); color: white; border: none; border-radius: 12px; font-weight: 600;">
+                                <i class="bi bi-pencil-square me-2"></i>Записаться на курс
+                            </button>
+                            
+                            <div class="bg-light rounded-3 p-3 mt-3">
+                                <p class="small text-muted mb-2"><i class="bi bi-info-circle me-1"></i> Информация</p>
+                                <p class="small text-muted mb-1">После успешной записи вы получите уведомление на email.</p>
+                                <p class="small text-muted mb-0">Все материалы курса будут доступны в личном кабинете.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal fade" id="paymentModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content rounded-4">
+                        <div class="modal-header border-0" style="background: var(--primary-gradient);">
+                            <h5 class="modal-title text-white"><i class="bi bi-credit-card me-2"></i>Оплата курса</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="text-center mb-4">
+                                <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                                    <i class="bi bi-calculator fs-1" style="color: var(--primary);"></i>
+                                </div>
+                                <h5>${escapeHtml(course.title)}</h5>
+                                <p class="display-6 fw-bold mt-3" style="color: var(--primary);">${priceText}</p>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mb-3">
+                                <button class="btn btn-outline-primary py-2 rounded-pill" onclick="processPayment('card')">
+                                    <i class="bi bi-credit-card me-2"></i>Банковская карта
+                                </button>
+                                <button class="btn btn-outline-success py-2 rounded-pill" onclick="processPayment('sbp')">
+                                    <i class="bi bi-phone me-2"></i>СБП
+                                </button>
+                                <button class="btn btn-outline-warning py-2 rounded-pill" onclick="processPayment('cash')">
+                                    <i class="bi bi-cash me-2"></i>Наличные
+                                </button>
+                            </div>
+                            
+                            <div class="alert alert-light small text-muted mb-0 rounded-3">
+                                <i class="bi bi-shield-check me-1"></i>
+                                Безопасная оплата. После подтверждения вы будете зачислены на курс.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        // Обновляем состояние кнопок если пользователь авторизован
+        if (isAuthenticated) {
+            const favBtn = document.getElementById('favoriteBtn');
+            const wlBtn = document.getElementById('watchLaterBtn');
+            
+            if (course.is_favorite) {
+                favBtn.classList.add('active');
+                favBtn.innerHTML = '<i class="bi bi-heart-fill me-1"></i> В избранном';
+                favBtn.style.backgroundColor = '#fee2e2';
+                favBtn.style.borderColor = '#ef4444';
+                favBtn.style.color = '#dc2626';
+            }
+            if (course.is_watch_later) {
+                wlBtn.classList.add('active');
+                wlBtn.innerHTML = '<i class="bi bi-clock-fill me-1"></i> В списке';
+                wlBtn.style.backgroundColor = '#fef3c7';
+                wlBtn.style.borderColor = '#f59e0b';
+                wlBtn.style.color = '#d97706';
+            }
+        } else {
+            // Для неавторизованных пользователей показываем всплывающую подсказку при наведении
+            const favBtn = document.getElementById('favoriteBtn');
+            const wlBtn = document.getElementById('watchLaterBtn');
+            if (favBtn) favBtn.title = 'Войдите в систему, чтобы добавить в избранное';
+            if (wlBtn) wlBtn.title = 'Войдите в систему, чтобы добавить в список';
+        }
+    }
+    
     async function toggleFavorite() {
+        const token = localStorage.getItem('token');
         if (!token) {
-            showToast('Войдите в систему', 'danger');
+            if (window.showToast) window.showToast('Войдите в систему', 'danger');
             setTimeout(() => window.location.href = '/login', 1500);
             return;
         }
@@ -276,21 +297,22 @@
                 btn.style.backgroundColor = '';
                 btn.style.borderColor = '';
                 btn.style.color = '';
-                showToast('Удалено из избранного', 'success');
+                if (window.showToast) window.showToast('Удалено из избранного', 'success');
             } else {
                 btn.classList.add('active');
                 btn.innerHTML = '<i class="bi bi-heart-fill me-1"></i> В избранном';
                 btn.style.backgroundColor = '#fee2e2';
                 btn.style.borderColor = '#ef4444';
                 btn.style.color = '#dc2626';
-                showToast('Добавлено в избранное', 'success');
+                if (window.showToast) window.showToast('Добавлено в избранное', 'success');
             }
         }
     }
     
     async function toggleWatchLater() {
+        const token = localStorage.getItem('token');
         if (!token) {
-            showToast('Войдите в систему', 'danger');
+            if (window.showToast) window.showToast('Войдите в систему', 'danger');
             setTimeout(() => window.location.href = '/login', 1500);
             return;
         }
@@ -310,54 +332,74 @@
                 btn.style.backgroundColor = '';
                 btn.style.borderColor = '';
                 btn.style.color = '';
-                showToast('Удалено из "Посмотреть позже"', 'success');
+                if (window.showToast) window.showToast('Удалено из "Посмотреть позже"', 'success');
             } else {
                 btn.classList.add('active');
                 btn.innerHTML = '<i class="bi bi-clock-fill me-1"></i> В списке';
                 btn.style.backgroundColor = '#fef3c7';
                 btn.style.borderColor = '#f59e0b';
                 btn.style.color = '#d97706';
-                showToast('Добавлено в "Посмотреть позже"', 'success');
+                if (window.showToast) window.showToast('Добавлено в "Посмотреть позже"', 'success');
             }
         }
     }
     
     async function handleRegistration() {
+        const token = localStorage.getItem('token');
         if (!token) {
-            showToast('Войдите в систему, чтобы записаться на курс', 'danger');
+            if (window.showToast) window.showToast('Войдите в систему, чтобы записаться на курс', 'danger');
             setTimeout(() => window.location.href = '/login', 1500);
             return;
         }
         
-        const response = await fetch(`/api/courses/${courseId}`, {
-            headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-        });
-        const course = await response.json();
+        const btn = document.getElementById('registerBtn');
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Запись...';
         
-        if (course.price > 0) {
+        if (!courseData) {
+            if (window.showToast) window.showToast('Ошибка загрузки данных курса', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            return;
+        }
+        
+        const coursePrice = Number(courseData.price);
+        
+        if (coursePrice > 0) {
             const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
             paymentModal.show();
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         } else {
-            const btn = document.getElementById('registerBtn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Запись...';
-            
-            const regResponse = await fetch(`/api/courses/${courseId}/register`, {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            
-            if (regResponse.ok) {
-                showToast('Вы успешно записаны на курс!', 'success');
-                setTimeout(() => location.reload(), 2000);
-            } else if (regResponse.status === 402) {
-                const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-                paymentModal.show();
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-            } else {
-                showToast('Ошибка записи на курс', 'danger');
+            try {
+                const regResponse = await fetch(`/api/courses/${courseId}/register`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (regResponse.ok) {
+                    if (window.showToast) window.showToast('Вы успешно записаны на курс!', 'success');
+                    btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Вы записаны';
+                    btn.style.background = '#10b981';
+                    setTimeout(() => location.reload(), 2000);
+                } else if (regResponse.status === 402) {
+                    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                    paymentModal.show();
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                } else {
+                    const error = await regResponse.json();
+                    if (window.showToast) window.showToast(error.detail || 'Ошибка записи на курс', 'danger');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+                if (window.showToast) window.showToast('Ошибка соединения с сервером', 'danger');
                 btn.disabled = false;
                 btn.innerHTML = originalText;
             }
@@ -365,26 +407,43 @@
     }
     
     async function processPayment(method) {
+        const token = localStorage.getItem('token');
         const modalElement = document.getElementById('paymentModal');
         const modal = bootstrap.Modal.getInstance(modalElement);
+        const btn = document.getElementById('registerBtn');
         
-        showToast('Обработка платежа...', 'info');
+        if (window.showToast) window.showToast('Обработка платежа...', 'info');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Оплата...';
         
-        setTimeout(async () => {
+        try {
             const response = await fetch(`/api/courses/${courseId}/pay`, {
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token }
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                }
             });
             
             if (response.ok) {
                 const result = await response.json();
-                showToast(result.message || 'Оплата прошла успешно! Вы записаны на курс.', 'success');
+                if (window.showToast) window.showToast(result.message || 'Оплата прошла успешно! Вы записаны на курс.', 'success');
                 modal.hide();
+                btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Вы записаны';
+                btn.style.background = '#10b981';
                 setTimeout(() => location.reload(), 2000);
             } else {
-                showToast('Ошибка оплаты. Попробуйте позже.', 'danger');
+                const error = await response.json();
+                if (window.showToast) window.showToast(error.detail || 'Ошибка оплаты. Попробуйте позже.', 'danger');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Записаться на курс';
             }
-        }, 1500);
+        } catch (error) {
+            console.error('Ошибка оплаты:', error);
+            if (window.showToast) window.showToast('Ошибка соединения', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Записаться на курс';
+        }
     }
     
     loadCourse();

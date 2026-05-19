@@ -42,6 +42,21 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         raise HTTPException(status_code=401, detail="User not found")
     return user
 
+def get_current_user_optional(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """Опциональная авторизация - не выдаёт ошибку если нет токена или он невалидный"""
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email = payload.get("sub")
+        if not email:
+            return None
+    except:
+        return None
+    
+    user = db.query(models.User).filter(models.User.email == email).first()
+    return user
+
 def get_current_active_user(current_user: models.User = Depends(get_current_user)):
     if current_user.is_blocked:
         raise HTTPException(status_code=403, detail="Account blocked")

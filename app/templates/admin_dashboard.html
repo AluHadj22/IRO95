@@ -5,10 +5,10 @@
 {% block extra_css %}
 <style>
     :root {
-        --primary: #059669;
-        --primary-dark: #047857;
-        --primary-light: #34d399;
-        --primary-gradient: linear-gradient(135deg, #064e3b 0%, #059669 50%, #10b981 100%);
+        --primary: #0057A4;
+        --primary-dark: #003d7a;
+        --primary-light: #2b7bcf;
+        --primary-gradient: linear-gradient(135deg, #0057A4 0%, #2b7bcf 50%, #4a90d9 100%);
         --secondary: #6366f1;
         --success: #10b981;
         --danger: #ef4444;
@@ -23,17 +23,17 @@
     
     .admin-sidebar {
         background: var(--white);
-        border-radius: 20px;
+        border-radius: 16px;
         border: 1px solid var(--border);
         padding: 20px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
     .admin-sidebar .nav-link {
         color: var(--gray);
         padding: 12px 16px;
         margin: 4px 0;
-        border-radius: 12px;
+        border-radius: 10px;
         transition: all 0.2s ease;
         font-size: 0.9rem;
         font-weight: 500;
@@ -41,12 +41,12 @@
     
     .admin-sidebar .nav-link i {
         margin-right: 12px;
-        width: 20px;
+        width: 22px;
         font-size: 1.1rem;
     }
     
     .admin-sidebar .nav-link:hover {
-        background: #ecfdf5;
+        background: #e0e7ff;
         color: var(--primary);
     }
     
@@ -57,7 +57,7 @@
     
     .stat-card {
         background: var(--white);
-        border-radius: 20px;
+        border-radius: 16px;
         padding: 24px;
         text-align: center;
         border: 1px solid var(--border);
@@ -85,14 +85,15 @@
     .stat-card p {
         color: var(--gray);
         margin: 0;
+        font-size: 0.875rem;
     }
     
     .table-card {
         background: var(--white);
-        border-radius: 20px;
+        border-radius: 16px;
         border: 1px solid var(--border);
         overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
     .table th {
@@ -101,18 +102,20 @@
         padding: 16px;
         background: var(--light);
         border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
     }
     
     .table td {
         padding: 16px;
         vertical-align: middle;
         border-bottom: 1px solid var(--border);
+        font-size: 0.875rem;
     }
     
     .btn-primary {
         background: var(--primary-gradient);
         border: none;
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 10px 24px;
         font-weight: 600;
         font-size: 0.875rem;
@@ -121,52 +124,53 @@
     
     .btn-primary:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+        box-shadow: 0 4px 12px rgba(0,87,164,0.3);
     }
     
     .btn-sm {
         padding: 6px 12px;
-        border-radius: 10px;
+        border-radius: 8px;
+        font-size: 0.75rem;
     }
     
     .badge-success {
-        background: #ecfdf5;
+        background: #d1fae5;
         color: #059669;
-        padding: 4px 12px;
+        padding: 4px 10px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
     
     .badge-danger {
-        background: #fef2f2;
+        background: #fee2e2;
         color: #dc2626;
-        padding: 4px 12px;
+        padding: 4px 10px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
     
     .badge-warning {
-        background: #fffbeb;
-        color: #d97706;
-        padding: 4px 12px;
+        background: #fed7aa;
+        color: #9a3412;
+        padding: 4px 10px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
     
     .badge-info {
-        background: #eff6ff;
-        color: #2563eb;
-        padding: 4px 12px;
+        background: #dbeafe;
+        color: #1e40af;
+        padding: 4px 10px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
     
     .modal-content {
-        border-radius: 24px;
+        border-radius: 16px;
         border: none;
         overflow: hidden;
     }
@@ -184,20 +188,20 @@
     }
     
     .modal-body {
-        padding: 28px;
+        padding: 24px;
     }
     
     .form-control, .form-select {
-        border-radius: 12px;
+        border-radius: 10px;
         border: 1px solid var(--border);
         padding: 12px 16px;
-        font-size: 0.9rem;
+        font-size: 0.875rem;
         transition: all 0.2s ease;
     }
     
     .form-control:focus, .form-select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(5,150,105,0.1);
+        box-shadow: 0 0 0 3px rgba(0,87,164,0.1);
         outline: none;
     }
     
@@ -212,10 +216,7 @@
         font-size: 1.5rem;
         font-weight: 700;
         margin-bottom: 8px;
-        background: var(--primary-gradient);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: var(--dark);
     }
     
     .loading-spinner {
@@ -236,13 +237,13 @@
         max-width: 150px;
         max-height: 150px;
         margin-top: 12px;
-        border-radius: 12px;
+        border-radius: 10px;
         border: 1px solid var(--border);
     }
     
     .speaker-item {
         background: var(--light);
-        border-radius: 16px;
+        border-radius: 12px;
         padding: 20px;
         margin-bottom: 16px;
         border: 1px solid var(--border);
@@ -272,15 +273,41 @@
         border: 1.5px solid var(--primary);
         color: var(--primary);
         background: transparent;
-        border-radius: 10px;
+        border-radius: 8px;
         padding: 6px 12px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         transition: all 0.2s ease;
     }
     
     .btn-outline-primary:hover {
         background: var(--primary);
         color: white;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray);
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    
+    .formats-group {
+        background: var(--light);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .formats-group label {
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: block;
+        color: var(--dark);
     }
 </style>
 {% endblock %}
@@ -293,7 +320,7 @@
             <div class="admin-sidebar">
                 <div class="text-center mb-4">
                     <i class="bi bi-shield-lock-check fs-2" style="color: var(--primary);"></i>
-                    <h6 class="mt-2 fw-bold" style="color: var(--dark);">Админ панель</h6>
+                    <h6 class="mt-2 fw-bold" style="color: var(--dark);">Панель управления</h6>
                 </div>
                 <hr class="my-3">
                 <div class="nav flex-column">
@@ -317,8 +344,10 @@
         <div class="col-md-9 col-lg-10">
             <!-- Дашборд -->
             <div id="dashboardSection">
-                <h2 class="section-title">Панель управления</h2>
-                <p class="text-muted mb-4">Общая статистика платформы</p>
+                <div class="mb-4">
+                    <h2 class="section-title">Панель управления</h2>
+                    <p class="text-muted">Общая статистика платформы</p>
+                </div>
                 <div class="row g-4">
                     <div class="col-md-3">
                         <div class="stat-card">
@@ -391,8 +420,8 @@
                             <thead>
                                 <tr>
                                     <th>ID</th><th>Название</th><th>Категория</th><th>Цена</th>
-                                    <th>Участники</th><th>Статус</th><th>Действия</th>
-                                </tr>
+                                    <th>Формат</th><th>Участники</th><th>Статус</th><th>Действия</th>
+                                </td>
                             </thead>
                             <tbody id="coursesList"></tbody>
                         </table>
@@ -402,8 +431,10 @@
             
             <!-- Пользователи -->
             <div id="usersSection" style="display: none;">
-                <h2 class="section-title">Управление пользователями</h2>
-                <p class="text-muted mb-4">Блокировка и разблокировка пользователей</p>
+                <div class="mb-4">
+                    <h2 class="section-title">Управление пользователями</h2>
+                    <p class="text-muted">Блокировка и разблокировка пользователей</p>
+                </div>
                 <div class="table-card">
                     <div class="table-responsive">
                         <table class="table mb-0">
@@ -447,7 +478,7 @@
     </div>
 </div>
 
-<!-- Модальное окно создания курса -->
+<!-- Модальное окно создания курса с новыми полями -->
 <div class="modal fade" id="createCourseModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -475,6 +506,53 @@
                         <label class="form-label">Полное описание</label>
                         <textarea class="form-control" id="course_desc" rows="3"></textarea>
                     </div>
+                    
+                    <!-- Формат обучения -->
+                    <div class="formats-group">
+                        <label><i class="bi bi-calendar-event me-2"></i>Формат обучения</label>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <select class="form-select" id="course_format">
+                                    <option value="online">Онлайн</option>
+                                    <option value="full_time">Очный</option>
+                                    <option value="part_time">Заочный</option>
+                                    <option value="full_part_time">Очно-заочный</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <select class="form-select" id="video_platform">
+                                    <option value="youtube">YouTube</option>
+                                    <option value="vk">VK Video</option>
+                                    <option value="rutube">Rutube</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Даты -->
+                    <div class="formats-group">
+                        <label><i class="bi bi-calendar-range me-2"></i>Даты проведения</label>
+                        <div class="row">
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label small">Дата начала</label>
+                                <input type="date" class="form-control" id="start_date">
+                            </div>
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label small">Дата окончания</label>
+                                <input type="date" class="form-control" id="end_date">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label small">&nbsp;</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="is_open_ended">
+                                    <label class="form-check-label" for="is_open_ended">
+                                        По набору
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Категория</label>
@@ -488,6 +566,7 @@
                         </div>
                     </div>
                     
+                    <!-- Загрузка изображения -->
                     <div class="mb-3">
                         <label class="form-label">Изображение курса</label>
                         <input type="file" class="form-control" id="course_image_file" accept="image/*">
@@ -507,6 +586,7 @@
                         </div>
                     </div>
                     
+                    <!-- Спикеры -->
                     <div class="mb-3">
                         <label class="form-label">Спикеры</label>
                         <div id="speakersContainer"></div>
@@ -555,6 +635,36 @@
         toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
         toastContainer.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    }
+    
+    async function exportRegistrations(courseId) {
+        try {
+            const response = await fetch(`/api/admin/courses/${courseId}/export`, {
+                method: 'GET',
+                headers: { 
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка экспорта');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `registrations_course_${courseId}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Экспорт успешно завершен', 'success');
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast('Ошибка при экспорте', 'danger');
+        }
     }
     
     async function uploadFile(file, endpoint) {
@@ -613,12 +723,12 @@
         speakerDiv.innerHTML = `
             <div class="row">
                 <div class="col-md-4 mb-2">
-                    <label class="form-label">ФИО *</label>
-                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'full_name', this.value)" placeholder="Иванов Иван Иванович">
+                    <label class="form-label">ФИО <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
                 </div>
                 <div class="col-md-4 mb-2">
                     <label class="form-label">Должность</label>
-                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'position', this.value)" placeholder="Профессор">
+                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'position', this.value)" placeholder="Должность">
                 </div>
                 <div class="col-md-3 mb-2">
                     <label class="form-label">Фото</label>
@@ -633,7 +743,7 @@
             </div>
             <div class="mb-2">
                 <label class="form-label">Биография</label>
-                <textarea class="form-control" rows="2" onchange="updateSpeaker(${index}, 'bio', this.value)" placeholder="Краткая биография спикера..."></textarea>
+                <textarea class="form-control" rows="2" onchange="updateSpeaker(${index}, 'bio', this.value)" placeholder="Краткая биография спикера"></textarea>
             </div>
             <hr>
         `;
@@ -664,12 +774,12 @@
             speakerDiv.innerHTML = `
                 <div class="row">
                     <div class="col-md-4 mb-2">
-                        <label class="form-label">ФИО *</label>
-                        <input type="text" class="form-control" value="${escapeHtml(speaker.full_name || '')}" onchange="updateSpeaker(${idx}, 'full_name', this.value)" placeholder="Иванов Иван Иванович">
+                        <label class="form-label">ФИО <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" value="${escapeHtml(speaker.full_name || '')}" onchange="updateSpeaker(${idx}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
                     </div>
                     <div class="col-md-4 mb-2">
                         <label class="form-label">Должность</label>
-                        <input type="text" class="form-control" value="${escapeHtml(speaker.position || '')}" onchange="updateSpeaker(${idx}, 'position', this.value)" placeholder="Профессор">
+                        <input type="text" class="form-control" value="${escapeHtml(speaker.position || '')}" onchange="updateSpeaker(${idx}, 'position', this.value)" placeholder="Должность">
                     </div>
                     <div class="col-md-3 mb-2">
                         <label class="form-label">Фото</label>
@@ -684,7 +794,7 @@
                 </div>
                 <div class="mb-2">
                     <label class="form-label">Биография</label>
-                    <textarea class="form-control" rows="2" onchange="updateSpeaker(${idx}, 'bio', this.value)" placeholder="Краткая биография спикера...">${escapeHtml(speaker.bio || '')}</textarea>
+                    <textarea class="form-control" rows="2" onchange="updateSpeaker(${idx}, 'bio', this.value)" placeholder="Краткая биография спикера">${escapeHtml(speaker.bio || '')}</textarea>
                 </div>
                 <hr>
             `;
@@ -714,7 +824,7 @@
         const tbody = document.getElementById('categoriesList');
         
         if (!categories || categories.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">Нет категорий</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-folder-x"></i><p>Нет категорий</p>NonNull</td>';
         } else {
             tbody.innerHTML = categories.map(c => `
                 <tr>
@@ -739,20 +849,28 @@
         const tbody = document.getElementById('coursesList');
         
         if (!courses || courses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Нет курсов</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p>NonNull</td>';
         } else {
+            const formatMap = {
+                'full_time': 'Очный',
+                'part_time': 'Заочный',
+                'full_part_time': 'Очно-заочный',
+                'online': 'Онлайн'
+            };
+            
             tbody.innerHTML = courses.map(c => `
                 <tr>
                     <td>${c.id}</td>
                     <td><i class="bi bi-book me-2" style="color: var(--primary);"></i>${c.title}</td>
                     <td>${c.category_name || '-'}</td>
                     <td class="fw-bold" style="color: var(--primary);">${c.price === 0 ? 'Бесплатно' : c.price + ' ₽'}</td>
+                    <td><span class="badge-info">${formatMap[c.format_type] || 'Онлайн'}</span></td>
                     <td>${c.current_participants}/${c.max_participants}</td>
                     <td><span class="${c.is_active ? 'badge-success' : 'badge-danger'}">${c.is_active ? 'Активен' : 'Неактивен'}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(${c.id})"><i class="bi bi-people"></i></button>
-                        <button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(${c.id}, ${!c.is_active})"><i class="bi bi-power"></i></button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteCourseItem(${c.id})"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(${c.id})" title="Регистрации"><i class="bi bi-people"></i></button>
+                        <button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(${c.id}, ${!c.is_active})" title="Изменить статус"><i class="bi bi-power"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteCourseItem(${c.id})" title="Удалить"><i class="bi bi-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -764,20 +882,21 @@
         const users = await response.json();
         const tbody = document.getElementById('usersList');
         
+        // Исправление: таблица пользователей теперь правильно отображается
         if (!users || users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Нет пользователей</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p>NonNull</tr>';
         } else {
             tbody.innerHTML = users.map(u => `
                 <tr>
                     <td>${u.id}</td>
                     <td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>${u.full_name}</td>
                     <td>${u.email}</td>
-                    <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Админ' : 'Учитель'}</span></td>
+                    <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Администратор' : 'Преподаватель'}</span></td>
                     <td><span class="badge-info">${u.registrations_count || 0}</span></td>
                     <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
                     <td>${!u.is_blocked ? 
-                        `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})"><i class="bi bi-lock"></i></button>` : 
-                        `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})"><i class="bi bi-unlock"></i></button>`}
+                        `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
+                        `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`}
                     </td>
                 </tr>
             `).join('');
@@ -791,13 +910,23 @@
         let html = `<div class="mb-4"><h5>${data.course.title}</h5><p class="text-muted">Цена: <strong>${data.course.price === 0 ? 'Бесплатно' : data.course.price + ' ₽'}</strong></p></div>`;
         
         if (!data.registrations || data.registrations.length === 0) {
-            html += '<div class="text-center py-4 text-muted">Нет регистраций</div>';
+            html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет регистраций</p></div>';
         } else {
-            html += `<div class="table-responsive"><table class="table table-striped"><thead><tr><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Оплата</th><th>Дата</th></tr></thead><tbody>`;
-            data.registrations.forEach(r => {
-                html += `<tr><td>${r.full_name}</td><td>${r.email}</td><td>${r.position || '-'}</td><td>${r.phone || '-'}</td><td>${r.organization || '-'}</td><td><span class="${r.is_paid ? 'badge-success' : 'badge-warning'}">${r.is_paid ? 'Оплачен' : 'Не оплачен'}</span></td><td>${new Date(r.registered_at).toLocaleDateString()}</td></tr>`;
+            html += `<div class="table-responsive"><table class="table table-striped"><thead class="table-light"><tr><th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Оплата</th><th>Дата</th></tr></thead><tbody>`;
+            data.registrations.forEach((r, idx) => {
+                html += `<tr>
+                    <td>${idx + 1}</td>
+                    <td>${r.full_name}</td>
+                    <td>${r.email}</td>
+                    <td>${r.position || '-'}</td>
+                    <td>${r.phone || '-'}</td>
+                    <td>${r.organization || '-'}</td>
+                    <td><span class="${r.is_paid ? 'badge-success' : 'badge-warning'}">${r.is_paid ? 'Оплачен' : 'Не оплачен'}</span></td>
+                    <td>${new Date(r.registered_at).toLocaleDateString()}</td>
+                </tr>`;
             });
-            html += `</tbody></table></div><div class="mt-3 text-center"><a href="/api/admin/courses/${courseId}/export" class="btn btn-primary"><i class="bi bi-download me-2"></i>Экспорт в Excel</a></div>`;
+            html += `</tbody></table></div>`;
+            html += `<div class="mt-3 text-center"><button class="btn btn-primary" onclick="exportRegistrations(${courseId})"><i class="bi bi-download me-2"></i>Экспорт в Excel</button></div>`;
         }
         
         document.getElementById('registrationsContent').innerHTML = html;
@@ -805,23 +934,27 @@
     }
     
     async function deleteCategoryItem(id) {
-        if (!confirm('Удалить категорию?')) return;
+        if (!confirm('Вы уверены, что хотите удалить эту категорию?')) return;
         const response = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
-            showToast('Категория удалена', 'success');
+            showToast('Категория успешно удалена', 'success');
             await loadCategories();
             await loadCourses();
             await loadStats();
+        } else {
+            showToast('Ошибка при удалении категории', 'danger');
         }
     }
     
     async function deleteCourseItem(id) {
-        if (!confirm('Удалить курс?')) return;
+        if (!confirm('Вы уверены, что хотите удалить этот курс? Действие необратимо.')) return;
         const response = await fetch(`/api/admin/courses/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
-            showToast('Курс удален', 'success');
+            showToast('Курс успешно удален', 'success');
             await loadCourses();
             await loadStats();
+        } else {
+            showToast('Ошибка при удалении курса', 'danger');
         }
     }
     
@@ -835,19 +968,31 @@
             showToast(isActive ? 'Курс активирован' : 'Курс деактивирован', 'success');
             await loadCourses();
             await loadStats();
+        } else {
+            showToast('Ошибка при изменении статуса', 'danger');
         }
     }
     
     async function blockUserItem(id) {
-        await fetch(`/api/admin/users/${id}/block`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
-        showToast('Пользователь заблокирован', 'success');
-        await loadUsers();
+        if (!confirm('Заблокировать этого пользователя?')) return;
+        const response = await fetch(`/api/admin/users/${id}/block`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        if (response.ok) {
+            showToast('Пользователь заблокирован', 'success');
+            await loadUsers();
+        } else {
+            showToast('Ошибка при блокировке', 'danger');
+        }
     }
     
     async function unblockUserItem(id) {
-        await fetch(`/api/admin/users/${id}/unblock`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
-        showToast('Пользователь разблокирован', 'success');
-        await loadUsers();
+        if (!confirm('Разблокировать этого пользователя?')) return;
+        const response = await fetch(`/api/admin/users/${id}/unblock`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        if (response.ok) {
+            showToast('Пользователь разблокирован', 'success');
+            await loadUsers();
+        } else {
+            showToast('Ошибка при разблокировке', 'danger');
+        }
     }
     
     document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
@@ -858,11 +1003,14 @@
             body: JSON.stringify(data)
         });
         if (response.ok) {
-            showToast('Категория создана', 'success');
+            showToast('Категория успешно создана', 'success');
             bootstrap.Modal.getInstance(document.getElementById('createCategoryModal')).hide();
             document.getElementById('createCategoryForm').reset();
             await loadCategories();
             await loadStats();
+        } else {
+            const error = await response.json();
+            showToast(error.detail || 'Ошибка при создании категории', 'danger');
         }
     });
     
@@ -871,7 +1019,7 @@
         
         const categoryId = document.getElementById('course_category_id').value;
         if (!categoryId) {
-            showToast('Выберите категорию', 'danger');
+            showToast('Пожалуйста, выберите категорию', 'danger');
             return;
         }
         
@@ -884,7 +1032,12 @@
             max_participants: parseInt(document.getElementById('course_max').value) || 30,
             image_url: document.getElementById('course_image_url').value || null,
             video_url: document.getElementById('course_video').value || null,
+            video_platform: document.getElementById('video_platform').value,
             hashtags: document.getElementById('course_hashtags').value || null,
+            format_type: document.getElementById('course_format').value,
+            start_date: document.getElementById('start_date').value || null,
+            end_date: document.getElementById('end_date').value || null,
+            is_open_ended: document.getElementById('is_open_ended').checked,
             speakers: speakersList.filter(s => s.full_name.trim())
         };
         
@@ -894,7 +1047,7 @@
         });
         
         if (response.ok) {
-            showToast('Курс создан', 'success');
+            showToast('Курс успешно создан', 'success');
             bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
             document.getElementById('createCourseForm').reset();
             speakersList = [];

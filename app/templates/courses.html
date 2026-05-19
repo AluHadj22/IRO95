@@ -1,28 +1,330 @@
 {% extends "base.html" %}
 
-{% block title %}Курсы - ИРО ЧР{% endblock %}
+{% block title %}Курсы - ГБУ ДПО «ИРО ЧР»{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-sidebar {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        padding: 20px;
+        position: sticky;
+        top: 90px;
+    }
+    
+    .filter-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--primary);
+        display: inline-block;
+    }
+    
+    .filter-group {
+        margin-bottom: 24px;
+    }
+    
+    .filter-group label {
+        font-weight: 500;
+        margin-bottom: 10px;
+        display: block;
+        color: var(--dark);
+    }
+    
+    .category-check {
+        margin-bottom: 10px;
+    }
+    
+    .category-check input {
+        margin-right: 10px;
+    }
+    
+    .category-check label {
+        font-weight: normal;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+    
+    .search-input {
+        position: relative;
+    }
+    
+    .search-input i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+    }
+    
+    .search-input input {
+        padding-left: 40px;
+    }
+    
+    .price-filter {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .clear-filters {
+        margin-top: 20px;
+        width: 100%;
+    }
+    
+    .course-card {
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.15);
+    }
+    
+    .course-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 1;
+    }
+    
+    .format-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 1;
+    }
+    
+    .no-results {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+    }
+    
+    .no-results i {
+        font-size: 4rem;
+        color: var(--gray);
+        opacity: 0.5;
+        margin-bottom: 16px;
+    }
+    
+    .no-results h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--dark);
+    }
+    
+    .no-results p {
+        color: var(--gray);
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4 mb-5">
-    <div class="text-center mb-5">
+    <div class="text-center mb-4">
         <h1 class="fw-bold">Все курсы</h1>
         <p class="text-muted">Выберите программу повышения квалификации</p>
     </div>
     
-    <div class="row g-4" id="coursesList">
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary"></div>
-            <p class="mt-3">Загрузка курсов...</p>
+    <div class="row g-4">
+        <!-- Фильтры - боковая панель -->
+        <div class="col-lg-3">
+            <div class="filter-sidebar">
+                <h5 class="filter-title"><i class="bi bi-funnel me-2"></i>Фильтры</h5>
+                
+                <!-- Поиск -->
+                <div class="filter-group">
+                    <label><i class="bi bi-search me-1"></i>Поиск</label>
+                    <div class="search-input">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Название курса...">
+                    </div>
+                </div>
+                
+                <!-- Категории -->
+                <div class="filter-group">
+                    <label><i class="bi bi-folder me-1"></i>Категории</label>
+                    <div id="categoriesList"></div>
+                </div>
+                
+                <!-- Цена -->
+                <div class="filter-group">
+                    <label><i class="bi bi-tag me-1"></i>Цена</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="freeOnlyCheckbox">
+                        <label class="form-check-label" for="freeOnlyCheckbox">
+                            Только бесплатные
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Формат обучения -->
+                <div class="filter-group">
+                    <label><i class="bi bi-calendar-event me-1"></i>Формат обучения</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="formatOnline">
+                        <label class="form-check-label" for="formatOnline">Онлайн</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="formatFullTime">
+                        <label class="form-check-label" for="formatFullTime">Очный</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="formatPartTime">
+                        <label class="form-check-label" for="formatPartTime">Заочный</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="formatFullPartTime">
+                        <label class="form-check-label" for="formatFullPartTime">Очно-заочный</label>
+                    </div>
+                </div>
+                
+                <!-- Кнопка сброса фильтров -->
+                <button class="btn btn-outline-secondary clear-filters" onclick="resetFilters()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Сбросить фильтры
+                </button>
+            </div>
+        </div>
+        
+        <!-- Список курсов -->
+        <div class="col-lg-9">
+            <div class="row g-4" id="coursesList">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-3">Загрузка курсов...</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
     const token = localStorage.getItem('token');
+    let allCourses = [];
+    let allCategories = [];
     
     function formatPrice(price) {
         if (price === 0) return 'Бесплатно';
         return price.toLocaleString() + ' ₽';
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    const formatMap = {
+        'full_time': 'Очный',
+        'part_time': 'Заочный',
+        'full_part_time': 'Очно-заочный',
+        'online': 'Онлайн'
+    };
+    
+    async function loadCategories() {
+        try {
+            const response = await fetch('/api/admin/categories', {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            });
+            if (response.ok) {
+                allCategories = await response.json();
+                renderCategoriesFilter();
+            }
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+    
+    function renderCategoriesFilter() {
+        const container = document.getElementById('categoriesList');
+        if (!container) return;
+        
+        if (allCategories.length === 0) {
+            container.innerHTML = '<p class="text-muted small">Нет категорий</p>';
+            return;
+        }
+        
+        let html = '';
+        allCategories.forEach(cat => {
+            html += `
+                <div class="category-check">
+                    <input type="checkbox" class="form-check-input category-checkbox" id="cat_${cat.id}" value="${cat.id}">
+                    <label class="form-check-label" for="cat_${cat.id}">
+                        ${escapeHtml(cat.name)} <span class="text-muted small">(${cat.courses_count || 0})</span>
+                    </label>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        
+        // Добавляем обработчики событий на чекбоксы категорий
+        document.querySelectorAll('.category-checkbox').forEach(cb => {
+            cb.addEventListener('change', filterCourses);
+        });
+    }
+    
+    function getSelectedCategories() {
+        const selected = [];
+        document.querySelectorAll('.category-checkbox:checked').forEach(cb => {
+            selected.push(parseInt(cb.value));
+        });
+        return selected;
+    }
+    
+    function getSelectedFormats() {
+        const formats = [];
+        if (document.getElementById('formatOnline')?.checked) formats.push('online');
+        if (document.getElementById('formatFullTime')?.checked) formats.push('full_time');
+        if (document.getElementById('formatPartTime')?.checked) formats.push('part_time');
+        if (document.getElementById('formatFullPartTime')?.checked) formats.push('full_part_time');
+        return formats;
+    }
+    
+    function filterCourses() {
+        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        const selectedCategories = getSelectedCategories();
+        const freeOnly = document.getElementById('freeOnlyCheckbox')?.checked || false;
+        const selectedFormats = getSelectedFormats();
+        
+        let filtered = [...allCourses];
+        
+        // Фильтр по поиску
+        if (searchTerm) {
+            filtered = filtered.filter(course => 
+                course.title.toLowerCase().includes(searchTerm) || 
+                (course.description && course.description.toLowerCase().includes(searchTerm))
+            );
+        }
+        
+        // Фильтр по категориям
+        if (selectedCategories.length > 0) {
+            filtered = filtered.filter(course => 
+                course.category_id && selectedCategories.includes(course.category_id)
+            );
+        }
+        
+        // Фильтр по цене (только бесплатные)
+        if (freeOnly) {
+            filtered = filtered.filter(course => course.price === 0);
+        }
+        
+        // Фильтр по формату
+        if (selectedFormats.length > 0) {
+            filtered = filtered.filter(course => 
+                course.format_type && selectedFormats.includes(course.format_type)
+            );
+        }
+        
+        renderCourses(filtered);
     }
     
     async function loadCourses() {
@@ -35,48 +337,9 @@
                 throw new Error('Ошибка загрузки');
             }
             
-            const courses = await response.json();
-            const container = document.getElementById('coursesList');
+            allCourses = await response.json();
+            filterCourses(); // Применяем фильтры после загрузки
             
-            if (courses.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-5">
-                        <i class="bi bi-inbox fs-1 text-muted"></i>
-                        <p class="mt-3">Курсы пока не добавлены</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            courses.forEach(course => {
-                html += `
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100">
-                            ${course.image_url ? 
-                                `<img src="${course.image_url}" class="course-card-img" alt="${course.title}">` :
-                                `<div class="course-card-img bg-secondary d-flex align-items-center justify-content-center">
-                                    <i class="bi bi-camera fs-1 text-white"></i>
-                                </div>`
-                            }
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge bg-primary">${course.category_name || "Обучение"}</span>
-                                    <span class="fw-bold text-primary">${formatPrice(course.price)}</span>
-                                </div>
-                                <h5 class="card-title">${escapeHtml(course.title)}</h5>
-                                <p class="card-text text-muted small">${escapeHtml(course.short_description ? course.short_description.substring(0, 80) : (course.description ? course.description.substring(0, 80) : "Описание курса"))}...</p>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <small class="text-muted"><i class="bi bi-people"></i> ${course.current_participants}/${course.max_participants}</small>
-                                    <a href="/course/${course.id}" class="btn btn-primary btn-sm">Подробнее <i class="bi bi-arrow-right"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
         } catch (error) {
             console.error('Error loading courses:', error);
             document.getElementById('coursesList').innerHTML = `
@@ -88,13 +351,110 @@
         }
     }
     
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    function renderCourses(courses) {
+        const container = document.getElementById('coursesList');
+        
+        if (!courses || courses.length === 0) {
+            container.innerHTML = `
+                <div class="no-results">
+                    <i class="bi bi-inbox"></i>
+                    <h5>Курсы не найдены</h5>
+                    <p>Попробуйте изменить параметры поиска или фильтры</p>
+                    <button class="btn btn-primary" onclick="resetFilters()">Сбросить фильтры</button>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        courses.forEach(course => {
+            const formatText = formatMap[course.format_type] || 'Онлайн';
+            const formatClass = course.format_type === 'online' ? 'bg-info' : 'bg-secondary';
+            
+            html += `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 position-relative">
+                        <div class="format-badge">
+                            <span class="badge ${formatClass}">${formatText}</span>
+                        </div>
+                        <div class="course-badge">
+                            <span class="badge bg-primary">${course.category_name || "Обучение"}</span>
+                        </div>
+                        ${course.image_url ? 
+                            `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}">` :
+                            `<div class="course-card-img bg-secondary d-flex align-items-center justify-content-center">
+                                <i class="bi bi-camera fs-1 text-white"></i>
+                            </div>`
+                        }
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="fw-bold text-primary">${formatPrice(course.price)}</span>
+                            </div>
+                            <h5 class="card-title">${escapeHtml(course.title)}</h5>
+                            <p class="card-text text-muted small">${escapeHtml(course.short_description ? course.short_description.substring(0, 80) : (course.description ? course.description.substring(0, 80) : "Описание курса"))}...</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted"><i class="bi bi-people"></i> ${course.current_participants}/${course.max_participants}</small>
+                                <a href="/course/${course.id}" class="btn btn-primary btn-sm">Подробнее <i class="bi bi-arrow-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
     }
     
+    function resetFilters() {
+        // Сброс поиска
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) searchInput.value = '';
+        
+        // Сброс категорий
+        document.querySelectorAll('.category-checkbox').forEach(cb => {
+            cb.checked = false;
+        });
+        
+        // Сброс цены
+        const freeOnlyCheckbox = document.getElementById('freeOnlyCheckbox');
+        if (freeOnlyCheckbox) freeOnlyCheckbox.checked = false;
+        
+        // Сброс форматов
+        document.getElementById('formatOnline') && (document.getElementById('formatOnline').checked = false);
+        document.getElementById('formatFullTime') && (document.getElementById('formatFullTime').checked = false);
+        document.getElementById('formatPartTime') && (document.getElementById('formatPartTime').checked = false);
+        document.getElementById('formatFullPartTime') && (document.getElementById('formatFullPartTime').checked = false);
+        
+        // Применяем фильтры (показываем все курсы)
+        filterCourses();
+    }
+    
+    // Добавляем обработчики событий
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', filterCourses);
+        }
+        
+        const freeOnlyCheckbox = document.getElementById('freeOnlyCheckbox');
+        if (freeOnlyCheckbox) {
+            freeOnlyCheckbox.addEventListener('change', filterCourses);
+        }
+        
+        // Обработчики для форматов
+        const formatOnline = document.getElementById('formatOnline');
+        const formatFullTime = document.getElementById('formatFullTime');
+        const formatPartTime = document.getElementById('formatPartTime');
+        const formatFullPartTime = document.getElementById('formatFullPartTime');
+        
+        if (formatOnline) formatOnline.addEventListener('change', filterCourses);
+        if (formatFullTime) formatFullTime.addEventListener('change', filterCourses);
+        if (formatPartTime) formatPartTime.addEventListener('change', filterCourses);
+        if (formatFullPartTime) formatFullPartTime.addEventListener('change', filterCourses);
+    });
+    
+    // Загружаем категории и курсы
+    loadCategories();
     loadCourses();
 </script>
 {% endblock %}

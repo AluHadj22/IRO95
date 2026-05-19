@@ -7,6 +7,7 @@ class UserRole(str, Enum):
     TEACHER = "teacher"
     ADMIN = "admin"
 
+
 class UserCreate(BaseModel):
     email: EmailStr
     full_name: str
@@ -15,6 +16,7 @@ class UserCreate(BaseModel):
     organization: Optional[str] = None
     password: str = Field(..., min_length=6)
     admin_code: Optional[str] = None
+
 
 class UserResponse(BaseModel):
     id: int
@@ -29,13 +31,16 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class CategoryCreate(BaseModel):
     name: str
     description: Optional[str] = None
+
 
 class CategoryResponse(BaseModel):
     id: int
@@ -46,11 +51,13 @@ class CategoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class SpeakerCreate(BaseModel):
     full_name: str
     bio: Optional[str] = None
     photo_url: Optional[str] = None
     position: Optional[str] = None
+
 
 class SpeakerResponse(BaseModel):
     id: int
@@ -62,6 +69,7 @@ class SpeakerResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class CourseCreate(BaseModel):
     title: str
     description: Optional[str] = None
@@ -69,13 +77,17 @@ class CourseCreate(BaseModel):
     category_id: Optional[int] = None
     image_url: Optional[str] = None
     video_url: Optional[str] = None
+    video_platform: str = "youtube"  # youtube, vk, rutube
     hashtags: Optional[str] = None
     keywords: Optional[str] = None
     price: float = 0.0
     max_participants: int = 100
+    format_type: str = "online"  # full_time, part_time, full_part_time, online
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
+    is_open_ended: bool = False
     speakers: List[SpeakerCreate] = []
+
 
 class CourseUpdate(BaseModel):
     title: Optional[str] = None
@@ -84,13 +96,17 @@ class CourseUpdate(BaseModel):
     category_id: Optional[int] = None
     image_url: Optional[str] = None
     video_url: Optional[str] = None
+    video_platform: Optional[str] = None
     hashtags: Optional[str] = None
     keywords: Optional[str] = None
     price: Optional[float] = None
     max_participants: Optional[int] = None
+    format_type: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
+    is_open_ended: Optional[bool] = None
     is_active: Optional[bool] = None
+
 
 class CourseResponse(BaseModel):
     id: int
@@ -101,28 +117,34 @@ class CourseResponse(BaseModel):
     category_name: Optional[str]
     image_url: Optional[str]
     video_url: Optional[str]
+    video_platform: Optional[str] = "youtube"
     hashtags: Optional[str]
     keywords: Optional[str]
     price: float
     max_participants: int
     current_participants: int
+    format_type: str = "online"
+    start_date: Optional[datetime]
+    end_date: Optional[datetime]
+    is_open_ended: bool = False
     is_active: bool
     speakers: List[SpeakerResponse] = []
     is_favorite: bool = False
     is_watch_later: bool = False
-    start_date: Optional[datetime]
-    end_date: Optional[datetime]
     
     class Config:
         from_attributes = True
 
+
 class PaymentRequest(BaseModel):
     course_id: int
+
 
 class PaymentResponse(BaseModel):
     success: bool
     message: str
     payment_id: Optional[str] = None
+
 
 class NotificationResponse(BaseModel):
     id: int

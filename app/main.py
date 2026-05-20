@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router
 import os
+from app.routers import lms_router  # <-- ЭТОГО НЕТ!
 
 # Создаём таблицы в базе данных
 Base.metadata.create_all(bind=engine)
@@ -38,6 +39,8 @@ app.include_router(admin_router.router)
 app.include_router(notifications_router.router)
 app.include_router(public_router.router)
 app.include_router(achievements_router.router)
+# И добавьте в список роутеров:
+app.include_router(lms_router.router)
 
 
 @app.get("/health")

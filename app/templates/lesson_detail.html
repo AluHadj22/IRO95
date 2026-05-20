@@ -1,0 +1,908 @@
+{% extends "base.html" %}
+
+{% block title %}Урок - ГБУ ДПО «ИРО ЧР»{% endblock %}
+
+{% block extra_css %}
+<style>
+    .lesson-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .lesson-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .lesson-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 10px;
+    }
+    
+    .lesson-meta {
+        display: flex;
+        gap: 20px;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+    
+    .lesson-content {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .lesson-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+    }
+    
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
+    .attachments-section {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .attachment-item {
+        display: inline-block;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        margin: 5px;
+        text-decoration: none;
+        color: #1e293b;
+        transition: all 0.2s ease;
+    }
+    
+    .attachment-item:hover {
+        background: #0057A4;
+        color: white;
+        border-color: #0057A4;
+    }
+    
+    .assignment-section {
+        background: #f0fdf4;
+        border-radius: 16px;
+        border: 1px solid #d1fae5;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .assignment-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #059669;
+        margin-bottom: 15px;
+    }
+    
+    .question-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .question-text {
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #1e293b;
+    }
+    
+    .question-image {
+        max-width: 100%;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .question-status {
+        margin-top: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .status-approved {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .status-rejected {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .option-item {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .option-item:hover {
+        background: #f1f5f9;
+    }
+    
+    .option-item.selected {
+        background: #e0e7ff;
+        border-left: 3px solid #0057A4;
+    }
+    
+    .text-answer {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-family: inherit;
+        resize: vertical;
+    }
+    
+    .text-answer:focus {
+        outline: none;
+        border-color: #0057A4;
+        box-shadow: 0 0 0 3px rgba(0,87,164,0.1);
+    }
+    
+    .submit-btn {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.2s ease;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+    }
+    
+    .submit-btn:disabled {
+        opacity: 0.5;
+        transform: none;
+    }
+    
+    .complete-btn {
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .complete-btn:disabled {
+        opacity: 0.5;
+        transform: none;
+        cursor: not-allowed;
+    }
+    
+    .result-card {
+        background: #eff6ff;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .result-score {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0057A4;
+    }
+    
+    .result-passed {
+        background: #d1fae5;
+        color: #059669;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+        font-size: 0.8rem;
+    }
+    
+    .result-failed {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+        font-size: 0.8rem;
+    }
+    
+    .result-pending {
+        background: #fef3c7;
+        color: #d97706;
+        padding: 4px 12px;
+        border-radius: 20px;
+        display: inline-block;
+        font-size: 0.8rem;
+    }
+    
+    .waiting-message {
+        background: #fef3c7;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 20px;
+        text-align: center;
+        color: #92400e;
+    }
+    
+    .navigation-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
+    
+    .nav-btn {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 20px;
+        color: #1e293b;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-btn:hover {
+        background: #f1f5f9;
+    }
+    
+    .error-container {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        margin: 40px auto;
+        max-width: 500px;
+    }
+    
+    .error-container i {
+        font-size: 4rem;
+        color: #ef4444;
+        margin-bottom: 20px;
+    }
+    
+    .error-container h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #1e293b;
+    }
+    
+    .error-container p {
+        color: #64748b;
+        margin-bottom: 20px;
+    }
+    
+    .progress-update {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #0057A4;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: fadeOut 3s ease forwards;
+    }
+    
+    @keyframes fadeOut {
+        0% { opacity: 1; }
+        70% { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-container">
+    <div id="lessonContent">
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary"></div>
+            <p class="mt-3">Загрузка урока...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    const lessonId = {{ lesson_id }};
+    let lessonData = null;
+    let textAnswersStatus = {}; // Хранит статус проверки текстовых ответов
+    
+    // Проверяем авторизацию перед загрузкой
+    if (!token) {
+        document.getElementById('lessonContent').innerHTML = `
+            <div class="error-container">
+                <i class="bi bi-lock-fill"></i>
+                <h3>Требуется авторизация</h3>
+                <p>Для просмотра урока необходимо войти в систему</p>
+                <a href="/login" class="btn btn-primary">Войти</a>
+            </div>
+        `;
+    } else {
+        loadLesson();
+    }
+    
+    // Функция для безопасного парсинга options
+    function parseOptions(options) {
+        if (!options) return [];
+        if (Array.isArray(options)) return options;
+        if (typeof options === 'string') {
+            try {
+                const parsed = JSON.parse(options);
+                if (Array.isArray(parsed)) return parsed;
+                if (typeof parsed === 'string') {
+                    try {
+                        const doubleParsed = JSON.parse(parsed);
+                        return Array.isArray(doubleParsed) ? doubleParsed : [];
+                    } catch(e) {
+                        return [];
+                    }
+                }
+                return [];
+            } catch(e) {
+                console.warn('Failed to parse options:', options, e);
+                return [];
+            }
+        }
+        return [];
+    }
+    
+    // Функция для обновления прогресса курса
+    async function updateCourseProgress() {
+        try {
+            // Получаем курс из данных урока
+            const moduleResponse = await fetch(`/api/lms/lessons/${lessonId}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const lessonInfo = await moduleResponse.json();
+            
+            // Здесь нужно получить course_id - пока не знаем, пропустим
+            console.log('Progress update would happen here');
+        } catch (error) {
+            console.error('Error updating course progress:', error);
+        }
+    }
+    
+    function showFloatingMessage(message) {
+        const div = document.createElement('div');
+        div.className = 'progress-update';
+        div.innerHTML = `<i class="bi bi-check-circle me-2"></i>${message}`;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+    
+    async function loadLesson() {
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+        
+        try {
+            console.log('Загрузка урока ID:', lessonId);
+            
+            const response = await fetch(`/api/lms/lessons/${lessonId}`, { headers });
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    throw new Error('Требуется авторизация');
+                } else if (response.status === 403) {
+                    throw new Error('У вас нет доступа к этому уроку. Возможно, вы не записаны на курс.');
+                } else if (response.status === 404) {
+                    throw new Error('Урок не найден');
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || 'Ошибка загрузки урока');
+                }
+            }
+            
+            lessonData = await response.json();
+            console.log('Данные урока загружены');
+            
+            // Получаем статус проверки текстовых ответов
+            await loadTextAnswersStatus();
+            
+            renderLesson();
+            
+        } catch (error) {
+            console.error('Error loading lesson:', error);
+            document.getElementById('lessonContent').innerHTML = `
+                <div class="error-container">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <h3>Ошибка загрузки урока</h3>
+                    <p>${escapeHtml(error.message)}</p>
+                    <a href="javascript:history.back()" class="btn btn-outline-primary me-2">Назад</a>
+                    <a href="/courses" class="btn btn-primary">К курсам</a>
+                </div>
+            `;
+        }
+    }
+    
+    async function loadTextAnswersStatus() {
+        if (!lessonData || !lessonData.assignment) return;
+        
+        try {
+            const response = await fetch(`/api/lms/assignment/${lessonData.assignment.id}/status`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                const status = await response.json();
+                textAnswersStatus = status;
+                console.log('Статус проверки ответов:', textAnswersStatus);
+            }
+        } catch (error) {
+            console.error('Error loading text answers status:', error);
+        }
+    }
+    
+    // Проверка, можно ли завершить урок
+    function canCompleteLesson() {
+        if (!lessonData || !lessonData.assignment) {
+            // Нет задания - можно завершить
+            return true;
+        }
+        
+        // Если урок уже пройден - не нужно
+        if (lessonData.is_completed) {
+            return false;
+        }
+        
+        // Получаем все текстовые вопросы
+        const textQuestions = lessonData.assignment.questions.filter(q => q.question_type === 'text');
+        
+        // Если нет текстовых вопросов - можно завершить после отправки
+        if (textQuestions.length === 0) {
+            // Проверяем, есть ли submission
+            return false; // Кнопка завершения показывается отдельно
+        }
+        
+        // Проверяем, все ли текстовые вопросы зачтены
+        let allApproved = true;
+        let hasAnyAnswer = false;
+        
+        for (const question of textQuestions) {
+            const status = textAnswersStatus[question.id];
+            if (status === 'pending') {
+                allApproved = false;
+                break;
+            }
+            if (status === 'rejected') {
+                allApproved = false;
+                break;
+            }
+            if (status === 'approved') {
+                hasAnyAnswer = true;
+            }
+            if (!status) {
+                allApproved = false;
+                break;
+            }
+        }
+        
+        return allApproved && hasAnyAnswer;
+    }
+    
+    function renderLesson() {
+        const container = document.getElementById('lessonContent');
+        
+        let html = `
+            <div class="lesson-header">
+                <h1 class="lesson-title">${escapeHtml(lessonData.title)}</h1>
+                <div class="lesson-meta">
+                    ${lessonData.duration_minutes > 0 ? `<span><i class="bi bi-clock"></i> ${lessonData.duration_minutes} мин</span>` : ''}
+                    ${lessonData.has_assignment ? `<span><i class="bi bi-pencil-square"></i> Есть задание</span>` : ''}
+                    ${lessonData.is_completed ? `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Пройдено</span>` : '<span class="text-warning"><i class="bi bi-clock-history"></i> Не пройдено</span>'}
+                </div>
+            </div>
+            
+            <div class="lesson-content">
+                ${lessonData.video_url ? `
+                    <div class="video-container">
+                        <iframe src="${getEmbedUrl(lessonData.video_url)}" allowfullscreen></iframe>
+                    </div>
+                ` : ''}
+                <div class="lesson-text">
+                    ${lessonData.content || '<p class="text-muted">Нет содержания урока</p>'}
+                </div>
+            </div>
+        `;
+        
+        // Прикреплённые файлы
+        if (lessonData.attachments && lessonData.attachments.length > 0) {
+            html += `
+                <div class="attachments-section">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-paperclip"></i> Материалы к уроку</h6>
+                    <div>
+                        ${lessonData.attachments.map(att => `
+                            <a href="${att.file_url}" class="attachment-item" download>
+                                <i class="bi bi-file-earmark-text"></i> ${escapeHtml(att.filename)}
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Задание
+        if (lessonData.assignment && !lessonData.is_completed) {
+            html += renderAssignment(lessonData.assignment);
+        } else if (lessonData.assignment && lessonData.is_completed) {
+            html += `
+                <div class="result-card">
+                    <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+                    <h5 class="mt-2">Урок пройден!</h5>
+                    <p>Вы успешно завершили этот урок. Можете перейти к следующему.</p>
+                    ${lessonData.next_lesson_id ? `<a href="/lesson/${lessonData.next_lesson_id}" class="btn btn-primary mt-3">Перейти к следующему уроку <i class="bi bi-arrow-right"></i></a>` : ''}
+                </div>
+            `;
+        }
+        
+        // Навигация (всегда показываем, чтобы можно было переключаться между уроками)
+        if (lessonData.next_lesson_id || lessonData.prev_lesson_id) {
+            html += `<div class="navigation-buttons">`;
+            if (lessonData.prev_lesson_id) {
+                html += `<a href="/lesson/${lessonData.prev_lesson_id}" class="nav-btn"><i class="bi bi-arrow-left"></i> Предыдущий урок</a>`;
+            } else {
+                html += `<div></div>`;
+            }
+            if (lessonData.next_lesson_id) {
+                html += `<a href="/lesson/${lessonData.next_lesson_id}" class="nav-btn">Следующий урок <i class="bi bi-arrow-right"></i></a>`;
+            }
+            html += `</div>`;
+        }
+        
+        container.innerHTML = html;
+    }
+    
+    function renderAssignment(assignment) {
+        // Проверяем, можно ли завершить урок
+        const canComplete = canCompleteLesson();
+        
+        // Если все текстовые вопросы зачтены, показываем кнопку завершения
+        if (canComplete && !lessonData.is_completed) {
+            return `
+                <div class="assignment-section">
+                    <div class="assignment-title">
+                        <i class="bi bi-pencil-square me-2"></i>${escapeHtml(assignment.title)}
+                    </div>
+                    <div class="result-card">
+                        <i class="bi bi-check-circle-fill fs-1 text-success"></i>
+                        <h5 class="mt-2">Все ответы проверены и зачтены!</h5>
+                        <p>Вы можете завершить урок.</p>
+                        <button class="complete-btn" onclick="completeLesson()">
+                            <i class="bi bi-check-circle me-2"></i>Завершить урок
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Проверяем, есть ли непроверенные текстовые ответы
+        const hasPendingTextAnswers = Object.values(textAnswersStatus).some(s => s === 'pending');
+        
+        if (hasPendingTextAnswers) {
+            return `
+                <div class="assignment-section">
+                    <div class="assignment-title">
+                        <i class="bi bi-pencil-square me-2"></i>${escapeHtml(assignment.title)}
+                    </div>
+                    ${renderQuestions(assignment)}
+                    <div class="waiting-message">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Ваши ответы отправлены на проверку учителю. Дождитесь проверки, чтобы завершить урок.
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Показываем все вопросы для ответа
+        return `
+            <div class="assignment-section">
+                <div class="assignment-title">
+                    <i class="bi bi-pencil-square me-2"></i>${escapeHtml(assignment.title)}
+                </div>
+                <p class="text-muted mb-4">${escapeHtml(assignment.description || 'Ответьте на вопросы, чтобы пройти задание')}</p>
+                <p class="small text-muted mb-3">⚠️ Внимание: текстовые ответы проверяются учителем. После проверки вы сможете завершить урок.</p>
+                <form id="assignmentForm">
+                    ${renderQuestions(assignment)}
+                    <button type="submit" class="submit-btn">
+                        <i class="bi bi-send me-2"></i>Отправить на проверку
+                    </button>
+                </form>
+            </div>
+        `;
+    }
+    
+    function renderQuestions(assignment) {
+        let questionsHtml = '';
+        
+        assignment.questions.forEach((question, idx) => {
+            const options = parseOptions(question.options);
+            const answerStatus = textAnswersStatus[question.id];
+            
+            // Если ответ уже отправлен и ожидает проверки
+            if (answerStatus === 'pending') {
+                questionsHtml += `
+                    <div class="question-card" data-question-id="${question.id}">
+                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
+                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
+                        <div class="question-status status-pending">
+                            <i class="bi bi-clock-history"></i> Ответ отправлен, ожидает проверки учителя
+                        </div>
+                    </div>
+                `;
+            } 
+            else if (answerStatus === 'rejected') {
+                questionsHtml += `
+                    <div class="question-card" data-question-id="${question.id}">
+                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
+                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
+                        <div class="question-status status-rejected">
+                            <i class="bi bi-x-circle"></i> Ответ не зачтен. Попробуйте еще раз.
+                        </div>
+                        ${renderQuestionInput(question, options)}
+                    </div>
+                `;
+            }
+            else if (answerStatus === 'approved') {
+                questionsHtml += `
+                    <div class="question-card" data-question-id="${question.id}">
+                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
+                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
+                        <div class="question-status status-approved">
+                            <i class="bi bi-check-circle"></i> Ответ зачтен! (+${question.points} баллов)
+                        </div>
+                    </div>
+                `;
+            }
+            else {
+                // Новый вопрос, ответ еще не отправлен
+                questionsHtml += `
+                    <div class="question-card" data-question-id="${question.id}">
+                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
+                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
+                        ${question.question_image ? `<img src="${question.question_image}" class="question-image">` : ''}
+                        ${renderQuestionInput(question, options)}
+                    </div>
+                `;
+            }
+        });
+        
+        return questionsHtml;
+    }
+    
+    function renderQuestionInput(question, options) {
+        if (question.question_type === 'choice') {
+            if (options.length === 0) {
+                return `
+                    <div class="alert alert-warning small">
+                        <i class="bi bi-exclamation-triangle"></i> Варианты ответов отсутствуют.
+                    </div>
+                    <input type="hidden" id="answer_${question.id}" name="question_${question.id}" value="">
+                `;
+            }
+            
+            return `
+                <div class="options-list">
+                    ${options.map((opt, optIdx) => `
+                        <div class="option-item" onclick="selectOption(${question.id}, ${optIdx})" data-opt-index="${optIdx}">
+                            <i class="bi bi-circle me-2"></i>
+                            <span>${escapeHtml(opt)}</span>
+                        </div>
+                    `).join('')}
+                    <input type="hidden" id="answer_${question.id}" name="question_${question.id}">
+                </div>
+            `;
+        } else {
+            return `
+                <textarea class="text-answer" id="answer_${question.id}" name="question_${question.id}" 
+                          rows="4" placeholder="Введите ваш ответ здесь..."></textarea>
+            `;
+        }
+    }
+    
+    function selectOption(questionId, optionIndex) {
+        const container = document.querySelector(`.question-card[data-question-id="${questionId}"]`);
+        if (!container) return;
+        
+        container.querySelectorAll('.option-item').forEach(opt => {
+            opt.classList.remove('selected');
+            const icon = opt.querySelector('i');
+            if (icon) icon.className = 'bi bi-circle me-2';
+        });
+        
+        const selectedOpt = container.querySelector(`.option-item[data-opt-index="${optionIndex}"]`);
+        if (selectedOpt) {
+            selectedOpt.classList.add('selected');
+            const icon = selectedOpt.querySelector('i');
+            if (icon) icon.className = 'bi bi-check-circle-fill me-2';
+        }
+        
+        const answerInput = document.getElementById(`answer_${questionId}`);
+        if (answerInput) answerInput.value = optionIndex;
+    }
+    
+    document.addEventListener('submit', async (e) => {
+        if (e.target.id === 'assignmentForm') {
+            e.preventDefault();
+            await submitAssignment();
+        }
+    });
+    
+    async function submitAssignment() {
+        const form = document.getElementById('assignmentForm');
+        const formData = new FormData(form);
+        const answers = [];
+        
+        if (lessonData.assignment && lessonData.assignment.questions) {
+            lessonData.assignment.questions.forEach(question => {
+                // Пропускаем вопросы, которые уже зачтены
+                if (textAnswersStatus[question.id] === 'approved') return;
+                
+                const answer = formData.get(`question_${question.id}`);
+                if (answer !== null && answer !== '') {
+                    answers.push({
+                        question_id: question.id,
+                        answer: answer
+                    });
+                }
+            });
+        }
+        
+        if (answers.length === 0) {
+            if (window.showToast) window.showToast('Нет новых ответов для отправки', 'warning');
+            return;
+        }
+        
+        const btn = form.querySelector('.submit-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Отправка...';
+        }
+        
+        try {
+            const response = await fetch(`/api/lms/assignments/${lessonData.assignment.id}/submit`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answers: answers })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                
+                if (window.showToast) window.showToast('Ответы отправлены на проверку!', 'success');
+                
+                // Обновляем статус текстовых ответов
+                await loadTextAnswersStatus();
+                renderLesson();
+                
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-send me-2"></i>Отправить на проверку';
+                }
+            } else {
+                const error = await response.json().catch(() => ({}));
+                if (window.showToast) window.showToast(error.detail || 'Ошибка отправки', 'danger');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-send me-2"></i>Отправить на проверку';
+                }
+            }
+        } catch (error) {
+            console.error('Submit error:', error);
+            if (window.showToast) window.showToast('Ошибка соединения', 'danger');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-send me-2"></i>Отправить на проверку';
+            }
+        }
+    }
+    
+    async function completeLesson() {
+        const btn = document.querySelector('.complete-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Отметка...';
+        }
+        
+        try {
+            const response = await fetch(`/api/lms/lessons/${lessonId}/complete`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                if (window.showToast) window.showToast('Урок отмечен как пройденный!', 'success');
+                
+                setTimeout(() => {
+                    if (lessonData.next_lesson_id) {
+                        if (confirm('Урок пройден! Перейти к следующему уроку?')) {
+                            window.location.href = `/lesson/${lessonData.next_lesson_id}`;
+                        } else {
+                            location.reload();
+                        }
+                    } else {
+                        location.reload();
+                    }
+                }, 1500);
+            } else {
+                const error = await response.json().catch(() => ({}));
+                if (window.showToast) window.showToast(error.detail || 'Ошибка', 'danger');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Завершить урок';
+                }
+            }
+        } catch (error) {
+            console.error('Complete lesson error:', error);
+            if (window.showToast) window.showToast('Ошибка соединения', 'danger');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Завершить урок';
+            }
+        }
+    }
+    
+    function getEmbedUrl(url) {
+        if (!url) return '';
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            let videoId = '';
+            if (url.includes('youtu.be')) {
+                videoId = url.split('/').pop()?.split('?')[0];
+            } else {
+                videoId = url.split('v=')[1]?.split('&')[0];
+            }
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+        return url;
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+</script>
+{% endblock %}

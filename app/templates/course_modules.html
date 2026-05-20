@@ -1,0 +1,475 @@
+{% extends "base.html" %}
+
+{% block title %}Курс - ГБУ ДПО «ИРО ЧР»{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-header {
+        background: linear-gradient(135deg, #0057A4 0%, #003d7a 100%);
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 30px;
+    }
+    
+    .module-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .module-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+    }
+    
+    .module-header {
+        background: #f8fafc;
+        padding: 16px 24px;
+        cursor: pointer;
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+    }
+    
+    .module-header:hover {
+        background: #f1f5f9;
+    }
+    
+    .module-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .module-badge {
+        background: #e0e7ff;
+        color: #0057A4;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .module-badge.online {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .module-badge.offline {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+    
+    .lessons-list {
+        padding: 0;
+    }
+    
+    .lesson-item {
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .lesson-item:hover {
+        background: #f8fafc;
+    }
+    
+    .lesson-item.completed {
+        background: #f0fdf4;
+    }
+    
+    .lesson-icon {
+        width: 40px;
+        height: 40px;
+        background: #e0e7ff;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+    
+    .lesson-icon i {
+        font-size: 1.2rem;
+        color: #0057A4;
+    }
+    
+    .lesson-item.completed .lesson-icon {
+        background: #d1fae5;
+    }
+    
+    .lesson-item.completed .lesson-icon i {
+        color: #059669;
+    }
+    
+    .lesson-info {
+        flex: 1;
+    }
+    
+    .lesson-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #1e293b;
+    }
+    
+    .lesson-meta {
+        font-size: 0.7rem;
+        color: #64748b;
+        display: flex;
+        gap: 16px;
+    }
+    
+    .lesson-status {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: #f1f5f9;
+    }
+    
+    .lesson-status.completed {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .lesson-status.locked {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .lesson-button {
+        flex-shrink: 0;
+    }
+    
+    .btn-outline {
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        background: transparent;
+        border: 1px solid #cbd5e1;
+        color: #64748b;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-outline:hover {
+        background: #0057A4;
+        border-color: #0057A4;
+        color: white;
+    }
+    
+    .progress-bar-container {
+        background: #e2e8f0;
+        border-radius: 10px;
+        height: 8px;
+        overflow: hidden;
+        margin: 20px 0;
+    }
+    
+    .progress-bar-fill {
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+    
+    .course-sidebar {
+        position: sticky;
+        top: 90px;
+    }
+    
+    .price-card {
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        padding: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0057A4;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,87,164,0.3);
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background: #f8fafc;
+        color: #0057A4;
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: #e2e8f0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="course-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1 class="fw-bold mb-3" id="courseTitle">Загрузка...</h1>
+                <p class="mb-0 opacity-75" id="courseDescription"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Прогресс курса -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-semibold">Ваш прогресс</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Модули курса -->
+            <div id="modulesContainer"></div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="course-sidebar">
+                <div class="price-card">
+                    <div class="price" id="coursePrice">-</div>
+                    <p class="text-muted small mt-2">Формат: <span id="courseFormat"></span></p>
+                    <button class="btn btn-primary w-100" id="registerBtn" onclick="registerForCourse()">
+                        <i class="bi bi-pencil-square me-2"></i>Записаться на курс
+                    </button>
+                </div>
+                
+                <!-- Информация -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>О курсе</h6>
+                        <p class="small text-muted" id="courseFullDescription"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    const courseId = {{ course_id }};
+    let courseData = null;
+    
+    function formatPrice(price) {
+        if (price === 0 || price === "0") return 'Бесплатно';
+        return Number(price).toLocaleString() + ' ₽';
+    }
+    
+    function formatMap(type) {
+        const map = {
+            'full_time': 'Очный',
+            'part_time': 'Заочный',
+            'full_part_time': 'Очно-заочный',
+            'online': 'Онлайн'
+        };
+        return map[type] || 'Онлайн';
+    }
+    
+    async function loadCourse() {
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+        
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/full`, { headers });
+            
+            if (!response.ok) {
+                throw new Error('Курс не найден');
+            }
+            
+            courseData = await response.json();
+            renderCourse();
+            
+        } catch (error) {
+            console.error('Error loading course:', error);
+            document.getElementById('modulesContainer').innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle fs-1"></i>
+                    <p class="mt-2">Курс не найден</p>
+                    <a href="/courses" class="btn btn-primary btn-sm">Вернуться к курсам</a>
+                </div>
+            `;
+        }
+    }
+    
+    function renderCourse() {
+        // Заголовок и описание
+        document.getElementById('courseTitle').innerText = courseData.title;
+        document.getElementById('courseDescription').innerText = courseData.description || '';
+        document.getElementById('courseFullDescription').innerText = courseData.description || 'Нет описания';
+        document.getElementById('coursePrice').innerHTML = formatPrice(courseData.price);
+        document.getElementById('courseFormat').innerText = formatMap(courseData.format_type);
+        
+        // Подсчёт прогресса
+        let totalLessons = 0;
+        let completedLessons = 0;
+        
+        courseData.modules.forEach(module => {
+            module.lessons.forEach(lesson => {
+                totalLessons++;
+                if (lesson.is_completed) completedLessons++;
+            });
+        });
+        
+        const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+        document.getElementById('progressPercent').innerText = `${progressPercent}%`;
+        document.getElementById('progressFill').style.width = `${progressPercent}%`;
+        
+        // Рендерим модули
+        const container = document.getElementById('modulesContainer');
+        let modulesHtml = '';
+        
+        courseData.modules.forEach((module, moduleIndex) => {
+            const isOnline = module.module_type === 'online';
+            const badgeClass = isOnline ? 'online' : 'offline';
+            const badgeText = isOnline ? 'Онлайн' : 'Оффлайн';
+            
+            let lessonsHtml = '';
+            module.lessons.forEach(lesson => {
+                const isCompleted = lesson.is_completed;
+                const statusClass = isCompleted ? 'completed' : '';
+                const statusIcon = isCompleted ? 'bi-check-circle-fill' : 'bi-play-circle';
+                const statusText = isCompleted ? 'Пройдено' : (lesson.is_free ? 'Свободный доступ' : 'Требуется запись');
+                const statusBadgeClass = isCompleted ? 'completed' : (lesson.is_free ? 'free' : 'locked');
+                
+                lessonsHtml += `
+                    <div class="lesson-item ${statusClass}" onclick="openLesson(${lesson.id})">
+                        <div class="lesson-icon">
+                            <i class="bi ${statusIcon}"></i>
+                        </div>
+                        <div class="lesson-info">
+                            <div class="lesson-title">${escapeHtml(lesson.title)}</div>
+                            <div class="lesson-meta">
+                                ${lesson.duration_minutes > 0 ? `<span><i class="bi bi-clock"></i> ${lesson.duration_minutes} мин</span>` : ''}
+                                ${lesson.has_assignment ? `<span><i class="bi bi-pencil-square"></i> Есть задание</span>` : ''}
+                                <span class="lesson-status ${statusBadgeClass}">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="lesson-button">
+                            <button class="btn-outline" onclick="event.stopPropagation(); openLesson(${lesson.id})">
+                                ${isCompleted ? 'Повторить' : 'Начать'}
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            modulesHtml += `
+                <div class="module-card">
+                    <div class="module-header" onclick="toggleModule(${moduleIndex})">
+                        <div class="module-title">
+                            <i class="bi bi-folder-fill" style="color: #0057A4;"></i>
+                            ${escapeHtml(module.title)}
+                            <span class="module-badge ${badgeClass}">${badgeText}</span>
+                        </div>
+                        <p class="text-muted small mt-1 mb-0">${escapeHtml(module.description || '')}</p>
+                    </div>
+                    <div class="lessons-list" id="module-${moduleIndex}" style="display: block;">
+                        ${lessonsHtml}
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = modulesHtml;
+    }
+    
+    function toggleModule(index) {
+        const element = document.getElementById(`module-${index}`);
+        if (element.style.display === 'none') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+    
+    function openLesson(lessonId) {
+        if (!token) {
+            if (window.showToast) window.showToast('Войдите в систему для доступа к урокам', 'danger');
+            setTimeout(() => window.location.href = '/login', 1500);
+            return;
+        }
+        window.location.href = `/lesson/${lessonId}`;
+    }
+    
+    async function registerForCourse() {
+        if (!token) {
+            if (window.showToast) window.showToast('Войдите в систему, чтобы записаться на курс', 'danger');
+            setTimeout(() => window.location.href = '/login', 1500);
+            return;
+        }
+        
+        const btn = document.getElementById('registerBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Запись...';
+        
+        try {
+            const response = await fetch(`/api/courses/${courseId}/register`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                if (window.showToast) window.showToast('Вы успешно записаны на курс!', 'success');
+                btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Вы записаны';
+                btn.disabled = true;
+                setTimeout(() => location.reload(), 2000);
+            } else if (response.status === 402) {
+                if (window.showToast) window.showToast('Требуется оплата', 'info');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Записаться на курс';
+            } else {
+                const error = await response.json();
+                if (window.showToast) window.showToast(error.detail || 'Ошибка записи', 'danger');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Записаться на курс';
+            }
+        } catch (error) {
+            if (window.showToast) window.showToast('Ошибка соединения', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Записаться на курс';
+        }
+    }
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    loadCourse();
+</script>
+{% endblock %}

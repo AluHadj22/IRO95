@@ -15,6 +15,9 @@
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
+    <!-- Yandex Maps API -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU" type="text/javascript"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
@@ -161,6 +164,7 @@
             overflow: hidden;
         }
         
+        /* Анимированные круги на фоне */
         .hero-section::before {
             content: '';
             position: absolute;
@@ -170,6 +174,7 @@
             height: 500px;
             background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
             border-radius: 50%;
+            animation: float 20s ease-in-out infinite;
         }
         
         .hero-section::after {
@@ -181,6 +186,54 @@
             height: 400px;
             background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
             border-radius: 50%;
+            animation: float 15s ease-in-out infinite reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, -20px) scale(1.05); }
+        }
+        
+        /* Герой-контент */
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Анимированная иконка-символ */
+        .hero-icon {
+            display: inline-block;
+            margin-bottom: 20px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Герой-изображение/иллюстрация */
+        .hero-illustration {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 40%;
+            min-width: 250px;
+            max-width: 400px;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        
+        /* Волны снизу */
+        .hero-waves {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f8fafc" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-repeat: no-repeat;
         }
         
         /* Тосты */
@@ -360,6 +413,28 @@
             animation: fadeInUp 0.6s ease-out forwards;
         }
         
+        /* Стили для карты */
+        .map-container {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .map-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .map-card-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .map-card-link:hover {
+            color: inherit;
+        }
+        
         /* Адаптивность */
         @media (max-width: 768px) {
             .hero-section {
@@ -376,6 +451,11 @@
             
             .navbar-brand .subtitle {
                 font-size: 0.6rem;
+            }
+            
+            .hero-illustration {
+                width: 60%;
+                opacity: 0.1;
             }
         }
     </style>
@@ -403,6 +483,7 @@
             <ul class="navbar-nav ms-auto" id="navLinks">
                 <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
                 <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
+                <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
                 <li class="nav-item"><a class="nav-link" href="/login">Вход</a></li>
                 <li class="nav-item"><a class="nav-link" href="/register">Регистрация</a></li>
             </ul>
@@ -436,21 +517,27 @@
                 <p class="small mb-2"><i class="bi bi-envelope me-2"></i>ipkro-chr@mail.ru</p>
                 <p class="small"><i class="bi bi-clock me-2"></i>Пн-Пт: 9:00 - 18:00</p>
             </div>
-            <div class="col-md-3 mb-4">
-                <h5>Разделы</h5>
-                <p class="small mb-2"><a href="/">Главная</a></p>
-                <p class="small mb-2"><a href="/courses">Курсы</a></p>
-                <p class="small mb-2"><a href="/login">Вход</a></p>
-                <p class="small mb-2"><a href="/register">Регистрация</a></p>
-            </div>
-            <div class="col-md-2 mb-4">
-                <h5>Учредитель</h5>
-                <p class="small"><a href="http://mon95.ru/" target="_blank">Министерство образования и науки ЧР</a></p>
+            <div class="col-md-5 mb-4">
+                <h5>Мы на карте</h5>
+                <a href="/map" class="map-card-link">
+                    <div class="map-container" id="footer-map" style="width: 100%; height: 200px; border-radius: 12px; cursor: pointer;"></div>
+                </a>
+                <p class="small mt-2 text-center">
+                    <i class="bi bi-geo-alt me-1"></i> г. Грозный, ул. Лермонтова, 2 
+                    <a href="/map" class="text-white-50 ms-2">(открыть на полный экран →)</a>
+                </p>
             </div>
         </div>
         <hr class="my-3" style="border-color: rgba(255,255,255,0.1);">
-        <div class="text-center small">
-            <p class="mb-0">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="d-flex justify-content-center justify-content-md-start gap-3">
+                    <span class="small"><i class="bi bi-arrow-left-right me-1"></i> От остановки "Институт развития образования" 2 мин пешком</span>
+                </div>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <p class="mb-0 small">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
+            </div>
         </div>
     </div>
 </footer>
@@ -471,6 +558,165 @@
             navbar.classList.remove('scrolled');
         }
     });
+    
+    // Координаты ИРО ЧР (г. Грозный, ул. Лермонтова, 2)
+    // Уточненные координаты - при необходимости замените на точные
+    const instituteCoords = [43.3181, 45.6941];
+    const instituteAddress = "г. Грозный, ул. Лермонтова, 2";
+    const institutePhone = "+7 (8712) 21-22-24";
+    const instituteEmail = "ipkro-chr@mail.ru";
+    const instituteHours = "Пн-Пт: 9:00 - 18:00";
+    
+    // Функция инициализации карты в футере
+    function initFooterMap() {
+        const mapElement = document.getElementById('footer-map');
+        if (!mapElement || typeof ymaps === 'undefined') return;
+        
+        const map = new ymaps.Map('footer-map', {
+            center: instituteCoords,
+            zoom: 16,
+            controls: ['zoomControl']
+        });
+        
+        // Создаем красивую метку
+        const placemark = new ymaps.Placemark(instituteCoords, {
+            hintContent: 'ГБУ ДПО «ИРО ЧР»',
+            balloonContent: `
+                <div style="font-family: 'Inter', sans-serif; min-width: 200px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #0057A4; padding-bottom: 8px;">
+                        <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 40px;" alt="logo">
+                        <strong style="color: #0057A4; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
+                    </div>
+                    <p style="margin: 0 0 5px 0; font-size: 12px;">
+                        <strong>Институт развития образования<br>Чеченской Республики</strong>
+                    </p>
+                    <hr style="margin: 8px 0;">
+                    <p style="margin: 5px 0; font-size: 12px;">
+                        <i class="bi bi-geo-alt" style="color: #0057A4;"></i> ${instituteAddress}<br>
+                        <i class="bi bi-telephone" style="color: #0057A4;"></i> ${institutePhone}<br>
+                        <i class="bi bi-envelope" style="color: #0057A4;"></i> ${instituteEmail}<br>
+                        <i class="bi bi-clock" style="color: #0057A4;"></i> ${instituteHours}
+                    </p>
+                    <hr style="margin: 8px 0;">
+                    <a href="/map" style="color: #0057A4; text-decoration: none; font-size: 12px; font-weight: 500;">
+                        Подробная карта →
+                    </a>
+                </div>
+            `
+        }, {
+            preset: 'islands#blueCircleIcon',
+            iconColor: '#0057A4'
+        });
+        
+        map.geoObjects.add(placemark);
+        
+        // Адаптация при ресайзе
+        window.addEventListener('resize', function() {
+            map.container.fitToViewport();
+        });
+    }
+    
+    // Функция для полной карты (для отдельной страницы)
+    function initFullMap() {
+        const mapElement = document.getElementById('full-map');
+        if (!mapElement || typeof ymaps === 'undefined') return;
+        
+        const map = new ymaps.Map('full-map', {
+            center: instituteCoords,
+            zoom: 17,
+            controls: ['zoomControl', 'fullscreenControl', 'geolocationControl', 'rulerControl']
+        });
+        
+        // Создаем красивую метку с подробной информацией
+        const placemark = new ymaps.Placemark(instituteCoords, {
+            hintContent: 'ГБУ ДПО «ИРО ЧР»',
+            balloonContentHeader: `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 35px;" alt="logo">
+                    <strong style="color: #0057A4; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
+                </div>
+            `,
+            balloonContentBody: `
+                <div style="margin-top: 10px;">
+                    <p><strong>Институт развития образования<br>Чеченской Республики</strong></p>
+                    <table style="width: 100%; font-size: 13px;">
+                        <tr>
+                            <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #0057A4;"></i> Адрес:</td>
+                            <td style="padding: 4px 0;">${instituteAddress}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #0057A4;"></i> Телефон:</td>
+                            <td style="padding: 4px 0;">${institutePhone}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #0057A4;"></i> Email:</td>
+                            <td style="padding: 4px 0;">${instituteEmail}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #0057A4;"></i> Часы работы:</td>
+                            <td style="padding: 4px 0;">${instituteHours}</td>
+                        </tr>
+                    </table>
+                    <hr style="margin: 8px 0;">
+                    <p style="font-size: 12px; margin: 0;">
+                        <i class="bi bi-bus-front"></i> Ближайшая остановка: "Институт развития образования" (2 мин пешком)<br>
+                        <i class="bi bi-car-front"></i> Имеется бесплатная парковка для слушателей курсов
+                    </p>
+                </div>
+            `,
+            balloonContentFooter: `
+                <div style="margin-top: 10px; text-align: center;">
+                    <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #0057A4; text-decoration: none;">
+                        🚗 Построить маршрут →
+                    </a>
+                </div>
+            `
+        }, {
+            preset: 'islands#blueCircleIcon',
+            iconColor: '#0057A4'
+        });
+        
+        map.geoObjects.add(placemark);
+        
+        // Открыть балун при загрузке
+        setTimeout(() => {
+            placemark.balloon.open();
+        }, 500);
+        
+        // Добавляем кнопку "Схема проезда" на карту
+        const routeButton = new ymaps.control.Button({
+            data: { content: "📍 Схема проезда", title: "Проложить маршрут" },
+            options: { maxWidth: 140, selectOnClick: false }
+        });
+        
+        routeButton.events.add('click', function() {
+            window.open(`https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}`, '_blank');
+        });
+        
+        map.controls.add(routeButton, { float: 'right' });
+    }
+    
+    // Загрузка карт после загрузки API
+    if (typeof ymaps !== 'undefined') {
+        ymaps.ready(function() {
+            initFooterMap();
+            // Если на странице есть полная карта - инициализируем её
+            if (document.getElementById('full-map')) {
+                initFullMap();
+            }
+        });
+    } else {
+        window.addEventListener('load', function() {
+            if (typeof ymaps !== 'undefined') {
+                ymaps.ready(function() {
+                    initFooterMap();
+                    if (document.getElementById('full-map')) {
+                        initFullMap();
+                    }
+                });
+            }
+        });
+    }
     
     const token = localStorage.getItem('token');
     
@@ -505,6 +751,7 @@
                 navLinks.innerHTML = `
                     <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
                     <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
                     <li class="nav-item"><a class="nav-link" href="/admin">Админ панель</a></li>
                     <li class="nav-item"><a class="nav-link" href="/lms-admin">LMS панель</a></li>
                     <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
@@ -514,6 +761,7 @@
                 navLinks.innerHTML = `
                     <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
                     <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
                     <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
                     <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Выйти</a></li>
                 `;
@@ -530,6 +778,8 @@
         return price.toLocaleString() + ' ₽';
     }
 </script>
+
+<!-- Блок для страницы с полной картой (нужно добавить в отдельный файл map.html) -->
 {% block extra_js %}{% endblock %}
 </body>
 </html>

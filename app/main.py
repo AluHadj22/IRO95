@@ -1,10 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
 from app.database import engine, Base
 from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router
 import os
-from app.routers import lms_router  # <-- ЭТОГО НЕТ!
+from app.routers import lms_router
 
 # Создаём таблицы в базе данных
 Base.metadata.create_all(bind=engine)
@@ -12,6 +13,9 @@ Base.metadata.create_all(bind=engine)
 # Создаём папки для статических файлов, если их нет
 os.makedirs("app/static/uploads/courses", exist_ok=True)
 os.makedirs("app/static/uploads/speakers", exist_ok=True)
+
+# Настройка шаблонов
+templates = Jinja2Templates(directory="app/templates")
 
 app = FastAPI(
     title="ИРО ЧР - Платформа повышения квалификации",
@@ -39,15 +43,20 @@ app.include_router(admin_router.router)
 app.include_router(notifications_router.router)
 app.include_router(public_router.router)
 app.include_router(achievements_router.router)
-# И добавьте в список роутеров:
 app.include_router(lms_router.router)
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
 
 
 @app.get("/")
 def root():
     return {"message": "API is running", "status": "healthy"}
+
+
+@app.get("/map")
+async def map_page(request: Request):
+    """Страница с картой в полноэкранном режиме"""
+    return templates.TemplateResponse("map.html", {"request": request})
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

@@ -145,7 +145,7 @@ def create_course(
 def get_course(
     course_id: int, 
     db: Session = Depends(get_db),
-    current_user: Optional[models.User] = Depends(auth.get_current_user_optional)  # Изменено на optional
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional)
 ):
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
@@ -599,26 +599,67 @@ def get_my_activity(
 @router.get("/my/registrations")
 def get_my_registrations(db: Session = Depends(get_db),
                          current_user: models.User = Depends(auth.get_current_active_user)):
+    """Получить мои регистрации на курсы с прогрессом (включая LMS курсы)"""
     registrations = db.query(models.CourseRegistration).filter(
         models.CourseRegistration.user_id == current_user.id
     ).all()
     
     result = []
     for r in registrations:
-        progress = db.query(models.UserProgress).filter(
-            and_(models.UserProgress.user_id == current_user.id,
-                 models.UserProgress.course_id == r.course_id)
-        ).first()
+        course = r.course
+        progress_percent = 0
+        is_completed = False
+        
+        # Проверяем, есть ли у курса модули (LMS курс)
+        modules = db.query(models.CourseModule).filter(
+            models.CourseModule.course_id == course.id
+        ).all()
+        
+        if modules:
+            # Это LMS курс - вычисляем прогресс по урокам
+            total_lessons = 0
+            completed_lessons = 0
+            
+            for module in modules:
+                lessons = db.query(models.CourseLesson).filter(
+                    models.CourseLesson.module_id == module.id
+            ).all()
+                total_lessons += len(lessons)
+                
+                for lesson in lessons:
+                    lesson_progress = db.query(models.UserLessonProgress).filter(
+                        and_(
+                            models.UserLessonProgress.user_id == current_user.id,
+                            models.UserLessonProgress.lesson_id == lesson.id,
+                            models.UserLessonProgress.is_completed == True
+                        )
+                    ).first()
+                    if lesson_progress:
+                        completed_lessons += 1
+            
+            progress_percent = int((completed_lessons / total_lessons) * 100) if total_lessons > 0 else 0
+            is_completed = progress_percent == 100
+        else:
+            # Обычный курс - используем UserProgress
+            user_progress = db.query(models.UserProgress).filter(
+                and_(
+                    models.UserProgress.user_id == current_user.id,
+                    models.UserProgress.course_id == course.id
+                )
+            ).first()
+            progress_percent = user_progress.progress_percent if user_progress else 0
+            is_completed = user_progress.is_completed if user_progress else False
         
         result.append({
             "course_id": r.course_id,
-            "course_title": r.course.title if r.course else "Unknown",
-            "price": r.course.price if r.course else 0,
+            "course_title": course.title if course else "Unknown",
+            "price": course.price if course else 0,
             "is_paid": r.is_paid,
             "registered_at": r.registered_at,
-            "progress": progress.progress_percent if progress else 0,
-            "is_completed": progress.is_completed if progress else False
+            "progress": progress_percent,
+            "is_completed": is_completed
         })
+    
     return result
 
 
@@ -633,7 +674,8 @@ def get_my_favorites(db: Session = Depends(get_db),
             result.append({
                 "id": fav.course.id, "title": fav.course.title,
                 "short_description": fav.course.short_description,
-                "price": fav.course.price, "image_url": fav.course.image_url
+                "price": fav.course.price, "image_url": fav.course.image_url,
+                "description": fav.course.description
             })
     return result
 
@@ -649,6 +691,7 @@ def get_my_watch_later(db: Session = Depends(get_db),
             result.append({
                 "id": wl.course.id, "title": wl.course.title,
                 "short_description": wl.course.short_description,
-                "price": wl.course.price, "image_url": wl.course.image_url
+                "price": wl.course.price, "image_url": wl.course.image_url,
+                "description": wl.course.description
             })
     return result

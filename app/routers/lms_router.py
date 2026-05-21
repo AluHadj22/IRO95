@@ -297,12 +297,9 @@ def get_lesson(
             options_value = q.options
             if options_value and isinstance(options_value, str):
                 try:
-                    # Пробуем распарсить JSON
                     parsed = json.loads(options_value)
-                    # Если распарсилось и это список - используем его
                     if isinstance(parsed, list):
                         options_value = parsed
-                    # Если распарсилось и это строка - возможно двойная сериализация
                     elif isinstance(parsed, str):
                         try:
                             double_parsed = json.loads(parsed)
@@ -313,7 +310,6 @@ def get_lesson(
                         except:
                             options_value = parsed
                 except:
-                    # Если не парсится, оставляем как есть
                     pass
             
             assignment["questions"].append({
@@ -513,17 +509,14 @@ def add_question(
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    # Обработка options - убираем двойную сериализацию
     options_raw = data.get("options", [])
     
-    # Если options пришли как строка, пытаемся распарсить
     if isinstance(options_raw, str):
         try:
             options_raw = json.loads(options_raw)
         except:
             pass
     
-    # Если options это список, преобразуем в JSON строку
     if isinstance(options_raw, list):
         options_value = json.dumps(options_raw)
     else:
@@ -586,7 +579,6 @@ def submit_assignment(
         if not question:
             continue
         
-        # Проверяем, есть ли уже ответ на этот вопрос
         existing_answer = db.query(models.UserAnswer).filter(
             and_(
                 models.UserAnswer.submission_id == submission.id,
@@ -595,15 +587,12 @@ def submit_assignment(
         ).first()
         
         if existing_answer:
-            # Если ответ уже есть, обновляем его
             existing_answer.answer_text = ans_data.get("answer", "")
-            # Для текстовых ответов сбрасываем статус проверки
             if question.question_type == "text":
                 existing_answer.is_correct = None
                 existing_answer.points_earned = 0
                 has_text_answers = True
             elif question.question_type == "choice":
-                # Для вопросов с выбором сразу проверяем
                 is_correct = False
                 if question.correct_answer and ans_data.get("answer"):
                     try:
@@ -616,7 +605,6 @@ def submit_assignment(
                 existing_answer.points_earned = question.points if is_correct else 0
                 total_points += existing_answer.points_earned
         else:
-            # Создаём новый ответ
             if question.question_type == "choice":
                 is_correct = False
                 if question.correct_answer and ans_data.get("answer"):
@@ -637,36 +625,30 @@ def submit_assignment(
                     points_earned=points_earned
                 )
                 db.add(user_answer)
-            else:  # text question
+            else:
                 has_text_answers = True
                 user_answer = models.UserAnswer(
                     submission_id=submission.id,
                     question_id=question.id,
                     answer_text=ans_data.get("answer", ""),
-                    is_correct=None,  # Ожидает проверки учителя
+                    is_correct=None,
                     points_earned=0
                 )
                 db.add(user_answer)
     
-    # Обновляем общий балл только для автоматически проверяемых вопросов
     submission.score = total_points
     
-    # Задание считается пройденным ТОЛЬКО если нет текстовых вопросов И сумма баллов >= проходного
     if not has_text_answers:
         submission.is_passed = total_points >= assignment.passing_score
     else:
-        # Если есть текстовые вопросы, задание не считается пройденным до проверки учителем
         submission.is_passed = False
     
-    # Сбрасываем graded_by, так как появились новые ответы
     submission.graded_by = None
     submission.graded_at = None
     
     db.commit()
     
-    # Создаём уведомление для учителя (если есть текстовые ответы)
     if has_text_answers:
-        # Находим всех админов/учителей курса
         lesson = assignment.lesson
         course = lesson.module.course
         admins = db.query(models.User).filter(models.User.role == models.UserRole.ADMIN).all()
@@ -680,7 +662,6 @@ def submit_assignment(
             db.add(notification)
         db.commit()
     
-    # Определяем сообщение для пользователя
     if has_text_answers:
         message = "Ответы отправлены на проверку учителю. После проверки вы сможете завершить урок."
     else:
@@ -742,7 +723,6 @@ def mark_module_completed(
     
     db.commit()
     
-    # Проверяем, все ли модули пройдены
     course_modules = db.query(models.CourseModule).filter(
         models.CourseModule.course_id == module.course_id
     ).all()
@@ -811,7 +791,6 @@ def get_assignment_text_answers_status(
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
     
-    # Получаем все текстовые вопросы в задании
     text_questions = db.query(models.AssignmentQuestion).filter(
         and_(
             models.AssignmentQuestion.assignment_id == assignment_id,
@@ -819,7 +798,6 @@ def get_assignment_text_answers_status(
         )
     ).all()
     
-    # Получаем submission студента
     submission = db.query(models.AssignmentSubmission).filter(
         and_(
             models.AssignmentSubmission.assignment_id == assignment_id,
@@ -831,10 +809,9 @@ def get_assignment_text_answers_status(
     
     for question in text_questions:
         if not submission:
-            result[str(question.id)] = None  # Нет ответа
+            result[str(question.id)] = None
             continue
         
-        # Ищем ответ на этот вопрос
         user_answer = db.query(models.UserAnswer).filter(
             and_(
                 models.UserAnswer.submission_id == submission.id,
@@ -843,13 +820,13 @@ def get_assignment_text_answers_status(
         ).first()
         
         if not user_answer:
-            result[str(question.id)] = None  # Нет ответа
+            result[str(question.id)] = None
         elif user_answer.is_correct is None:
-            result[str(question.id)] = "pending"  # Ожидает проверки
+            result[str(question.id)] = "pending"
         elif user_answer.is_correct:
-            result[str(question.id)] = "approved"  # Зачтено
+            result[str(question.id)] = "approved"
         else:
-            result[str(question.id)] = "rejected"  # Не зачтено
+            result[str(question.id)] = "rejected"
     
     return result
 
@@ -864,33 +841,28 @@ def get_pending_submissions(
 ):
     """Получить все непроверенные текстовые ответы для курса"""
     
-    # Проверяем существование курса
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    # Получаем все модули курса
     modules = db.query(models.CourseModule).filter(
         models.CourseModule.course_id == course_id
     ).all()
     
     module_ids = [m.id for m in modules]
     
-    # Получаем все уроки этих модулей
     lessons = db.query(models.CourseLesson).filter(
         models.CourseLesson.module_id.in_(module_ids)
     ).all()
     
     lesson_ids = [l.id for l in lessons]
     
-    # Получаем все задания этих уроков
     assignments = db.query(models.LessonAssignment).filter(
         models.LessonAssignment.lesson_id.in_(lesson_ids)
     ).all()
     
     assignment_ids = [a.id for a in assignments]
     
-    # Получаем все вопросы с типом 'text' из этих заданий
     text_questions = db.query(models.AssignmentQuestion).filter(
         and_(
             models.AssignmentQuestion.assignment_id.in_(assignment_ids),
@@ -898,23 +870,22 @@ def get_pending_submissions(
         )
     ).all()
     
-    # Получаем все ответы на эти вопросы, которые ещё не проверены
     pending_submissions = []
     
     for question in text_questions:
-        # Получаем все ответы на этот вопрос
         answers = db.query(models.UserAnswer).filter(
-            models.UserAnswer.question_id == question.id
+            and_(
+                models.UserAnswer.question_id == question.id,
+                models.UserAnswer.is_correct.is_(None)
+            )
         ).all()
         
         for answer in answers:
-            # Получаем submission
             submission = db.query(models.AssignmentSubmission).filter(
                 models.AssignmentSubmission.id == answer.submission_id
             ).first()
             
-            # Проверяем, что ответ ещё не проверен (graded_by is None) и не зачтен/отклонен
-            if submission and submission.graded_by is None and answer.is_correct is False:
+            if submission:
                 user = db.query(models.User).filter(models.User.id == submission.user_id).first()
                 lesson = db.query(models.CourseLesson).filter(
                     models.CourseLesson.id == question.assignment.lesson_id
@@ -946,11 +917,10 @@ def grade_text_answer(
     
     submission_id = data.get("submission_id")
     question_id = data.get("question_id")
-    status = data.get("status")  # "pass", "fail", "retake"
+    status = data.get("status")
     points = data.get("points", 0)
     comment = data.get("comment", "")
     
-    # Получаем submission
     submission = db.query(models.AssignmentSubmission).filter(
         models.AssignmentSubmission.id == submission_id
     ).first()
@@ -958,7 +928,6 @@ def grade_text_answer(
     if not submission:
         raise HTTPException(status_code=404, detail="Submission not found")
     
-    # Получаем ответ
     user_answer = db.query(models.UserAnswer).filter(
         and_(
             models.UserAnswer.submission_id == submission_id,
@@ -969,7 +938,6 @@ def grade_text_answer(
     if not user_answer:
         raise HTTPException(status_code=404, detail="Answer not found")
     
-    # Получаем вопрос
     question = db.query(models.AssignmentQuestion).filter(
         models.AssignmentQuestion.id == question_id
     ).first()
@@ -977,158 +945,136 @@ def grade_text_answer(
     if not question:
         raise HTTPException(status_code=404, detail="Question not found")
     
-    # Обновляем ответ
+    if status == "retake":
+        db.delete(user_answer)
+        db.commit()
+        
+        notification = models.Notification(
+            user_id=submission.user_id,
+            title="Ответ отправлен на пересдачу",
+            message=f"Ваш ответ на вопрос \"{question.question_text[:50]}...\" отправлен на пересдачу. {comment}"
+        )
+        db.add(notification)
+        db.commit()
+        
+        return {"message": "Answer marked for retake. Student can try again."}
+    
     if status == "pass":
         user_answer.is_correct = True
         user_answer.points_earned = points
     elif status == "fail":
         user_answer.is_correct = False
         user_answer.points_earned = 0
-    elif status == "retake":
-        # Для пересдачи - удаляем ответ, чтобы студент мог отправить снова
-        db.delete(user_answer)
-        
-        # Также удаляем submission если это был единственный ответ
-        other_answers = db.query(models.UserAnswer).filter(
-            models.UserAnswer.submission_id == submission_id
-        ).count()
-        
-        if other_answers <= 1:
-            db.delete(submission)
-        
-        db.commit()
-        return {"message": "Answer marked for retake. Student can try again."}
-    
-    # Обновляем submission
-    submission.graded_by = current_user.id
-    submission.graded_at = datetime.utcnow()
-    submission.teacher_comment = comment
-    
-    # Пересчитываем общий балл submission (только для вопросов с выбором варианта)
-    all_answers = db.query(models.UserAnswer).filter(
-        models.UserAnswer.submission_id == submission_id
-    ).all()
-    
-    total_points = sum(a.points_earned for a in all_answers if a.is_correct is not None)
-    submission.score = total_points
-    submission.is_passed = total_points >= submission.assignment.passing_score
-    
-    # Проверяем, все ли текстовые вопросы проверены и зачтены
-    text_questions = db.query(models.AssignmentQuestion).filter(
-        and_(
-            models.AssignmentQuestion.assignment_id == submission.assignment_id,
-            models.AssignmentQuestion.question_type == "text"
-        )
-    ).all()
-    
-    all_text_questions_graded = True
-    all_text_questions_passed = True
-    
-    for tq in text_questions:
-        tq_answer = db.query(models.UserAnswer).filter(
-            and_(
-                models.UserAnswer.submission_id == submission_id,
-                models.UserAnswer.question_id == tq.id
-            )
-        ).first()
-        
-        if not tq_answer or tq_answer.is_correct is None:
-            all_text_questions_graded = False
-            break
-        if not tq_answer.is_correct:
-            all_text_questions_passed = False
-    
-    # Если все текстовые вопросы проверены и зачтены, отмечаем урок как пройденный
-    if all_text_questions_graded and all_text_questions_passed:
-        lesson = submission.assignment.lesson
-        user_progress = db.query(models.UserLessonProgress).filter(
-            and_(
-                models.UserLessonProgress.user_id == submission.user_id,
-                models.UserLessonProgress.lesson_id == lesson.id
-            )
-        ).first()
-        
-        if not user_progress:
-            user_progress = models.UserLessonProgress(
-                user_id=submission.user_id,
-                lesson_id=lesson.id,
-                is_completed=True,
-                completed_at=datetime.utcnow()
-            )
-            db.add(user_progress)
-        elif not user_progress.is_completed:
-            user_progress.is_completed = True
-            user_progress.completed_at = datetime.utcnow()
-        
-        # Проверяем, все ли уроки в модуле пройдены
-        module = lesson.module
-        lessons_in_module = db.query(models.CourseLesson).filter(
-            models.CourseLesson.module_id == module.id
-        ).all()
-        
-        completed_lessons = db.query(models.UserLessonProgress).filter(
-            and_(
-                models.UserLessonProgress.user_id == submission.user_id,
-                models.UserLessonProgress.lesson_id.in_([l.id for l in lessons_in_module]),
-                models.UserLessonProgress.is_completed == True
-            )
-        ).count()
-        
-        if completed_lessons == len(lessons_in_module):
-            module_progress = db.query(models.UserModuleProgress).filter(
-                and_(
-                    models.UserModuleProgress.user_id == submission.user_id,
-                    models.UserModuleProgress.module_id == module.id
-                )
-            ).first()
-            
-            if not module_progress:
-                module_progress = models.UserModuleProgress(
-                    user_id=submission.user_id,
-                    module_id=module.id,
-                    is_completed=True,
-                    completed_at=datetime.utcnow()
-                )
-                db.add(module_progress)
-            elif not module_progress.is_completed:
-                module_progress.is_completed = True
-                module_progress.completed_at = datetime.utcnow()
-            
-            # Проверяем весь курс
-            course_modules = db.query(models.CourseModule).filter(
-                models.CourseModule.course_id == module.course_id
-            ).all()
-            
-            completed_modules = db.query(models.UserModuleProgress).filter(
-                and_(
-                    models.UserModuleProgress.user_id == submission.user_id,
-                    models.UserModuleProgress.module_id.in_([m.id for m in course_modules]),
-                    models.UserModuleProgress.is_completed == True
-                )
-            ).count()
-            
-            if completed_modules == len(course_modules):
-                course_progress = db.query(models.UserProgress).filter(
-                    and_(
-                        models.UserProgress.user_id == submission.user_id,
-                        models.UserProgress.course_id == module.course_id
-                    )
-                ).first()
-                
-                if course_progress and not course_progress.is_completed:
-                    course_progress.is_completed = True
-                    course_progress.completed_at = datetime.utcnow()
-                    course_progress.progress_percent = 100
     
     db.commit()
     
-    # Создаём уведомление для студента
+    pending_answers = db.query(models.UserAnswer).filter(
+        and_(
+            models.UserAnswer.submission_id == submission_id,
+            models.UserAnswer.is_correct.is_(None)
+        )
+    ).count()
+    
+    if pending_answers == 0:
+        submission.graded_by = current_user.id
+        submission.graded_at = datetime.utcnow()
+        submission.teacher_comment = comment
+        
+        all_answers = db.query(models.UserAnswer).filter(
+            models.UserAnswer.submission_id == submission_id
+        ).all()
+        
+        total_points = sum(a.points_earned for a in all_answers if a.is_correct is not None)
+        submission.score = total_points
+        submission.is_passed = total_points >= submission.assignment.passing_score
+        
+        if submission.is_passed:
+            lesson = submission.assignment.lesson
+            user_progress = db.query(models.UserLessonProgress).filter(
+                and_(
+                    models.UserLessonProgress.user_id == submission.user_id,
+                    models.UserLessonProgress.lesson_id == lesson.id
+                )
+            ).first()
+            
+            if not user_progress:
+                user_progress = models.UserLessonProgress(
+                    user_id=submission.user_id,
+                    lesson_id=lesson.id,
+                    is_completed=True,
+                    completed_at=datetime.utcnow()
+                )
+                db.add(user_progress)
+            elif not user_progress.is_completed:
+                user_progress.is_completed = True
+                user_progress.completed_at = datetime.utcnow()
+            
+            module = lesson.module
+            lessons_in_module = db.query(models.CourseLesson).filter(
+                models.CourseLesson.module_id == module.id
+            ).all()
+            
+            completed_lessons = db.query(models.UserLessonProgress).filter(
+                and_(
+                    models.UserLessonProgress.user_id == submission.user_id,
+                    models.UserLessonProgress.lesson_id.in_([l.id for l in lessons_in_module]),
+                    models.UserLessonProgress.is_completed == True
+                )
+            ).count()
+            
+            if completed_lessons == len(lessons_in_module):
+                module_progress = db.query(models.UserModuleProgress).filter(
+                    and_(
+                        models.UserModuleProgress.user_id == submission.user_id,
+                        models.UserModuleProgress.module_id == module.id
+                    )
+                ).first()
+                
+                if not module_progress:
+                    module_progress = models.UserModuleProgress(
+                        user_id=submission.user_id,
+                        module_id=module.id,
+                        is_completed=True,
+                        completed_at=datetime.utcnow()
+                    )
+                    db.add(module_progress)
+                elif not module_progress.is_completed:
+                    module_progress.is_completed = True
+                    module_progress.completed_at = datetime.utcnow()
+                
+                course_modules = db.query(models.CourseModule).filter(
+                    models.CourseModule.course_id == module.course_id
+                ).all()
+                
+                completed_modules = db.query(models.UserModuleProgress).filter(
+                    and_(
+                        models.UserModuleProgress.user_id == submission.user_id,
+                        models.UserModuleProgress.module_id.in_([m.id for m in course_modules]),
+                        models.UserModuleProgress.is_completed == True
+                    )
+                ).count()
+                
+                if completed_modules == len(course_modules):
+                    course_progress = db.query(models.UserProgress).filter(
+                        and_(
+                            models.UserProgress.user_id == submission.user_id,
+                            models.UserProgress.course_id == module.course_id
+                        )
+                    ).first()
+                    
+                    if course_progress and not course_progress.is_completed:
+                        course_progress.is_completed = True
+                        course_progress.completed_at = datetime.utcnow()
+                        course_progress.progress_percent = 100
+        
+        db.commit()
+    
     notification = models.Notification(
         user_id=submission.user_id,
-        title="Задание проверено",
+        title="Ответ проверен",
         message=f"Ваш ответ на вопрос \"{question.question_text[:50]}...\" проверен. " + 
                 (f"✅ Зачтено! Получено баллов: {points}" if status == "pass" else 
-                 (f"❌ Не зачтено. {comment}" if status == "fail" else "🔄 Отправлено на пересдачу. Попробуйте ещё раз."))
+                 f"❌ Не зачтено. {comment}")
     )
     db.add(notification)
     db.commit()
@@ -1137,7 +1083,8 @@ def grade_text_answer(
         "message": "Answer graded successfully",
         "status": status,
         "points": points if status == "pass" else 0,
-        "comment": comment
+        "comment": comment,
+        "pending_answers_left": pending_answers
     }
 
 
@@ -1162,7 +1109,6 @@ def get_submission_details(
     module = lesson.module
     course = module.course
     
-    # Получаем все ответы
     answers = []
     for answer in submission.answers:
         question = db.query(models.AssignmentQuestion).filter(

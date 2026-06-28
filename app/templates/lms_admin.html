@@ -12,6 +12,7 @@
         --success: #10b981;
         --danger: #ef4444;
         --warning: #f59e0b;
+        --retake: #f59e0b;
         --info: #3b82f6;
         --dark: #1f2937;
         --light: #f9fafb;
@@ -69,6 +70,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
     }
     
     .module-header:hover {
@@ -88,6 +91,21 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .lesson-item .lesson-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .lesson-item .lesson-actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
     }
     
     .btn-sm {
@@ -132,6 +150,51 @@
         font-weight: 500;
     }
     
+    .badge-retake {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .badge-overdue {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .badge-no-retake {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .badge-published {
+        background: #d1fae5;
+        color: #059669;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .badge-hidden {
+        background: #e2e8f0;
+        color: #64748b;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
     .question-card {
         background: var(--light);
         border-radius: 12px;
@@ -152,6 +215,16 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     
+    .submission-card.retake-status {
+        border-color: #f59e0b;
+        background: #fffbeb;
+    }
+    
+    .submission-card.overdue-status {
+        border-color: #dc2626;
+        background: #fef2f2;
+    }
+    
     .submission-header {
         display: flex;
         justify-content: space-between;
@@ -159,6 +232,8 @@
         margin-bottom: 15px;
         padding-bottom: 10px;
         border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+        gap: 10px;
     }
     
     .submission-answer {
@@ -166,36 +241,66 @@
         padding: 12px;
         border-radius: 8px;
         margin: 10px 0;
-        font-family: monospace;
         white-space: pre-wrap;
+        word-break: break-word;
+    }
+    
+    .submission-answer .file-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--primary);
+        transition: all 0.2s ease;
+    }
+    
+    .submission-answer .file-link:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
     }
     
     .grade-buttons {
         display: flex;
         gap: 10px;
         margin-top: 15px;
+        flex-wrap: wrap;
     }
     
     .btn-grade-pass {
         background: #10b981;
         color: white;
         border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
     }
     
     .btn-grade-fail {
         background: #ef4444;
         color: white;
         border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
     }
     
     .btn-grade-retake {
         background: #f59e0b;
         color: white;
         border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
     }
     
     .btn-grade-pass:hover, .btn-grade-fail:hover, .btn-grade-retake:hover {
         opacity: 0.85;
+        transform: translateY(-1px);
     }
     
     .loading {
@@ -230,6 +335,279 @@
         color: #cbd5e1;
         margin-bottom: 16px;
     }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .stat-card .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    
+    .stat-card .stat-label {
+        color: var(--gray);
+        font-size: 0.85rem;
+    }
+    
+    .attachment-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+    
+    .attachment-badge {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .attachment-badge.required {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+    
+    .attachment-badge .remove-btn {
+        color: #ef4444;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 1rem;
+        padding: 0 4px;
+    }
+    
+    .attachment-badge .remove-btn:hover {
+        color: #dc2626;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(0,87,164,0.1);
+        outline: none;
+    }
+    
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+        overflow: hidden;
+    }
+    
+    .modal-header {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 16px 24px;
+    }
+    
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+    
+    .modal-body {
+        padding: 24px;
+    }
+    
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,87,164,0.3);
+    }
+    
+    .btn-outline-primary {
+        border: 1.5px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+        border-radius: 10px;
+        padding: 8px 20px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-outline-primary:hover {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: var(--dark);
+    }
+    
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+    
+    .table-card .table {
+        margin-bottom: 0;
+    }
+    
+    .table-card .table th {
+        background: var(--light);
+        font-weight: 600;
+        color: var(--gray);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid var(--border);
+        padding: 12px 16px;
+    }
+    
+    .table-card .table td {
+        padding: 12px 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9rem;
+    }
+    
+    .progress-small {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        width: 100px;
+    }
+    
+    .progress-small .fill {
+        height: 100%;
+        background: var(--primary-gradient);
+        border-radius: 10px;
+        transition: width 0.5s ease;
+    }
+    
+    .lecture-file-preview {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: #f0fdf4;
+        border: 1px solid #d1fae5;
+        border-radius: 8px;
+        margin-top: 8px;
+    }
+    
+    .lecture-file-preview .file-icon {
+        font-size: 1.5rem;
+    }
+    
+    .lecture-file-preview .file-name {
+        font-weight: 500;
+    }
+    
+    .lecture-file-preview .file-size {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+    
+    .lecture-file-preview .remove-btn {
+        color: #ef4444;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        margin-left: auto;
+    }
+    
+    .module-type-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    
+    .module-type-badge.online {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .module-type-badge.offline {
+        background: #fed7aa;
+        color: #9a3412;
+    }
+    
+    .lesson-retake-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.65rem;
+        font-weight: 500;
+    }
+    
+    .lesson-retake-badge.allowed {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .lesson-retake-badge.forbidden {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    @media (max-width: 768px) {
+        .lms-sidebar {
+            margin-bottom: 20px;
+        }
+        
+        .module-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .lesson-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .lesson-item .lesson-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+        
+        .grade-buttons {
+            flex-direction: column;
+        }
+        
+        .grade-buttons .btn {
+            width: 100%;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -247,11 +625,17 @@
                     <a class="nav-link active" href="#" onclick="showSection('modules'); return false;">
                         <i class="bi bi-layers"></i> Модули и уроки
                     </a>
+                    <a class="nav-link" href="#" onclick="showSection('materials'); return false;">
+                        <i class="bi bi-paperclip"></i> Материалы
+                    </a>
                     <a class="nav-link" href="#" onclick="showSection('journal'); return false;">
                         <i class="bi bi-journal"></i> Журнал
                     </a>
                     <a class="nav-link" href="#" onclick="showSection('submissions'); return false;">
                         <i class="bi bi-check2-square"></i> Проверка заданий
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('statistics'); return false;">
+                        <i class="bi bi-graph-up"></i> Статистика
                     </a>
                 </div>
             </div>
@@ -263,9 +647,9 @@
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
                         <h2 class="section-title">Управление модулями и уроками</h2>
-                        <p class="text-muted">Создание структуры курса</p>
+                        <p class="text-muted">Создание и редактирование структуры курса</p>
                     </div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
                         <select class="form-select w-auto" id="courseSelector" onchange="loadCourseModules()">
                             <option value="">-- Выберите курс --</option>
                         </select>
@@ -275,6 +659,25 @@
                     </div>
                 </div>
                 <div id="modulesList"></div>
+            </div>
+            
+            <!-- Материалы -->
+            <div id="materialsSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h2 class="section-title">Материалы курса</h2>
+                        <p class="text-muted">Загрузка и управление файлами</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <select class="form-select w-auto" id="materialsCourseSelector" onchange="loadMaterials()">
+                            <option value="">-- Выберите курс --</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="showUploadMaterialModal()">
+                            <i class="bi bi-upload me-2"></i>Загрузить материал
+                        </button>
+                    </div>
+                </div>
+                <div id="materialsList"></div>
             </div>
             
             <!-- Журнал -->
@@ -296,7 +699,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
                         <h2 class="section-title">Проверка заданий</h2>
-                        <p class="text-muted">Проверка текстовых ответов студентов</p>
+                        <p class="text-muted">Проверка текстовых и файловых ответов студентов</p>
                     </div>
                     <select class="form-select w-auto" id="submissionsCourseSelector" onchange="loadSubmissions()">
                         <option value="">-- Выберите курс --</option>
@@ -304,23 +707,42 @@
                 </div>
                 <div id="submissionsList"></div>
             </div>
+            
+            <!-- Статистика -->
+            <div id="statisticsSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h2 class="section-title">Статистика курса</h2>
+                        <p class="text-muted">Анализ успеваемости студентов</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <select class="form-select w-auto" id="statsCourseSelector" onchange="loadStatistics()">
+                            <option value="">-- Выберите курс --</option>
+                        </select>
+                        <button class="btn btn-success" onclick="exportResults()">
+                            <i class="bi bi-download me-2"></i>Экспорт
+                        </button>
+                    </div>
+                </div>
+                <div id="statisticsContent"></div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Модальное окно создания модуля -->
+<!-- Модальное окно создания модуля (ОБНОВЛЕННОЕ) -->
 <div class="modal fade" id="createModuleModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Создать модуль</h5>
+                <h5 class="modal-title"><i class="bi bi-folder-plus me-2"></i>Создать модуль</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="createModuleForm">
                     <input type="hidden" id="module_course_id">
                     <div class="mb-3">
-                        <label class="form-label">Название</label>
+                        <label class="form-label">Название <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="module_title" required>
                     </div>
                     <div class="mb-3">
@@ -350,24 +772,53 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Создать урок</h5>
+                <h5 class="modal-title"><i class="bi bi-file-earmark-plus me-2"></i>Создать урок</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="createLessonForm">
                     <input type="hidden" id="lesson_module_id">
                     <div class="mb-3">
-                        <label class="form-label">Название</label>
+                        <label class="form-label">Название <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="lesson_title" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Содержание</label>
                         <textarea class="form-control" id="lesson_content" rows="5"></textarea>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">URL видео</label>
-                        <input type="text" class="form-control" id="lesson_video_url" placeholder="https://youtu.be/...">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Тип лекции</label>
+                            <select class="form-select" id="lesson_lecture_type">
+                                <option value="video">Видео-лекция</option>
+                                <option value="file">Файл-лекция</option>
+                                <option value="hybrid">Гибридный (видео + файл)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">URL видео</label>
+                            <input type="text" class="form-control" id="lesson_video_url" placeholder="https://youtu.be/...">
+                        </div>
                     </div>
+                    
+                    <!-- Загрузка файла лекции -->
+                    <div class="mb-3">
+                        <label class="form-label">Файл лекции</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="lesson_lecture_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.md">
+                            <button class="btn btn-outline-secondary" type="button" onclick="uploadLectureFile()">Загрузить</button>
+                        </div>
+                        <small class="text-muted">Поддерживаются: PDF, DOC, DOCX, PPT, PPTX, TXT, MD (макс. 50MB)</small>
+                        <div id="lectureFilePreview" style="display: none;" class="lecture-file-preview mt-2">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name" id="lectureFileName">-</span>
+                            <span class="file-size" id="lectureFileSize">-</span>
+                            <button type="button" class="remove-btn" onclick="removeLectureFile()">&times;</button>
+                        </div>
+                        <input type="hidden" id="lesson_lecture_file_url">
+                    </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Длительность (мин)</label>
@@ -378,12 +829,29 @@
                             <input type="number" class="form-control" id="lesson_order" value="0">
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="lesson_is_free">
-                            <label class="form-check-label" for="lesson_is_free">Бесплатный урок</label>
+                    
+                    <!-- Настройки управления -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Дедлайн</label>
+                            <input type="datetime-local" class="form-control" id="lesson_deadline">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="lesson_allow_retake" checked>
+                                <label class="form-check-label" for="lesson_allow_retake">Разрешена пересдача</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="lesson_is_free">
+                                <label class="form-check-label" for="lesson_is_free">Бесплатный урок</label>
+                            </div>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="lesson_is_published" checked>
+                                <label class="form-check-label" for="lesson_is_published">Опубликован</label>
+                            </div>
                         </div>
                     </div>
+                    
                     <button type="submit" class="btn btn-primary w-100">Создать урок</button>
                 </form>
             </div>
@@ -396,14 +864,14 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Создать задание</h5>
+                <h5 class="modal-title"><i class="bi bi-pencil-square me-2"></i>Создать задание</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="createAssignmentForm">
                     <input type="hidden" id="assignment_lesson_id">
                     <div class="mb-3">
-                        <label class="form-label">Название</label>
+                        <label class="form-label">Название <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="assignment_title" required>
                     </div>
                     <div class="mb-3">
@@ -420,6 +888,44 @@
                             <input type="number" class="form-control" id="assignment_passing_score" value="60">
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Лимит времени (мин)</label>
+                            <input type="number" class="form-control" id="assignment_time_limit" value="0">
+                            <small class="text-muted">0 = без ограничения</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Макс. попыток</label>
+                            <input type="number" class="form-control" id="assignment_max_attempts" value="1">
+                            <small class="text-muted">0 = без ограничения</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Дедлайн сдачи</label>
+                            <input type="datetime-local" class="form-control" id="assignment_deadline">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="assignment_allow_retake" checked>
+                                <label class="form-check-label" for="assignment_allow_retake">Разрешена пересдача</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="assignment_show_timer" checked>
+                                <label class="form-check-label" for="assignment_show_timer">Показывать таймер</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="assignment_auto_grade">
+                                <label class="form-check-label" for="assignment_auto_grade">Автоматическая проверка</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Количество пересдач</label>
+                        <input type="number" class="form-control" id="assignment_retake_count" value="3">
+                        <small class="text-muted">Сколько раз студент может пересдать задание</small>
+                    </div>
+                    
                     <div id="questionsContainer"></div>
                     <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addQuestion()">
                         <i class="bi bi-plus-circle me-1"></i>Добавить вопрос
@@ -431,12 +937,44 @@
     </div>
 </div>
 
+<!-- Модальное окно загрузки материала -->
+<div class="modal fade" id="uploadMaterialModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-upload me-2"></i>Загрузить материал</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadMaterialForm">
+                    <div class="mb-3">
+                        <label class="form-label">Урок <span class="text-danger">*</span></label>
+                        <select class="form-select" id="material_lesson_id" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Файл <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="material_file" required>
+                        <small class="text-muted">Поддерживаются: PDF, DOC, DOCX, XLS, XLSX, ZIP, RAR, MP4 (макс. 100MB)</small>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="material_required">
+                            <label class="form-check-label" for="material_required">Обязательный для просмотра</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Загрузить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Модальное окно отметки прогресса -->
 <div class="modal fade" id="markProgressModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Отметить прогресс</h5>
+                <h5 class="modal-title"><i class="bi bi-check2-circle me-2"></i>Отметить прогресс</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -467,6 +1005,8 @@
     if (!token) window.location.href = '/login';
     
     let questionsList = [];
+    let allCourses = [];
+    let lectureFileData = null;
     
     function showToast(message, type = 'success') {
         const toastContainer = document.querySelector('.toast-container') || (() => {
@@ -489,50 +1029,98 @@
         return div.innerHTML;
     }
     
-    // Вопросы для заданий
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    function getFileIcon(fileType) {
+        const icons = {
+            'pdf': 'pdf',
+            'doc': 'word',
+            'docx': 'word',
+            'xls': 'excel',
+            'xlsx': 'excel',
+            'zip': 'zip',
+            'rar': 'zip',
+            'archive': 'zip',
+            'video': 'play',
+            'image': 'image',
+            'text': 'text',
+            'ppt': 'presentation',
+            'pptx': 'presentation'
+        };
+        return icons[fileType] || 'text';
+    }
+    
+    function getLectureFileIcon(fileType) {
+        const icons = {
+            'pdf': '📄',
+            'doc': '📝',
+            'docx': '📝',
+            'ppt': '📊',
+            'pptx': '📊',
+            'txt': '📄',
+            'md': '📄'
+        };
+        return icons[fileType] || '📄';
+    }
+    
+    // ========== ЗАГРУЗКА ФАЙЛА ЛЕКЦИИ ==========
+    
+    async function uploadLectureFile() {
+        const fileInput = document.getElementById('lesson_lecture_file');
+        if (!fileInput.files[0]) {
+            showToast('Выберите файл', 'warning');
+            return;
+        }
+        
+        const file = fileInput.files[0];
+        
+        try {
+            lectureFileData = {
+                name: file.name,
+                size: file.size,
+                type: file.name.split('.').pop().toLowerCase(),
+                file: file
+            };
+            
+            document.getElementById('lectureFileName').textContent = file.name;
+            document.getElementById('lectureFileSize').textContent = formatFileSize(file.size);
+            document.getElementById('lectureFilePreview').style.display = 'flex';
+            document.getElementById('lectureFilePreview').querySelector('.file-icon').textContent = getLectureFileIcon(file.name.split('.').pop().toLowerCase());
+            
+            showToast('Файл выбран для загрузки', 'success');
+        } catch (error) {
+            console.error('Upload error:', error);
+            showToast('Ошибка выбора файла', 'danger');
+        }
+    }
+    
+    function removeLectureFile() {
+        lectureFileData = null;
+        document.getElementById('lectureFilePreview').style.display = 'none';
+        document.getElementById('lesson_lecture_file').value = '';
+        showToast('Файл удален', 'info');
+    }
+    
+    // ========== ВОПРОСЫ ДЛЯ ЗАДАНИЙ ==========
+    
     function addQuestion() {
         const index = questionsList.length;
-        questionsList.push({ text: '', type: 'text', options: [], correct: '', points: 10 });
-        const container = document.getElementById('questionsContainer');
-        const questionDiv = document.createElement('div');
-        questionDiv.className = 'question-card';
-        questionDiv.id = `question_${index}`;
-        questionDiv.innerHTML = `
-            <div class="d-flex justify-content-between mb-2">
-                <strong>Вопрос ${index + 1}</strong>
-                <button type="button" class="btn btn-sm btn-danger" onclick="removeQuestion(${index})">×</button>
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Текст вопроса</label>
-                <input type="text" class="form-control" onchange="updateQuestion(${index}, 'text', this.value)">
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Тип вопроса</label>
-                <select class="form-select" onchange="updateQuestion(${index}, 'type', this.value)">
-                    <option value="text">Текстовый ответ (проверяет учитель)</option>
-                    <option value="choice">Выбор варианта (автопроверка)</option>
-                </select>
-            </div>
-            <div id="question_options_${index}" style="display: none;">
-                <div class="mb-2">
-                    <label class="form-label">Варианты ответов (через запятую)</label>
-                    <input type="text" class="form-control" placeholder="Вариант 1, Вариант 2, Вариант 3" onchange="updateQuestion(${index}, 'options', this.value)">
-                </div>
-                <div class="mb-2">
-                    <label class="form-label">Правильный ответ (номер варианта, начиная с 0)</label>
-                    <input type="number" class="form-control" onchange="updateQuestion(${index}, 'correct', this.value)">
-                </div>
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Баллы</label>
-                <input type="number" class="form-control" value="10" onchange="updateQuestion(${index}, 'points', this.value)">
-            </div>
-            <div class="text-muted small mt-2">
-                <i class="bi bi-info-circle"></i> 
-                ${index === 0 ? 'Для текстовых ответов учитель проверяет вручную в разделе "Проверка заданий"' : ''}
-            </div>
-        `;
-        container.appendChild(questionDiv);
+        questionsList.push({ 
+            text: '', 
+            type: 'text', 
+            options: [], 
+            correct: '', 
+            points: 10,
+            hint: '',
+            explanation: ''
+        });
+        renderQuestions();
     }
     
     function removeQuestion(index) {
@@ -543,13 +1131,15 @@
     function updateQuestion(index, field, value) {
         if (questionsList[index]) {
             if (field === 'options') {
-                questionsList[index][field] = value.split(',').map(s => s.trim());
+                questionsList[index][field] = value.split(',').map(s => s.trim()).filter(s => s);
+            } else if (field === 'type') {
+                questionsList[index][field] = value;
+                const optionsDiv = document.getElementById(`question_options_${index}`);
+                if (optionsDiv) {
+                    optionsDiv.style.display = value === 'choice' || value === 'multiple' ? 'block' : 'none';
+                }
             } else {
                 questionsList[index][field] = value;
-            }
-            if (field === 'type') {
-                const optionsDiv = document.getElementById(`question_options_${index}`);
-                if (optionsDiv) optionsDiv.style.display = value === 'choice' ? 'block' : 'none';
             }
         }
     }
@@ -558,48 +1148,99 @@
         const container = document.getElementById('questionsContainer');
         container.innerHTML = '';
         questionsList.forEach((q, idx) => {
-            const questionDiv = document.createElement('div');
-            questionDiv.className = 'question-card';
-            questionDiv.innerHTML = `
-                <div class="d-flex justify-content-between mb-2"><strong>Вопрос ${idx + 1}</strong><button type="button" class="btn btn-sm btn-danger" onclick="removeQuestion(${idx})">×</button></div>
-                <div class="mb-2"><label class="form-label">Текст вопроса</label><input type="text" class="form-control" value="${escapeHtml(q.text)}" onchange="updateQuestion(${idx}, 'text', this.value)"></div>
-                <div class="mb-2"><label class="form-label">Тип вопроса</label><select class="form-select" onchange="updateQuestion(${idx}, 'type', this.value)"><option value="text" ${q.type === 'text' ? 'selected' : ''}>Текстовый ответ (проверяет учитель)</option><option value="choice" ${q.type === 'choice' ? 'selected' : ''}>Выбор варианта (автопроверка)</option></select></div>
-                <div id="question_options_${idx}" style="display: ${q.type === 'choice' ? 'block' : 'none'};">
-                    <div class="mb-2"><label class="form-label">Варианты ответов (через запятую)</label><input type="text" class="form-control" value="${escapeHtml((q.options || []).join(', '))}" onchange="updateQuestion(${idx}, 'options', this.value)"></div>
-                    <div class="mb-2"><label class="form-label">Правильный ответ (номер варианта)</label><input type="number" class="form-control" value="${q.correct}" onchange="updateQuestion(${idx}, 'correct', this.value)"></div>
+            const isChoice = q.type === 'choice' || q.type === 'multiple';
+            container.innerHTML += `
+                <div class="question-card" id="question_${idx}">
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong>Вопрос ${idx + 1}</strong>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeQuestion(${idx})">×</button>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Текст вопроса <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" value="${escapeHtml(q.text)}" onchange="updateQuestion(${idx}, 'text', this.value)" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Тип вопроса</label>
+                        <select class="form-select" onchange="updateQuestion(${idx}, 'type', this.value)">
+                            <option value="text" ${q.type === 'text' ? 'selected' : ''}>Текстовый ответ</option>
+                            <option value="choice" ${q.type === 'choice' ? 'selected' : ''}>Одиночный выбор</option>
+                            <option value="multiple" ${q.type === 'multiple' ? 'selected' : ''}>Множественный выбор</option>
+                            <option value="file" ${q.type === 'file' ? 'selected' : ''}>Файл</option>
+                        </select>
+                    </div>
+                    <div id="question_options_${idx}" style="display: ${isChoice ? 'block' : 'none'};">
+                        <div class="mb-2">
+                            <label class="form-label">Варианты ответов (через запятую)</label>
+                            <input type="text" class="form-control" value="${escapeHtml((q.options || []).join(', '))}" onchange="updateQuestion(${idx}, 'options', this.value)" placeholder="Вариант 1, Вариант 2, Вариант 3">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Правильный ответ (номер варианта, начиная с 0)</label>
+                            <input type="text" class="form-control" value="${escapeHtml(q.correct)}" onchange="updateQuestion(${idx}, 'correct', this.value)" placeholder="0">
+                            <small class="text-muted">Для множественного выбора укажите номера через запятую, например: 0,2,4</small>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Баллы</label>
+                        <input type="number" class="form-control" value="${q.points}" onchange="updateQuestion(${idx}, 'points', parseInt(this.value) || 0)">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Подсказка (необязательно)</label>
+                        <input type="text" class="form-control" value="${escapeHtml(q.hint)}" onchange="updateQuestion(${idx}, 'hint', this.value)" placeholder="Подсказка для студента">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Объяснение правильного ответа (необязательно)</label>
+                        <input type="text" class="form-control" value="${escapeHtml(q.explanation)}" onchange="updateQuestion(${idx}, 'explanation', this.value)" placeholder="Объяснение для студента">
+                    </div>
+                    <div class="text-muted small mt-2">
+                        <i class="bi bi-info-circle"></i> 
+                        ${q.type === 'text' ? 'Текстовые ответы требуют ручной проверки' : 
+                          q.type === 'file' ? 'Файловые ответы требуют ручной проверки' : 
+                          'Ответы проверяются автоматически'}
+                    </div>
                 </div>
-                <div class="mb-2"><label class="form-label">Баллы</label><input type="number" class="form-control" value="${q.points}" onchange="updateQuestion(${idx}, 'points', this.value)"></div>
-                <div class="text-muted small mt-2"><i class="bi bi-info-circle"></i> ${q.type === 'text' ? 'Текстовые ответы требуют ручной проверки' : 'Варианты ответов проверяются автоматически'}</div>
             `;
-            container.appendChild(questionDiv);
         });
     }
     
-    // Загрузка курсов для селектора
+    // ========== ЗАГРУЗКА КУРСОВ ДЛЯ СЕЛЕКТОРОВ ==========
+    
     async function loadCourseSelector() {
-        const response = await fetch('/api/admin/courses', { 
-            headers: { 'Authorization': 'Bearer ' + token } 
-        });
-        const courses = await response.json();
-        const select = document.getElementById('courseSelector');
-        const journalSelect = document.getElementById('journalCourseSelector');
-        const submissionsSelect = document.getElementById('submissionsCourseSelector');
-        
-        if (courses && courses.length > 0) {
-            const optionsHtml = '<option value="">-- Выберите курс --</option>' + 
-                courses.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+        try {
+            const response = await fetch('/api/admin/courses', { 
+                headers: { 'Authorization': 'Bearer ' + token } 
+            });
+            allCourses = await response.json();
             
-            select.innerHTML = optionsHtml;
-            journalSelect.innerHTML = optionsHtml;
-            submissionsSelect.innerHTML = optionsHtml;
-        } else {
-            select.innerHTML = '<option value="">-- Нет доступных курсов --</option>';
-            journalSelect.innerHTML = '<option value="">-- Нет доступных курсов --</option>';
-            submissionsSelect.innerHTML = '<option value="">-- Нет доступных курсов --</option>';
+            const selectors = [
+                'courseSelector', 
+                'journalCourseSelector', 
+                'submissionsCourseSelector',
+                'materialsCourseSelector',
+                'statsCourseSelector'
+            ];
+            
+            if (allCourses && allCourses.length > 0) {
+                const optionsHtml = '<option value="">-- Выберите курс --</option>' + 
+                    allCourses.map(c => `<option value="${c.id}">${escapeHtml(c.title)}</option>`).join('');
+                
+                selectors.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = optionsHtml;
+                });
+            } else {
+                const msg = '<option value="">-- Нет доступных курсов --</option>';
+                selectors.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerHTML = msg;
+                });
+            }
+        } catch (error) {
+            console.error('Error loading courses:', error);
         }
     }
     
-    // Загрузка модулей курса
+    // ========== МОДУЛИ И УРОКИ ==========
+    
     async function loadCourseModules() {
         const courseId = document.getElementById('courseSelector').value;
         if (!courseId) {
@@ -609,34 +1250,245 @@
         
         document.getElementById('modulesList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка модулей...</p></div>';
         
-        const response = await fetch(`/api/lms/courses/${courseId}/full`, { 
-            headers: { 'Authorization': 'Bearer ' + token } 
-        });
-        const course = await response.json();
-        
-        let html = '';
-        for (const module of course.modules) {
-            html += `<div class="module-card">
-                <div class="module-header" onclick="toggleModule(${module.id})">
-                    <div><strong><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>${escapeHtml(module.title)}</strong><span class="badge ${module.module_type === 'online' ? 'badge-success' : 'badge-warning'} ms-2">${module.module_type === 'online' ? 'Онлайн' : 'Оффлайн'}</span></div>
-                    <div><button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); showCreateLessonModal(${module.id})"><i class="bi bi-plus-circle"></i> Урок</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteModule(${module.id})"><i class="bi bi-trash"></i></button></div>
-                </div>
-                <div class="module-content" id="module_${module.id}" style="display: block;">`;
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/full`, { 
+                headers: { 'Authorization': 'Bearer ' + token } 
+            });
+            const course = await response.json();
             
-            for (const lesson of module.lessons) {
-                html += `<div class="lesson-item">
-                    <div><i class="bi bi-play-circle-fill me-2" style="color: var(--primary);"></i><strong>${escapeHtml(lesson.title)}</strong>${lesson.is_free ? '<span class="badge bg-success ms-2">Бесплатно</span>' : ''}${lesson.has_assignment ? '<span class="badge bg-info ms-2">Есть задание</span>' : ''}</div>
-                    <div>${!lesson.has_assignment ? `<button class="btn btn-sm btn-info me-1" onclick="showCreateAssignmentModal(${lesson.id})"><i class="bi bi-pencil-square"></i> Задание</button>` : ''}<button class="btn btn-sm btn-danger" onclick="deleteLesson(${lesson.id})"><i class="bi bi-trash"></i></button></div>
-                </div>`;
+            let html = '';
+            for (const module of course.modules) {
+                const moduleType = module.module_type || 'online';
+                const moduleTypeBadge = moduleType === 'online' ? 
+                    '<span class="module-type-badge online">Онлайн</span>' : 
+                    '<span class="module-type-badge offline">Оффлайн</span>';
+                
+                html += `<div class="module-card">
+                    <div class="module-header" onclick="toggleModule(${module.id})">
+                        <div>
+                            <strong><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>${escapeHtml(module.title)}</strong>
+                            <span class="badge bg-secondary ms-1">${module.lessons.length} уроков</span>
+                            ${moduleTypeBadge}
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-primary me-1" onclick="event.stopPropagation(); showCreateLessonModal(${module.id})">
+                                <i class="bi bi-plus-circle"></i> Урок
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="event.stopPropagation(); editModule(${module.id})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteModule(${module.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="module-content" id="module_${module.id}" style="display: block;">`;
+                
+                for (const lesson of module.lessons) {
+                    const hasLecture = lesson.has_lecture_file;
+                    const lectureBadge = hasLecture ? `<span class="badge bg-success ms-1"><i class="bi bi-file-earmark-text"></i> Лекция</span>` : '';
+                    
+                    const isOverdue = lesson.deadline ? new Date(lesson.deadline) < new Date() : false;
+                    const deadlineBadge = lesson.deadline ? 
+                        `<span class="badge ${isOverdue ? 'badge-overdue' : 'badge-warning'} ms-1">
+                            <i class="bi bi-calendar-exclamation"></i> ${new Date(lesson.deadline).toLocaleDateString()}
+                            ${isOverdue ? ' ⚠️' : ''}
+                        </span>` : '';
+                    
+                    const retakeBadge = lesson.allow_retake !== undefined ? 
+                        (lesson.allow_retake ? 
+                            `<span class="lesson-retake-badge allowed ms-1"><i class="bi bi-arrow-repeat"></i> Пересдача</span>` : 
+                            `<span class="lesson-retake-badge forbidden ms-1"><i class="bi bi-x-circle"></i> Без пересдачи</span>`) : 
+                        `<span class="lesson-retake-badge allowed ms-1"><i class="bi bi-arrow-repeat"></i> Пересдача</span>`;
+                    
+                    const isPublished = lesson.is_published !== undefined ? lesson.is_published : true;
+                    const publishBadge = isPublished ? 
+                        `<span class="badge badge-published ms-1"><i class="bi bi-eye"></i> Опубликован</span>` : 
+                        `<span class="badge badge-hidden ms-1"><i class="bi bi-eye-slash"></i> Скрыт</span>`;
+                    
+                    html += `<div class="lesson-item">
+                        <div class="lesson-info">
+                            <i class="bi bi-play-circle-fill me-2" style="color: var(--primary);"></i>
+                            <strong>${escapeHtml(lesson.title)}</strong>
+                            ${lesson.is_free ? '<span class="badge bg-success ms-1">Бесплатно</span>' : ''}
+                            ${lesson.has_assignment ? '<span class="badge bg-info ms-1">Есть задание</span>' : ''}
+                            ${lectureBadge}
+                            ${deadlineBadge}
+                            ${retakeBadge}
+                            ${publishBadge}
+                            ${lesson.duration_minutes > 0 ? `<span class="badge bg-secondary ms-1">${lesson.duration_minutes} мин</span>` : ''}
+                            ${lesson.attachments && lesson.attachments.length > 0 ? `<span class="badge bg-secondary ms-1"><i class="bi bi-paperclip"></i> ${lesson.attachments.length}</span>` : ''}
+                        </div>
+                        <div class="lesson-actions">
+                            ${!lesson.has_assignment ? `<button class="btn btn-sm btn-info" onclick="showCreateAssignmentModal(${lesson.id})"><i class="bi bi-pencil-square"></i> Задание</button>` : 
+                             `<button class="btn btn-sm btn-outline-info" onclick="editAssignment(${lesson.id})"><i class="bi bi-pencil"></i></button>`}
+                            <button class="btn btn-sm btn-outline-primary" onclick="showUploadMaterialModal(${lesson.id})"><i class="bi bi-paperclip"></i></button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteLesson(${lesson.id})"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>`;
+                }
+                if (module.lessons.length === 0) {
+                    html += '<div class="text-muted text-center py-3">Нет уроков. Добавьте первый урок</div>';
+                }
+                html += `</div></div>`;
             }
-            if (module.lessons.length === 0) html += '<div class="text-muted text-center py-3">Нет уроков. Добавьте первый урок</div>';
-            html += `</div></div>`;
+            if (course.modules.length === 0) {
+                html = '<div class="alert alert-info">Нет модулей. Создайте первый модуль</div>';
+            }
+            document.getElementById('modulesList').innerHTML = html;
+        } catch (error) {
+            console.error('Error loading modules:', error);
+            document.getElementById('modulesList').innerHTML = '<div class="alert alert-danger">Ошибка загрузки модулей</div>';
         }
-        if (course.modules.length === 0) html = '<div class="alert alert-info">Нет модулей. Создайте первый модуль</div>';
-        document.getElementById('modulesList').innerHTML = html;
     }
     
-    // Загрузка журнала
+    function toggleModule(moduleId) {
+        const element = document.getElementById(`module_${moduleId}`);
+        if (element) {
+            element.style.display = element.style.display === 'none' ? 'block' : 'none';
+        }
+    }
+    
+    // ========== МАТЕРИАЛЫ ==========
+    
+    async function loadMaterials() {
+        const courseId = document.getElementById('materialsCourseSelector').value;
+        if (!courseId) {
+            document.getElementById('materialsList').innerHTML = '<div class="alert alert-info">Выберите курс</div>';
+            return;
+        }
+        
+        document.getElementById('materialsList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка материалов...</p></div>';
+        
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/full`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const course = await response.json();
+            
+            let html = '';
+            let hasMaterials = false;
+            
+            for (const module of course.modules) {
+                for (const lesson of module.lessons) {
+                    // Показываем файлы лекций
+                    if (lesson.has_lecture_file && lesson.lecture_file_url) {
+                        hasMaterials = true;
+                        html += `
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-body">
+                                    <h6 class="fw-bold">
+                                        <i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>
+                                        ${escapeHtml(module.title)}
+                                        <span class="badge bg-secondary ms-2">${escapeHtml(lesson.title)}</span>
+                                        <span class="badge bg-success ms-2">Лекция</span>
+                                    </h6>
+                                    <div class="attachment-list">
+                                        <span class="attachment-badge">
+                                            <i class="bi bi-file-earmark-${getFileIcon(lesson.lecture_file_type)}"></i>
+                                            ${escapeHtml(lesson.lecture_file_name)}
+                                            <span class="text-muted">(${formatFileSize(lesson.lecture_file_size)})</span>
+                                            <a href="${lesson.lecture_file_url}" class="btn btn-sm btn-outline-primary ms-1" target="_blank">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            <button class="remove-btn" onclick="removeLectureFileFromLesson(${lesson.id})" title="Удалить лекцию">×</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    // Показываем прикрепления
+                    if (lesson.attachments && lesson.attachments.length > 0) {
+                        hasMaterials = true;
+                        html += `
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-body">
+                                    <h6 class="fw-bold">
+                                        <i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>
+                                        ${escapeHtml(module.title)}
+                                        <span class="badge bg-secondary ms-2">${escapeHtml(lesson.title)}</span>
+                                        <span class="badge bg-info ms-2">Материалы</span>
+                                    </h6>
+                                    <div class="attachment-list">
+                                        ${lesson.attachments.map(att => `
+                                            <span class="attachment-badge ${att.is_required ? 'required' : ''}">
+                                                <i class="bi bi-file-earmark-${getFileIcon(att.file_type)}"></i>
+                                                ${escapeHtml(att.filename)}
+                                                <span class="text-muted">(${formatFileSize(att.file_size)})</span>
+                                                ${att.is_required ? '<span class="badge bg-danger ms-1">Обязательный</span>' : ''}
+                                                <button class="remove-btn" onclick="deleteAttachment(${att.id})" title="Удалить">×</button>
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+            }
+            
+            if (!hasMaterials) {
+                html = `
+                    <div class="empty-state">
+                        <i class="bi bi-paperclip"></i>
+                        <h5>Нет материалов</h5>
+                        <p>Загрузите файлы для уроков курса</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('materialsList').innerHTML = html;
+        } catch (error) {
+            console.error('Error loading materials:', error);
+            document.getElementById('materialsList').innerHTML = '<div class="alert alert-danger">Ошибка загрузки материалов</div>';
+        }
+    }
+    
+    async function deleteAttachment(attachmentId) {
+        if (!confirm('Удалить этот файл?')) return;
+        
+        try {
+            const response = await fetch(`/api/lms/attachments/${attachmentId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                showToast('Файл удалён', 'success');
+                loadMaterials();
+            } else {
+                showToast('Ошибка удаления', 'danger');
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', 'danger');
+        }
+    }
+    
+    async function removeLectureFileFromLesson(lessonId) {
+        if (!confirm('Удалить файл лекции?')) return;
+        
+        try {
+            const response = await fetch(`/api/lms/lessons/${lessonId}/remove-lecture`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                showToast('Файл лекции удалён', 'success');
+                loadMaterials();
+                loadCourseModules();
+            } else {
+                showToast('Ошибка удаления', 'danger');
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', 'danger');
+        }
+    }
+    
+    // ========== ЖУРНАЛ ==========
+    
     async function loadJournal() {
         const courseId = document.getElementById('journalCourseSelector').value;
         if (!courseId) {
@@ -646,27 +1498,81 @@
         
         document.getElementById('journalContent').innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка журнала...</p></div>';
         
-        const response = await fetch(`/api/lms/courses/${courseId}/teacher/journal`, { 
-            headers: { 'Authorization': 'Bearer ' + token } 
-        });
-        const data = await response.json();
-        
-        let html = `<div class="table-card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Студент</th>${data.modules.map(m => `<th>${escapeHtml(m.title)}<br><small>${m.type === 'online' ? 'Онлайн' : 'Оффлайн'}</small></th>`).join('')}</tr></thead><tbody>`;
-        for (const student of data.students) {
-            html += `<tr><td><strong>${escapeHtml(student.full_name)}</strong><br><small>${student.email}</small></td>`;
-            for (const module of student.modules) {
-                const isCompleted = module.is_completed;
-                const statusClass = isCompleted ? 'badge-success' : 'badge-warning';
-                const statusText = isCompleted ? (module.completed_by_teacher ? 'Отмечен' : 'Пройден') : 'Не пройден';
-                html += `<td class="text-center"><span class="badge ${statusClass}">${statusText}</span>${!isCompleted ? `<button class="btn btn-sm btn-primary mt-1" onclick="markModuleCompleted(${student.user_id}, ${module.module_id}, '${escapeHtml(student.full_name)}', '${escapeHtml(data.modules.find(m => m.id === module.module_id)?.title || '')}')"><i class="bi bi-check-lg"></i> Отметить</button>` : ''}</td>`;
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/teacher/journal`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await response.json();
+            
+            if (!data.students || data.students.length === 0) {
+                document.getElementById('journalContent').innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-people"></i>
+                        <h5>Нет студентов</h5>
+                        <p>На этот курс ещё никто не записался</p>
+                    </div>
+                `;
+                return;
             }
-            html += `</tr>`;
+            
+            let html = `<div class="table-card"><div class="table-responsive"><table class="table"><thead><tr>
+                <th>Студент</th>
+                <th>Прогресс</th>
+                <th>Пересдач</th>`;
+            
+            data.modules.forEach(m => {
+                html += `<th>${escapeHtml(m.title)}</th>`;
+            });
+            
+            html += `<th>Статус</th></tr></thead><tbody>`;
+            
+            for (const student of data.students) {
+                html += `<tr>
+                    <td>
+                        <strong>${escapeHtml(student.full_name)}</strong>
+                        <br><small class="text-muted">${student.email}</small>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="progress-small">
+                                <div class="fill" style="width: ${student.total_progress}%"></div>
+                            </div>
+                            <span>${student.total_progress}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${student.retake_count > 0 ? 'badge-warning' : 'badge-info'}">
+                            ${student.retake_count || 0}
+                        </span>
+                    </td>`;
+                
+                for (const module of student.modules) {
+                    const isCompleted = module.is_completed;
+                    const statusClass = isCompleted ? 'badge-success' : 'badge-warning';
+                    const statusText = isCompleted ? (module.completed_by_teacher ? '✅ Отмечен' : '✅ Пройден') : '⏳ Не пройден';
+                    
+                    html += `<td class="text-center">
+                        <span class="badge ${statusClass}">${statusText}</span>
+                        ${!isCompleted ? `<button class="btn btn-sm btn-primary mt-1" onclick="markModuleCompleted(${student.user_id}, ${module.module_id}, '${escapeHtml(student.full_name)}', '${escapeHtml(data.modules.find(m => m.id === module.module_id)?.title || '')}')">
+                            <i class="bi bi-check-lg"></i>
+                        </button>` : ''}
+                    </td>`;
+                }
+                
+                html += `<td>${student.is_completed ? '<span class="badge-success">✅ Завершён</span>' : '<span class="badge-warning">⏳ В процессе</span>'}</td>`;
+                html += `</tr>`;
+            }
+            
+            html += `</tbody></table></div></div>`;
+            document.getElementById('journalContent').innerHTML = html;
+        } catch (error) {
+            console.error('Error loading journal:', error);
+            document.getElementById('journalContent').innerHTML = '<div class="alert alert-danger">Ошибка загрузки журнала</div>';
         }
-        html += `</tbody></table></div></div>`;
-        document.getElementById('journalContent').innerHTML = html;
     }
     
-    // Загрузка непроверенных ответов (ОБНОВЛЕННАЯ ВЕРСИЯ)
+    // ========== ПРОВЕРКА ЗАДАНИЙ ==========
+    
     async function loadSubmissions() {
         const courseId = document.getElementById('submissionsCourseSelector').value;
         if (!courseId) {
@@ -677,8 +1583,8 @@
         document.getElementById('submissionsList').innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка ответов...</p></div>';
         
         try {
-            const response = await fetch(`/api/lms/courses/${courseId}/submissions/pending`, { 
-                headers: { 'Authorization': 'Bearer ' + token } 
+            const response = await fetch(`/api/lms/courses/${courseId}/submissions/pending`, {
+                headers: { 'Authorization': 'Bearer ' + token }
             });
             
             if (!response.ok) {
@@ -692,7 +1598,7 @@
                     <div class="empty-state">
                         <i class="bi bi-check-circle-fill text-success"></i>
                         <h5 class="mt-3">Нет непроверенных ответов</h5>
-                        <p class="text-muted">Все текстовые ответы проверены</p>
+                        <p class="text-muted">Все текстовые и файловые ответы проверены</p>
                     </div>
                 `;
                 return;
@@ -700,33 +1606,41 @@
             
             let html = '';
             for (const sub of submissions) {
+                const answerDisplay = sub.answer_text || 
+                    (sub.answer_file ? `<a href="${sub.answer_file}" class="file-link" target="_blank"><i class="bi bi-download"></i> Скачать файл</a>` : '');
+                
+                const isRetake = sub.is_retake || false;
+                const retakeBadge = isRetake ? `<span class="badge badge-retake ms-1"><i class="bi bi-arrow-repeat"></i> Пересдача #${sub.retake_number || 1}</span>` : '';
+                
                 html += `
-                    <div class="submission-card">
+                    <div class="submission-card ${isRetake ? 'retake-status' : ''}">
                         <div class="submission-header">
                             <div>
-                                <strong>${escapeHtml(sub.student_name)}</strong><br>
-                                <small class="text-muted">${escapeHtml(sub.student_email)}</small>
+                                <strong>${escapeHtml(sub.student_name)}</strong>
+                                <br><small class="text-muted">${escapeHtml(sub.student_email)}</small>
                             </div>
                             <div>
                                 <span class="badge bg-secondary">${escapeHtml(sub.course_title)}</span>
                                 <span class="badge bg-info ms-1">${escapeHtml(sub.lesson_title)}</span>
+                                <span class="badge ${sub.question_type === 'text' ? 'badge-warning' : 'badge-info'} ms-1">${sub.question_type === 'text' ? 'Текст' : 'Файл'}</span>
+                                ${retakeBadge}
                             </div>
                         </div>
                         <div class="mb-2">
                             <strong>Вопрос:</strong> ${escapeHtml(sub.question_text)}
                         </div>
                         <div class="submission-answer">
-                            <strong>Ответ студента:</strong><br>
-                            ${escapeHtml(sub.answer_text)}
+                            <strong>Ответ студента:</strong>
+                            <div class="mt-1">${answerDisplay}</div>
                         </div>
                         <div class="grade-buttons">
-                            <button class="btn btn-sm btn-grade-pass" onclick="gradeSubmission(${sub.submission_id}, ${sub.question_id}, 'pass', ${sub.points})">
+                            <button class="btn btn-grade-pass" onclick="gradeSubmission(${sub.submission_id}, ${sub.question_id}, 'pass', ${sub.points})">
                                 <i class="bi bi-check-lg"></i> Зачтено (${sub.points} баллов)
                             </button>
-                            <button class="btn btn-sm btn-grade-fail" onclick="gradeSubmission(${sub.submission_id}, ${sub.question_id}, 'fail', 0)">
+                            <button class="btn btn-grade-fail" onclick="gradeSubmission(${sub.submission_id}, ${sub.question_id}, 'fail', 0)">
                                 <i class="bi bi-x-lg"></i> Не зачтено
                             </button>
-                            <button class="btn btn-sm btn-grade-retake" onclick="gradeSubmission(${sub.submission_id}, ${sub.question_id}, 'retake', 0)">
+                            <button class="btn btn-grade-retake" onclick="gradeSubmission(${sub.submission_id}, ${sub.question_id}, 'retake', 0)">
                                 <i class="bi bi-arrow-repeat"></i> На пересдачу
                             </button>
                         </div>
@@ -741,7 +1655,6 @@
         }
     }
     
-    // Функция для оценки ответа
     async function gradeSubmission(submissionId, questionId, status, maxPoints) {
         let points = 0;
         let comment = '';
@@ -756,9 +1669,9 @@
             if (comment === null) return;
             if (!comment) comment = '❌ Ответ не зачтен';
         } else if (status === 'retake') {
-            comment = prompt('Укажите, что нужно исправить:', '🔄 Отправлено на пересдачу');
+            comment = prompt('Укажите, что нужно исправить:', '🔄 Отправлено на пересдачу. Попробуйте ответить еще раз.');
             if (comment === null) return;
-            if (!comment) comment = '🔄 Попробуйте ответить еще раз';
+            if (!comment) comment = '🔄 Отправлено на пересдачу. Попробуйте ответить еще раз.';
         }
         
         const data = {
@@ -779,7 +1692,7 @@
             if (response.ok) {
                 const result = await response.json();
                 showToast(result.message || 'Оценка сохранена', 'success');
-                await loadSubmissions(); // Обновляем список
+                await loadSubmissions();
             } else {
                 const error = await response.json();
                 showToast(error.detail || 'Ошибка при сохранении оценки', 'danger');
@@ -790,24 +1703,187 @@
         }
     }
     
-    function toggleModule(moduleId) {
-        const element = document.getElementById(`module_${moduleId}`);
-        if (element) {
-            element.style.display = element.style.display === 'none' ? 'block' : 'none';
+    // ========== СТАТИСТИКА ==========
+    
+    async function loadStatistics() {
+        const courseId = document.getElementById('statsCourseSelector').value;
+        if (!courseId) {
+            document.getElementById('statisticsContent').innerHTML = '<div class="alert alert-info">Выберите курс</div>';
+            return;
+        }
+        
+        document.getElementById('statisticsContent').innerHTML = '<div class="loading"><div class="spinner"></div><p>Загрузка статистики...</p></div>';
+        
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/statistics`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const stats = await response.json();
+            
+            let html = `
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.total_students}</div>
+                            <div class="stat-label">Всего студентов</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.completed_students}</div>
+                            <div class="stat-label">Завершили курс</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.average_progress}%</div>
+                            <div class="stat-label">Средний прогресс</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">${stats.completion_rate}%</div>
+                            <div class="stat-label">Процент завершения</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <h6 class="fw-bold mb-0"><i class="bi bi-clipboard-data me-2" style="color: var(--primary);"></i>Детальная статистика по заданиям</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Задание</th>
+                                        <th>Всего ответов</th>
+                                        <th>Средний балл</th>
+                                        <th>Пройдено</th>
+                                        <th>Процент</th>
+                                        <th>Пересдач</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+            
+            if (stats.assignments && stats.assignments.length > 0) {
+                for (const assignment of stats.assignments) {
+                    html += `
+                        <tr>
+                            <td>${escapeHtml(assignment.title)}</td>
+                            <td>${assignment.total_submissions}</td>
+                            <td>${assignment.avg_score}</td>
+                            <td>${assignment.passed_count}</td>
+                            <td>${assignment.pass_rate}%</td>
+                            <td>${assignment.retake_count || 0}</td>
+                        </tr>
+                    `;
+                }
+            } else {
+                html += `<tr><td colspan="6" class="text-center text-muted">Нет заданий</td></tr>`;
+            }
+            
+            html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('statisticsContent').innerHTML = html;
+        } catch (error) {
+            console.error('Error loading statistics:', error);
+            document.getElementById('statisticsContent').innerHTML = '<div class="alert alert-danger">Ошибка загрузки статистики</div>';
         }
     }
     
-    // CRUD операции
+    async function exportResults() {
+        const courseId = document.getElementById('statsCourseSelector').value;
+        if (!courseId) {
+            showToast('Выберите курс для экспорта', 'warning');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/export-results`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка экспорта');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `results_course_${courseId}.xlsx`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Экспорт успешно завершен', 'success');
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast('Ошибка при экспорте', 'danger');
+        }
+    }
+    
+    // ========== CRUD ОПЕРАЦИИ ==========
+    
     async function deleteModule(moduleId) {
         if (!confirm('Удалить модуль? Все уроки в нём также будут удалены.')) return;
-        const response = await fetch(`/api/lms/modules/${moduleId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-        if (response.ok) { showToast('Модуль удалён', 'success'); await loadCourseModules(); }
+        try {
+            const response = await fetch(`/api/lms/modules/${moduleId}`, { 
+                method: 'DELETE', 
+                headers: { 'Authorization': 'Bearer ' + token } 
+            });
+            if (response.ok) {
+                showToast('Модуль удалён', 'success');
+                await loadCourseModules();
+            }
+        } catch (error) {
+            showToast('Ошибка удаления', 'danger');
+        }
     }
     
     async function deleteLesson(lessonId) {
         if (!confirm('Удалить урок?')) return;
-        const response = await fetch(`/api/lms/lessons/${lessonId}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
-        if (response.ok) { showToast('Урок удалён', 'success'); await loadCourseModules(); }
+        try {
+            const response = await fetch(`/api/lms/lessons/${lessonId}`, { 
+                method: 'DELETE', 
+                headers: { 'Authorization': 'Bearer ' + token } 
+            });
+            if (response.ok) {
+                showToast('Урок удалён', 'success');
+                await loadCourseModules();
+            }
+        } catch (error) {
+            showToast('Ошибка удаления', 'danger');
+        }
+    }
+    
+    function editModule(moduleId) {
+        showToast('Редактирование модуля в разработке', 'info');
+    }
+    
+    function editAssignment(lessonId) {
+        showToast('Редактирование задания в разработке', 'info');
     }
     
     function markModuleCompleted(userId, moduleId, studentName, moduleName) {
@@ -819,10 +1895,14 @@
         new bootstrap.Modal(document.getElementById('markProgressModal')).show();
     }
     
-    // Формы
+    // ========== МОДАЛЬНЫЕ ОКНА ==========
+    
     function showCreateModuleModal() {
         const courseId = document.getElementById('courseSelector').value;
-        if (!courseId) { showToast('Сначала выберите курс', 'danger'); return; }
+        if (!courseId) {
+            showToast('Сначала выберите курс', 'danger');
+            return;
+        }
         document.getElementById('module_course_id').value = courseId;
         document.getElementById('createModuleForm').reset();
         new bootstrap.Modal(document.getElementById('createModuleModal')).show();
@@ -831,6 +1911,9 @@
     function showCreateLessonModal(moduleId) {
         document.getElementById('lesson_module_id').value = moduleId;
         document.getElementById('createLessonForm').reset();
+        lectureFileData = null;
+        document.getElementById('lectureFilePreview').style.display = 'none';
+        document.getElementById('lesson_lecture_file').value = '';
         new bootstrap.Modal(document.getElementById('createLessonModal')).show();
     }
     
@@ -839,8 +1922,49 @@
         questionsList = [];
         renderQuestions();
         document.getElementById('createAssignmentForm').reset();
+        document.getElementById('assignment_time_limit').value = 0;
+        document.getElementById('assignment_max_attempts').value = 1;
+        document.getElementById('assignment_retake_count').value = 3;
+        document.getElementById('assignment_show_timer').checked = true;
+        document.getElementById('assignment_allow_retake').checked = true;
         new bootstrap.Modal(document.getElementById('createAssignmentModal')).show();
     }
+    
+    function showUploadMaterialModal(lessonId) {
+        const courseId = document.getElementById('materialsCourseSelector').value;
+        if (!courseId) {
+            showToast('Сначала выберите курс', 'danger');
+            return;
+        }
+        
+        const select = document.getElementById('material_lesson_id');
+        select.innerHTML = '<option value="">-- Выберите урок --</option>';
+        
+        fetch(`/api/lms/courses/${courseId}/full`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(res => res.json())
+        .then(course => {
+            for (const module of course.modules) {
+                for (const lesson of module.lessons) {
+                    const option = document.createElement('option');
+                    option.value = lesson.id;
+                    option.textContent = `${module.title} / ${lesson.title}`;
+                    if (lessonId && lesson.id === lessonId) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                }
+            }
+            document.getElementById('uploadMaterialForm').reset();
+            new bootstrap.Modal(document.getElementById('uploadMaterialModal')).show();
+        })
+        .catch(error => {
+            showToast('Ошибка загрузки уроков', 'danger');
+        });
+    }
+    
+    // ========== ОБРАБОТЧИКИ ФОРМ ==========
     
     document.getElementById('createModuleForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -849,90 +1973,172 @@
             title: document.getElementById('module_title').value,
             description: document.getElementById('module_description').value,
             module_type: document.getElementById('module_type').value,
-            order_index: parseInt(document.getElementById('module_order').value)
+            order_index: parseInt(document.getElementById('module_order').value) || 0
         };
-        const response = await fetch(`/api/lms/courses/${courseId}/modules`, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (response.ok) {
-            showToast('Модуль создан', 'success');
-            bootstrap.Modal.getInstance(document.getElementById('createModuleModal')).hide();
-            await loadCourseModules();
+        
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/modules`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (response.ok) {
+                showToast('Модуль создан', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('createModuleModal')).hide();
+                await loadCourseModules();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Ошибка создания', 'danger');
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', 'danger');
         }
     });
     
     document.getElementById('createLessonForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const moduleId = document.getElementById('lesson_module_id').value;
+        
         const data = {
             title: document.getElementById('lesson_title').value,
             content: document.getElementById('lesson_content').value,
             video_url: document.getElementById('lesson_video_url').value,
-            duration_minutes: parseInt(document.getElementById('lesson_duration').value),
-            order_index: parseInt(document.getElementById('lesson_order').value),
-            is_free: document.getElementById('lesson_is_free').checked
+            duration_minutes: parseInt(document.getElementById('lesson_duration').value) || 0,
+            order_index: parseInt(document.getElementById('lesson_order').value) || 0,
+            is_free: document.getElementById('lesson_is_free').checked,
+            lecture_type: document.getElementById('lesson_lecture_type').value,
+            allow_retake: document.getElementById('lesson_allow_retake').checked,
+            deadline: document.getElementById('lesson_deadline').value || null,
+            is_published: document.getElementById('lesson_is_published').checked
         };
-        const response = await fetch(`/api/lms/modules/${moduleId}/lessons`, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (response.ok) {
-            showToast('Урок создан', 'success');
-            bootstrap.Modal.getInstance(document.getElementById('createLessonModal')).hide();
-            await loadCourseModules();
+        
+        try {
+            const response = await fetch(`/api/lms/modules/${moduleId}/lessons`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                const lessonId = result.id;
+                
+                if (lectureFileData && lectureFileData.file) {
+                    const formData = new FormData();
+                    formData.append('file', lectureFileData.file);
+                    
+                    const uploadResponse = await fetch(`/api/lms/lessons/${lessonId}/upload-lecture`, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token },
+                        body: formData
+                    });
+                    
+                    if (!uploadResponse.ok) {
+                        showToast('Урок создан, но файл лекции не загружен', 'warning');
+                    } else {
+                        showToast('Урок создан, файл лекции загружен', 'success');
+                    }
+                } else {
+                    showToast('Урок создан', 'success');
+                }
+                
+                bootstrap.Modal.getInstance(document.getElementById('createLessonModal')).hide();
+                await loadCourseModules();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Ошибка создания урока', 'danger');
+            }
+        } catch (error) {
+            console.error('Create lesson error:', error);
+            showToast('Ошибка соединения', 'danger');
         }
     });
     
     document.getElementById('createAssignmentForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const lessonId = document.getElementById('assignment_lesson_id').value;
+        
         const assignmentData = {
             title: document.getElementById('assignment_title').value,
             description: document.getElementById('assignment_description').value,
-            max_score: parseInt(document.getElementById('assignment_max_score').value),
-            passing_score: parseInt(document.getElementById('assignment_passing_score').value)
+            max_score: parseInt(document.getElementById('assignment_max_score').value) || 100,
+            passing_score: parseInt(document.getElementById('assignment_passing_score').value) || 60,
+            time_limit_minutes: parseInt(document.getElementById('assignment_time_limit').value) || 0,
+            show_timer: document.getElementById('assignment_show_timer').checked,
+            max_attempts: parseInt(document.getElementById('assignment_max_attempts').value) || 1,
+            deadline: document.getElementById('assignment_deadline').value || null,
+            allow_retake: document.getElementById('assignment_allow_retake').checked,
+            retake_count: parseInt(document.getElementById('assignment_retake_count').value) || 3,
+            auto_grade: document.getElementById('assignment_auto_grade').checked,
+            questions: questionsList.map(q => ({
+                question_text: q.text,
+                question_type: q.type,
+                options: q.options || [],
+                correct_answer: q.correct || '',
+                points: parseInt(q.points) || 10,
+                order_index: 0,
+                is_required: true,
+                hint: q.hint || '',
+                explanation: q.explanation || ''
+            }))
         };
-        const assignmentResponse = await fetch(`/api/lms/lessons/${lessonId}/assignment`, {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify(assignmentData)
-        });
-        if (assignmentResponse.ok) {
-            const assignmentResult = await assignmentResponse.json();
-            const assignmentId = assignmentResult.id;
-            for (const question of questionsList) {
-                let optionsValue;
-                if (question.type === 'choice') {
-                    if (Array.isArray(question.options)) {
-                        optionsValue = JSON.stringify(question.options);
-                    } else if (typeof question.options === 'string') {
-                        optionsValue = question.options;
-                    } else {
-                        optionsValue = '[]';
-                    }
-                } else {
-                    optionsValue = '[]';
-                }
-                
-                const questionData = {
-                    question_text: question.text,
-                    question_type: question.type,
-                    options: optionsValue,
-                    correct_answer: question.correct ? question.correct.toString() : '',
-                    points: question.points || 10
-                };
-                await fetch(`/api/lms/assignments/${assignmentId}/questions`, {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(questionData)
-                });
+        
+        try {
+            const response = await fetch(`/api/lms/lessons/${lessonId}/assignment`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(assignmentData)
+            });
+            
+            if (response.ok) {
+                showToast('Задание создано', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('createAssignmentModal')).hide();
+                await loadCourseModules();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Ошибка создания задания', 'danger');
             }
-            showToast('Задание создано', 'success');
-            bootstrap.Modal.getInstance(document.getElementById('createAssignmentModal')).hide();
-            await loadCourseModules();
+        } catch (error) {
+            showToast('Ошибка соединения', 'danger');
+        }
+    });
+    
+    document.getElementById('uploadMaterialForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        const fileInput = document.getElementById('material_file');
+        const lessonId = document.getElementById('material_lesson_id').value;
+        
+        if (!lessonId) {
+            showToast('Выберите урок', 'danger');
+            return;
+        }
+        
+        if (!fileInput.files[0]) {
+            showToast('Выберите файл', 'danger');
+            return;
+        }
+        
+        formData.append('file', fileInput.files[0]);
+        formData.append('is_required', document.getElementById('material_required').checked ? 'true' : 'false');
+        
+        try {
+            const response = await fetch(`/api/lms/lessons/${lessonId}/attachments`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+            
+            if (response.ok) {
+                showToast('Файл загружен', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('uploadMaterialModal')).hide();
+                await loadMaterials();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Ошибка загрузки', 'danger');
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', 'danger');
         }
     });
     
@@ -943,44 +2149,78 @@
             module_id: parseInt(document.getElementById('mark_module_id').value),
             comment: document.getElementById('mark_comment').value
         };
-        const response = await fetch('/api/lms/teacher/mark-module-completed', {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (response.ok) {
-            showToast('Прогресс отмечен', 'success');
-            bootstrap.Modal.getInstance(document.getElementById('markProgressModal')).hide();
-            await loadJournal();
+        
+        try {
+            const response = await fetch('/api/lms/teacher/mark-module-completed', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok) {
+                showToast('Прогресс отмечен', 'success');
+                bootstrap.Modal.getInstance(document.getElementById('markProgressModal')).hide();
+                await loadJournal();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Ошибка', 'danger');
+            }
+        } catch (error) {
+            showToast('Ошибка соединения', 'danger');
         }
     });
     
+    // ========== НАВИГАЦИЯ ==========
+    
     function showSection(section) {
-        document.getElementById('modulesSection').style.display = 'none';
-        document.getElementById('journalSection').style.display = 'none';
-        document.getElementById('submissionsSection').style.display = 'none';
         document.querySelectorAll('.lms-sidebar .nav-link').forEach(link => link.classList.remove('active'));
         
-        if (section === 'modules') {
-            document.getElementById('modulesSection').style.display = 'block';
-            document.querySelector('.lms-sidebar .nav-link:nth-child(1)').classList.add('active');
-            if (document.getElementById('courseSelector').value) {
-                loadCourseModules();
-            }
-        } else if (section === 'journal') {
-            document.getElementById('journalSection').style.display = 'block';
-            document.querySelector('.lms-sidebar .nav-link:nth-child(2)').classList.add('active');
-            if (document.getElementById('journalCourseSelector').value) {
-                loadJournal();
-            }
-        } else if (section === 'submissions') {
-            document.getElementById('submissionsSection').style.display = 'block';
-            document.querySelector('.lms-sidebar .nav-link:nth-child(3)').classList.add('active');
-            if (document.getElementById('submissionsCourseSelector').value) {
-                loadSubmissions();
-            }
+        const sections = ['modules', 'materials', 'journal', 'submissions', 'statistics'];
+        sections.forEach(id => {
+            document.getElementById(id + 'Section').style.display = 'none';
+        });
+        
+        document.getElementById(section + 'Section').style.display = 'block';
+        
+        const links = document.querySelectorAll('.lms-sidebar .nav-link');
+        const sectionMap = {
+            'modules': 0,
+            'materials': 1,
+            'journal': 2,
+            'submissions': 3,
+            'statistics': 4
+        };
+        if (sectionMap[section] !== undefined) {
+            links[sectionMap[section]].classList.add('active');
+        }
+        
+        switch(section) {
+            case 'modules':
+                if (document.getElementById('courseSelector').value) loadCourseModules();
+                break;
+            case 'materials':
+                if (document.getElementById('materialsCourseSelector').value) loadMaterials();
+                break;
+            case 'journal':
+                if (document.getElementById('journalCourseSelector').value) loadJournal();
+                break;
+            case 'submissions':
+                if (document.getElementById('submissionsCourseSelector').value) loadSubmissions();
+                break;
+            case 'statistics':
+                if (document.getElementById('statsCourseSelector').value) loadStatistics();
+                break;
         }
     }
+    
+    // ========== ИНИЦИАЛИЗАЦИЯ ==========
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('materialsCourseSelector')?.addEventListener('change', loadMaterials);
+        document.getElementById('journalCourseSelector')?.addEventListener('change', loadJournal);
+        document.getElementById('submissionsCourseSelector')?.addEventListener('change', loadSubmissions);
+        document.getElementById('statsCourseSelector')?.addEventListener('change', loadStatistics);
+    });
     
     loadCourseSelector();
 </script>

@@ -1,8 +1,10 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, Enum, Float, JSON
+# app/models.py
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, Enum, Float, JSON, Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
+
 
 class UserRole(str, enum.Enum):
     TEACHER = "teacher"
@@ -19,6 +21,14 @@ class AssignmentType(str, enum.Enum):
     FILE = "file"          # Ответ файлом
     CHOICE = "choice"      # Выбор варианта
     MULTIPLE = "multiple"  # Множественный выбор
+    MATCHING = "matching"  # Соответствие
+    ORDERING = "ordering"  # Упорядочивание
+
+
+class LessonLectureType(str, enum.Enum):
+    VIDEO = "video"        # Видео-лекция
+    FILE = "file"          # Файл-лекция (PDF, DOC, PPT и т.д.)
+    HYBRID = "hybrid"      # И видео, и файл
 
 
 class User(Base):
@@ -50,6 +60,7 @@ class User(Base):
     module_progress = relationship("UserModuleProgress", back_populates="user", cascade="all, delete-orphan", foreign_keys="UserModuleProgress.user_id")
     lesson_progress = relationship("UserLessonProgress", back_populates="user", cascade="all, delete-orphan", foreign_keys="UserLessonProgress.user_id")
     assignment_submissions = relationship("AssignmentSubmission", back_populates="user", cascade="all, delete-orphan", foreign_keys="AssignmentSubmission.user_id")
+    assignment_attempts = relationship("AssignmentAttempt", back_populates="user", cascade="all, delete-orphan")
 
 
 class Category(Base):
@@ -90,6 +101,9 @@ class Course(Base):
     is_active = Column(Boolean, default=True)
     created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # ========== НОВОЕ ПОЛЕ ДЛЯ MOODLE ==========
+    moodle_course_id = Column(Integer, nullable=True, index=True)  # ID курса в Moodle
     
     category = relationship("Category", back_populates="courses")
     speakers = relationship("CourseSpeaker", back_populates="course", cascade="all, delete-orphan")
@@ -238,8 +252,8 @@ class CourseModule(Base):
     course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(500), nullable=False)
     description = Column(Text, nullable=True)
-    order_index = Column(Integer, default=0)
     module_type = Column(Enum(ModuleType), default=ModuleType.ONLINE)
+    order_index = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     course = relationship("Course", back_populates="modules")
@@ -254,12 +268,25 @@ class CourseLesson(Base):
     id = Column(Integer, primary_key=True, index=True)
     module_id = Column(Integer, ForeignKey("course_modules.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(500), nullable=False)
-    content = Column(Text, nullable=True)  # HTML текст
+    content = Column(Text, nullable=True)
     video_url = Column(String(500), nullable=True)
     order_index = Column(Integer, default=0)
-    is_free = Column(Boolean, default=False)  # Бесплатный урок для ознакомления
+    is_free = Column(Boolean, default=False)
     duration_minutes = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # ========== ПОЛЯ ДЛЯ ЛЕКЦИЙ ==========
+    lecture_type = Column(Enum(LessonLectureType), server_default=LessonLectureType.VIDEO)
+    lecture_file_url = Column(String(500), nullable=True)
+    lecture_file_name = Column(String(500), nullable=True)
+    lecture_file_type = Column(String(50), nullable=True)
+    lecture_file_size = Column(Integer, default=0)
+    has_lecture_file = Column(Boolean, default=False)
+    
+    # ========== ПОЛЯ ДЛЯ УПРАВЛЕНИЯ ==========
+    allow_retake = Column(Boolean, default=True)
+    deadline = Column(DateTime(timezone=True), nullable=True)
+    is_published = Column(Boolean, default=True)
     
     module = relationship("CourseModule", back_populates="lessons")
     attachments = relationship("LessonAttachment", back_populates="lesson", cascade="all, delete-orphan")
@@ -277,6 +304,7 @@ class LessonAttachment(Base):
     file_url = Column(String(500), nullable=False)
     file_size = Column(Integer, default=0)
     file_type = Column(String(100), nullable=True)
+    is_required = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     lesson = relationship("CourseLesson", back_populates="attachments")
@@ -293,7 +321,16 @@ class LessonAssignment(Base):
     assignment_type = Column(Enum(AssignmentType), default=AssignmentType.TEXT)
     max_score = Column(Integer, default=100)
     passing_score = Column(Integer, default=60)
+    time_limit_minutes = Column(Integer, default=0)
+    show_timer = Column(Boolean, default=True)
+    max_attempts = Column(Integer, default=1)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # ========== ПОЛЯ ДЛЯ УПРАВЛЕНИЯ ==========
+    deadline = Column(DateTime(timezone=True), nullable=True)
+    allow_retake = Column(Boolean, default=True)
+    retake_count = Column(Integer, default=3)
+    auto_grade = Column(Boolean, default=False)
     
     lesson = relationship("CourseLesson", back_populates="assignment")
     questions = relationship("AssignmentQuestion", back_populates="assignment", cascade="all, delete-orphan")
@@ -310,10 +347,15 @@ class AssignmentQuestion(Base):
     question_image = Column(String(500), nullable=True)
     question_video = Column(String(500), nullable=True)
     question_type = Column(Enum(AssignmentType), default=AssignmentType.TEXT)
-    options = Column(Text, nullable=True)  # JSON для вариантов ответов
+    options = Column(Text, nullable=True)
     correct_answer = Column(Text, nullable=True)
     points = Column(Integer, default=10)
     order_index = Column(Integer, default=0)
+    is_required = Column(Boolean, default=True)
+    
+    # ========== НОВЫЕ ПОЛЯ ==========
+    hint = Column(Text, nullable=True)
+    explanation = Column(Text, nullable=True)
     
     assignment = relationship("LessonAssignment", back_populates="questions")
     answers = relationship("UserAnswer", back_populates="question", cascade="all, delete-orphan")
@@ -345,6 +387,12 @@ class UserLessonProgress(Base):
     is_completed = Column(Boolean, default=False)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     last_position = Column(Integer, default=0)
+    video_watched_percent = Column(Integer, default=0)
+    
+    # ========== НОВЫЕ ПОЛЯ ==========
+    lecture_file_downloaded = Column(Boolean, default=False)
+    last_accessed = Column(DateTime(timezone=True), default=func.now())
+    time_spent_seconds = Column(Integer, default=0)
     
     user = relationship("User", back_populates="lesson_progress", foreign_keys=[user_id])
     lesson = relationship("CourseLesson", back_populates="user_progress")
@@ -363,10 +411,50 @@ class AssignmentSubmission(Base):
     graded_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     graded_at = Column(DateTime(timezone=True), nullable=True)
     teacher_comment = Column(Text, nullable=True)
+    current_attempt = Column(Integer, default=1)
+    is_latest = Column(Boolean, default=True)
+    
+    # ========== ПОЛЯ ДЛЯ ПЕРЕСДАЧИ ==========
+    is_retake = Column(Boolean, default=False)
+    retake_number = Column(Integer, default=0)
+    previous_submission_id = Column(Integer, ForeignKey("assignment_submissions.id", ondelete="SET NULL"), nullable=True)
+    time_spent_seconds = Column(Integer, default=0)
+    is_auto_graded = Column(Boolean, default=False)
+    auto_grade_score = Column(Integer, nullable=True)
+    can_retake = Column(Boolean, default=True)
     
     assignment = relationship("LessonAssignment", back_populates="submissions")
     user = relationship("User", back_populates="assignment_submissions", foreign_keys=[user_id])
     answers = relationship("UserAnswer", back_populates="submission", cascade="all, delete-orphan")
+    attempts = relationship("AssignmentAttempt", back_populates="submission", cascade="all, delete-orphan")
+    
+    previous_submission = relationship(
+        "AssignmentSubmission", 
+        remote_side=[id], 
+        backref="next_submissions",
+        foreign_keys=[previous_submission_id]
+    )
+
+
+class AssignmentAttempt(Base):
+    """Попытки прохождения задания"""
+    __tablename__ = "assignment_attempts"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    submission_id = Column(Integer, ForeignKey("assignment_submissions.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    attempt_number = Column(Integer, default=1)
+    started_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    score = Column(Integer, nullable=True)
+    is_passed = Column(Boolean, default=False)
+    
+    # ========== ПОЛЯ ДЛЯ ПЕРЕСДАЧИ ==========
+    is_retake = Column(Boolean, default=False)
+    time_spent_seconds = Column(Integer, default=0)
+    
+    submission = relationship("AssignmentSubmission", back_populates="attempts")
+    user = relationship("User", back_populates="assignment_attempts", foreign_keys=[user_id])
 
 
 class UserAnswer(Base):
@@ -378,8 +466,13 @@ class UserAnswer(Base):
     question_id = Column(Integer, ForeignKey("assignment_questions.id", ondelete="CASCADE"), nullable=False)
     answer_text = Column(Text, nullable=True)
     answer_file = Column(String(500), nullable=True)
-    is_correct = Column(Boolean, default=False)
+    is_correct = Column(Boolean, nullable=True)
     points_earned = Column(Integer, default=0)
+    attempt_id = Column(Integer, ForeignKey("assignment_attempts.id", ondelete="SET NULL"), nullable=True)
+    
+    # ========== НОВЫЕ ПОЛЯ ==========
+    teacher_comment = Column(Text, nullable=True)
+    auto_graded = Column(Boolean, default=False)
     
     submission = relationship("AssignmentSubmission", back_populates="answers")
     question = relationship("AssignmentQuestion", back_populates="answers")

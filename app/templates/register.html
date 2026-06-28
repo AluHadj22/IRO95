@@ -7,54 +7,95 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white text-center border-0">
-                    <h3 class="mb-0"><i class="bi bi-person-plus"></i> Регистрация</h3>
+                <div class="card-header text-center border-0" style="background-color: #f8f9fa;">
+                    <h3 class="mb-0 fw-bold" style="color: #6c757d;">
+                        <i class="bi bi-person-plus"></i> РЕГИСТРАЦИЯ
+                    </h3>
                 </div>
                 <div class="card-body p-4">
                     <form id="registerForm">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold"><i class="bi bi-person"></i> ФИО *</label>
+                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-person"></i> ФИО *</label>
                                 <input type="text" class="form-control" id="full_name" placeholder="Иванов Иван Иванович" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold"><i class="bi bi-envelope"></i> Email *</label>
+                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-envelope"></i> Email *</label>
                                 <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold"><i class="bi bi-briefcase"></i> Должность</label>
+                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-briefcase"></i> Должность</label>
                                 <input type="text" class="form-control" id="position" placeholder="Учитель">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold"><i class="bi bi-phone"></i> Телефон</label>
+                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-phone"></i> Телефон</label>
                                 <input type="tel" class="form-control" id="phone" placeholder="+7 (999) 123-45-67">
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold"><i class="bi bi-building"></i> Организация</label>
+                            <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-building"></i> Организация</label>
                             <input type="text" class="form-control" id="organization" placeholder="Школа №1">
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold"><i class="bi bi-lock"></i> Пароль *</label>
-                                <input type="password" class="form-control" id="password" placeholder="минимум 6 символов" required>
+                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-lock"></i> Пароль *</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" placeholder="минимум 6 символов" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" style="background-color: white;">
+                                        <i class="bi bi-eye" id="passwordIcon"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold"><i class="bi bi-shield-lock"></i> Подтверждение *</label>
-                                <input type="password" class="form-control" id="confirm" placeholder="повторите пароль" required>
+                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-shield-lock"></i> Подтверждение *</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirm" placeholder="повторите пароль" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirm" style="background-color: white;">
+                                        <i class="bi bi-eye" id="confirmIcon"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold"><i class="bi bi-key"></i> Код администратора</label>
-                            <input type="password" class="form-control" id="admin_code" placeholder="Оставьте пустым для обычного пользователя">
-                            <small class="text-muted">Введите код <strong>adminIRO3377</strong> для получения прав администратора</small>
+                        
+                        <!-- Чекбоксы и ссылки -->
+                        <div class="mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agree_policy" required>
+                                <label class="form-check-label" for="agree_policy">
+                                    Я принимаю <a href="/privacy-policy" target="_blank">Политику конфиденциальности</a>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agree_terms" required>
+                                <label class="form-check-label" for="agree_terms">
+                                    Я принимаю <a href="/terms" target="_blank">Пользовательское соглашение</a>
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agree_offer" required>
+                                <label class="form-check-label" for="agree_offer">
+                                    Я принимаю условия <a href="/offer" target="_blank">Договора оферты</a>
+                                </label>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-gradient w-100 btn-lg">Зарегистрироваться</button>
+
+                        <!-- Ремарка с щитом -->
+                        <div class="alert border-0 d-flex align-items-center mb-3" style="background-color: #f8f9fa; border-left: 4px solid #28a745 !important;">
+                            <i class="bi bi-shield-check fs-4 me-2" style="color: #28a745;"></i>
+                            <div>
+                                <strong style="color: #6c757d;">Все данные защищены!</strong> 
+                                <span class="text-muted">Используется надежное шифрование данных.</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn w-100 btn-lg" style="background-color: white; color: #6c757d; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            Зарегистрироваться
+                        </button>
                     </form>
                     <div class="mt-4 text-center">
-                        <p class="text-muted">Уже есть аккаунт? <a href="/login" class="text-primary">Войдите</a></p>
+                        <p class="text-muted">Уже есть аккаунт? <a href="/login" class="fw-bold" style="color: #6c757d;">Войдите</a></p>
                     </div>
                 </div>
             </div>
@@ -63,8 +104,49 @@
 </div>
 
 <script>
+// Toggle password visibility
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = document.getElementById('passwordIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+});
+
+document.getElementById('toggleConfirm').addEventListener('click', function() {
+    const confirmInput = document.getElementById('confirm');
+    const icon = document.getElementById('confirmIcon');
+    
+    if (confirmInput.type === 'password') {
+        confirmInput.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        confirmInput.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+});
+
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    // Проверка чекбоксов
+    if (!document.getElementById('agree_policy').checked) {
+        showToast('Необходимо принять Политику конфиденциальности', 'danger');
+        return;
+    }
+    if (!document.getElementById('agree_terms').checked) {
+        showToast('Необходимо принять Пользовательское соглашение', 'danger');
+        return;
+    }
+    if (!document.getElementById('agree_offer').checked) {
+        showToast('Необходимо принять условия Договора оферты', 'danger');
+        return;
+    }
     
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('confirm').value;
@@ -85,8 +167,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         position: document.getElementById('position').value || null,
         phone: document.getElementById('phone').value || null,
         organization: document.getElementById('organization').value || null,
-        password: password,
-        admin_code: document.getElementById('admin_code').value || null
+        password: password
     };
     
     const response = await fetch('/api/auth/register', {

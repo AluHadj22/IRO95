@@ -28,6 +28,19 @@
         gap: 20px;
         color: #64748b;
         font-size: 0.85rem;
+        flex-wrap: wrap;
+    }
+    
+    .lesson-meta .deadline {
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .lesson-meta .deadline.overdue {
+        color: #dc2626;
+        background: #fee2e2;
+        padding: 2px 10px;
+        border-radius: 20px;
     }
     
     .lesson-content {
@@ -44,6 +57,69 @@
         border-radius: 12px;
     }
     
+    .lecture-file-section {
+        background: #f0fdf4;
+        border: 1px solid #d1fae5;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .lecture-file-section .file-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .lecture-file-section .file-icon {
+        font-size: 2.5rem;
+        color: #059669;
+    }
+    
+    .lecture-file-section .file-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .lecture-file-section .file-size {
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+    
+    .lecture-file-section .download-btn {
+        background: #059669;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .lecture-file-section .download-btn:hover {
+        background: #047857;
+        transform: translateY(-1px);
+    }
+    
+    .lecture-file-section .download-btn i {
+        margin-right: 8px;
+    }
+    
+    .lecture-file-section.downloaded {
+        background: #dbeafe;
+        border-color: #93c5fd;
+    }
+    
+    .lecture-file-section.downloaded .file-icon {
+        color: #2563eb;
+    }
+    
     .video-container {
         position: relative;
         padding-bottom: 56.25%;
@@ -51,6 +127,7 @@
         overflow: hidden;
         border-radius: 12px;
         margin-bottom: 20px;
+        background: #000;
     }
     
     .video-container iframe {
@@ -60,6 +137,23 @@
         width: 100%;
         height: 100%;
         border: none;
+    }
+    
+    .video-progress-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgba(255,255,255,0.3);
+        z-index: 10;
+    }
+    
+    .video-progress-overlay .progress-fill {
+        height: 100%;
+        background: #0057A4;
+        transition: width 0.5s ease;
+        width: 0%;
     }
     
     .attachments-section {
@@ -79,6 +173,7 @@
         text-decoration: none;
         color: #1e293b;
         transition: all 0.2s ease;
+        font-size: 0.85rem;
     }
     
     .attachment-item:hover {
@@ -87,19 +182,63 @@
         border-color: #0057A4;
     }
     
+    .attachment-item.required {
+        border-color: #ef4444;
+        background: #fef2f2;
+    }
+    
+    .attachment-item.required:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: white;
+    }
+    
     .assignment-section {
-        background: #f0fdf4;
+        background: #f8fafc;
         border-radius: 16px;
-        border: 1px solid #d1fae5;
+        border: 1px solid #e2e8f0;
         padding: 25px;
         margin-bottom: 30px;
+    }
+    
+    .assignment-section.passed {
+        background: #f0fdf4;
+        border-color: #d1fae5;
+    }
+    
+    .assignment-section.failed {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+    
+    .assignment-section.pending {
+        background: #fffbeb;
+        border-color: #fde68a;
+    }
+    
+    .assignment-section.retake {
+        background: #fef3c7;
+        border-color: #f59e0b;
+    }
+    
+    .assignment-section.overdue {
+        background: #fef2f2;
+        border-color: #dc2626;
     }
     
     .assignment-title {
         font-size: 1.3rem;
         font-weight: 600;
-        color: #059669;
         margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .assignment-title .badge {
+        font-size: 0.75rem;
+        padding: 4px 12px;
     }
     
     .question-card {
@@ -110,10 +249,25 @@
         margin-bottom: 20px;
     }
     
+    .question-card.answered {
+        border-color: #d1fae5;
+        background: #fafdfa;
+    }
+    
+    .question-card.incorrect {
+        border-color: #fecaca;
+        background: #fefafa;
+    }
+    
     .question-text {
         font-weight: 600;
         margin-bottom: 15px;
         color: #1e293b;
+    }
+    
+    .question-text .required-mark {
+        color: #ef4444;
+        margin-left: 4px;
     }
     
     .question-image {
@@ -122,9 +276,37 @@
         margin-bottom: 15px;
     }
     
+    .question-hint {
+        background: #f0f9ff;
+        border-left: 3px solid #0284c7;
+        padding: 10px 14px;
+        margin: 10px 0;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.9rem;
+        color: #0369a1;
+    }
+    
+    .question-hint i {
+        margin-right: 8px;
+    }
+    
+    .question-explanation {
+        background: #f0fdf4;
+        border-left: 3px solid #059669;
+        padding: 10px 14px;
+        margin: 10px 0;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.9rem;
+        color: #065f46;
+    }
+    
+    .question-explanation i {
+        margin-right: 8px;
+    }
+    
     .question-status {
         margin-top: 10px;
-        padding: 8px;
+        padding: 8px 12px;
         border-radius: 8px;
         font-size: 0.8rem;
     }
@@ -144,12 +326,26 @@
         color: #dc2626;
     }
     
+    .status-partial {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .status-retake {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
     .option-item {
         margin-bottom: 10px;
-        padding: 10px;
+        padding: 10px 14px;
         border-radius: 8px;
+        border: 1px solid #e2e8f0;
         transition: all 0.2s ease;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
     .option-item:hover {
@@ -158,7 +354,22 @@
     
     .option-item.selected {
         background: #e0e7ff;
-        border-left: 3px solid #0057A4;
+        border-color: #0057A4;
+    }
+    
+    .option-item.correct {
+        background: #d1fae5;
+        border-color: #059669;
+    }
+    
+    .option-item.wrong {
+        background: #fee2e2;
+        border-color: #dc2626;
+    }
+    
+    .option-item input[type="checkbox"],
+    .option-item input[type="radio"] {
+        margin-right: 8px;
     }
     
     .text-answer {
@@ -168,6 +379,7 @@
         border-radius: 8px;
         font-family: inherit;
         resize: vertical;
+        font-size: 0.9rem;
     }
     
     .text-answer:focus {
@@ -176,42 +388,152 @@
         box-shadow: 0 0 0 3px rgba(0,87,164,0.1);
     }
     
+    .file-answer-area {
+        border: 2px dashed #e2e8f0;
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .file-answer-area:hover {
+        border-color: #0057A4;
+        background: #f8fafc;
+    }
+    
+    .file-answer-area.dragover {
+        border-color: #0057A4;
+        background: #e0e7ff;
+    }
+    
+    .file-answer-area .upload-icon {
+        font-size: 3rem;
+        color: #94a3b8;
+        margin-bottom: 10px;
+    }
+    
+    .file-answer-area .file-name {
+        font-weight: 500;
+        color: #1e293b;
+    }
+    
+    .file-answer-area .file-size {
+        color: #64748b;
+        font-size: 0.8rem;
+    }
+    
+    .file-preview {
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8fafc;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .file-preview .file-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .file-preview .remove-file {
+        color: #ef4444;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+    }
+    
     .submit-btn {
-        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
         color: white;
         border: none;
         border-radius: 12px;
-        padding: 12px 24px;
+        padding: 14px 28px;
         font-weight: 600;
         width: 100%;
         transition: all 0.2s ease;
+        font-size: 1rem;
     }
     
-    .submit-btn:hover {
+    .submit-btn:hover:not(:disabled) {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+        box-shadow: 0 4px 12px rgba(0,87,164,0.3);
     }
     
     .submit-btn:disabled {
         opacity: 0.5;
         transform: none;
+        cursor: not-allowed;
     }
     
     .complete-btn {
-        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
         color: white;
         border: none;
         border-radius: 12px;
-        padding: 12px 24px;
+        padding: 14px 28px;
         font-weight: 600;
         width: 100%;
         margin-top: 20px;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+    }
+    
+    .complete-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
     }
     
     .complete-btn:disabled {
         opacity: 0.5;
         transform: none;
         cursor: not-allowed;
+    }
+    
+    .retake-btn {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 28px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 20px;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+    }
+    
+    .retake-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+    }
+    
+    .retake-btn:disabled {
+        opacity: 0.5;
+        transform: none;
+        cursor: not-allowed;
+    }
+    
+    .reset-btn {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 28px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 20px;
+        transition: all 0.2s ease;
+        font-size: 1rem;
+    }
+    
+    .reset-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(107,114,128,0.3);
     }
     
     .result-card {
@@ -222,53 +544,145 @@
         text-align: center;
     }
     
+    .result-card.passed {
+        background: #d1fae5;
+    }
+    
+    .result-card.failed {
+        background: #fee2e2;
+    }
+    
+    .result-card.pending {
+        background: #fef3c7;
+    }
+    
+    .result-card.retake {
+        background: #fef3c7;
+    }
+    
     .result-score {
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 700;
         color: #0057A4;
+    }
+    
+    .result-card.passed .result-score {
+        color: #059669;
+    }
+    
+    .result-card.failed .result-score {
+        color: #dc2626;
     }
     
     .result-passed {
         background: #d1fae5;
         color: #059669;
-        padding: 4px 12px;
+        padding: 4px 16px;
         border-radius: 20px;
         display: inline-block;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        font-weight: 600;
     }
     
     .result-failed {
         background: #fee2e2;
         color: #dc2626;
-        padding: 4px 12px;
+        padding: 4px 16px;
         border-radius: 20px;
         display: inline-block;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        font-weight: 600;
     }
     
     .result-pending {
         background: #fef3c7;
         color: #d97706;
-        padding: 4px 12px;
+        padding: 4px 16px;
         border-radius: 20px;
         display: inline-block;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .result-retake {
+        background: #fef3c7;
+        color: #d97706;
+        padding: 4px 16px;
+        border-radius: 20px;
+        display: inline-block;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .result-overdue {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 4px 16px;
+        border-radius: 20px;
+        display: inline-block;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .retake-message {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin: 20px 0;
+        text-align: center;
+        color: #92400e;
+    }
+    
+    .retake-message .teacher-comment {
+        margin-top: 10px;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+        text-align: left;
+        font-style: italic;
+        border-left: 3px solid #f59e0b;
     }
     
     .waiting-message {
         background: #fef3c7;
         border: 1px solid #fde68a;
         border-radius: 12px;
-        padding: 15px;
+        padding: 16px 20px;
         margin-top: 20px;
         text-align: center;
         color: #92400e;
+    }
+    
+    .timer-display {
+        background: #1e293b;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 1.2rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .timer-display.warning {
+        background: #dc2626;
+        animation: pulse 1s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
     }
     
     .navigation-buttons {
         display: flex;
         justify-content: space-between;
         margin-top: 30px;
+        gap: 10px;
+        flex-wrap: wrap;
     }
     
     .nav-btn {
@@ -279,6 +693,7 @@
         color: #1e293b;
         text-decoration: none;
         transition: all 0.2s ease;
+        font-size: 0.9rem;
     }
     
     .nav-btn:hover {
@@ -313,22 +728,115 @@
         margin-bottom: 20px;
     }
     
-    .progress-update {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: #0057A4;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        z-index: 1000;
-        animation: fadeOut 3s ease forwards;
+    .attempts-info {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 10px;
+        text-align: center;
     }
     
-    @keyframes fadeOut {
-        0% { opacity: 1; }
-        70% { opacity: 1; }
-        100% { opacity: 0; visibility: hidden; }
+    .attempts-info .remaining {
+        font-weight: 700;
+        color: #0057A4;
+    }
+    
+    .attempts-info .remaining.low {
+        color: #dc2626;
+    }
+    
+    .attempts-info .remaining.none {
+        color: #dc2626;
+        font-weight: 700;
+    }
+    
+    .teacher-comment {
+        background: #f8fafc;
+        border-left: 3px solid #0057A4;
+        padding: 12px 16px;
+        margin-top: 10px;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.9rem;
+    }
+    
+    .teacher-comment .label {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .deadline-warning {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        padding: 10px 16px;
+        margin: 10px 0;
+        color: #dc2626;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .no-attempts-message {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin: 20px 0;
+        color: #dc2626;
+    }
+    
+    .no-attempts-message i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .retake-info {
+        background: #f0fdf4;
+        border: 1px solid #d1fae5;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin: 10px 0;
+        font-size: 0.9rem;
+        color: #065f46;
+    }
+    
+    .retake-info i {
+        margin-right: 8px;
+    }
+    
+    @media (max-width: 768px) {
+        .lesson-container {
+            padding: 10px;
+        }
+        
+        .lesson-content {
+            padding: 16px;
+        }
+        
+        .assignment-section {
+            padding: 16px;
+        }
+        
+        .question-card {
+            padding: 14px;
+        }
+        
+        .navigation-buttons {
+            flex-direction: column;
+        }
+        
+        .nav-btn {
+            text-align: center;
+        }
+        
+        .lecture-file-section {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .lecture-file-section .file-info {
+            flex-direction: column;
+        }
     }
 </style>
 {% endblock %}
@@ -347,9 +855,15 @@
     const token = localStorage.getItem('token');
     const lessonId = {{ lesson_id }};
     let lessonData = null;
-    let textAnswersStatus = {}; // Хранит статус проверки текстовых ответов
+    let assignmentStatus = null;
+    let selectedFiles = {};
+    let timerInterval = null;
+    let timeRemaining = 0;
+    let videoCheckInterval = null;
+    let timeSpentSeconds = 0;
+    let timeTrackingInterval = null;
+    let isSubmitting = false;
     
-    // Проверяем авторизацию перед загрузкой
     if (!token) {
         document.getElementById('lessonContent').innerHTML = `
             <div class="error-container">
@@ -363,7 +877,6 @@
         loadLesson();
     }
     
-    // Функция для безопасного парсинга options
     function parseOptions(options) {
         if (!options) return [];
         if (Array.isArray(options)) return options;
@@ -388,12 +901,70 @@
         return [];
     }
     
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    
+    function getFileIcon(fileType) {
+        const icons = {
+            'pdf': 'filetype-pdf',
+            'doc': 'filetype-doc',
+            'docx': 'filetype-docx',
+            'ppt': 'filetype-ppt',
+            'pptx': 'filetype-pptx',
+            'txt': 'filetype-txt',
+            'md': 'filetype-md'
+        };
+        return icons[fileType] || 'file-earmark-text';
+    }
+    
+    function getFileEmoji(fileType) {
+        const emojis = {
+            'pdf': '📄',
+            'doc': '📝',
+            'docx': '📝',
+            'ppt': '📊',
+            'pptx': '📊',
+            'txt': '📄',
+            'md': '📄'
+        };
+        return emojis[fileType] || '📄';
+    }
+    
+    function getFileTypeName(fileType) {
+        const names = {
+            'pdf': 'PDF',
+            'doc': 'Word',
+            'docx': 'Word',
+            'ppt': 'PowerPoint',
+            'pptx': 'PowerPoint',
+            'txt': 'Текст',
+            'md': 'Markdown'
+        };
+        return names[fileType] || 'Файл';
+    }
+    
     async function loadLesson() {
         const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         
         try {
-            console.log('Загрузка урока ID:', lessonId);
-            
             const response = await fetch(`/api/lms/lessons/${lessonId}`, { headers });
             
             if (!response.ok) {
@@ -410,10 +981,10 @@
             }
             
             lessonData = await response.json();
-            console.log('Данные урока загружены');
             
-            // Получаем статус проверки текстовых ответов
-            await loadTextAnswersStatus();
+            if (lessonData.assignment) {
+                await loadAssignmentStatus();
+            }
             
             renderLesson();
             
@@ -431,25 +1002,23 @@
         }
     }
     
-    async function loadTextAnswersStatus() {
+    async function loadAssignmentStatus() {
         if (!lessonData || !lessonData.assignment) return;
         
         try {
-            const response = await fetch(`/api/lms/assignment/${lessonData.assignment.id}/status`, {
+            const response = await fetch(`/api/lms/assignments/${lessonData.assignment.id}/status`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             
             if (response.ok) {
-                const status = await response.json();
-                textAnswersStatus = status;
-                console.log('Статус проверки ответов:', textAnswersStatus);
+                assignmentStatus = await response.json();
+                console.log('Статус задания:', assignmentStatus);
             }
         } catch (error) {
-            console.error('Error loading text answers status:', error);
+            console.error('Error loading assignment status:', error);
         }
     }
     
-    // Проверка, можно ли завершить урок
     function canCompleteLesson() {
         if (!lessonData || !lessonData.assignment) {
             return true;
@@ -459,35 +1028,43 @@
             return false;
         }
         
-        const textQuestions = lessonData.assignment.questions.filter(q => q.question_type === 'text');
-        
-        if (textQuestions.length === 0) {
+        if (!assignmentStatus) {
             return false;
         }
         
-        let allApproved = true;
-        let hasAnyAnswer = false;
-        
-        for (const question of textQuestions) {
-            const status = textAnswersStatus[question.id];
-            if (status === 'pending') {
-                allApproved = false;
-                break;
-            }
-            if (status === 'rejected') {
-                allApproved = false;
-                break;
-            }
-            if (status === 'approved') {
-                hasAnyAnswer = true;
-            }
-            if (!status) {
-                allApproved = false;
-                break;
-            }
+        if (assignmentStatus.status === 'passed') {
+            return true;
         }
         
-        return allApproved && hasAnyAnswer;
+        if (assignmentStatus.status === 'retake') {
+            return false;
+        }
+        
+        if (assignmentStatus.is_overdue) {
+            return false;
+        }
+        
+        return false;
+    }
+    
+    function isRetake() {
+        return assignmentStatus && assignmentStatus.status === 'retake';
+    }
+    
+    function isPending() {
+        return assignmentStatus && (assignmentStatus.status === 'pending_teacher' || assignmentStatus.status === 'submitted');
+    }
+    
+    function isFailed() {
+        return assignmentStatus && assignmentStatus.status === 'failed';
+    }
+    
+    function isOverdue() {
+        return assignmentStatus && assignmentStatus.is_overdue === true;
+    }
+    
+    function hasNoAttempts() {
+        return assignmentStatus && assignmentStatus.remaining_attempts === 0 && assignmentStatus.max_attempts > 0;
     }
     
     function renderLesson() {
@@ -500,30 +1077,55 @@
                     ${lessonData.duration_minutes > 0 ? `<span><i class="bi bi-clock"></i> ${lessonData.duration_minutes} мин</span>` : ''}
                     ${lessonData.has_assignment ? `<span><i class="bi bi-pencil-square"></i> Есть задание</span>` : ''}
                     ${lessonData.is_completed ? `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Пройдено</span>` : '<span class="text-warning"><i class="bi bi-clock-history"></i> Не пройдено</span>'}
+                    ${lessonData.deadline ? `<span class="deadline ${new Date(lessonData.deadline) < new Date() ? 'overdue' : ''}"><i class="bi bi-calendar-exclamation"></i> Дедлайн: ${new Date(lessonData.deadline).toLocaleDateString()} ${new Date(lessonData.deadline).toLocaleTimeString()}</span>` : ''}
+                    ${lessonData.allow_retake ? `<span class="text-muted"><i class="bi bi-arrow-repeat"></i> Пересдача разрешена</span>` : `<span class="text-muted"><i class="bi bi-x-circle"></i> Пересдача запрещена</span>`}
                 </div>
             </div>
             
             <div class="lesson-content">
                 ${lessonData.video_url ? `
-                    <div class="video-container">
-                        <iframe src="${getEmbedUrl(lessonData.video_url)}" allowfullscreen></iframe>
+                    <div class="video-container" id="videoContainer">
+                        <iframe id="lessonVideo" src="${getEmbedUrl(lessonData.video_url)}" 
+                                allowfullscreen
+                                allow="autoplay; encrypted-media"
+                                onload="initVideoTracking()"></iframe>
+                        <div class="video-progress-overlay">
+                            <div class="progress-fill" id="videoProgressFill"></div>
+                        </div>
                     </div>
                 ` : ''}
-                <div class="lesson-text">
-                    ${lessonData.content || '<p class="text-muted">Нет содержания урока</p>'}
-                </div>
+                
+                ${lessonData.content ? `<div class="lesson-text">${lessonData.content}</div>` : ''}
+                
+                <!-- Файл лекции -->
+                ${lessonData.has_lecture_file && lessonData.lecture_file_url ? `
+                    <div class="lecture-file-section" id="lectureFileSection">
+                        <div class="file-info">
+                            <div class="file-icon">${getFileEmoji(lessonData.lecture_file_type)}</div>
+                            <div>
+                                <div class="file-name">${escapeHtml(lessonData.lecture_file_name)}</div>
+                                <div class="file-size">${getFileTypeName(lessonData.lecture_file_type)} • ${formatFileSize(lessonData.lecture_file_size)}</div>
+                            </div>
+                        </div>
+                        <a href="/api/lms/lessons/${lessonId}/download-lecture" class="download-btn" target="_blank">
+                            <i class="bi bi-download"></i> Скачать лекцию
+                        </a>
+                    </div>
+                ` : ''}
             </div>
         `;
         
-        // Прикреплённые файлы
         if (lessonData.attachments && lessonData.attachments.length > 0) {
             html += `
                 <div class="attachments-section">
                     <h6 class="fw-bold mb-3"><i class="bi bi-paperclip"></i> Материалы к уроку</h6>
                     <div>
                         ${lessonData.attachments.map(att => `
-                            <a href="${att.file_url}" class="attachment-item" download>
-                                <i class="bi bi-file-earmark-text"></i> ${escapeHtml(att.filename)}
+                            <a href="${att.file_url}" class="attachment-item ${att.is_required ? 'required' : ''}" download>
+                                <i class="bi bi-file-earmark-${getFileIcon(att.file_type)}"></i> 
+                                ${escapeHtml(att.filename)}
+                                ${att.is_required ? '<span class="badge bg-danger ms-1">Обязательный</span>' : ''}
+                                <span class="text-muted ms-1">(${formatFileSize(att.file_size)})</span>
                             </a>
                         `).join('')}
                     </div>
@@ -531,21 +1133,20 @@
             `;
         }
         
-        // Задание
         if (lessonData.assignment && !lessonData.is_completed) {
             html += renderAssignment(lessonData.assignment);
         } else if (lessonData.assignment && lessonData.is_completed) {
             html += `
-                <div class="result-card">
+                <div class="result-card passed">
                     <i class="bi bi-check-circle-fill fs-1 text-success"></i>
                     <h5 class="mt-2">Урок пройден!</h5>
                     <p>Вы успешно завершили этот урок. Можете перейти к следующему.</p>
-                    ${lessonData.next_lesson_id ? `<a href="/lesson/${lessonData.next_lesson_id}" class="btn btn-primary mt-3">Перейти к следующему уроку <i class="bi bi-arrow-right"></i></a>` : ''}
+                    ${lessonData.next_lesson_id ? `<a href="/lesson/${lessonData.next_lesson_id}" class="btn btn-primary mt-3">Перейти к следующему уроку <i class="bi bi-arrow-right"></i></a>` : 
+                     `<p class="text-muted mt-3">Это последний урок курса!</p>`}
                 </div>
             `;
         }
         
-        // Навигация
         if (lessonData.next_lesson_id || lessonData.prev_lesson_id) {
             html += `<div class="navigation-buttons">`;
             if (lessonData.prev_lesson_id) {
@@ -560,147 +1161,372 @@
         }
         
         container.innerHTML = html;
+        
+        if (lessonData.video_url && !lessonData.is_completed) {
+            initVideoTracking();
+        }
+        
+        startTimeTracking();
     }
     
     function renderAssignment(assignment) {
-        const canComplete = canCompleteLesson();
+        const status = assignmentStatus || {};
+        const isRetakeStatus = isRetake();
+        const isPendingStatus = isPending();
+        const isFailedStatus = isFailed();
+        const isOverdueStatus = isOverdue();
+        const isPassed = status.status === 'passed';
+        const noAttempts = hasNoAttempts();
+        const remainingAttempts = status.remaining_attempts !== undefined ? status.remaining_attempts : 0;
         
-        if (canComplete && !lessonData.is_completed) {
-            return `
-                <div class="assignment-section">
-                    <div class="assignment-title">
-                        <i class="bi bi-pencil-square me-2"></i>${escapeHtml(assignment.title)}
+        let sectionClass = 'assignment-section';
+        if (isPassed) sectionClass += ' passed';
+        else if (isFailedStatus) sectionClass += ' failed';
+        else if (isPendingStatus) sectionClass += ' pending';
+        else if (isRetakeStatus) sectionClass += ' retake';
+        else if (isOverdueStatus) sectionClass += ' overdue';
+        
+        let html = `
+            <div class="${sectionClass}" id="assignmentSection">
+                <div class="assignment-title">
+                    <i class="bi bi-pencil-square"></i>
+                    ${escapeHtml(assignment.title)}
+                    ${status.score !== undefined && status.score !== null ? `<span class="badge bg-primary">${status.score}/${assignment.max_score}</span>` : ''}
+                    ${isPassed ? `<span class="result-passed"><i class="bi bi-check-circle"></i> Пройдено</span>` : ''}
+                    ${isFailedStatus ? `<span class="result-failed"><i class="bi bi-x-circle"></i> Не пройдено</span>` : ''}
+                    ${isPendingStatus ? `<span class="result-pending"><i class="bi bi-clock"></i> На проверке</span>` : ''}
+                    ${isRetakeStatus ? `<span class="result-retake"><i class="bi bi-arrow-repeat"></i> На пересдачу</span>` : ''}
+                    ${isOverdueStatus ? `<span class="result-overdue"><i class="bi bi-clock-history"></i> Просрочено</span>` : ''}
+                </div>
+                
+                ${assignment.description ? `<p class="text-muted mb-4">${escapeHtml(assignment.description)}</p>` : ''}
+                
+                ${status.teacher_comment ? `
+                    <div class="teacher-comment">
+                        <span class="label"><i class="bi bi-chat"></i> Комментарий учителя:</span>
+                        ${escapeHtml(status.teacher_comment)}
                     </div>
-                    <div class="result-card">
-                        <i class="bi bi-check-circle-fill fs-1 text-success"></i>
-                        <h5 class="mt-2">Все ответы проверены и зачтены!</h5>
-                        <p>Вы можете завершить урок.</p>
-                        <button class="complete-btn" onclick="completeLesson()">
-                            <i class="bi bi-check-circle me-2"></i>Завершить урок
-                        </button>
+                ` : ''}
+                
+                ${isOverdueStatus ? `
+                    <div class="deadline-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span><strong>Дедлайн задания истек!</strong> Вы не можете больше отправлять ответы.</span>
                     </div>
+                ` : ''}
+                
+                ${noAttempts ? `
+                    <div class="no-attempts-message">
+                        <i class="bi bi-x-circle-fill"></i>
+                        <h5>Попыток больше нет</h5>
+                        <p>Вы исчерпали все попытки выполнения этого задания.</p>
+                        ${status.allow_retake ? '<p class="text-muted small">Обратитесь к учителю для получения дополнительной попытки.</p>' : ''}
+                    </div>
+                ` : ''}
+        `;
+        
+        // Информация о пересдаче
+        if (status.is_retake) {
+            html += `
+                <div class="retake-info">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <strong>Пересдача #${status.retake_number}</strong>
+                    ${status.remaining_attempts !== undefined ? ` • Осталось попыток: <span class="${status.remaining_attempts <= 1 ? 'text-danger' : ''}">${status.remaining_attempts}</span>` : ''}
                 </div>
             `;
         }
         
-        const hasPendingTextAnswers = Object.values(textAnswersStatus).some(s => s === 'pending');
+        // Таймер
+        if (assignment.time_limit_minutes > 0 && !status.submitted_at && !isRetakeStatus && !isPassed && !isOverdueStatus && !noAttempts) {
+            const timeLimit = assignment.time_limit_minutes * 60;
+            const startTime = localStorage.getItem(`assignment_start_${assignment.id}`);
+            
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+                timeRemaining = Math.max(0, timeLimit - elapsed);
+            } else {
+                timeRemaining = timeLimit;
+                localStorage.setItem(`assignment_start_${assignment.id}`, Date.now().toString());
+            }
+            
+            if (timeRemaining > 0) {
+                html += `
+                    <div class="mb-3">
+                        <span class="timer-display ${timeRemaining < 60 ? 'warning' : ''}" id="timerDisplay">
+                            <i class="bi bi-clock"></i>
+                            ${formatTime(timeRemaining)}
+                        </span>
+                        <span class="text-muted ms-2">осталось</span>
+                    </div>
+                `;
+                startTimer(assignment.id, timeRemaining);
+            } else {
+                // Время вышло - автоматическая отправка
+                html += `
+                    <div class="deadline-warning">
+                        <i class="bi bi-clock-history"></i>
+                        <span><strong>Время вышло!</strong> Ответы будут отправлены автоматически.</span>
+                    </div>
+                `;
+                setTimeout(() => submitAssignment(), 2000);
+            }
+        }
         
-        if (hasPendingTextAnswers) {
-            return `
-                <div class="assignment-section">
-                    <div class="assignment-title">
-                        <i class="bi bi-pencil-square me-2"></i>${escapeHtml(assignment.title)}
+        // Сообщение о пересдаче
+        if (isRetakeStatus) {
+            html += `
+                <div class="retake-message">
+                    <i class="bi bi-arrow-repeat fs-4"></i>
+                    <h5 class="mt-2">Ответ отправлен на пересдачу</h5>
+                    <p>Вы можете попробовать ответить на вопросы заново.</p>
+                    ${status.teacher_comment ? `
+                        <div class="teacher-comment">
+                            <strong>Комментарий учителя:</strong>
+                            ${escapeHtml(status.teacher_comment)}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Вопросы
+        html += `<div id="questionsContainer">`;
+        assignment.questions.forEach((question, idx) => {
+            html += renderQuestion(question, idx, status);
+        });
+        html += `</div>`;
+        
+        // Кнопки действий
+        const isSubmitted = status.status === 'submitted' || status.status === 'pending_teacher' || status.status === 'passed';
+        const hasUnanswered = assignment.questions.some(q => {
+            const qStatus = status.questions?.find(s => s.question_id === q.id);
+            return qStatus && qStatus.status === 'not_answered';
+        });
+        
+        // Если просрочено или нет попыток - блокируем все действия
+        if (isOverdueStatus || noAttempts) {
+            html += `
+                <div class="alert alert-danger mt-3">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>${isOverdueStatus ? 'Дедлайн истек.' : 'Попыток больше нет.'}</strong> 
+                    ${isOverdueStatus ? 'Вы не можете больше отправлять ответы на это задание.' : 'Обратитесь к учителю.'}
+                </div>
+            `;
+        }
+        // Если статус "retake" - показываем кнопку "Попробовать снова"
+        else if (isRetakeStatus && !noAttempts) {
+            html += `
+                <button class="retake-btn" onclick="resetProgress()">
+                    <i class="bi bi-arrow-repeat me-2"></i>Пройти заново
+                </button>
+                <p class="text-muted small mt-2 text-center">Это сбросит ваш прогресс по уроку, и вы сможете выполнить задание заново.</p>
+            `;
+        } 
+        // Если не отправлено и не пройдено
+        else if (!isSubmitted && !isPassed && !lessonData.is_completed && !noAttempts) {
+            html += `
+                <button class="submit-btn" id="submitBtn" onclick="submitAssignment()" ${hasUnanswered ? 'disabled' : ''}>
+                    <i class="bi bi-send me-2"></i>Отправить на проверку
+                </button>
+                ${hasUnanswered ? '<p class="text-danger small mt-2"><i class="bi bi-exclamation-circle"></i> Ответьте на все вопросы перед отправкой</p>' : ''}
+                ${remainingAttempts > 0 ? `<p class="text-muted small mt-2 text-center">Осталось попыток: <span class="${remainingAttempts <= 1 ? 'text-danger' : ''}">${remainingAttempts}</span></p>` : ''}
+            `;
+        } 
+        // Если пройдено - кнопка завершения урока
+        else if (isPassed && !lessonData.is_completed) {
+            html += `
+                <button class="complete-btn" onclick="completeLesson()">
+                    <i class="bi bi-check-circle me-2"></i>Завершить урок
+                </button>
+            `;
+        } 
+        // Если не пройдено и есть попытки
+        else if (isFailedStatus && remainingAttempts > 0 && !noAttempts) {
+            html += `
+                <button class="retake-btn" onclick="resetProgress()">
+                    <i class="bi bi-arrow-repeat me-2"></i>Попробовать снова (осталось ${remainingAttempts} попыток)
+                </button>
+            `;
+        } 
+        // Если ожидает проверки
+        else if (isPendingStatus) {
+            html += `
+                <div class="waiting-message">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Ваши ответы отправлены на проверку учителю. Дождитесь проверки, чтобы завершить урок.
+                </div>
+            `;
+        }
+        
+        // Информация о попытках
+        if (status.max_attempts > 0) {
+            html += `
+                <div class="attempts-info">
+                    Попыток: ${status.attempt || 0}/${status.max_attempts}
+                    ${status.is_retake ? ` • Пересдача #${status.retake_number}` : ''}
+                    ${status.allow_retake ? ' • Пересдача разрешена' : ''}
+                    ${remainingAttempts > 0 ? ` • Осталось: <span class="remaining ${remainingAttempts <= 1 ? 'low' : ''}">${remainingAttempts}</span>` : ''}
+                    ${remainingAttempts === 0 && status.max_attempts > 0 ? ` • <span class="remaining none">Попыток больше нет</span>` : ''}
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        
+        return html;
+    }
+    
+    function renderQuestion(question, idx, status) {
+        const options = parseOptions(question.options);
+        const qStatus = status.questions?.find(s => s.question_id === question.id);
+        const isAnswered = qStatus && qStatus.is_answered;
+        const isCorrect = qStatus && qStatus.is_correct === true;
+        const isIncorrect = qStatus && qStatus.is_correct === false;
+        const isPendingStatus = qStatus && qStatus.status === 'pending';
+        const isRetakeStatus = status.status === 'retake';
+        const isOverdueStatus = status.is_overdue === true;
+        const noAttempts = hasNoAttempts();
+        const pointsEarned = qStatus ? qStatus.points_earned : 0;
+        
+        let cardClass = 'question-card';
+        if (isCorrect) cardClass += ' answered';
+        else if (isIncorrect) cardClass += ' incorrect';
+        
+        let statusHtml = '';
+        if (isPendingStatus) {
+            statusHtml = `<div class="question-status status-pending"><i class="bi bi-clock-history"></i> Ответ отправлен, ожидает проверки</div>`;
+        } else if (isCorrect) {
+            statusHtml = `<div class="question-status status-approved"><i class="bi bi-check-circle"></i> Зачтено (+${pointsEarned} баллов)</div>`;
+        } else if (isIncorrect) {
+            statusHtml = `<div class="question-status status-rejected"><i class="bi bi-x-circle"></i> Не зачтено</div>`;
+        }
+        
+        let inputHtml = '';
+        const canAnswer = (isRetakeStatus || (qStatus && qStatus.status === 'not_answered') || !qStatus) && !isOverdueStatus && !noAttempts;
+        
+        if (canAnswer) {
+            if (question.question_type === 'choice') {
+                const savedAnswer = qStatus && qStatus.answer_text ? parseInt(qStatus.answer_text) : -1;
+                inputHtml = `
+                    <div class="options-list" id="options_${question.id}">
+                        ${options.map((opt, optIdx) => `
+                            <div class="option-item ${savedAnswer === optIdx ? 'selected' : ''}" 
+                                 onclick="selectOption(${question.id}, ${optIdx})" 
+                                 data-opt-index="${optIdx}">
+                                <span>${String.fromCharCode(65 + optIdx)}. ${escapeHtml(opt)}</span>
+                            </div>
+                        `).join('')}
+                        <input type="hidden" id="answer_${question.id}" name="question_${question.id}" value="${savedAnswer >= 0 ? savedAnswer : ''}">
                     </div>
-                    ${renderQuestions(assignment)}
-                    <div class="waiting-message">
-                        <i class="bi bi-clock-history me-2"></i>
-                        Ваши ответы отправлены на проверку учителю. Дождитесь проверки, чтобы завершить урок.
+                `;
+            } else if (question.question_type === 'multiple') {
+                const savedAnswers = qStatus && qStatus.answer_text ? JSON.parse(qStatus.answer_text) : [];
+                inputHtml = `
+                    <div class="options-list" id="options_${question.id}">
+                        ${options.map((opt, optIdx) => `
+                            <div class="option-item ${savedAnswers.includes(optIdx) ? 'selected' : ''}" 
+                                 onclick="toggleMultipleOption(${question.id}, ${optIdx})" 
+                                 data-opt-index="${optIdx}">
+                                <input type="checkbox" class="form-check-input me-2" ${savedAnswers.includes(optIdx) ? 'checked' : ''}>
+                                <span>${String.fromCharCode(65 + optIdx)}. ${escapeHtml(opt)}</span>
+                            </div>
+                        `).join('')}
+                        <input type="hidden" id="answer_${question.id}" name="question_${question.id}" value="${JSON.stringify(savedAnswers)}">
                     </div>
+                `;
+            } else if (question.question_type === 'text') {
+                const savedAnswer = qStatus && qStatus.answer_text ? qStatus.answer_text : '';
+                inputHtml = `
+                    <textarea class="text-answer" id="answer_${question.id}" name="question_${question.id}" 
+                              rows="4" placeholder="Введите ваш ответ здесь...">${escapeHtml(savedAnswer)}</textarea>
+                `;
+            } else if (question.question_type === 'file') {
+                const savedFile = qStatus && qStatus.answer_file ? qStatus.answer_file : '';
+                inputHtml = `
+                    <div class="file-answer-area" id="fileDrop_${question.id}" 
+                         onclick="document.getElementById('fileInput_${question.id}').click()"
+                         ondragover="event.preventDefault(); document.getElementById('fileDrop_${question.id}').classList.add('dragover');"
+                         ondragleave="document.getElementById('fileDrop_${question.id}').classList.remove('dragover');"
+                         ondrop="event.preventDefault(); document.getElementById('fileDrop_${question.id}').classList.remove('dragover'); handleFileDrop(${question.id}, event.dataTransfer.files[0]);">
+                        <div class="upload-icon"><i class="bi bi-cloud-upload"></i></div>
+                        <p>Нажмите или перетащите файл сюда</p>
+                        <p class="text-muted small">Поддерживаются: PDF, DOC, DOCX, ZIP, RAR, JPG, PNG (макс. 50MB)</p>
+                        <input type="file" id="fileInput_${question.id}" style="display: none;" 
+                               accept=".pdf,.doc,.docx,.zip,.rar,.jpg,.jpeg,.png"
+                               onchange="handleFileSelect(${question.id}, this.files[0])">
+                    </div>
+                    <div id="filePreview_${question.id}" style="display: ${savedFile ? 'flex' : 'none'};" class="file-preview">
+                        <div class="file-info">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span id="fileName_${question.id}">${savedFile ? escapeHtml(savedFile.split('/').pop()) : ''}</span>
+                            <span class="text-muted" id="fileSize_${question.id}"></span>
+                        </div>
+                        <button type="button" class="remove-file" onclick="removeFile(${question.id})">&times;</button>
+                    </div>
+                    <input type="hidden" id="answer_${question.id}" name="question_${question.id}" value="${escapeHtml(savedFile)}">
+                `;
+            }
+        } else if (qStatus && (qStatus.status === 'pending' || qStatus.status === 'graded')) {
+            if (question.question_type === 'choice') {
+                const selectedIdx = parseInt(qStatus.answer_text);
+                inputHtml = `
+                    <div class="options-list">
+                        ${options.map((opt, optIdx) => `
+                            <div class="option-item ${selectedIdx === optIdx ? 'selected' : ''} ${isCorrect && selectedIdx === optIdx ? 'correct' : ''} ${isIncorrect && selectedIdx === optIdx ? 'wrong' : ''}">
+                                <span>${String.fromCharCode(65 + optIdx)}. ${escapeHtml(opt)}</span>
+                                ${selectedIdx === optIdx ? (isCorrect ? '<i class="bi bi-check-circle-fill text-success"></i>' : '<i class="bi bi-x-circle-fill text-danger"></i>') : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (question.question_type === 'text') {
+                inputHtml = `
+                    <div class="text-answer" style="background: #f8fafc; cursor: default;">
+                        ${escapeHtml(qStatus.answer_text || '')}
+                    </div>
+                `;
+            } else if (question.question_type === 'file') {
+                inputHtml = `
+                    <div class="file-preview" style="display: flex; background: #f8fafc;">
+                        <div class="file-info">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>${escapeHtml(qStatus.answer_file ? qStatus.answer_file.split('/').pop() : 'Файл')}</span>
+                            ${qStatus.answer_file ? `<a href="${qStatus.answer_file}" class="btn btn-sm btn-outline-primary ms-2" target="_blank"><i class="bi bi-download"></i> Скачать</a>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+        } else if (isOverdueStatus || noAttempts) {
+            inputHtml = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-${isOverdueStatus ? 'clock-history' : 'x-circle-fill'}"></i> 
+                    ${isOverdueStatus ? 'Дедлайн истек.' : 'Попыток больше нет.'}
                 </div>
             `;
         }
         
         return `
-            <div class="assignment-section">
-                <div class="assignment-title">
-                    <i class="bi bi-pencil-square me-2"></i>${escapeHtml(assignment.title)}
+            <div class="${cardClass}" data-question-id="${question.id}">
+                <div class="question-text">
+                    ${idx + 1}. ${escapeHtml(question.question_text)}
+                    ${question.is_required ? '<span class="required-mark">*</span>' : ''}
+                    <span class="text-muted small ms-2">(${question.points} баллов)</span>
                 </div>
-                <p class="text-muted mb-4">${escapeHtml(assignment.description || 'Ответьте на вопросы, чтобы пройти задание')}</p>
-                <p class="small text-muted mb-3">⚠️ Внимание: текстовые ответы проверяются учителем. После проверки вы сможете завершить урок.</p>
-                <form id="assignmentForm">
-                    ${renderQuestions(assignment)}
-                    <button type="submit" class="submit-btn">
-                        <i class="bi bi-send me-2"></i>Отправить на проверку
-                    </button>
-                </form>
+                ${question.question_image ? `<img src="${question.question_image}" class="question-image">` : ''}
+                ${question.hint ? `
+                    <div class="question-hint">
+                        <i class="bi bi-lightbulb"></i> ${escapeHtml(question.hint)}
+                    </div>
+                ` : ''}
+                ${inputHtml}
+                ${question.explanation && isCorrect ? `
+                    <div class="question-explanation">
+                        <i class="bi bi-info-circle"></i> ${escapeHtml(question.explanation)}
+                    </div>
+                ` : ''}
+                ${statusHtml}
             </div>
         `;
-    }
-    
-    function renderQuestions(assignment) {
-        let questionsHtml = '';
-        
-        assignment.questions.forEach((question, idx) => {
-            const options = parseOptions(question.options);
-            const answerStatus = textAnswersStatus[question.id];
-            
-            if (answerStatus === 'pending') {
-                questionsHtml += `
-                    <div class="question-card" data-question-id="${question.id}">
-                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
-                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
-                        <div class="question-status status-pending">
-                            <i class="bi bi-clock-history"></i> Ответ отправлен, ожидает проверки учителя
-                        </div>
-                    </div>
-                `;
-            } 
-            else if (answerStatus === 'rejected') {
-                questionsHtml += `
-                    <div class="question-card" data-question-id="${question.id}">
-                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
-                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
-                        <div class="question-status status-rejected">
-                            <i class="bi bi-x-circle"></i> Ответ не зачтен. Попробуйте еще раз.
-                        </div>
-                        ${renderQuestionInput(question, options)}
-                    </div>
-                `;
-            }
-            else if (answerStatus === 'approved') {
-                questionsHtml += `
-                    <div class="question-card" data-question-id="${question.id}">
-                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
-                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
-                        <div class="question-status status-approved">
-                            <i class="bi bi-check-circle"></i> Ответ зачтен! (+${question.points} баллов)
-                        </div>
-                    </div>
-                `;
-            }
-            else {
-                questionsHtml += `
-                    <div class="question-card" data-question-id="${question.id}">
-                        <div class="question-text">${idx + 1}. ${escapeHtml(question.question_text)}</div>
-                        <div class="text-muted small mb-2">Баллов: ${question.points || 10}</div>
-                        ${question.question_image ? `<img src="${question.question_image}" class="question-image">` : ''}
-                        ${renderQuestionInput(question, options)}
-                    </div>
-                `;
-            }
-        });
-        
-        return questionsHtml;
-    }
-    
-    function renderQuestionInput(question, options) {
-        if (question.question_type === 'choice') {
-            if (options.length === 0) {
-                return `
-                    <div class="alert alert-warning small">
-                        <i class="bi bi-exclamation-triangle"></i> Варианты ответов отсутствуют.
-                    </div>
-                    <input type="hidden" id="answer_${question.id}" name="question_${question.id}" value="">
-                `;
-            }
-            
-            return `
-                <div class="options-list">
-                    ${options.map((opt, optIdx) => `
-                        <div class="option-item" onclick="selectOption(${question.id}, ${optIdx})" data-opt-index="${optIdx}">
-                            <i class="bi bi-circle me-2"></i>
-                            <span>${escapeHtml(opt)}</span>
-                        </div>
-                    `).join('')}
-                    <input type="hidden" id="answer_${question.id}" name="question_${question.id}">
-                </div>
-            `;
-        } else {
-            return `
-                <textarea class="text-answer" id="answer_${question.id}" name="question_${question.id}" 
-                          rows="4" placeholder="Введите ваш ответ здесь..."></textarea>
-            `;
-        }
     }
     
     function selectOption(questionId, optionIndex) {
@@ -709,54 +1535,207 @@
         
         container.querySelectorAll('.option-item').forEach(opt => {
             opt.classList.remove('selected');
-            const icon = opt.querySelector('i');
-            if (icon) icon.className = 'bi bi-circle me-2';
         });
         
         const selectedOpt = container.querySelector(`.option-item[data-opt-index="${optionIndex}"]`);
         if (selectedOpt) {
             selectedOpt.classList.add('selected');
-            const icon = selectedOpt.querySelector('i');
-            if (icon) icon.className = 'bi bi-check-circle-fill me-2';
         }
         
         const answerInput = document.getElementById(`answer_${questionId}`);
         if (answerInput) answerInput.value = optionIndex;
+        
+        checkAllAnswered();
     }
     
-    document.addEventListener('submit', async (e) => {
-        if (e.target.id === 'assignmentForm') {
-            e.preventDefault();
-            await submitAssignment();
+    function toggleMultipleOption(questionId, optionIndex) {
+        const container = document.querySelector(`.question-card[data-question-id="${questionId}"]`);
+        if (!container) return;
+        
+        const optItem = container.querySelector(`.option-item[data-opt-index="${optionIndex}"]`);
+        const checkbox = optItem.querySelector('input[type="checkbox"]');
+        checkbox.checked = !checkbox.checked;
+        optItem.classList.toggle('selected', checkbox.checked);
+        
+        const selected = container.querySelectorAll('.option-item.selected');
+        const selectedIndices = Array.from(selected).map(el => parseInt(el.dataset.optIndex));
+        
+        const answerInput = document.getElementById(`answer_${questionId}`);
+        if (answerInput) answerInput.value = JSON.stringify(selectedIndices);
+        
+        checkAllAnswered();
+    }
+    
+    function handleFileSelect(questionId, file) {
+        if (file) {
+            uploadFileAnswer(questionId, file);
         }
-    });
+    }
+    
+    function handleFileDrop(questionId, file) {
+        if (file) {
+            uploadFileAnswer(questionId, file);
+        }
+    }
+    
+    async function uploadFileAnswer(questionId, file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const response = await fetch(`/api/lms/questions/${questionId}/file-answer`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                
+                const preview = document.getElementById(`filePreview_${questionId}`);
+                const dropArea = document.getElementById(`fileDrop_${questionId}`);
+                if (preview && dropArea) {
+                    dropArea.style.display = 'none';
+                    preview.style.display = 'flex';
+                    document.getElementById(`fileName_${questionId}`).textContent = file.name;
+                    document.getElementById(`fileSize_${questionId}`).textContent = formatFileSize(file.size);
+                }
+                
+                const answerInput = document.getElementById(`answer_${questionId}`);
+                if (answerInput) answerInput.value = result.file_url;
+                
+                checkAllAnswered();
+                if (window.showToast) window.showToast('Файл загружен', 'success');
+            } else {
+                const error = await response.json();
+                if (window.showToast) window.showToast(error.detail || 'Ошибка загрузки файла', 'danger');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            if (window.showToast) window.showToast('Ошибка загрузки файла', 'danger');
+        }
+    }
+    
+    function removeFile(questionId) {
+        const preview = document.getElementById(`filePreview_${questionId}`);
+        const dropArea = document.getElementById(`fileDrop_${questionId}`);
+        if (preview && dropArea) {
+            preview.style.display = 'none';
+            dropArea.style.display = 'block';
+        }
+        
+        const answerInput = document.getElementById(`answer_${questionId}`);
+        if (answerInput) answerInput.value = '';
+        
+        const fileInput = document.getElementById(`fileInput_${questionId}`);
+        if (fileInput) fileInput.value = '';
+        
+        checkAllAnswered();
+    }
+    
+    function checkAllAnswered() {
+        if (!lessonData || !lessonData.assignment) return;
+        
+        const questions = lessonData.assignment.questions;
+        let allAnswered = true;
+        
+        for (const question of questions) {
+            const answerInput = document.getElementById(`answer_${question.id}`);
+            if (!answerInput) continue;
+            
+            const value = answerInput.value;
+            if (!value || value === '') {
+                allAnswered = false;
+                break;
+            }
+        }
+        
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.disabled = !allAnswered;
+        }
+    }
+    
+    function startTimer(assignmentId, seconds) {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            
+            const display = document.getElementById('timerDisplay');
+            if (display) {
+                display.innerHTML = `<i class="bi bi-clock"></i> ${formatTime(timeRemaining)}`;
+                if (timeRemaining < 60) {
+                    display.classList.add('warning');
+                }
+            }
+            
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                if (window.showToast) window.showToast('⏰ Время вышло! Ответы будут отправлены автоматически.', 'warning');
+                submitAssignment();
+            }
+        }, 1000);
+    }
+    
+    function startTimeTracking() {
+        if (timeTrackingInterval) {
+            clearInterval(timeTrackingInterval);
+        }
+        
+        timeTrackingInterval = setInterval(() => {
+            timeSpentSeconds++;
+        }, 1000);
+    }
     
     async function submitAssignment() {
-        const form = document.getElementById('assignmentForm');
-        const formData = new FormData(form);
-        const answers = [];
+        if (isSubmitting) return;
+        isSubmitting = true;
         
-        if (lessonData.assignment && lessonData.assignment.questions) {
-            lessonData.assignment.questions.forEach(question => {
-                if (textAnswersStatus[question.id] === 'approved') return;
-                if (textAnswersStatus[question.id] === 'pending') return;
-                
-                const answer = formData.get(`question_${question.id}`);
-                if (answer !== null && answer !== '') {
-                    answers.push({
-                        question_id: question.id,
-                        answer: answer
-                    });
-                }
-            });
-        }
-        
-        if (answers.length === 0) {
-            if (window.showToast) window.showToast('Нет новых ответов для отправки', 'warning');
+        const form = document.getElementById('assignmentSection');
+        if (!form) {
+            isSubmitting = false;
             return;
         }
         
-        const btn = form.querySelector('.submit-btn');
+        if (isOverdue()) {
+            if (window.showToast) window.showToast('⚠️ Дедлайн истек! Вы не можете отправить ответы.', 'danger');
+            isSubmitting = false;
+            return;
+        }
+        
+        if (hasNoAttempts()) {
+            if (window.showToast) window.showToast('⚠️ Попыток больше нет!', 'danger');
+            isSubmitting = false;
+            return;
+        }
+        
+        const questions = lessonData.assignment.questions;
+        const answers = [];
+        
+        for (const question of questions) {
+            const answerInput = document.getElementById(`answer_${question.id}`);
+            if (!answerInput) continue;
+            
+            const value = answerInput.value;
+            if (value && value !== '') {
+                answers.push({
+                    question_id: question.id,
+                    answer_text: value,
+                    answer_file: question.question_type === 'file' ? value : null
+                });
+            }
+        }
+        
+        if (answers.length === 0) {
+            if (window.showToast) window.showToast('Нет ответов для отправки', 'warning');
+            isSubmitting = false;
+            return;
+        }
+        
+        const btn = document.getElementById('submitBtn');
         if (btn) {
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Отправка...';
@@ -769,37 +1748,46 @@
                     'Authorization': 'Bearer ' + token,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ answers: answers })
+                body: JSON.stringify({ 
+                    answers: answers,
+                    time_spent_seconds: timeSpentSeconds,
+                    is_retake: isRetake()
+                })
             });
             
             if (response.ok) {
                 const result = await response.json();
                 
-                if (result.has_text_answers) {
-                    if (window.showToast) window.showToast('Ответы отправлены на проверку!', 'success');
+                if (result.has_text_answers || result.has_file_answers) {
+                    if (window.showToast) window.showToast('📤 Ответы отправлены на проверку!', 'success');
                 } else if (result.passed) {
-                    if (window.showToast) window.showToast('Задание пройдено!', 'success');
+                    if (window.showToast) window.showToast('✅ Задание пройдено!', 'success');
                 } else {
                     if (window.showToast) window.showToast(result.message || 'Ответы сохранены', 'info');
                 }
                 
-                // Обновляем статус текстовых ответов и перерисовываем
-                await loadTextAnswersStatus();
+                // Обновляем статус задания
+                await loadAssignmentStatus();
                 renderLesson();
                 
             } else {
                 const error = await response.json().catch(() => ({}));
                 if (window.showToast) window.showToast(error.detail || 'Ошибка отправки', 'danger');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-send me-2"></i>Отправить на проверку';
+                }
             }
         } catch (error) {
             console.error('Submit error:', error);
             if (window.showToast) window.showToast('Ошибка соединения', 'danger');
-        } finally {
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-send me-2"></i>Отправить на проверку';
             }
         }
+        
+        isSubmitting = false;
     }
     
     async function completeLesson() {
@@ -816,7 +1804,17 @@
             });
             
             if (response.ok) {
-                if (window.showToast) window.showToast('Урок отмечен как пройденный!', 'success');
+                if (window.showToast) window.showToast('✅ Урок отмечен как пройденный!', 'success');
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    if (lessonData.assignment) {
+                        localStorage.removeItem(`assignment_start_${lessonData.assignment.id}`);
+                    }
+                }
+                if (timeTrackingInterval) {
+                    clearInterval(timeTrackingInterval);
+                }
                 
                 setTimeout(() => {
                     if (lessonData.next_lesson_id) {
@@ -847,6 +1845,50 @@
         }
     }
     
+    async function resetProgress() {
+        if (!confirm('Вы уверены, что хотите сбросить прогресс урока? Все ваши ответы и попытки будут удалены, и вы сможете пройти урок заново.')) return;
+        
+        const btn = document.querySelector('.retake-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сброс...';
+        }
+        
+        try {
+            const response = await fetch(`/api/lms/lessons/${lessonId}/reset-progress`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                if (window.showToast) window.showToast('🔄 Прогресс сброшен! Вы можете пройти урок заново.', 'success');
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    if (lessonData.assignment) {
+                        localStorage.removeItem(`assignment_start_${lessonData.assignment.id}`);
+                    }
+                }
+                
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                const error = await response.json().catch(() => ({}));
+                if (window.showToast) window.showToast(error.detail || 'Ошибка сброса', 'danger');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Пройти заново';
+                }
+            }
+        } catch (error) {
+            console.error('Reset error:', error);
+            if (window.showToast) window.showToast('Ошибка соединения', 'danger');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Пройти заново';
+            }
+        }
+    }
+    
     function getEmbedUrl(url) {
         if (!url) return '';
         if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -861,11 +1903,87 @@
         return url;
     }
     
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    function initVideoTracking() {
+        if (!lessonData || !lessonData.video_url || lessonData.is_completed) return;
+        
+        const videoContainer = document.getElementById('videoContainer');
+        if (!videoContainer) return;
+        
+        const iframe = document.querySelector('#lessonVideo');
+        if (iframe) {
+            iframe.addEventListener('load', () => {
+                if (videoCheckInterval) {
+                    clearInterval(videoCheckInterval);
+                }
+                
+                videoCheckInterval = setInterval(() => {
+                    iframe.contentWindow?.postMessage(
+                        JSON.stringify({
+                            event: 'command',
+                            func: 'getCurrentTime'
+                        }),
+                        '*'
+                    );
+                }, 5000);
+            });
+        }
+        
+        window.addEventListener('message', (event) => {
+            if (event.origin !== 'https://www.youtube.com') return;
+            
+            try {
+                const data = JSON.parse(event.data);
+                if (data.event === 'infoDelivery' && data.info && data.info.currentTime !== undefined) {
+                    const currentTime = data.info.currentTime;
+                    const duration = data.info.duration || 0;
+                    
+                    if (duration > 0) {
+                        const percent = Math.round((currentTime / duration) * 100);
+                        const progressFill = document.getElementById('videoProgressFill');
+                        if (progressFill) {
+                            progressFill.style.width = `${Math.min(percent, 100)}%`;
+                        }
+                        
+                        if (percent > 0 && percent % 5 === 0) {
+                            sendVideoProgress(Math.round(currentTime), Math.round(duration));
+                        }
+                    }
+                }
+            } catch (e) {
+                // Игнорируем не-JSON сообщения
+            }
+        });
     }
+    
+    async function sendVideoProgress(position, totalDuration) {
+        try {
+            const response = await fetch(`/api/lms/lessons/${lessonId}/video-progress?position_seconds=${position}&total_duration=${totalDuration}`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.is_completed) {
+                    if (window.showToast) window.showToast('✅ Урок пройден!', 'success');
+                    setTimeout(() => location.reload(), 2000);
+                }
+            }
+        } catch (error) {
+            console.error('Error sending video progress:', error);
+        }
+    }
+    
+    window.addEventListener('beforeunload', () => {
+        if (videoCheckInterval) {
+            clearInterval(videoCheckInterval);
+        }
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
+        if (timeTrackingInterval) {
+            clearInterval(timeTrackingInterval);
+        }
+    });
 </script>
 {% endblock %}

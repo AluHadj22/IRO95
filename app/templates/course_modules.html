@@ -11,6 +11,16 @@
         margin-bottom: 30px;
     }
     
+    .course-header .course-title {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .course-header .course-meta {
+        opacity: 0.8;
+        font-size: 0.9rem;
+    }
+    
     .module-card {
         border: 1px solid #e2e8f0;
         border-radius: 16px;
@@ -30,6 +40,9 @@
         cursor: pointer;
         border-bottom: 1px solid #e2e8f0;
         transition: all 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     
     .module-header:hover {
@@ -64,6 +77,34 @@
         color: #9a3412;
     }
     
+    .module-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .module-progress .progress {
+        width: 120px;
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .module-progress .progress-bar {
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.5s ease;
+    }
+    
+    .module-progress .progress-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #64748b;
+        min-width: 40px;
+    }
+    
     .lessons-list {
         padding: 0;
     }
@@ -71,7 +112,7 @@
     .lesson-item {
         display: flex;
         align-items: center;
-        padding: 16px 24px;
+        padding: 14px 24px;
         border-bottom: 1px solid #f1f5f9;
         transition: all 0.2s ease;
         cursor: pointer;
@@ -85,6 +126,30 @@
         background: #f0fdf4;
     }
     
+    .lesson-item.locked {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .lesson-item.locked:hover {
+        background: transparent;
+    }
+    
+    .lesson-item.overdue {
+        background: #fef2f2;
+        border-left: 3px solid #dc2626;
+    }
+    
+    .lesson-item.retake-status {
+        background: #fef3c7;
+        border-left: 3px solid #f59e0b;
+    }
+    
+    .lesson-item.pending-status {
+        background: #fffbeb;
+        border-left: 3px solid #f59e0b;
+    }
+    
     .lesson-icon {
         width: 40px;
         height: 40px;
@@ -95,6 +160,7 @@
         justify-content: center;
         margin-right: 16px;
         flex-shrink: 0;
+        transition: all 0.2s ease;
     }
     
     .lesson-icon i {
@@ -108,6 +174,30 @@
     
     .lesson-item.completed .lesson-icon i {
         color: #059669;
+    }
+    
+    .lesson-item.locked .lesson-icon {
+        background: #f1f5f9;
+    }
+    
+    .lesson-item.locked .lesson-icon i {
+        color: #94a3b8;
+    }
+    
+    .lesson-item.overdue .lesson-icon {
+        background: #fee2e2;
+    }
+    
+    .lesson-item.overdue .lesson-icon i {
+        color: #dc2626;
+    }
+    
+    .lesson-item.retake-status .lesson-icon {
+        background: #fef3c7;
+    }
+    
+    .lesson-item.retake-status .lesson-icon i {
+        color: #f59e0b;
     }
     
     .lesson-info {
@@ -125,11 +215,17 @@
         color: #64748b;
         display: flex;
         gap: 16px;
+        flex-wrap: wrap;
+    }
+    
+    .lesson-meta .badge {
+        font-size: 0.65rem;
+        padding: 2px 10px;
     }
     
     .lesson-status {
         font-size: 0.7rem;
-        padding: 2px 8px;
+        padding: 2px 10px;
         border-radius: 20px;
         background: #f1f5f9;
     }
@@ -144,8 +240,54 @@
         color: #d97706;
     }
     
+    .lesson-status.pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .lesson-status.free {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .lesson-status.retake {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .lesson-status.overdue {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .lesson-status.no-attempts {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .lesson-progress-bar {
+        width: 100px;
+        height: 4px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 4px;
+    }
+    
+    .lesson-progress-bar .fill {
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.5s ease;
+    }
+    
+    .lesson-progress-bar .fill.overdue {
+        background: #dc2626;
+    }
+    
     .lesson-button {
         flex-shrink: 0;
+        margin-left: 12px;
     }
     
     .btn-outline {
@@ -158,10 +300,65 @@
         transition: all 0.2s ease;
     }
     
-    .btn-outline:hover {
+    .btn-outline:hover:not(:disabled) {
         background: #0057A4;
         border-color: #0057A4;
         color: white;
+    }
+    
+    .btn-outline:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .btn-primary-sm {
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary-sm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,87,164,0.3);
+    }
+    
+    .btn-primary-sm:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .btn-warning-sm {
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-warning-sm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+    }
+    
+    .btn-danger-sm {
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-danger-sm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220,38,38,0.3);
     }
     
     .progress-bar-container {
@@ -176,7 +373,7 @@
         background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
         height: 100%;
         border-radius: 10px;
-        transition: width 0.3s ease;
+        transition: width 0.5s ease;
     }
     
     .course-sidebar {
@@ -212,6 +409,114 @@
         box-shadow: 0 4px 12px rgba(0,87,164,0.3);
     }
     
+    .btn-success {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 12px;
+        font-weight: 600;
+    }
+    
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+    }
+    
+    .assignment-status-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        padding: 16px;
+        margin-top: 12px;
+    }
+    
+    .assignment-status-card .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+    
+    .status-passed {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .status-failed {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .status-not-started {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    
+    .status-retake {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-overdue {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .status-no-attempts {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .deadline-info {
+        font-size: 0.65rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .deadline-info.overdue {
+        color: #dc2626;
+    }
+    
+    .deadline-info .deadline-date {
+        font-weight: 500;
+    }
+    
+    .retake-info {
+        font-size: 0.65rem;
+        color: #92400e;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .attempts-info {
+        font-size: 0.65rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .attempts-info .remaining {
+        font-weight: 600;
+        color: #0057A4;
+    }
+    
+    .attempts-info .remaining.low {
+        color: #dc2626;
+    }
+    
+    .attempts-info .remaining.none {
+        color: #dc2626;
+        font-weight: 700;
+    }
+    
     .accordion-button:not(.collapsed) {
         background: #f8fafc;
         color: #0057A4;
@@ -221,6 +526,77 @@
         box-shadow: none;
         border-color: #e2e8f0;
     }
+    
+    .video-progress-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.7rem;
+        color: #64748b;
+    }
+    
+    .video-progress-indicator .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #e2e8f0;
+    }
+    
+    .video-progress-indicator .dot.watched {
+        background: #059669;
+    }
+    
+    .video-progress-indicator .dot.partial {
+        background: #f59e0b;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .module-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .module-progress {
+            width: 100%;
+        }
+        
+        .module-progress .progress {
+            flex: 1;
+        }
+        
+        .lesson-item {
+            flex-wrap: wrap;
+            padding: 12px 16px;
+        }
+        
+        .lesson-button {
+            margin-left: 56px;
+            margin-top: 8px;
+            width: 100%;
+        }
+        
+        .lesson-button .btn {
+            width: 100%;
+        }
+        
+        .course-sidebar {
+            position: static;
+            margin-top: 20px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -229,8 +605,13 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8">
-                <h1 class="fw-bold mb-3" id="courseTitle">Загрузка...</h1>
-                <p class="mb-0 opacity-75" id="courseDescription"></p>
+                <h1 class="course-title" id="courseTitle">Загрузка...</h1>
+                <p class="course-meta" id="courseDescription"></p>
+                <div class="d-flex gap-3 mt-2 flex-wrap">
+                    <span class="badge bg-light text-dark" id="courseCategory">-</span>
+                    <span class="badge bg-light text-dark" id="courseFormat">-</span>
+                    <span class="badge bg-light text-dark" id="coursePrice">-</span>
+                </div>
             </div>
         </div>
     </div>
@@ -243,34 +624,66 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-semibold">Ваш прогресс</span>
+                        <span class="fw-semibold">
+                            <i class="bi bi-bar-chart-fill me-2" style="color: #0057A4;"></i>
+                            Ваш прогресс
+                        </span>
                         <span id="progressPercent">0%</span>
                     </div>
                     <div class="progress-bar-container">
                         <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
                     </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <small class="text-muted" id="completedLessonsInfo">0 из 0 уроков пройдено</small>
+                        <small class="text-muted" id="completedModulesInfo">0 из 0 модулей</small>
+                    </div>
                 </div>
             </div>
             
             <!-- Модули курса -->
-            <div id="modulesContainer"></div>
+            <div id="modulesContainer">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-3">Загрузка модулей...</p>
+                </div>
+            </div>
         </div>
         
         <div class="col-lg-4">
             <div class="course-sidebar">
                 <div class="price-card">
-                    <div class="price" id="coursePrice">-</div>
-                    <p class="text-muted small mt-2">Формат: <span id="courseFormat"></span></p>
+                    <div class="price" id="sidebarPrice">-</div>
+                    <p class="text-muted small mt-2">
+                        <i class="bi bi-people me-1"></i>
+                        Участников: <span id="sidebarParticipants">0/0</span>
+                    </p>
                     <button class="btn btn-primary w-100" id="registerBtn" onclick="registerForCourse()">
                         <i class="bi bi-pencil-square me-2"></i>Записаться на курс
                     </button>
+                    <div id="registrationStatus" class="mt-2" style="display: none;">
+                        <span class="badge bg-success w-100 py-2">
+                            <i class="bi bi-check-circle me-1"></i> Вы записаны
+                        </span>
+                    </div>
                 </div>
                 
-                <!-- Информация -->
+                <!-- Информация о курсе -->
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
-                        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>О курсе</h6>
-                        <p class="small text-muted" id="courseFullDescription"></p>
+                        <h6 class="fw-bold mb-3">
+                            <i class="bi bi-info-circle me-2" style="color: #0057A4;"></i>
+                            О курсе
+                        </h6>
+                        <p class="small text-muted" id="sidebarDescription">Загрузка...</p>
+                        <hr>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-muted"><i class="bi bi-calendar me-1"></i>Начало</span>
+                            <span id="sidebarStartDate">-</span>
+                        </div>
+                        <div class="d-flex justify-content-between small mt-1">
+                            <span class="text-muted"><i class="bi bi-calendar-check me-1"></i>Окончание</span>
+                            <span id="sidebarEndDate">-</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -282,6 +695,8 @@
     const token = localStorage.getItem('token');
     const courseId = {{ course_id }};
     let courseData = null;
+    let isRegistered = false;
+    let videoProgressInterval = null;
     
     function formatPrice(price) {
         if (price === 0 || price === "0") return 'Бесплатно';
@@ -298,10 +713,51 @@
         return map[type] || 'Онлайн';
     }
     
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    }
+    
+    function isDateOverdue(dateStr) {
+        if (!dateStr) return false;
+        return new Date(dateStr) < new Date();
+    }
+    
+    function getStatusBadge(status, isOverdue = false, remainingAttempts = null, maxAttempts = null) {
+        const map = {
+            'passed': '<span class="status-badge status-passed"><i class="bi bi-check-circle me-1"></i>Пройдено</span>',
+            'failed': '<span class="status-badge status-failed"><i class="bi bi-x-circle me-1"></i>Не пройдено</span>',
+            'pending_teacher': '<span class="status-badge status-pending"><i class="bi bi-clock-history me-1"></i>Ожидает проверки</span>',
+            'in_progress': '<span class="status-badge status-not-started"><i class="bi bi-play-circle me-1"></i>В процессе</span>',
+            'not_started': '<span class="status-badge status-not-started"><i class="bi bi-circle me-1"></i>Не начато</span>',
+            'submitted': '<span class="status-badge status-pending"><i class="bi bi-send me-1"></i>Отправлено</span>',
+            'retake': '<span class="status-badge status-retake"><i class="bi bi-arrow-repeat me-1"></i>На пересдачу</span>'
+        };
+        
+        if (isOverdue) {
+            return '<span class="status-badge status-overdue"><i class="bi bi-clock-history me-1"></i>Просрочено</span>';
+        }
+        
+        if (remainingAttempts !== null && maxAttempts !== null && remainingAttempts === 0 && maxAttempts > 0) {
+            return '<span class="status-badge status-no-attempts"><i class="bi bi-x-circle me-1"></i>Попыток нет</span>';
+        }
+        
+        return map[status] || map['not_started'];
+    }
+    
     async function loadCourse() {
         const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         
         try {
+            // Загружаем данные курса
             const response = await fetch(`/api/lms/courses/${courseId}/full`, { headers });
             
             if (!response.ok) {
@@ -309,6 +765,15 @@
             }
             
             courseData = await response.json();
+            
+            // Проверяем регистрацию
+            await checkRegistration();
+            
+            // Загружаем прогресс
+            if (token && isRegistered) {
+                await loadProgress();
+            }
+            
             renderCourse();
             
         } catch (error) {
@@ -316,52 +781,240 @@
             document.getElementById('modulesContainer').innerHTML = `
                 <div class="alert alert-danger text-center">
                     <i class="bi bi-exclamation-triangle fs-1"></i>
-                    <p class="mt-2">Курс не найден</p>
+                    <p class="mt-2">${escapeHtml(error.message)}</p>
                     <a href="/courses" class="btn btn-primary btn-sm">Вернуться к курсам</a>
                 </div>
             `;
         }
     }
     
+    async function checkRegistration() {
+        if (!token) return;
+        
+        try {
+            const response = await fetch(`/api/courses/my/registrations`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                const registrations = await response.json();
+                isRegistered = registrations.some(r => r.course_id === courseId);
+                
+                if (isRegistered) {
+                    document.getElementById('registrationStatus').style.display = 'block';
+                    document.getElementById('registerBtn').style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error checking registration:', error);
+        }
+    }
+    
+    async function loadProgress() {
+        try {
+            const response = await fetch(`/api/lms/courses/${courseId}/progress`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                const progress = await response.json();
+                return progress;
+            }
+        } catch (error) {
+            console.error('Error loading progress:', error);
+        }
+        return null;
+    }
+    
     function renderCourse() {
         // Заголовок и описание
         document.getElementById('courseTitle').innerText = courseData.title;
         document.getElementById('courseDescription').innerText = courseData.description || '';
-        document.getElementById('courseFullDescription').innerText = courseData.description || 'Нет описания';
-        document.getElementById('coursePrice').innerHTML = formatPrice(courseData.price);
-        document.getElementById('courseFormat').innerText = formatMap(courseData.format_type);
+        document.getElementById('sidebarDescription').innerText = courseData.description || 'Нет описания';
         
-        // Подсчёт прогресса
-        let totalLessons = 0;
-        let completedLessons = 0;
+        // Метаданные
+        document.getElementById('courseCategory').innerHTML = `<i class="bi bi-folder me-1"></i> ${escapeHtml(courseData.category_name || 'Без категории')}`;
+        document.getElementById('courseFormat').innerHTML = `<i class="bi bi-calendar-event me-1"></i> ${formatMap(courseData.format_type)}`;
+        document.getElementById('coursePrice').innerHTML = `<i class="bi bi-tag me-1"></i> ${formatPrice(courseData.price)}`;
         
-        courseData.modules.forEach(module => {
-            module.lessons.forEach(lesson => {
-                totalLessons++;
-                if (lesson.is_completed) completedLessons++;
-            });
-        });
-        
-        const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-        document.getElementById('progressPercent').innerText = `${progressPercent}%`;
-        document.getElementById('progressFill').style.width = `${progressPercent}%`;
+        // Сайдбар
+        document.getElementById('sidebarPrice').innerHTML = formatPrice(courseData.price);
+        document.getElementById('sidebarParticipants').innerText = `${courseData.current_participants || 0}/${courseData.max_participants || 0}`;
+        document.getElementById('sidebarStartDate').innerText = courseData.start_date ? new Date(courseData.start_date).toLocaleDateString() : 'Скоро';
+        document.getElementById('sidebarEndDate').innerText = courseData.end_date ? new Date(courseData.end_date).toLocaleDateString() : 'По набору';
         
         // Рендерим модули
         const container = document.getElementById('modulesContainer');
         let modulesHtml = '';
+        let totalLessons = 0;
+        let completedLessons = 0;
+        let completedModules = 0;
         
         courseData.modules.forEach((module, moduleIndex) => {
             const isOnline = module.module_type === 'online';
             const badgeClass = isOnline ? 'online' : 'offline';
             const badgeText = isOnline ? 'Онлайн' : 'Оффлайн';
             
+            let moduleCompleted = 0;
             let lessonsHtml = '';
-            module.lessons.forEach(lesson => {
+            
+            module.lessons.forEach((lesson, lessonIndex) => {
+                totalLessons++;
+                if (lesson.is_completed) {
+                    completedLessons++;
+                    moduleCompleted++;
+                }
+                
                 const isCompleted = lesson.is_completed;
-                const statusClass = isCompleted ? 'completed' : '';
-                const statusIcon = isCompleted ? 'bi-check-circle-fill' : 'bi-play-circle';
-                const statusText = isCompleted ? 'Пройдено' : (lesson.is_free ? 'Свободный доступ' : 'Требуется запись');
-                const statusBadgeClass = isCompleted ? 'completed' : (lesson.is_free ? 'free' : 'locked');
+                const isLocked = !lesson.is_free && !isRegistered && !token;
+                const isOverdue = lesson.deadline && isDateOverdue(lesson.deadline) && !isCompleted;
+                const isRetakeStatus = lesson.has_assignment && lesson.is_retake === true;
+                const isPendingStatus = lesson.has_assignment && lesson.has_pending_submission === true;
+                
+                let statusClass = '';
+                if (isCompleted) statusClass = 'completed';
+                else if (isLocked) statusClass = 'locked';
+                else if (isOverdue) statusClass = 'overdue';
+                else if (isRetakeStatus) statusClass = 'retake-status';
+                else if (isPendingStatus) statusClass = 'pending-status';
+                
+                const statusIcon = isCompleted ? 'bi-check-circle-fill' : 
+                                   (isLocked ? 'bi-lock' : 
+                                   (isOverdue ? 'bi-clock-history' : 
+                                   (isRetakeStatus ? 'bi-arrow-repeat' : 'bi-play-circle')));
+                
+                let statusText = '';
+                if (isCompleted) statusText = 'Пройдено';
+                else if (isLocked) statusText = 'Требуется запись';
+                else if (isOverdue) statusText = 'Просрочено';
+                else if (isRetakeStatus) statusText = 'На пересдачу';
+                else if (isPendingStatus) statusText = 'На проверке';
+                else if (lesson.is_free) statusText = 'Свободный доступ';
+                
+                let statusBadgeClass = '';
+                if (isCompleted) statusBadgeClass = 'completed';
+                else if (isLocked) statusBadgeClass = 'locked';
+                else if (isOverdue) statusBadgeClass = 'overdue';
+                else if (isRetakeStatus) statusBadgeClass = 'retake';
+                else if (isPendingStatus) statusBadgeClass = 'pending';
+                else if (lesson.is_free) statusBadgeClass = 'free';
+                
+                // Проверяем статус задания
+                let assignmentStatusHtml = '';
+                if (lesson.has_assignment && token && isRegistered) {
+                    assignmentStatusHtml = `<span class="badge bg-secondary" id="assignment_status_${lesson.id}">Проверка...</span>`;
+                }
+                
+                // Информация о дедлайне
+                let deadlineHtml = '';
+                if (lesson.deadline) {
+                    const overdue = isDateOverdue(lesson.deadline);
+                    deadlineHtml = `
+                        <span class="deadline-info ${overdue ? 'overdue' : ''}">
+                            <i class="bi bi-calendar-exclamation"></i>
+                            <span class="deadline-date">${formatDate(lesson.deadline)}</span>
+                            ${overdue ? '⚠️' : ''}
+                        </span>
+                    `;
+                }
+                
+                // Информация о пересдаче
+                let retakeHtml = '';
+                if (lesson.has_assignment && lesson.allow_retake === false) {
+                    retakeHtml = `
+                        <span class="retake-info">
+                            <i class="bi bi-x-circle"></i> Пересдача запрещена
+                        </span>
+                    `;
+                } else if (lesson.has_assignment && lesson.allow_retake === true) {
+                    retakeHtml = `
+                        <span class="retake-info">
+                            <i class="bi bi-arrow-repeat"></i> Пересдача разрешена
+                        </span>
+                    `;
+                }
+                
+                // Информация о попытках
+                let attemptsHtml = '';
+                if (lesson.has_assignment && lesson.remaining_attempts !== undefined) {
+                    const remaining = lesson.remaining_attempts;
+                    const maxAttempts = lesson.max_attempts || 0;
+                    let remainingClass = 'remaining';
+                    if (remaining === 0 && maxAttempts > 0) remainingClass = 'remaining none';
+                    else if (remaining <= 1) remainingClass = 'remaining low';
+                    
+                    attemptsHtml = `
+                        <span class="attempts-info">
+                            <i class="bi bi-pencil-square"></i>
+                            Попыток: <span class="${remainingClass}">${remaining}</span>
+                            ${maxAttempts > 0 ? `/ ${maxAttempts}` : ''}
+                        </span>
+                    `;
+                }
+                
+                // Прогресс видео
+                let videoProgressHtml = '';
+                if (lesson.progress && lesson.progress.video_watched_percent > 0) {
+                    const percent = lesson.progress.video_watched_percent;
+                    const dotClass = percent >= 90 ? 'watched' : (percent > 0 ? 'partial' : '');
+                    videoProgressHtml = `
+                        <div class="video-progress-indicator">
+                            <span class="dot ${dotClass}"></span>
+                            ${percent}%
+                        </div>
+                    `;
+                }
+                
+                // Прогресс-бар для урока (если есть прогресс видео)
+                let progressBarHtml = '';
+                if (!isCompleted && lesson.progress && lesson.progress.video_watched_percent > 0) {
+                    const percent = lesson.progress.video_watched_percent;
+                    progressBarHtml = `
+                        <div class="lesson-progress-bar">
+                            <div class="fill ${isOverdue ? 'overdue' : ''}" style="width: ${percent}%"></div>
+                        </div>
+                    `;
+                }
+                
+                // Определяем кнопку
+                let buttonHtml = '';
+                if (isCompleted) {
+                    buttonHtml = `
+                        <button class="btn-outline" onclick="event.stopPropagation(); openLesson(${lesson.id})">
+                            Повторить
+                        </button>
+                    `;
+                } else if (isLocked) {
+                    buttonHtml = `
+                        <button class="btn-outline" disabled>
+                            🔒
+                        </button>
+                    `;
+                } else if (isOverdue) {
+                    buttonHtml = `
+                        <button class="btn-danger-sm" onclick="event.stopPropagation(); openLesson(${lesson.id})">
+                            <i class="bi bi-clock-history"></i> Просрочено
+                        </button>
+                    `;
+                } else if (isRetakeStatus) {
+                    buttonHtml = `
+                        <button class="btn-warning-sm" onclick="event.stopPropagation(); openLesson(${lesson.id})">
+                            <i class="bi bi-arrow-repeat"></i> Пересдача
+                        </button>
+                    `;
+                } else if (isPendingStatus) {
+                    buttonHtml = `
+                        <button class="btn-warning-sm" onclick="event.stopPropagation(); openLesson(${lesson.id})">
+                            <i class="bi bi-clock-history"></i> На проверке
+                        </button>
+                    `;
+                } else {
+                    buttonHtml = `
+                        <button class="btn-primary-sm" onclick="event.stopPropagation(); openLesson(${lesson.id})">
+                            Начать <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    `;
+                }
                 
                 lessonsHtml += `
                     <div class="lesson-item ${statusClass}" onclick="openLesson(${lesson.id})">
@@ -373,18 +1026,25 @@
                             <div class="lesson-meta">
                                 ${lesson.duration_minutes > 0 ? `<span><i class="bi bi-clock"></i> ${lesson.duration_minutes} мин</span>` : ''}
                                 ${lesson.has_assignment ? `<span><i class="bi bi-pencil-square"></i> Есть задание</span>` : ''}
-                                <span class="lesson-status ${statusBadgeClass}">${statusText}</span>
+                                ${statusText ? `<span class="lesson-status ${statusBadgeClass}">${statusText}</span>` : ''}
+                                ${assignmentStatusHtml}
+                                ${deadlineHtml}
+                                ${retakeHtml}
+                                ${attemptsHtml}
+                                ${videoProgressHtml}
                             </div>
+                            ${progressBarHtml}
                         </div>
                         <div class="lesson-button">
-                            <button class="btn-outline" onclick="event.stopPropagation(); openLesson(${lesson.id})">
-                                ${isCompleted ? 'Повторить' : 'Начать'}
-                                <i class="bi bi-arrow-right ms-1"></i>
-                            </button>
+                            ${buttonHtml}
                         </div>
                     </div>
                 `;
             });
+            
+            // Прогресс модуля
+            const moduleProgressPercent = module.lessons.length > 0 ? Math.round((moduleCompleted / module.lessons.length) * 100) : 0;
+            if (moduleProgressPercent === 100 && module.lessons.length > 0) completedModules++;
             
             modulesHtml += `
                 <div class="module-card">
@@ -394,7 +1054,12 @@
                             ${escapeHtml(module.title)}
                             <span class="module-badge ${badgeClass}">${badgeText}</span>
                         </div>
-                        <p class="text-muted small mt-1 mb-0">${escapeHtml(module.description || '')}</p>
+                        <div class="module-progress">
+                            <span class="progress-text">${moduleProgressPercent}%</span>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: ${moduleProgressPercent}%"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="lessons-list" id="module-${moduleIndex}" style="display: block;">
                         ${lessonsHtml}
@@ -403,15 +1068,68 @@
             `;
         });
         
+        // Обновляем прогресс
+        const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+        document.getElementById('progressPercent').innerText = `${progressPercent}%`;
+        document.getElementById('progressFill').style.width = `${progressPercent}%`;
+        document.getElementById('completedLessonsInfo').innerText = `${completedLessons} из ${totalLessons} уроков пройдено`;
+        document.getElementById('completedModulesInfo').innerText = `${completedModules} из ${courseData.modules.length} модулей`;
+        
         container.innerHTML = modulesHtml;
+        
+        // Загружаем статусы заданий
+        if (token && isRegistered) {
+            loadAssignmentStatuses();
+        }
+    }
+    
+    async function loadAssignmentStatuses() {
+        // Находим все уроки с заданиями
+        const lessonsWithAssignments = [];
+        for (const module of courseData.modules) {
+            for (const lesson of module.lessons) {
+                if (lesson.has_assignment) {
+                    lessonsWithAssignments.push(lesson.id);
+                }
+            }
+        }
+        
+        for (const lessonId of lessonsWithAssignments) {
+            try {
+                // Сначала получаем assignment_id
+                const lessonResponse = await fetch(`/api/lms/lessons/${lessonId}`, {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                
+                if (lessonResponse.ok) {
+                    const lessonData = await lessonResponse.json();
+                    if (lessonData.assignment) {
+                        const statusResponse = await fetch(`/api/lms/assignments/${lessonData.assignment.id}/status`, {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
+                        
+                        if (statusResponse.ok) {
+                            const statusData = await statusResponse.json();
+                            const statusEl = document.getElementById(`assignment_status_${lessonId}`);
+                            if (statusEl) {
+                                const isOverdue = statusData.is_overdue || false;
+                                const remainingAttempts = statusData.remaining_attempts !== undefined ? statusData.remaining_attempts : null;
+                                const maxAttempts = statusData.max_attempts || 0;
+                                statusEl.innerHTML = getStatusBadge(statusData.status, isOverdue, remainingAttempts, maxAttempts);
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading assignment status:', error);
+            }
+        }
     }
     
     function toggleModule(index) {
         const element = document.getElementById(`module-${index}`);
-        if (element.style.display === 'none') {
-            element.style.display = 'block';
-        } else {
-            element.style.display = 'none';
+        if (element) {
+            element.style.display = element.style.display === 'none' ? 'block' : 'none';
         }
     }
     
@@ -421,6 +1139,12 @@
             setTimeout(() => window.location.href = '/login', 1500);
             return;
         }
+        
+        if (!isRegistered) {
+            if (window.showToast) window.showToast('Запишитесь на курс для доступа к урокам', 'warning');
+            return;
+        }
+        
         window.location.href = `/lesson/${lessonId}`;
     }
     
@@ -443,13 +1167,15 @@
             
             if (response.ok) {
                 if (window.showToast) window.showToast('Вы успешно записаны на курс!', 'success');
-                btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Вы записаны';
-                btn.disabled = true;
-                setTimeout(() => location.reload(), 2000);
+                isRegistered = true;
+                document.getElementById('registrationStatus').style.display = 'block';
+                btn.style.display = 'none';
+                location.reload();
             } else if (response.status === 402) {
                 if (window.showToast) window.showToast('Требуется оплата', 'info');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Записаться на курс';
+                // Можно открыть модальное окно оплаты
             } else {
                 const error = await response.json();
                 if (window.showToast) window.showToast(error.detail || 'Ошибка записи', 'danger');
@@ -463,13 +1189,7 @@
         }
     }
     
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-    loadCourse();
+    // Загружаем курс при загрузке страницы
+    document.addEventListener('DOMContentLoaded', loadCourse);
 </script>
 {% endblock %}

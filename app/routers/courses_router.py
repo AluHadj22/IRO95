@@ -1,8 +1,10 @@
+# app/routers/courses_router.py
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from app import models, schemas, auth
 from app.database import get_db
+from app.services.moodle_service import MoodleService
 from typing import Optional
 import json
 from datetime import datetime
@@ -80,6 +82,7 @@ def get_courses(
             "is_open_ended": c.is_open_ended or False,
             "category_name": c.category.name if c.category else None,
             "category_id": c.category_id,
+            "moodle_course_id": c.moodle_course_id,
             "is_favorite": c.id in user_favorites, "is_watch_later": c.id in user_watch_later,
             "start_date": c.start_date, "end_date": c.end_date,
             "speakers": [{"id": s.id, "full_name": s.full_name, "bio": s.bio, 
@@ -94,16 +97,13 @@ def create_course(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    # Проверяем существование категории
     if course.category_id:
         category = db.query(models.Category).filter(models.Category.id == course.category_id).first()
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
     
-    # Обработка видео URL в зависимости от платформы
     video_url = convert_video_url(course.video_url, course.video_platform) if course.video_url else None
     
-    # Создаем курс
     db_course = models.Course(
         title=course.title,
         description=course.description,
@@ -120,13 +120,13 @@ def create_course(
         start_date=course.start_date,
         end_date=course.end_date,
         is_open_ended=course.is_open_ended,
+        moodle_course_id=course.moodle_course_id,
         created_by=current_user.id
     )
     db.add(db_course)
     db.commit()
     db.refresh(db_course)
     
-    # Добавляем спикеров с их фото
     for speaker in course.speakers:
         db_speaker = models.CourseSpeaker(
             course_id=db_course.id,
@@ -176,6 +176,7 @@ def get_course(
         "is_open_ended": course.is_open_ended or False,
         "category_id": course.category_id, "category_name": course.category.name if course.category else None,
         "start_date": course.start_date, "end_date": course.end_date, "is_active": course.is_active,
+        "moodle_course_id": course.moodle_course_id,
         "is_favorite": is_favorite, "is_watch_later": is_watch_later,
         "speakers": [{"id": s.id, "full_name": s.full_name, "bio": s.bio, 
                       "photo_url": s.photo_url, "position": s.position} for s in course.speakers]
@@ -206,25 +207,13 @@ def delete_course(course_id: int, db: Session = Depends(get_db),
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    # Удаляем связанных спикеров
     db.query(models.CourseSpeaker).filter(models.CourseSpeaker.course_id == course_id).delete()
-    
-    # Удаляем из избранного
     db.query(models.UserFavorite).filter(models.UserFavorite.course_id == course_id).delete()
-    
-    # Удаляем из "посмотреть позже"
     db.query(models.UserWatchLater).filter(models.UserWatchLater.course_id == course_id).delete()
-    
-    # Удаляем регистрации
     db.query(models.CourseRegistration).filter(models.CourseRegistration.course_id == course_id).delete()
-    
-    # Удаляем прогресс
     db.query(models.UserProgress).filter(models.UserProgress.course_id == course_id).delete()
-    
-    # Удаляем сертификаты
     db.query(models.Certificate).filter(models.Certificate.course_id == course_id).delete()
     
-    # Удаляем сам курс
     db.delete(course)
     db.commit()
     return {"message": "Course deleted successfully"}
@@ -296,15 +285,31 @@ def remove_from_watch_later(course_id: int, db: Session = Depends(get_db),
     return {"message": "Removed from watch later"}
 
 
+# ========== ОСНОВНОЙ ЭНДПОИНТ РЕГИСТРАЦИИ С ИНТЕГРАЦИЕЙ MOODLE ==========
+
 @router.post("/{course_id}/register")
-def register_for_course(course_id: int, db: Session = Depends(get_db),
-                        current_user: models.User = Depends(auth.get_current_active_user)):
+def register_for_course(
+    course_id: int, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Запись на курс с автоматической синхронизацией с Moodle.
+    Если у курса указан moodle_course_id, пользователь автоматически
+    создается и зачисляется на соответствующий курс в Moodle.
+    """
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
+    if not course.is_active:
+        raise HTTPException(status_code=400, detail="Course is not active")
+    
     existing = db.query(models.CourseRegistration).filter(
-        and_(models.CourseRegistration.user_id == current_user.id, models.CourseRegistration.course_id == course_id)
+        and_(
+            models.CourseRegistration.user_id == current_user.id,
+            models.CourseRegistration.course_id == course_id
+        )
     ).first()
     if existing:
         raise HTTPException(status_code=400, detail="Already registered")
@@ -315,12 +320,39 @@ def register_for_course(course_id: int, db: Session = Depends(get_db),
     if float(course.price) > 0:
         raise HTTPException(status_code=402, detail="Payment required")
     
-    # Создаём регистрацию
-    registration = models.CourseRegistration(user_id=current_user.id, course_id=course_id, is_paid=True)
+    moodle_enrolled = False
+    moodle_course_url = None
+    moodle_user_id = None
+    moodle_error = None
+    
+    if course.moodle_course_id:
+        moodle = MoodleService()
+        try:
+            moodle_user_id = moodle.sync_user(
+                email=current_user.email,
+                full_name=current_user.full_name
+            )
+            
+            is_enrolled = moodle.is_user_enrolled(moodle_user_id, course.moodle_course_id)
+            
+            if not is_enrolled:
+                moodle.enroll_user_to_course(moodle_user_id, course.moodle_course_id)
+            
+            moodle_enrolled = True
+            moodle_course_url = moodle.get_course_url(course.moodle_course_id)
+            
+        except Exception as e:
+            moodle_error = str(e)
+            print(f"Moodle sync error: {e}")
+    
+    registration = models.CourseRegistration(
+        user_id=current_user.id, 
+        course_id=course_id, 
+        is_paid=True
+    )
     course.current_participants += 1
     db.add(registration)
     
-    # Создаём запись прогресса (0% в начале)
     user_progress = models.UserProgress(
         user_id=current_user.id,
         course_id=course_id,
@@ -328,68 +360,252 @@ def register_for_course(course_id: int, db: Session = Depends(get_db),
     )
     db.add(user_progress)
     
-    # Логируем действие
     activity = models.UserActivityLog(
         user_id=current_user.id,
         action_type="course_register",
         course_id=course_id,
-        extra_data=json.dumps({"course_title": course.title})
+        extra_data=json.dumps({
+            "course_title": course.title,
+            "moodle_enrolled": moodle_enrolled,
+            "moodle_course_id": course.moodle_course_id,
+            "moodle_error": moodle_error
+        })
     )
     db.add(activity)
     
     db.commit()
-    return {"message": "Successfully registered"}
+    
+    response = {
+        "message": "Successfully registered",
+        "course_id": course_id,
+        "course_title": course.title,
+        "moodle_enrolled": moodle_enrolled
+    }
+    
+    if moodle_course_url:
+        response["moodle_course_url"] = moodle_course_url
+        response["message"] = "Successfully registered! You can now access the course in Moodle."
+    elif moodle_error:
+        response["moodle_error"] = moodle_error
+        response["message"] = "Registered in the system, but Moodle sync failed. Please contact support."
+    
+    return response
 
 
-@router.post("/{course_id}/pay")
-def pay_for_course(course_id: int, db: Session = Depends(get_db),
-                   current_user: models.User = Depends(auth.get_current_active_user)):
+# ========== ПОЛУЧЕНИЕ ССЫЛКИ НА MOODLE ==========
+
+@router.get("/{course_id}/moodle-link")
+def get_moodle_link(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """Получить ссылку на курс в Moodle (если пользователь зарегистрирован)"""
+    
+    registration = db.query(models.CourseRegistration).filter(
+        and_(
+            models.CourseRegistration.user_id == current_user.id,
+            models.CourseRegistration.course_id == course_id
+        )
+    ).first()
+    
+    if not registration:
+        raise HTTPException(status_code=403, detail="You are not registered for this course")
+    
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    existing = db.query(models.CourseRegistration).filter(
-        and_(models.CourseRegistration.user_id == current_user.id, models.CourseRegistration.course_id == course_id)
-    ).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Already registered")
+    if not course.moodle_course_id:
+        return {
+            "has_moodle": False,
+            "message": "This course is not connected to Moodle"
+        }
     
-    if course.current_participants >= course.max_participants:
-        raise HTTPException(status_code=400, detail="Course is full")
-    
-    # Создаём регистрацию с оплатой
-    registration = models.CourseRegistration(user_id=current_user.id, course_id=course_id, is_paid=True)
-    course.current_participants += 1
-    db.add(registration)
-    
-    # Создаём запись прогресса (0% в начале)
-    user_progress = db.query(models.UserProgress).filter(
-        and_(models.UserProgress.user_id == current_user.id, models.UserProgress.course_id == course_id)
-    ).first()
-    
-    if not user_progress:
-        user_progress = models.UserProgress(
-            user_id=current_user.id,
-            course_id=course_id,
-            progress_percent=0
+    moodle = MoodleService()
+    try:
+        moodle_user_id = moodle.sync_user(
+            email=current_user.email,
+            full_name=current_user.full_name
         )
-        db.add(user_progress)
-    
-    # Логируем действие
-    activity = models.UserActivityLog(
-        user_id=current_user.id,
-        action_type="course_paid",
-        course_id=course_id,
-        extra_data=json.dumps({"course_title": course.title, "amount": course.price})
-    )
-    db.add(activity)
-    
-    db.commit()
-    
-    return {"success": True, "message": f"Оплата {course.price} руб. прошла успешно!", "payment_id": f"PAY_{course_id}_{current_user.id}"}
+        
+        is_enrolled = moodle.is_user_enrolled(moodle_user_id, course.moodle_course_id)
+        
+        if not is_enrolled:
+            moodle.enroll_user_to_course(moodle_user_id, course.moodle_course_id)
+        
+        return {
+            "has_moodle": True,
+            "moodle_course_url": moodle.get_course_url(course.moodle_course_id),
+            "moodle_course_id": course.moodle_course_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get Moodle link: {str(e)}")
 
 
-# ========== ЭНДПОИНТЫ ДЛЯ ПРОГРЕССА И СТАТИСТИКИ ==========
+# ========== НОВЫЙ ЭНДПОИНТ ДЛЯ ПОЛУЧЕНИЯ ПРОГРЕССА ИЗ MOODLE ==========
+
+@router.get("/{course_id}/moodle-progress")
+def get_moodle_course_progress(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Получить прогресс пользователя по курсу из Moodle.
+    Возвращает процент завершения, список активностей и их статус.
+    """
+    # Проверяем, зарегистрирован ли пользователь на курс
+    registration = db.query(models.CourseRegistration).filter(
+        and_(
+            models.CourseRegistration.user_id == current_user.id,
+            models.CourseRegistration.course_id == course_id
+        )
+    ).first()
+    
+    if not registration:
+        raise HTTPException(status_code=403, detail="You are not registered for this course")
+    
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    if not course.moodle_course_id:
+        return {
+            "has_moodle": False,
+            "message": "This course is not connected to Moodle"
+        }
+    
+    moodle = MoodleService()
+    
+    try:
+        # Синхронизируем пользователя с Moodle (получаем ID)
+        moodle_user_id = moodle.sync_user(
+            email=current_user.email,
+            full_name=current_user.full_name
+        )
+        
+        # Проверяем, зачислен ли пользователь на курс в Moodle
+        is_enrolled = moodle.is_user_enrolled(moodle_user_id, course.moodle_course_id)
+        
+        if not is_enrolled:
+            # Если не зачислен - зачисляем
+            moodle.enroll_user_to_course(moodle_user_id, course.moodle_course_id)
+        
+        # Получаем полный прогресс
+        progress = moodle.get_course_progress(moodle_user_id, course.moodle_course_id)
+        
+        # Формируем ответ с информацией об активностях
+        activities = []
+        for activity in progress.get('activities', []):
+            activities.append({
+                'id': activity.get('cmid'),
+                'name': activity.get('name', 'Без названия'),
+                'type': activity.get('type', 'unknown'),
+                'completed': activity.get('completionstate', 0) > 0,
+                'completionstate': activity.get('completionstate', 0),
+                'timecompleted': activity.get('timecompleted'),
+                'url': activity.get('url', '')
+            })
+        
+        return {
+            "has_moodle": True,
+            "course_id": course_id,
+            "moodle_course_id": course.moodle_course_id,
+            "is_completed": progress.get('completed', False),
+            "progress_percent": progress.get('progress_percent', 0),
+            "timecompleted": progress.get('timecompleted'),
+            "total_activities": progress.get('total_activities', 0),
+            "completed_activities": progress.get('completed_activities', 0),
+            "activities": activities
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get Moodle progress: {str(e)}")
+
+
+# ========== СИНХРОНИЗАЦИЯ ВСЕХ КУРСОВ ПОЛЬЗОВАТЕЛЯ ==========
+
+@router.get("/my/moodle-progress")
+def get_all_moodle_progress(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Получить прогресс по ВСЕМ курсам пользователя, которые привязаны к Moodle.
+    """
+    # Получаем все регистрации пользователя
+    registrations = db.query(models.CourseRegistration).filter(
+        models.CourseRegistration.user_id == current_user.id
+    ).all()
+    
+    # Фильтруем только те, у которых есть moodle_course_id
+    moodle_courses = []
+    for reg in registrations:
+        course = db.query(models.Course).filter(models.Course.id == reg.course_id).first()
+        if course and course.moodle_course_id:
+            moodle_courses.append({
+                'course_id': course.id,
+                'course_title': course.title,
+                'moodle_course_id': course.moodle_course_id,
+                'registered_at': reg.registered_at
+            })
+    
+    if not moodle_courses:
+        return {
+            "has_moodle": False,
+            "message": "No courses connected to Moodle",
+            "courses": []
+        }
+    
+    moodle = MoodleService()
+    results = []
+    
+    try:
+        # Получаем ID пользователя в Moodle
+        moodle_user_id = moodle.sync_user(
+            email=current_user.email,
+            full_name=current_user.full_name
+        )
+        
+        for course_info in moodle_courses:
+            try:
+                # Проверяем зачисление
+                is_enrolled = moodle.is_user_enrolled(moodle_user_id, course_info['moodle_course_id'])
+                
+                if not is_enrolled:
+                    moodle.enroll_user_to_course(moodle_user_id, course_info['moodle_course_id'])
+                
+                # Получаем прогресс
+                progress = moodle.get_course_progress(moodle_user_id, course_info['moodle_course_id'])
+                
+                results.append({
+                    'course_id': course_info['course_id'],
+                    'course_title': course_info['course_title'],
+                    'moodle_course_id': course_info['moodle_course_id'],
+                    'is_completed': progress.get('completed', False),
+                    'progress_percent': progress.get('progress_percent', 0),
+                    'total_activities': progress.get('total_activities', 0),
+                    'completed_activities': progress.get('completed_activities', 0)
+                })
+            except Exception as e:
+                results.append({
+                    'course_id': course_info['course_id'],
+                    'course_title': course_info['course_title'],
+                    'moodle_course_id': course_info['moodle_course_id'],
+                    'error': str(e)
+                })
+        
+        return {
+            "has_moodle": True,
+            "user_id": current_user.id,
+            "moodle_user_id": moodle_user_id,
+            "courses": results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get Moodle progress: {str(e)}")
+
+
+# ========== ЭНДПОИНТЫ ДЛЯ ПРОГРЕССА И СТАТИСТИКИ (СУЩЕСТВУЮЩИЕ) ==========
 
 @router.post("/{course_id}/progress")
 def update_course_progress(
@@ -610,13 +826,11 @@ def get_my_registrations(db: Session = Depends(get_db),
         progress_percent = 0
         is_completed = False
         
-        # Проверяем, есть ли у курса модули (LMS курс)
         modules = db.query(models.CourseModule).filter(
             models.CourseModule.course_id == course.id
         ).all()
         
         if modules:
-            # Это LMS курс - вычисляем прогресс по урокам
             total_lessons = 0
             completed_lessons = 0
             
@@ -640,7 +854,6 @@ def get_my_registrations(db: Session = Depends(get_db),
             progress_percent = int((completed_lessons / total_lessons) * 100) if total_lessons > 0 else 0
             is_completed = progress_percent == 100
         else:
-            # Обычный курс - используем UserProgress
             user_progress = db.query(models.UserProgress).filter(
                 and_(
                     models.UserProgress.user_id == current_user.id,
@@ -657,7 +870,8 @@ def get_my_registrations(db: Session = Depends(get_db),
             "is_paid": r.is_paid,
             "registered_at": r.registered_at,
             "progress": progress_percent,
-            "is_completed": is_completed
+            "is_completed": is_completed,
+            "moodle_course_id": course.moodle_course_id
         })
     
     return result
@@ -675,7 +889,8 @@ def get_my_favorites(db: Session = Depends(get_db),
                 "id": fav.course.id, "title": fav.course.title,
                 "short_description": fav.course.short_description,
                 "price": fav.course.price, "image_url": fav.course.image_url,
-                "description": fav.course.description
+                "description": fav.course.description,
+                "moodle_course_id": fav.course.moodle_course_id
             })
     return result
 
@@ -692,6 +907,7 @@ def get_my_watch_later(db: Session = Depends(get_db),
                 "id": wl.course.id, "title": wl.course.title,
                 "short_description": wl.course.short_description,
                 "price": wl.course.price, "image_url": wl.course.image_url,
-                "description": wl.course.description
+                "description": wl.course.description,
+                "moodle_course_id": wl.course.moodle_course_id
             })
     return result

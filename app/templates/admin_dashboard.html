@@ -169,6 +169,16 @@
         font-weight: 500;
     }
     
+    .badge-moodle {
+        background: #f0f0f0;
+        color: #555;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        border: 1px solid #ddd;
+    }
+    
     .modal-content {
         border-radius: 16px;
         border: none;
@@ -309,6 +319,22 @@
         display: block;
         color: var(--dark);
     }
+    
+    .help-text {
+        font-size: 0.8rem;
+        color: var(--gray);
+        margin-top: 4px;
+    }
+    
+    .field-note {
+        background: #f8f9fa;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border-left: 3px solid var(--primary);
+        margin-top: 6px;
+        font-size: 0.85rem;
+        color: var(--gray);
+    }
 </style>
 {% endblock %}
 
@@ -420,8 +446,8 @@
                             <thead>
                                 <tr>
                                     <th>ID</th><th>Название</th><th>Категория</th><th>Цена</th>
-                                    <th>Формат</th><th>Участники</th><th>Статус</th><th>Действия</th>
-                                </td>
+                                    <th>Формат</th><th>Участники</th><th>Moodle</th><th>Статус</th><th>Действия</th>
+                                </tr>
                             </thead>
                             <tbody id="coursesList"></tbody>
                         </table>
@@ -478,7 +504,7 @@
     </div>
 </div>
 
-<!-- Модальное окно создания курса с новыми полями -->
+<!-- Модальное окно создания курса -->
 <div class="modal fade" id="createCourseModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -505,6 +531,28 @@
                     <div class="mb-3">
                         <label class="form-label">Полное описание</label>
                         <textarea class="form-control" id="course_desc" rows="3"></textarea>
+                    </div>
+                    
+                    <!-- ========== НОВОЕ ПОЛЕ ДЛЯ MOODLE ========== -->
+                    <div class="formats-group" style="border-left: 4px solid #f59e0b;">
+                        <label><i class="bi bi-box-arrow-up-right me-2"></i>Интеграция с Moodle</label>
+                        <div class="mb-3">
+                            <label class="form-label">ID курса в Moodle</label>
+                            <input type="number" class="form-control" id="moodle_course_id" 
+                                   placeholder="Например: 2" value="">
+                            <div class="help-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Укажите ID курса, который был создан в Moodle.
+                                <a href="#" onclick="fetchMoodleCourses(); return false;" class="text-primary">
+                                    <i class="bi bi-arrow-repeat me-1"></i>Показать список курсов в Moodle
+                                </a>
+                            </div>
+                            <div id="moodleCoursesList" class="mt-2" style="display: none; max-height: 200px; overflow-y: auto; background: #f8f9fa; border-radius: 8px; padding: 10px;">
+                            </div>
+                            <div class="field-note">
+                                <strong>Как это работает:</strong> Если указать ID курса из Moodle, то при записи пользователя на этот курс на платформе, он автоматически будет создан и зачислен на соответствующий курс в Moodle.
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Формат обучения -->
@@ -635,6 +683,46 @@
         toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
         toastContainer.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // ========== ФУНКЦИЯ ПОЛУЧЕНИЯ СПИСКА КУРСОВ ИЗ MOODLE ==========
+    async function fetchMoodleCourses() {
+        const container = document.getElementById('moodleCoursesList');
+        container.style.display = 'block';
+        container.innerHTML = '<div class="text-center py-2"><span class="loading-spinner"></span> Загрузка курсов из Moodle...</div>';
+        
+        try {
+            const response = await fetch('/api/admin/moodle-courses', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки курсов из Moodle');
+            }
+            
+            const courses = await response.json();
+            
+            if (!courses || courses.length === 0) {
+                container.innerHTML = '<div class="text-center py-2 text-muted">Нет курсов в Moodle</div>';
+                return;
+            }
+            
+            let html = '<ul class="list-unstyled mb-0">';
+            courses.forEach(c => {
+                html += `
+                    <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                        <span><strong>${c.id}</strong> — ${c.fullname}</span>
+                        <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('moodle_course_id').value = ${c.id}; document.getElementById('moodleCoursesList').style.display = 'none'; showToast('ID курса ${c.id} выбран', 'success');">
+                            <i class="bi bi-check"></i> Выбрать
+                        </button>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        } catch (error) {
+            container.innerHTML = `<div class="text-center py-2 text-danger">${error.message}</div>`;
+        }
     }
     
     async function exportRegistrations(courseId) {
@@ -824,7 +912,7 @@
         const tbody = document.getElementById('categoriesList');
         
         if (!categories || categories.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-folder-x"></i><p>Нет категорий</p>NonNull</td>';
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-folder-x"></i><p>Нет категорий</p></td></tr>';
         } else {
             tbody.innerHTML = categories.map(c => `
                 <tr>
@@ -849,7 +937,7 @@
         const tbody = document.getElementById('coursesList');
         
         if (!courses || courses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p>NonNull</td>';
+            tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p></td></tr>';
         } else {
             const formatMap = {
                 'full_time': 'Очный',
@@ -866,6 +954,11 @@
                     <td class="fw-bold" style="color: var(--primary);">${c.price === 0 ? 'Бесплатно' : c.price + ' ₽'}</td>
                     <td><span class="badge-info">${formatMap[c.format_type] || 'Онлайн'}</span></td>
                     <td>${c.current_participants}/${c.max_participants}</td>
+                    <td>
+                        ${c.moodle_course_id 
+                            ? `<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ${c.moodle_course_id}</span>` 
+                            : `<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>`}
+                    </td>
                     <td><span class="${c.is_active ? 'badge-success' : 'badge-danger'}">${c.is_active ? 'Активен' : 'Неактивен'}</span></td>
                     <td>
                         <button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(${c.id})" title="Регистрации"><i class="bi bi-people"></i></button>
@@ -882,9 +975,8 @@
         const users = await response.json();
         const tbody = document.getElementById('usersList');
         
-        // Исправление: таблица пользователей теперь правильно отображается
         if (!users || users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p>NonNull</tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p></td></tr>';
         } else {
             tbody.innerHTML = users.map(u => `
                 <tr>
@@ -907,7 +999,11 @@
         const response = await fetch(`/api/admin/courses/${courseId}/registrations`, { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await response.json();
         
-        let html = `<div class="mb-4"><h5>${data.course.title}</h5><p class="text-muted">Цена: <strong>${data.course.price === 0 ? 'Бесплатно' : data.course.price + ' ₽'}</strong></p></div>`;
+        let html = `<div class="mb-4"><h5>${data.course.title}</h5><p class="text-muted">Цена: <strong>${data.course.price === 0 ? 'Бесплатно' : data.course.price + ' ₽'}</strong></p>`;
+        if (data.course.moodle_course_id) {
+            html += `<p class="text-muted">Moodle ID: <strong>${data.course.moodle_course_id}</strong></p>`;
+        }
+        html += `</div>`;
         
         if (!data.registrations || data.registrations.length === 0) {
             html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет регистраций</p></div>';
@@ -1023,6 +1119,9 @@
             return;
         }
         
+        // Получаем значение moodle_course_id
+        const moodleCourseId = document.getElementById('moodle_course_id').value;
+        
         const data = {
             title: document.getElementById('course_title').value,
             short_description: document.getElementById('course_short_desc').value,
@@ -1038,6 +1137,7 @@
             start_date: document.getElementById('start_date').value || null,
             end_date: document.getElementById('end_date').value || null,
             is_open_ended: document.getElementById('is_open_ended').checked,
+            moodle_course_id: moodleCourseId ? parseInt(moodleCourseId) : null,  // ✅ НОВОЕ ПОЛЕ
             speakers: speakersList.filter(s => s.full_name.trim())
         };
         
@@ -1047,7 +1147,7 @@
         });
         
         if (response.ok) {
-            showToast('Курс успешно создан', 'success');
+            showToast('Курс успешно создан' + (data.moodle_course_id ? ' и привязан к Moodle!' : ''), 'success');
             bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
             document.getElementById('createCourseForm').reset();
             speakersList = [];
@@ -1093,6 +1193,8 @@
         renderSpeakers();
         document.getElementById('course_image_url').value = '';
         document.getElementById('course_image_preview').innerHTML = '';
+        document.getElementById('moodle_course_id').value = '';
+        document.getElementById('moodleCoursesList').style.display = 'none';
         
         fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } })
             .then(res => res.json())

@@ -269,20 +269,36 @@
         }
         
         .footer .social-icons a {
-            display: inline-block;
-            width: 36px;
-            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
             background: rgba(255,255,255,0.1);
             border-radius: 50%;
             text-align: center;
-            line-height: 36px;
             margin-right: 10px;
             transition: all 0.3s ease;
+            font-size: 1.1rem;
+            text-decoration: none;
+            color: #cbd5e1;
         }
         
         .footer .social-icons a:hover {
             background: var(--accent);
             transform: translateY(-3px);
+            color: white;
+        }
+        
+        .footer .social-icons .vk-link {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .footer .social-icons .vk-link:hover {
+            background: #4a76a8;
+            color: white;
         }
         
         /* Карточки курсов */
@@ -505,9 +521,8 @@
                 <h5>ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
                 <p class="small">Повышение квалификации педагогических работников</p>
                 <div class="social-icons mt-3">
-                    <a href="https://t.me/irochr" target="_blank"><i class="bi bi-telegram"></i></a>
-                    <a href="https://vk.com/chipkro.official/" target="_blank"><i class="bi bi-vk"></i></a>
-                    <a href="https://www.youtube.com/channel/UC4JstR8NrXG0WcdtTWjRjrg" target="_blank"><i class="bi bi-youtube"></i></a>
+                    <a href="https://vk.com/public215702903" target="_blank" title="ВКонтакте" class="vk-link">ВК</a>
+                    <a href="https://govzalla.ru/" target="_blank" title="Сайт организации"><i class="bi bi-globe2"></i></a>
                 </div>
             </div>
             <div class="col-md-3 mb-4">
@@ -530,12 +545,7 @@
         </div>
         <hr class="my-3" style="border-color: rgba(255,255,255,0.1);">
         <div class="row">
-            <div class="col-md-6 mb-3">
-                <div class="d-flex justify-content-center justify-content-md-start gap-3">
-                    <span class="small"><i class="bi bi-arrow-left-right me-1"></i> От остановки "Институт развития образования" 2 мин пешком</span>
-                </div>
-            </div>
-            <div class="col-md-6 text-center text-md-end">
+            <div class="col-md-12 text-center">
                 <p class="mb-0 small">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
             </div>
         </div>

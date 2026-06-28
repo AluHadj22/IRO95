@@ -2,6 +2,26 @@
 
 {% block title %}Курс - ГБУ ДПО «ИРО ЧР»{% endblock %}
 
+{% block extra_css %}
+<style>
+    .moodle-badge {
+        background: #f0f7ff;
+        border: 1px solid #b3d4fc;
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #1a56db;
+        margin-bottom: 12px;
+    }
+    .moodle-badge i {
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4" id="courseContainer">
     <div class="text-center py-5">
@@ -34,7 +54,6 @@
     };
     
     async function loadCourse() {
-        // Получаем токен из localStorage
         const token = localStorage.getItem('token');
         const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
         
@@ -70,9 +89,19 @@
         const courseFormat = formatMap[course.format_type] || 'Онлайн';
         const priceText = formatPrice(course.price);
         
-        // Получаем токен для проверки авторизации
         const token = localStorage.getItem('token');
         const isAuthenticated = !!token;
+        
+        // ========== MOODLE БЛОК ==========
+        let moodleHtml = '';
+        if (course.moodle_course_id) {
+            moodleHtml = `
+                <div class="moodle-badge">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                    <span>Курс привязан к Moodle (ID: ${course.moodle_course_id})</span>
+                </div>
+            `;
+        }
         
         // Спикеры
         let speakersHtml = '';
@@ -126,6 +155,7 @@
                             </div>`
                         }
                         <div class="card-body p-4">
+                            ${moodleHtml}
                             <h1 class="fw-bold mb-3" style="color: var(--dark);">${escapeHtml(course.title)}</h1>
                             
                             <div class="d-flex gap-3 mb-4">
@@ -266,7 +296,6 @@
                 wlBtn.style.color = '#d97706';
             }
         } else {
-            // Для неавторизованных пользователей показываем всплывающую подсказку при наведении
             const favBtn = document.getElementById('favoriteBtn');
             const wlBtn = document.getElementById('watchLaterBtn');
             if (favBtn) favBtn.title = 'Войдите в систему, чтобы добавить в избранное';
@@ -382,10 +411,21 @@
                 });
                 
                 if (regResponse.ok) {
-                    if (window.showToast) window.showToast('Вы успешно записаны на курс!', 'success');
+                    const result = await regResponse.json();
+                    if (window.showToast) window.showToast(result.message || 'Вы успешно записаны на курс!', 'success');
                     btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Вы записаны';
                     btn.style.background = '#10b981';
-                    setTimeout(() => location.reload(), 2000);
+                    
+                    // Если есть ссылка на Moodle, показываем уведомление
+                    if (result.moodle_course_url) {
+                        if (window.showToast) {
+                            setTimeout(() => {
+                                window.showToast('Курс также доступен в Moodle!', 'info');
+                            }, 1000);
+                        }
+                    }
+                    
+                    setTimeout(() => location.reload(), 3000);
                 } else if (regResponse.status === 402) {
                     const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
                     paymentModal.show();

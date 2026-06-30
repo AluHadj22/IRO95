@@ -1898,6 +1898,7 @@ document.getElementById('addressForm').addEventListener('submit', async (e) => {
 
         if (response.ok) {
             showToast('Адрес сохранен', 'success');
+            await checkProfileComplete();
         } else {
             const error = await response.json();
             showToast(error.detail || 'Ошибка сохранения', 'danger');
@@ -2146,7 +2147,7 @@ async function deleteEducation(id) {
 }
 
 // ============================================================
-// ПРОВЕРКА СТАТУСА ДИПЛОМА
+// ПРОВЕРКА СТАТУСА ДИПЛОМА (ИСПРАВЛЕНО)
 // ============================================================
 async function checkDiplomaStatus() {
     try {
@@ -2155,13 +2156,19 @@ async function checkDiplomaStatus() {
         });
         if (response.ok) {
             const eduData = await response.json();
+            // Проверяем, есть ли вообще образование
             if (eduData && eduData.length > 0) {
                 const edu = eduData.find(e => e.is_main) || eduData[0];
+                // Если есть файл диплома — обновляем статус на "Загружен"
                 if (edu && edu.diploma_file_url) {
                     updateDocumentStatus('diploma', edu.diploma_file_url);
                 } else {
+                    // Если нет файла диплома — статус "Не загружен"
                     updateDocumentStatus('diploma', null);
                 }
+            } else {
+                // Если нет образования — статус "Не загружен"
+                updateDocumentStatus('diploma', null);
             }
         }
     } catch (error) {
@@ -2552,6 +2559,9 @@ async function loadAdditionalInfo() {
     }
 }
 
+// ============================================================
+// UPDATE DOCUMENT STATUS (ИСПРАВЛЕНО - корректно обрабатывает null)
+// ============================================================
 function updateDocumentStatus(docType, fileUrl) {
     const statusEl = document.getElementById(`${docType}Status`);
     const downloadBtn = document.getElementById(`${docType}DownloadBtn`);
@@ -2839,7 +2849,7 @@ async function confirmAllData() {
 }
 
 // ============================================================
-// ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ
+// ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ (ИСПРАВЛЕНО - показывает незаполненные поля)
 // ============================================================
 async function checkProfileComplete() {
     try {
@@ -2854,7 +2864,37 @@ async function checkProfileComplete() {
                 badge.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>Профиль заполнен полностью</span>';
             } else {
                 badge.className = 'profile-complete-badge incomplete';
-                badge.innerHTML = `<i class="bi bi-exclamation-circle"></i><span>${data.message}</span>`;
+                // Показываем детальное сообщение с перечислением незаполненных полей
+                const fields = data.missing_fields || [];
+                let message = 'Профиль не заполнен';
+                if (fields.length > 0) {
+                    // Формируем читаемое сообщение
+                    const fieldLabels = {
+                        'last_name': 'фамилия',
+                        'first_name': 'имя',
+                        'middle_name': 'отчество',
+                        'gender': 'пол',
+                        'birth_date': 'дата рождения',
+                        'citizenship': 'гражданство',
+                        'region': 'субъект РФ',
+                        'municipality': 'муниципалитет',
+                        'phone_raw': 'телефон',
+                        'consent_to_personal_data': 'согласие на обработку данных',
+                        'address': 'адрес',
+                        'education': 'образование',
+                        'work': 'работа',
+                        'snils_number': 'номер СНИЛС',
+                        'snils_file': 'копия СНИЛС',
+                        'diploma_file': 'копия диплома',
+                        'passport_file': 'копия паспорта',
+                        'inn_file': 'копия ИНН',
+                        'marriage_certificate_file': 'свидетельство о браке',
+                        'data_confirmed': 'подтверждение данных'
+                    };
+                    const readableFields = fields.map(f => fieldLabels[f] || f);
+                    message = `Не заполнены: ${readableFields.join(', ')}`;
+                }
+                badge.innerHTML = `<i class="bi bi-exclamation-circle"></i><span>${message}</span>`;
             }
         }
     } catch (error) {

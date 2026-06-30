@@ -144,7 +144,6 @@ def get_all_courses(db: Session = Depends(get_db),
         result.append({
             "id": c.id,
             "title": c.title,
-            "price": c.price,
             "current_participants": c.current_participants,
             "max_participants": c.max_participants,
             "is_active": c.is_active,
@@ -152,7 +151,8 @@ def get_all_courses(db: Session = Depends(get_db),
             "format_type": c.format_type,
             "start_date": c.start_date,
             "end_date": c.end_date,
-            "created_at": c.created_at
+            "created_at": c.created_at,
+            "moodle_course_id": c.moodle_course_id
         })
     return result
 
@@ -190,7 +190,11 @@ def get_course_registrations(course_id: int, db: Session = Depends(get_db),
     ).all()
     
     return {
-        "course": {"id": course.id, "title": course.title, "price": course.price},
+        "course": {
+            "id": course.id,
+            "title": course.title,
+            "moodle_course_id": course.moodle_course_id
+        },
         "registrations": [{
             "id": r.CourseRegistration.id,
             "user_id": r.User.id,
@@ -199,7 +203,6 @@ def get_course_registrations(course_id: int, db: Session = Depends(get_db),
             "position": r.User.position,
             "phone": r.User.phone,
             "organization": r.User.organization,
-            "is_paid": r.CourseRegistration.is_paid,
             "registered_at": r.CourseRegistration.registered_at
         } for r in registrations]
     }

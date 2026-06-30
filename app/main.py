@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from app.database import engine, Base
 from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router
-from app.routers import lms_router
 from app.routers import profile_router  # ✅ ДОБАВЛЯЕМ ИМПОРТ
 import os
 
@@ -45,7 +44,6 @@ app.include_router(admin_router.router)
 app.include_router(notifications_router.router)
 app.include_router(public_router.router)
 app.include_router(achievements_router.router)
-app.include_router(lms_router.router)
 app.include_router(profile_router.router)  # ✅ ДОБАВЛЯЕМ ПОДКЛЮЧЕНИЕ
 
 

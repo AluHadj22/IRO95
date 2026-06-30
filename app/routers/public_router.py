@@ -51,22 +51,6 @@ def course_detail_page(request: Request, course_id: int):
     return templates.TemplateResponse("course_detail.html", {"request": request, "course_id": course_id})
 
 
-@router.get("/course-modules/{course_id}", response_class=HTMLResponse)
-async def course_modules_page(request: Request, course_id: int):
-    return templates.TemplateResponse("course_modules.html", {"request": request, "course_id": course_id})
-
-
-@router.get("/lesson/{lesson_id}", response_class=HTMLResponse)
-async def lesson_page(request: Request, lesson_id: int):
-    return templates.TemplateResponse("lesson_detail.html", {"request": request, "lesson_id": lesson_id})
-
-
-@router.get("/lms-admin", response_class=HTMLResponse)
-async def lms_admin_page(request: Request):
-    return templates.TemplateResponse("lms_admin.html", {"request": request})
-
-
-# ========== НОВЫЙ МАРШРУТ ДЛЯ СТРАНИЦЫ ПРОФИЛЯ ==========
 @router.get("/profile", response_class=HTMLResponse)
 async def profile_page(request: Request):
     """Страница профиля пользователя (Мои данные)"""

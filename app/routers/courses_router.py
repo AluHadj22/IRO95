@@ -871,10 +871,12 @@ def get_my_activity(
     } for a in activities]
 
 
+# ========== ОБНОВЛЕННЫЙ ЭНДПОИНТ: МОИ РЕГИСТРАЦИИ (БЕЗ LMS) ==========
+
 @router.get("/my/registrations")
 def get_my_registrations(db: Session = Depends(get_db),
                          current_user: models.User = Depends(auth.get_current_active_user)):
-    """Получить мои регистрации на курсы с прогрессом (включая LMS курсы)"""
+    """Получить мои регистрации на курсы с прогрессом"""
     registrations = db.query(models.CourseRegistration).filter(
         models.CourseRegistration.user_id == current_user.id
     ).all()
@@ -885,42 +887,17 @@ def get_my_registrations(db: Session = Depends(get_db),
         progress_percent = 0
         is_completed = False
         
-        modules = db.query(models.CourseModule).filter(
-            models.CourseModule.course_id == course.id
-        ).all()
+        # Используем UserProgress для получения прогресса
+        user_progress = db.query(models.UserProgress).filter(
+            and_(
+                models.UserProgress.user_id == current_user.id,
+                models.UserProgress.course_id == course.id
+            )
+        ).first()
         
-        if modules:
-            total_lessons = 0
-            completed_lessons = 0
-            
-            for module in modules:
-                lessons = db.query(models.CourseLesson).filter(
-                    models.CourseLesson.module_id == module.id
-            ).all()
-                total_lessons += len(lessons)
-                
-                for lesson in lessons:
-                    lesson_progress = db.query(models.UserLessonProgress).filter(
-                        and_(
-                            models.UserLessonProgress.user_id == current_user.id,
-                            models.UserLessonProgress.lesson_id == lesson.id,
-                            models.UserLessonProgress.is_completed == True
-                        )
-                    ).first()
-                    if lesson_progress:
-                        completed_lessons += 1
-            
-            progress_percent = int((completed_lessons / total_lessons) * 100) if total_lessons > 0 else 0
-            is_completed = progress_percent == 100
-        else:
-            user_progress = db.query(models.UserProgress).filter(
-                and_(
-                    models.UserProgress.user_id == current_user.id,
-                    models.UserProgress.course_id == course.id
-                )
-            ).first()
-            progress_percent = user_progress.progress_percent if user_progress else 0
-            is_completed = user_progress.is_completed if user_progress else False
+        if user_progress:
+            progress_percent = user_progress.progress_percent
+            is_completed = user_progress.is_completed
         
         result.append({
             "course_id": r.course_id,
@@ -928,7 +905,7 @@ def get_my_registrations(db: Session = Depends(get_db),
             "registered_at": r.registered_at,
             "progress": progress_percent,
             "is_completed": is_completed,
-            "moodle_course_id": course.moodle_course_id
+            "moodle_course_id": course.moodle_course_id if course else None
         })
     
     return result

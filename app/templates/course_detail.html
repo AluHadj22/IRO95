@@ -19,6 +19,125 @@
     .moodle-badge i {
         font-size: 1.1rem;
     }
+    
+    /* Стили для модального окна профиля */
+    .profile-incomplete-modal .modal-content {
+        border-radius: 16px;
+        border: none;
+        overflow: hidden;
+    }
+    .profile-incomplete-modal .modal-header {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 18px 24px;
+    }
+    .profile-incomplete-modal .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+    }
+    .profile-incomplete-modal .modal-body {
+        padding: 24px;
+    }
+    .profile-incomplete-modal .missing-sections-list {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0 20px 0;
+    }
+    .profile-incomplete-modal .missing-sections-list li {
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        background: #fef2f2;
+        border-radius: 10px;
+        border-left: 4px solid #ef4444;
+    }
+    .profile-incomplete-modal .missing-sections-list li .section-label {
+        font-weight: 600;
+        color: #dc2626;
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.95rem;
+    }
+    .profile-incomplete-modal .missing-sections-list li .section-fields {
+        font-size: 0.85rem;
+        color: #6b7280;
+        display: block;
+    }
+    .profile-incomplete-modal .missing-sections-list li .section-fields .field-item {
+        display: inline-block;
+        background: white;
+        padding: 1px 10px;
+        border-radius: 12px;
+        margin: 2px 4px 2px 0;
+        font-size: 0.75rem;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    .profile-incomplete-modal .alert-info-custom {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 12px 16px;
+        color: #1e40af;
+        font-size: 0.9rem;
+    }
+    .profile-incomplete-modal .alert-info-custom i {
+        margin-right: 8px;
+    }
+    .profile-incomplete-modal .btn-go-profile {
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .profile-incomplete-modal .btn-go-profile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,87,164,0.3);
+    }
+    .profile-incomplete-modal .btn-close-modal {
+        border: 1px solid #d1d5db;
+        background: transparent;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-weight: 500;
+        color: #6b7280;
+        transition: all 0.2s ease;
+    }
+    .profile-incomplete-modal .btn-close-modal:hover {
+        background: #f3f4f6;
+    }
+    .profile-incomplete-modal .progress-status {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+    }
+    .profile-incomplete-modal .progress-status .progress-bar-mini {
+        flex: 1;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .profile-incomplete-modal .progress-status .progress-bar-mini .fill {
+        height: 100%;
+        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        border-radius: 10px;
+        transition: width 0.5s ease;
+    }
+    .profile-incomplete-modal .progress-status .progress-text {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+    }
 </style>
 {% endblock %}
 
@@ -373,6 +492,8 @@
         }
     }
     
+    // ========== ОБНОВЛЕННАЯ ФУНКЦИЯ РЕГИСТРАЦИИ ==========
+    
     async function handleRegistration() {
         const token = localStorage.getItem('token');
         if (!token) {
@@ -384,24 +505,54 @@
         const btn = document.getElementById('registerBtn');
         btn.disabled = true;
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Запись...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Проверка...';
         
-        if (!courseData) {
-            if (window.showToast) window.showToast('Ошибка загрузки данных курса', 'danger');
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-            return;
-        }
-        
-        const coursePrice = Number(courseData.price);
-        
-        if (coursePrice > 0) {
-            const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-            paymentModal.show();
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        } else {
-            try {
+        try {
+            // ========== СНАЧАЛА ПРОВЕРЯЕМ ВОЗМОЖНОСТЬ ЗАПИСИ ==========
+            const checkResponse = await fetch(`/api/courses/${courseId}/check-registration-eligibility`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (checkResponse.ok) {
+                const checkResult = await checkResponse.json();
+                
+                if (!checkResult.eligible) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                    
+                    if (checkResult.reason === 'profile_incomplete') {
+                        // ========== ПРОФИЛЬ НЕ ЗАПОЛНЕН - ПОКАЗЫВАЕМ МОДАЛЬНОЕ ОКНО С РАЗДЕЛАМИ ==========
+                        showProfileIncompleteModal(checkResult.missing_sections, checkResult.redirect);
+                    } else if (checkResult.reason === 'already_registered') {
+                        if (window.showToast) window.showToast('Вы уже записаны на этот курс', 'warning');
+                    } else if (checkResult.reason === 'course_full') {
+                        if (window.showToast) window.showToast('Курс полностью заполнен', 'danger');
+                    } else if (checkResult.reason === 'payment_required') {
+                        const coursePrice = Number(courseData.price);
+                        if (coursePrice > 0) {
+                            const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                            paymentModal.show();
+                            btn.disabled = false;
+                            btn.innerHTML = originalText;
+                        }
+                    } else {
+                        if (window.showToast) window.showToast(checkResult.message || 'Невозможно записаться', 'warning');
+                    }
+                    return;
+                }
+            }
+            
+            // ========== ПРОВЕРКА ПРОЙДЕНА - ПРОДОЛЖАЕМ РЕГИСТРАЦИЮ ==========
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Запись...';
+            
+            const coursePrice = Number(courseData.price);
+            
+            if (coursePrice > 0) {
+                const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                paymentModal.show();
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            } else {
                 const regResponse = await fetch(`/api/courses/${courseId}/register`, {
                     method: 'POST',
                     headers: { 
@@ -416,16 +567,22 @@
                     btn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Вы записаны';
                     btn.style.background = '#10b981';
                     
-                    // Если есть ссылка на Moodle, показываем уведомление
                     if (result.moodle_course_url) {
-                        if (window.showToast) {
-                            setTimeout(() => {
-                                window.showToast('Курс также доступен в Moodle!', 'info');
-                            }, 1000);
-                        }
+                        setTimeout(() => {
+                            window.showToast('Курс также доступен в Moodle!', 'info');
+                        }, 1000);
                     }
                     
                     setTimeout(() => location.reload(), 3000);
+                } else if (regResponse.status === 403) {
+                    const error = await regResponse.json();
+                    if (error.detail && typeof error.detail === 'object' && error.detail.code === 'profile_incomplete') {
+                        showProfileIncompleteModal(error.detail.missing_sections, error.detail.redirect);
+                    } else {
+                        if (window.showToast) window.showToast(error.detail || 'Ошибка записи на курс', 'danger');
+                    }
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
                 } else if (regResponse.status === 402) {
                     const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
                     paymentModal.show();
@@ -437,14 +594,138 @@
                     btn.disabled = false;
                     btn.innerHTML = originalText;
                 }
-            } catch (error) {
-                console.error('Ошибка:', error);
-                if (window.showToast) window.showToast('Ошибка соединения с сервером', 'danger');
-                btn.disabled = false;
-                btn.innerHTML = originalText;
             }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            if (window.showToast) window.showToast('Ошибка соединения с сервером', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
         }
     }
+    
+    // ========== ОБНОВЛЕННОЕ МОДАЛЬНОЕ ОКНО ДЛЯ НЕЗАПОЛНЕННОГО ПРОФИЛЯ ==========
+    
+    function showProfileIncompleteModal(missingSections, redirectUrl) {
+        // Удаляем старый модал, если есть
+        const existingModal = document.getElementById('profileIncompleteModal');
+        if (existingModal) {
+            const modal = bootstrap.Modal.getInstance(existingModal);
+            if (modal) modal.hide();
+            existingModal.remove();
+        }
+        
+        // Считаем общее количество разделов и заполненных
+        let totalSections = 0;
+        let completedSections = 0;
+        let sectionsHtml = '';
+        
+        if (missingSections && Array.isArray(missingSections)) {
+            totalSections = missingSections.length;
+            completedSections = missingSections.filter(s => s.is_complete).length;
+            
+            const incompleteSections = missingSections.filter(s => !s.is_complete);
+            
+            if (incompleteSections.length > 0) {
+                sectionsHtml = incompleteSections.map(section => {
+                    const fieldsHtml = section.fields && section.fields.length > 0 
+                        ? section.fields.map(f => `<span class="field-item">${escapeHtml(f)}</span>`).join('')
+                        : '';
+                    
+                    return `
+                        <li>
+                            <span class="section-label">${escapeHtml(section.label)}</span>
+                            ${fieldsHtml ? `<span class="section-fields">${fieldsHtml}</span>` : ''}
+                        </li>
+                    `;
+                }).join('');
+            }
+        }
+        
+        // Если нет данных о разделах, показываем общее сообщение
+        if (!sectionsHtml) {
+            sectionsHtml = `
+                <li>
+                    <span class="section-label">Необходимо заполнить все разделы профиля</span>
+                    <span class="section-fields">Личные данные, Образование, Работа, Документы</span>
+                </li>
+            `;
+        }
+        
+        const progressPercent = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
+        
+        const modalHtml = `
+            <div class="modal fade profile-incomplete-modal" id="profileIncompleteModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                Профиль не заполнен
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-person-x fs-1" style="color: #ef4444;"></i>
+                            </div>
+                            
+                            <div class="progress-status">
+                                <span class="progress-text">${progressPercent}%</span>
+                                <div class="progress-bar-mini">
+                                    <div class="fill" style="width: ${progressPercent}%"></div>
+                                </div>
+                                <span class="progress-text" style="font-weight: 400; color: #6b7280; font-size: 0.75rem;">
+                                    ${completedSections}/${totalSections}
+                                </span>
+                            </div>
+                            
+                            <p style="font-weight: 500; color: #1e293b;">
+                                Для записи на курсы необходимо заполнить все разделы профиля:
+                            </p>
+                            <ul class="missing-sections-list">
+                                ${sectionsHtml}
+                            </ul>
+                            <div class="alert-info-custom">
+                                <i class="bi bi-info-circle"></i>
+                                После заполнения всех разделов вы сможете записаться на курсы.
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border-top: 1px solid #e5e7eb; padding: 16px 24px;">
+                            <button class="btn-close-modal" data-bs-dismiss="modal">
+                                Закрыть
+                            </button>
+                            <button class="btn-go-profile" onclick="redirectToProfile('${redirectUrl || '/profile'}')">
+                                <i class="bi bi-person-badge me-2"></i>
+                                Перейти в Мои данные
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        const modalElement = document.getElementById('profileIncompleteModal');
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+        });
+        modal.show();
+    }
+    
+    function redirectToProfile(url) {
+        const modalElement = document.getElementById('profileIncompleteModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) modal.hide();
+        }
+        setTimeout(() => {
+            window.location.href = url;
+        }, 300);
+    }
+    
+    // ========== ОБРАБОТКА ОПЛАТЫ ==========
     
     async function processPayment(method) {
         const token = localStorage.getItem('token');

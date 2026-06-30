@@ -5,6 +5,7 @@ from sqlalchemy import or_, and_
 from app import models, schemas, auth
 from app.database import get_db
 from app.services.moodle_service import MoodleService
+from app.dependencies import require_complete_profile
 from typing import Optional
 import json
 from datetime import datetime
@@ -291,10 +292,11 @@ def remove_from_watch_later(course_id: int, db: Session = Depends(get_db),
 def register_for_course(
     course_id: int, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+    current_user: models.User = Depends(require_complete_profile)
 ):
     """
     Запись на курс с автоматической синхронизацией с Moodle.
+    Требует полностью заполненного профиля пользователя.
     Если у курса указан moodle_course_id, пользователь автоматически
     создается и зачисляется на соответствующий курс в Moodle.
     """
@@ -390,6 +392,71 @@ def register_for_course(
         response["message"] = "Registered in the system, but Moodle sync failed. Please contact support."
     
     return response
+
+
+# ========== ОБНОВЛЕННЫЙ ЭНДПОИНТ: ПРОВЕРКА ВОЗМОЖНОСТИ ЗАПИСИ ==========
+
+@router.get("/{course_id}/check-registration-eligibility")
+def check_registration_eligibility(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Проверяет, может ли пользователь записаться на курс.
+    Возвращает статус и причину, если нельзя.
+    Используется на фронтенде для предварительной проверки.
+    """
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        return {"eligible": False, "reason": "course_not_found", "message": "Курс не найден"}
+    
+    # 1. Проверка заполненности профиля с использованием нового метода
+    if not current_user.is_profile_complete():
+        # Получаем детальную информацию о заполненности профиля
+        completion_details = current_user.get_profile_completion_details()
+        
+        # Формируем список незаполненных разделов
+        missing_sections = []
+        for section in completion_details["sections"]:
+            if not section["is_complete"]:
+                missing_sections.append({
+                    "section": section["section"],
+                    "label": section["label"],
+                    "fields": section["fields"]
+                })
+        
+        # Формируем понятное сообщение
+        section_names = [s["label"] for s in missing_sections]
+        message = f"Для записи на курс необходимо заполнить: {', '.join(section_names)}"
+        
+        return {
+            "eligible": False,
+            "reason": "profile_incomplete",
+            "message": message,
+            "missing_sections": missing_sections,
+            "redirect": "/profile"
+        }
+    
+    # 2. Проверка регистрации
+    existing = db.query(models.CourseRegistration).filter(
+        and_(
+            models.CourseRegistration.user_id == current_user.id,
+            models.CourseRegistration.course_id == course_id
+        )
+    ).first()
+    if existing:
+        return {"eligible": False, "reason": "already_registered", "message": "Вы уже записаны на этот курс"}
+    
+    # 3. Проверка мест
+    if course.current_participants >= course.max_participants:
+        return {"eligible": False, "reason": "course_full", "message": "Курс полностью заполнен"}
+    
+    # 4. Проверка оплаты
+    if float(course.price) > 0:
+        return {"eligible": False, "reason": "payment_required", "message": "Требуется оплата курса"}
+    
+    return {"eligible": True, "message": "Вы можете записаться на курс"}
 
 
 # ========== ПОЛУЧЕНИЕ ССЫЛКИ НА MOODLE ==========

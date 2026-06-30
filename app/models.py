@@ -82,8 +82,10 @@ class User(Base):
     assignment_submissions = relationship("AssignmentSubmission", back_populates="user", cascade="all, delete-orphan", foreign_keys="AssignmentSubmission.user_id")
     assignment_attempts = relationship("AssignmentAttempt", back_populates="user", cascade="all, delete-orphan")
     
-    def is_profile_complete(self) -> bool:
-        """Проверяет, заполнены ли все обязательные поля профиля"""
+    # ========== МЕТОДЫ ПРОВЕРКИ ПРОФИЛЯ ==========
+    
+    def is_personal_data_complete(self) -> bool:
+        """Проверяет, заполнены ли все обязательные поля личных данных"""
         required_fields = [
             self.last_name, self.first_name, self.middle_name,
             self.gender, self.birth_date, self.citizenship,
@@ -91,6 +93,211 @@ class User(Base):
             self.consent_to_personal_data
         ]
         return all(required_fields)
+    
+    def has_education(self) -> bool:
+        """Проверяет, есть ли хотя бы одна запись об образовании"""
+        return len(self.education) > 0
+    
+    def has_education_with_diploma(self) -> bool:
+        """Проверяет, есть ли запись об образовании с загруженным дипломом"""
+        for edu in self.education:
+            if edu.diploma_file_url:
+                return True
+        return False
+    
+    def has_work(self) -> bool:
+        """Проверяет, есть ли хотя бы одна запись о работе"""
+        return len(self.work) > 0
+    
+    def has_work_with_subjects(self) -> bool:
+        """Проверяет, есть ли запись о работе с заполненными предметами"""
+        import json
+        for work in self.work:
+            if work.subjects:
+                try:
+                    subjects = json.loads(work.subjects)
+                    if subjects and len(subjects) > 0:
+                        return True
+                except:
+                    pass
+        return False
+    
+    def has_snils(self) -> bool:
+        """Проверяет, заполнен ли СНИЛС"""
+        return self.additional_info is not None and bool(self.additional_info.snils)
+    
+    def has_snils_file(self) -> bool:
+        """Проверяет, загружен ли файл СНИЛС"""
+        return self.additional_info is not None and bool(self.additional_info.snils_file_url)
+    
+    def has_passport_file(self) -> bool:
+        """Проверяет, загружен ли файл паспорта"""
+        return self.additional_info is not None and bool(self.additional_info.passport_file_url)
+    
+    def has_inn_file(self) -> bool:
+        """Проверяет, загружен ли файл ИНН"""
+        return self.additional_info is not None and bool(self.additional_info.inn_file_url)
+    
+    def has_data_confirmed(self) -> bool:
+        """Проверяет, подтверждены ли данные"""
+        return self.additional_info is not None and self.additional_info.data_confirmed
+    
+    def is_profile_complete(self) -> bool:
+        """
+        ОСНОВНАЯ ПРОВЕРКА: заполнен ли профиль полностью для записи на курсы.
+        Проверяет:
+        1. Личные данные (все обязательные поля)
+        2. Образование (хотя бы одна запись)
+        3. Диплом (загружен файл)
+        4. Работа (хотя бы одна запись с предметами)
+        5. СНИЛС (номер и файл)
+        6. Паспорт (файл)
+        7. ИНН (файл)
+        8. Подтверждение данных
+        """
+        return (
+            self.is_personal_data_complete() and
+            self.has_education() and
+            self.has_education_with_diploma() and
+            self.has_work() and
+            self.has_work_with_subjects() and
+            self.has_snils() and
+            self.has_snils_file() and
+            self.has_passport_file() and
+            self.has_inn_file() and
+            self.has_data_confirmed()
+        )
+    
+    def get_profile_completion_details(self) -> dict:
+        """
+        Возвращает детальную информацию о заполненности профиля.
+        Используется для отображения пользователю списка незаполненных разделов.
+        """
+        missing_sections = []
+        
+        # Проверка личных данных
+        if not self.is_personal_data_complete():
+            missing_fields = []
+            if not self.last_name: missing_fields.append("Фамилия")
+            if not self.first_name: missing_fields.append("Имя")
+            if not self.middle_name: missing_fields.append("Отчество")
+            if not self.gender: missing_fields.append("Пол")
+            if not self.birth_date: missing_fields.append("Дата рождения")
+            if not self.citizenship: missing_fields.append("Гражданство")
+            if not self.region: missing_fields.append("Субъект РФ")
+            if not self.municipality: missing_fields.append("Муниципалитет")
+            if not self.phone_raw: missing_fields.append("Телефон")
+            if not self.consent_to_personal_data: missing_fields.append("Согласие на обработку данных")
+            missing_sections.append({
+                "section": "personal_data",
+                "label": "Личные данные",
+                "fields": missing_fields,
+                "is_complete": False
+            })
+        else:
+            missing_sections.append({
+                "section": "personal_data",
+                "label": "Личные данные",
+                "fields": [],
+                "is_complete": True
+            })
+        
+        # Проверка образования
+        if not self.has_education():
+            missing_sections.append({
+                "section": "education",
+                "label": "Образование",
+                "fields": ["Добавьте запись об образовании"],
+                "is_complete": False
+            })
+        elif not self.has_education_with_diploma():
+            missing_sections.append({
+                "section": "education",
+                "label": "Образование",
+                "fields": ["Загрузите копию диплома"],
+                "is_complete": False
+            })
+        else:
+            missing_sections.append({
+                "section": "education",
+                "label": "Образование",
+                "fields": [],
+                "is_complete": True
+            })
+        
+        # Проверка работы
+        if not self.has_work():
+            missing_sections.append({
+                "section": "work",
+                "label": "Место работы",
+                "fields": ["Добавьте место работы"],
+                "is_complete": False
+            })
+        elif not self.has_work_with_subjects():
+            missing_sections.append({
+                "section": "work",
+                "label": "Место работы",
+                "fields": ["Заполните предметы в месте работы"],
+                "is_complete": False
+            })
+        else:
+            missing_sections.append({
+                "section": "work",
+                "label": "Место работы",
+                "fields": [],
+                "is_complete": True
+            })
+        
+        # Проверка документов
+        doc_fields = []
+        if not self.has_snils():
+            doc_fields.append("Заполните номер СНИЛС")
+        if not self.has_snils_file():
+            doc_fields.append("Загрузите файл СНИЛС")
+        if not self.has_passport_file():
+            doc_fields.append("Загрузите копию паспорта")
+        if not self.has_inn_file():
+            doc_fields.append("Загрузите копию ИНН")
+        
+        if doc_fields:
+            missing_sections.append({
+                "section": "documents",
+                "label": "Документы",
+                "fields": doc_fields,
+                "is_complete": False
+            })
+        else:
+            missing_sections.append({
+                "section": "documents",
+                "label": "Документы",
+                "fields": [],
+                "is_complete": True
+            })
+        
+        # Проверка подтверждения данных
+        if not self.has_data_confirmed():
+            missing_sections.append({
+                "section": "confirmation",
+                "label": "Подтверждение данных",
+                "fields": ["Подтвердите все данные в разделе Документы"],
+                "is_complete": False
+            })
+        else:
+            missing_sections.append({
+                "section": "confirmation",
+                "label": "Подтверждение данных",
+                "fields": [],
+                "is_complete": True
+            })
+        
+        all_complete = all(section["is_complete"] for section in missing_sections)
+        
+        return {
+            "is_complete": all_complete,
+            "sections": missing_sections,
+            "total_sections": len(missing_sections),
+            "completed_sections": sum(1 for s in missing_sections if s["is_complete"])
+        }
 
 
 class Category(Base):

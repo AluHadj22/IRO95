@@ -4,7 +4,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from app import models, schemas, auth
 from app.database import get_db
-from app.services.excel_service import generate_registrations_excel
+from app.services.excel_service import generate_full_registrations_excel
+from app.services.excel_export_service import ExcelExportService, generate_export_filename
+from app.services.document_export_service import DocumentExportService
 from typing import List
 import os
 import shutil
@@ -209,35 +211,17 @@ def export_course_registrations(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Экспорт регистраций на курс в Excel с красивым форматированием"""
+    """
+    Экспорт регистраций на курс в Excel с ПОЛНЫМИ данными пользователей.
+    Использует те же поля, что и основной экспорт пользователей.
+    """
     # Проверяем существование курса
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    # Получаем все регистрации с данными пользователей
-    registrations = db.query(models.CourseRegistration, models.User).join(
-        models.User
-    ).filter(models.CourseRegistration.course_id == course_id).order_by(
-        models.CourseRegistration.registered_at.desc()
-    ).all()
-    
-    # Подготавливаем данные для Excel
-    data = []
-    for idx, reg in enumerate(registrations, 1):
-        data.append({
-            "number": idx,
-            "full_name": reg.User.full_name,
-            "email": reg.User.email,
-            "phone": reg.User.phone or "",
-            "position": reg.User.position or "",
-            "organization": reg.User.organization or "",
-            "is_paid": "Да" if reg.CourseRegistration.is_paid else "Нет",
-            "registered_at": reg.CourseRegistration.registered_at.strftime("%d.%m.%Y %H:%M") if reg.CourseRegistration.registered_at else ""
-        })
-    
-    # Генерируем Excel файл с информацией о курсе
-    buffer = generate_registrations_excel(data, course.title)
+    # Используем новую функцию с полными данными
+    buffer = generate_full_registrations_excel(db, course_id, course.title)
     
     # Формируем имя файла
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -281,3 +265,278 @@ def unblock_user(user_id: int, db: Session = Depends(get_db),
     user.is_blocked = False
     db.commit()
     return {"message": "User unblocked"}
+
+
+# ============================================================
+# НОВЫЕ ЭНДПОИНТЫ ДЛЯ ЭКСПОРТА ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ
+# ============================================================
+
+@router.get("/users/list")
+def get_users_with_data(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Получить список пользователей с их данными для отображения в админке.
+    Используется для вкладки "Данные пользователей".
+    """
+    export_service = ExcelExportService(db)
+    users_list = export_service.get_users_list_with_data()
+    return users_list
+
+
+@router.get("/users/export-all")
+def export_all_users(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Экспорт данных всех пользователей в Excel по шаблону.
+    """
+    export_service = ExcelExportService(db)
+    buffer = export_service.export_users_to_excel()
+    
+    filename = generate_export_filename("all")
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
+
+
+@router.get("/users/{user_id}/export")
+def export_single_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Экспорт данных одного пользователя в Excel по шаблону.
+    """
+    # Проверяем существование пользователя
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    export_service = ExcelExportService(db)
+    buffer = export_service.export_single_user(user_id)
+    
+    if not buffer:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    filename = generate_export_filename("single", user_id)
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
+
+
+@router.get("/users/export-selected")
+def export_selected_users(
+    user_ids: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Экспорт данных выбранных пользователей в Excel по шаблону.
+    
+    Args:
+        user_ids: Список ID пользователей через запятую (например: "1,2,3,4")
+    """
+    if not user_ids:
+        raise HTTPException(status_code=400, detail="Не указаны ID пользователей")
+    
+    try:
+        ids_list = [int(id_str.strip()) for id_str in user_ids.split(',') if id_str.strip()]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректный формат ID пользователей")
+    
+    if not ids_list:
+        raise HTTPException(status_code=400, detail="Не указаны ID пользователей")
+    
+    export_service = ExcelExportService(db)
+    buffer = export_service.export_users_to_excel(ids_list)
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"selected_users_{len(ids_list)}_{timestamp}.xlsx"
+    
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
+
+
+# ============================================================
+# НОВЫЕ ЭНДПОИНТЫ ДЛЯ РАБОТЫ С ДОКУМЕНТАМИ ПОЛЬЗОВАТЕЛЕЙ
+# ============================================================
+
+@router.get("/users/{user_id}/documents")
+def get_user_documents(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Получить список документов пользователя с их статусами.
+    """
+    doc_service = DocumentExportService(db)
+    return doc_service.get_user_documents_list(user_id)
+
+
+@router.get("/users/{user_id}/documents/download")
+def download_user_documents(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Скачать все документы пользователя в ZIP-архиве.
+    """
+    doc_service = DocumentExportService(db)
+    zip_content, filename = doc_service.create_user_zip(user_id)
+    
+    # Кодируем имя файла для заголовка
+    encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
+    
+    return StreamingResponse(
+        iter([zip_content]),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f"attachment; filename={encoded_filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
+
+
+@router.get("/users/documents/download-selected")
+def download_selected_users_documents(
+    user_ids: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Скачать документы выбранных пользователей в ZIP-архиве.
+    Каждый пользователь получает отдельную папку.
+    
+    Args:
+        user_ids: Список ID пользователей через запятую (например: "1,2,3,4")
+    """
+    if not user_ids:
+        raise HTTPException(status_code=400, detail="Не указаны ID пользователей")
+    
+    try:
+        ids_list = [int(id_str.strip()) for id_str in user_ids.split(',') if id_str.strip()]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Некорректный формат ID пользователей")
+    
+    if not ids_list:
+        raise HTTPException(status_code=400, detail="Не указаны ID пользователей")
+    
+    doc_service = DocumentExportService(db)
+    zip_content, filename = doc_service.create_multiple_users_zip(ids_list)
+    
+    # Кодируем имя файла для заголовка
+    encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
+    
+    return StreamingResponse(
+        iter([zip_content]),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f"attachment; filename={encoded_filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
+
+
+@router.get("/users/documents/download-all")
+def download_all_users_documents(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Скачать документы ВСЕХ пользователей в ZIP-архиве.
+    Каждый пользователь получает отдельную папку.
+    """
+    # Получаем всех пользователей
+    users = db.query(models.User).all()
+    if not users:
+        raise HTTPException(status_code=404, detail="Нет пользователей")
+    
+    user_ids = [user.id for user in users]
+    
+    doc_service = DocumentExportService(db)
+    zip_content, filename = doc_service.create_multiple_users_zip(user_ids)
+    
+    # Кодируем имя файла для заголовка
+    encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
+    
+    return StreamingResponse(
+        iter([zip_content]),
+        media_type="application/zip",
+        headers={
+            "Content-Disposition": f"attachment; filename={encoded_filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
+
+
+@router.get("/users/{user_id}/documents/{doc_type}/download")
+def download_user_document(
+    user_id: int,
+    doc_type: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Скачать конкретный документ пользователя.
+    
+    Args:
+        user_id: ID пользователя
+        doc_type: Тип документа (snils, diploma, passport, inn, marriage)
+    """
+    doc_service = DocumentExportService(db)
+    content, filename, mime_type = doc_service.get_document_file(user_id, doc_type)
+    
+    # Кодируем имя файла для заголовка
+    encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
+    
+    return StreamingResponse(
+        iter([content]),
+        media_type=mime_type,
+        headers={
+            "Content-Disposition": f"attachment; filename={encoded_filename}",
+            "Access-Control-Expose-Headers": "Content-Disposition"
+        }
+    )
+
+
+@router.delete("/users/{user_id}/documents/{doc_type}")
+def delete_user_document(
+    user_id: int,
+    doc_type: str,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Удалить документ пользователя (админское удаление).
+    
+    Args:
+        user_id: ID пользователя
+        doc_type: Тип документа (snils, diploma, passport, inn, marriage)
+    """
+    doc_service = DocumentExportService(db)
+    result = doc_service.delete_document(user_id, doc_type)
+    return result

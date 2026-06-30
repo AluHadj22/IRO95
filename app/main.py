@@ -4,8 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
 from app.database import engine, Base
 from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router
-import os
 from app.routers import lms_router
+from app.routers import profile_router  # ✅ ДОБАВЛЯЕМ ИМПОРТ
+import os
 
 # Создаём таблицы в базе данных
 Base.metadata.create_all(bind=engine)
@@ -13,6 +14,7 @@ Base.metadata.create_all(bind=engine)
 # Создаём папки для статических файлов, если их нет
 os.makedirs("app/static/uploads/courses", exist_ok=True)
 os.makedirs("app/static/uploads/speakers", exist_ok=True)
+os.makedirs("app/static/uploads/profile/documents", exist_ok=True)  # ✅ ДОБАВЛЯЕМ
 
 # Настройка шаблонов
 templates = Jinja2Templates(directory="app/templates")
@@ -26,11 +28,11 @@ app = FastAPI(
 # Настройка CORS для экспорта Excel и других запросов
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Для production замените на конкретные домены
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Content-Disposition"],  # Важно для скачивания файлов
+    expose_headers=["Content-Disposition"],
 )
 
 # Подключаем статические файлы (CSS, JS, загруженные изображения)
@@ -44,6 +46,7 @@ app.include_router(notifications_router.router)
 app.include_router(public_router.router)
 app.include_router(achievements_router.router)
 app.include_router(lms_router.router)
+app.include_router(profile_router.router)  # ✅ ДОБАВЛЯЕМ ПОДКЛЮЧЕНИЕ
 
 
 @app.get("/")

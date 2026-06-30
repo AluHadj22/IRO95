@@ -335,6 +335,317 @@
         font-size: 0.85rem;
         color: var(--gray);
     }
+
+    /* Стили для вкладки "Данные пользователей" */
+    .user-data-table .user-row {
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .user-data-table .user-row:hover {
+        background: #f1f5f9;
+    }
+    .user-data-table .user-row .expand-icon {
+        transition: transform 0.2s ease;
+        display: inline-block;
+    }
+    .user-data-table .user-row .expand-icon.expanded {
+        transform: rotate(90deg);
+    }
+    .user-data-table .user-details-row {
+        background: #fafbfc;
+    }
+    .user-data-table .user-details-row td {
+        padding: 0 16px 16px 16px;
+    }
+    .user-data-table .user-details-row .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 8px 20px;
+        padding: 12px 16px;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+    .user-data-table .user-details-row .details-grid .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+    .user-data-table .user-details-row .details-grid .detail-item .label {
+        font-size: 0.65rem;
+        color: var(--gray);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .user-data-table .user-details-row .details-grid .detail-item .value {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--dark);
+        word-break: break-word;
+    }
+    .user-data-table .user-details-row .details-grid .detail-item .value.empty {
+        color: #bbb;
+        font-style: italic;
+        font-weight: 400;
+    }
+    .user-data-table .badge-profile-complete {
+        background: #d1fae5;
+        color: #059669;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    .user-data-table .badge-profile-incomplete {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+    .export-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+        align-items: center;
+    }
+    .btn-export-all {
+        background: #059669;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    .btn-export-all:hover {
+        background: #047857;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+    }
+    .btn-export-selected {
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    .btn-export-selected:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    }
+    .btn-export-selected:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .btn-export-single {
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .btn-export-single:hover {
+        background: var(--primary-dark);
+    }
+    .user-select-checkbox {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+
+    /* Стили для документов - обновлены для красивого отображения */
+    .doc-status-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.6rem;
+        font-weight: 600;
+    }
+    .doc-status-badge.uploaded {
+        background: #d1fae5;
+        color: #059669;
+    }
+    .doc-status-badge.missing {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    .doc-actions-group {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+    }
+    .btn-doc-download {
+        background: transparent;
+        color: var(--primary);
+        border: none;
+        padding: 2px 6px;
+        font-size: 0.7rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .btn-doc-download:hover {
+        color: var(--primary-dark);
+    }
+    .btn-doc-delete {
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 2px 8px;
+        font-size: 0.6rem;
+        transition: all 0.2s ease;
+    }
+    .btn-doc-delete:hover {
+        background: #dc2626;
+    }
+    .btn-doc-zip {
+        background: #8b5cf6;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 0.7rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    .btn-doc-zip:hover {
+        background: #7c3aed;
+    }
+    .btn-doc-zip-all {
+        background: #8b5cf6;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    .btn-doc-zip-all:hover {
+        background: #7c3aed;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+    }
+    .btn-doc-zip-selected {
+        background: #8b5cf6;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+    }
+    .btn-doc-zip-selected:hover {
+        background: #7c3aed;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+    }
+    .btn-doc-zip-selected:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .documents-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        padding: 4px 0;
+    }
+    .document-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.75rem;
+        background: #f8fafc;
+        padding: 2px 8px 2px 6px;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+    .document-item .doc-label {
+        font-weight: 500;
+        color: var(--dark);
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    .document-item .doc-label:hover {
+        color: var(--primary);
+        text-decoration: underline;
+    }
+    .document-item .doc-actions-inline {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+    .document-item .doc-delete-btn {
+        background: none;
+        border: none;
+        color: #999;
+        font-size: 0.7rem;
+        cursor: pointer;
+        padding: 0 2px;
+        transition: color 0.2s ease;
+        line-height: 1;
+    }
+    .document-item .doc-delete-btn:hover {
+        color: #ef4444;
+    }
+
+    /* Поиск */
+    .search-wrapper {
+        position: relative;
+        max-width: 350px;
+        width: 100%;
+    }
+    .search-wrapper .form-control {
+        padding-right: 40px;
+        border-radius: 10px;
+    }
+    .search-wrapper .search-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        pointer-events: none;
+    }
+    .search-wrapper .clear-search {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--gray);
+        cursor: pointer;
+        display: none;
+        padding: 4px;
+    }
+    .search-wrapper .clear-search:hover {
+        color: var(--dark);
+    }
+    .search-wrapper .form-control:not(:placeholder-shown) ~ .clear-search {
+        display: block;
+    }
+    .search-wrapper .form-control:not(:placeholder-shown) ~ .search-icon {
+        display: none;
+    }
 </style>
 {% endblock %}
 
@@ -361,6 +672,9 @@
                     </a>
                     <a class="nav-link" href="#" onclick="showSection('users'); return false;">
                         <i class="bi bi-people"></i> Пользователи
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('userdata'); return false;">
+                        <i class="bi bi-table"></i> Данные пользователей
                     </a>
                 </div>
             </div>
@@ -455,7 +769,7 @@
                 </div>
             </div>
             
-            <!-- Пользователи -->
+            <!-- Пользователи (управление) -->
             <div id="usersSection" style="display: none;">
                 <div class="mb-4">
                     <h2 class="section-title">Управление пользователями</h2>
@@ -474,6 +788,77 @@
                         </table>
                     </div>
                 </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- НОВАЯ ВКЛАДКА: ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ -->
+            <!-- ============================================================ -->
+            <div id="userdataSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h2 class="section-title">Данные пользователей</h2>
+                        <p class="text-muted">Просмотр и экспорт данных пользователей в Excel по шаблону</p>
+                    </div>
+                </div>
+
+                <!-- Поиск и кнопки экспорта -->
+                <div class="export-actions">
+                    <div class="search-wrapper">
+                        <input type="text" class="form-control" id="userSearchInput" 
+                               placeholder="🔍 Поиск по ФИО, email..." 
+                               oninput="filterUserTable(this.value)">
+                        <span class="search-icon"><i class="bi bi-search"></i></span>
+                        <button class="clear-search" onclick="document.getElementById('userSearchInput').value=''; filterUserTable('');">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                    <button class="btn-export-all" onclick="exportAllUsers()">
+                        <i class="bi bi-download me-2"></i>Экспорт всех
+                    </button>
+                    <button class="btn-export-selected" id="exportSelectedBtn" onclick="exportSelectedUsers()" disabled>
+                        <i class="bi bi-download me-2"></i>Экспорт выбранных
+                    </button>
+                    <button class="btn-doc-zip-all" onclick="downloadAllDocuments()">
+                        <i class="bi bi-file-zip me-2"></i>Все документы
+                    </button>
+                    <button class="btn-doc-zip-selected" id="docZipSelectedBtn" onclick="downloadSelectedDocuments()" disabled>
+                        <i class="bi bi-file-zip me-2"></i>Доки выбранных
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="loadUserData()">
+                        <i class="bi bi-arrow-repeat me-1"></i>Обновить
+                    </button>
+                </div>
+
+                <!-- Таблица пользователей -->
+                <div class="table-card">
+                    <div class="table-responsive">
+                        <table class="table mb-0 user-data-table" id="userDataTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" id="selectAllUsers" onchange="toggleSelectAll()" class="user-select-checkbox">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>ФИО</th>
+                                    <th>Email</th>
+                                    <th>Роль</th>
+                                    <th>Статус профиля</th>
+                                    <th style="width: 280px;">Документы</th>
+                                    <th style="width: 140px;">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userDataList">
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        <div class="loading-spinner"></div>
+                                        <p class="mt-2 text-muted">Загрузка данных...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-2 text-muted small" id="userCountInfo"></div>
             </div>
         </div>
     </div>
@@ -669,6 +1054,9 @@
     
     let currentSection = 'dashboard';
     let speakersList = [];
+    let usersData = [];
+    let filteredUsersData = [];
+    let selectedUserIds = new Set();
     
     function showToast(message, type = 'success') {
         const toastContainer = document.querySelector('.toast-container') || (() => {
@@ -683,6 +1071,48 @@
         toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
         toastContainer.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // ========== ФУНКЦИЯ ПОИСКА ==========
+    function filterUserTable(query) {
+        query = query.toLowerCase().trim();
+        const rows = document.querySelectorAll('#userDataList .user-row');
+        let visibleCount = 0;
+        
+        rows.forEach(row => {
+            const fio = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
+            const email = row.querySelector('td:nth-child(4)')?.textContent?.toLowerCase() || '';
+            const id = row.querySelector('td:nth-child(2)')?.textContent || '';
+            
+            const match = !query || fio.includes(query) || email.includes(query) || id.includes(query);
+            row.style.display = match ? '' : 'none';
+            
+            // Скрываем детали, если строка скрыта
+            if (!match) {
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('user-details-row')) {
+                    detailsRow.style.display = 'none';
+                }
+            }
+            
+            if (match) visibleCount++;
+        });
+        
+        document.getElementById('userCountInfo').textContent = `Показано: ${visibleCount} из ${usersData.length} пользователей`;
+        updateSelectAllState();
+    }
+    
+    function updateSelectAllState() {
+        const visibleCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox');
+        const checkedCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox:checked');
+        const selectAll = document.getElementById('selectAllUsers');
+        if (visibleCheckboxes.length > 0) {
+            selectAll.checked = visibleCheckboxes.length === checkedCheckboxes.length;
+            selectAll.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < visibleCheckboxes.length;
+        } else {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+        }
     }
     
     // ========== ФУНКЦИЯ ПОЛУЧЕНИЯ СПИСКА КУРСОВ ИЗ MOODLE ==========
@@ -1119,7 +1549,6 @@
             return;
         }
         
-        // Получаем значение moodle_course_id
         const moodleCourseId = document.getElementById('moodle_course_id').value;
         
         const data = {
@@ -1137,7 +1566,7 @@
             start_date: document.getElementById('start_date').value || null,
             end_date: document.getElementById('end_date').value || null,
             is_open_ended: document.getElementById('is_open_ended').checked,
-            moodle_course_id: moodleCourseId ? parseInt(moodleCourseId) : null,  // ✅ НОВОЕ ПОЛЕ
+            moodle_course_id: moodleCourseId ? parseInt(moodleCourseId) : null,
             speakers: speakersList.filter(s => s.full_name.trim())
         };
         
@@ -1166,6 +1595,7 @@
         document.getElementById('categoriesSection').style.display = 'none';
         document.getElementById('coursesSection').style.display = 'none';
         document.getElementById('usersSection').style.display = 'none';
+        document.getElementById('userdataSection').style.display = 'none';
         
         if (section === 'dashboard') {
             document.getElementById('dashboardSection').style.display = 'block';
@@ -1179,6 +1609,9 @@
         } else if (section === 'users') {
             document.getElementById('usersSection').style.display = 'block';
             loadUsers();
+        } else if (section === 'userdata') {
+            document.getElementById('userdataSection').style.display = 'block';
+            loadUserData();
         }
     }
     
@@ -1206,6 +1639,623 @@
             });
         
         new bootstrap.Modal(document.getElementById('createCourseModal')).show();
+    }
+    
+    // ============================================================
+    // ФУНКЦИИ ДЛЯ ВКЛАДКИ "ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ"
+    // ============================================================
+    
+    async function loadUserData() {
+        const tbody = document.getElementById('userDataList');
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-2 text-muted">Загрузка данных...</p>
+                </td>
+            </tr>
+        `;
+        
+        try {
+            const response = await fetch('/api/admin/users/list', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки данных');
+            }
+            
+            usersData = await response.json();
+            filteredUsersData = [...usersData];
+            selectedUserIds = new Set();
+            document.getElementById('selectAllUsers').checked = false;
+            updateExportButton();
+            updateDocZipButton();
+            renderUserData(usersData);
+            document.getElementById('userCountInfo').textContent = `Всего: ${usersData.length} пользователей`;
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-danger">
+                        <i class="bi bi-exclamation-triangle fs-2"></i>
+                        <p class="mt-2">Ошибка загрузки данных: ${error.message}</p>
+                    </td>
+                </tr>
+            `;
+        }
+    }
+    
+    function renderUserData(users) {
+        const tbody = document.getElementById('userDataList');
+        
+        if (!users || users.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">
+                        <i class="bi bi-people fs-2"></i>
+                        <p class="mt-2">Нет пользователей</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        let html = '';
+        users.forEach((user, index) => {
+            const isSelected = selectedUserIds.has(user.id);
+            const profileStatus = user.has_complete_profile 
+                ? '<span class="badge-profile-complete">✅ Заполнен</span>' 
+                : '<span class="badge-profile-incomplete">⚠️ Не заполнен</span>';
+            
+            const roleLabel = user.role === 'admin' ? 'Администратор' : 'Преподаватель';
+            const roleBadge = user.role === 'admin' ? 'badge-danger' : 'badge-info';
+            
+            html += `
+                <tr class="user-row" data-user-id="${user.id}" onclick="toggleUserDetails(${index})">
+                    <td onclick="event.stopPropagation();">
+                        <input type="checkbox" class="user-select-checkbox user-checkbox" 
+                               data-user-id="${user.id}" ${isSelected ? 'checked' : ''} 
+                               onchange="toggleUserSelection(${user.id}, this.checked)">
+                    </td>
+                    <td>${user.id}</td>
+                    <td>
+                        <strong>${escapeHtml(user.full_name)}</strong>
+                        <span class="expand-icon ${isSelected ? 'expanded' : ''}" id="expandIcon_${index}">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
+                    </td>
+                    <td>${escapeHtml(user.email)}</td>
+                    <td><span class="${roleBadge}">${roleLabel}</span></td>
+                    <td>${profileStatus}</td>
+                    <td>
+                        <div id="documents_${user.id}">
+                            <span class="text-muted" style="font-size:0.7rem;">Загрузка...</span>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-export-single" onclick="event.stopPropagation(); exportSingleUser(${user.id})" title="Экспортировать данные пользователя">
+                            <i class="bi bi-download"></i> Экспорт
+                        </button>
+                        <button class="btn-doc-zip" onclick="event.stopPropagation(); downloadUserDocuments(${user.id})" title="Скачать документы пользователя">
+                            <i class="bi bi-file-zip"></i> Доки
+                        </button>
+                    </td>
+                </tr>
+                <tr class="user-details-row" id="detailsRow_${index}" style="display: none;">
+                    <td colspan="8">
+                        <div class="details-grid">
+                            <div class="detail-item">
+                                <span class="label">Муниципалитет</span>
+                                <span class="value ${!user.data.municipality ? 'empty' : ''}">${escapeHtml(user.data.municipality) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Место работы</span>
+                                <span class="value ${!user.data.organization ? 'empty' : ''}">${escapeHtml(user.data.organization) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Должность</span>
+                                <span class="value ${!user.data.position ? 'empty' : ''}">${escapeHtml(user.data.position) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">СНИЛС</span>
+                                <span class="value ${!user.data.snils ? 'empty' : ''}">${escapeHtml(user.data.snils) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Образование</span>
+                                <span class="value ${!user.data.education ? 'empty' : ''}">${escapeHtml(user.data.education) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Предметы</span>
+                                <span class="value ${!user.data.subjects ? 'empty' : ''}">${escapeHtml(user.data.subjects) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Педагогический стаж</span>
+                                <span class="value ${!user.data.teaching_experience ? 'empty' : ''}">${user.data.teaching_experience || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Стаж в должности</span>
+                                <span class="value ${!user.data.work_experience ? 'empty' : ''}">${user.data.work_experience || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Телефон</span>
+                                <span class="value ${!user.data.phone ? 'empty' : ''}">${escapeHtml(user.data.phone) || '—'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">Дата регистрации</span>
+                                <span class="value">${user.created_at || '—'}</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+        
+        // Загружаем документы для каждого пользователя
+        users.forEach(user => {
+            loadUserDocuments(user.id);
+        });
+    }
+    
+    async function loadUserDocuments(userId) {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/documents`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки документов');
+            }
+            
+            const data = await response.json();
+            renderUserDocuments(userId, data);
+        } catch (error) {
+            console.error('Error loading documents:', error);
+            const container = document.getElementById(`documents_${userId}`);
+            if (container) {
+                container.innerHTML = '<span class="text-danger" style="font-size:0.7rem;">Ошибка</span>';
+            }
+        }
+    }
+    
+    function renderUserDocuments(userId, data) {
+        const container = document.getElementById(`documents_${userId}`);
+        if (!container) return;
+        
+        if (!data.has_any_document) {
+            container.innerHTML = '<span class="text-muted" style="font-size:0.7rem;">Нет документов</span>';
+            return;
+        }
+        
+        let html = '<div class="documents-container">';
+        const docLabels = {
+            'snils': 'СНИЛС',
+            'diploma': 'Диплом',
+            'passport': 'Паспорт',
+            'inn': 'ИНН',
+            'marriage': 'Св-во о браке'
+        };
+        
+        for (const [docType, docInfo] of Object.entries(data.documents)) {
+            if (docInfo.exists) {
+                const label = docLabels[docType] || docType;
+                html += `
+                    <div class="document-item">
+                        <span class="doc-label" onclick="event.stopPropagation(); downloadSingleDocument(${userId}, '${docType}')" title="Скачать ${label}">
+                            ${label}
+                        </span>
+                        <span class="doc-actions-inline">
+                            <button class="doc-delete-btn" onclick="event.stopPropagation(); deleteUserDocument(${userId}, '${docType}')" title="Удалить документ">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </span>
+                    </div>
+                `;
+            }
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    
+    function toggleUserDetails(index) {
+        const row = document.getElementById(`detailsRow_${index}`);
+        const icon = document.getElementById(`expandIcon_${index}`);
+        if (row) {
+            const isVisible = row.style.display !== 'none';
+            row.style.display = isVisible ? 'none' : 'table-row';
+            if (icon) {
+                icon.classList.toggle('expanded');
+            }
+        }
+    }
+    
+    function toggleUserSelection(userId, checked) {
+        if (checked) {
+            selectedUserIds.add(userId);
+        } else {
+            selectedUserIds.delete(userId);
+        }
+        updateExportButton();
+        updateDocZipButton();
+        updateSelectAllState();
+    }
+    
+    function toggleSelectAll() {
+        const checked = document.getElementById('selectAllUsers').checked;
+        const visibleRows = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"])');
+        
+        visibleRows.forEach(row => {
+            const cb = row.querySelector('.user-checkbox');
+            if (cb) {
+                cb.checked = checked;
+                const userId = parseInt(cb.dataset.userId);
+                if (checked) {
+                    selectedUserIds.add(userId);
+                } else {
+                    selectedUserIds.delete(userId);
+                }
+            }
+        });
+        
+        updateExportButton();
+        updateDocZipButton();
+    }
+    
+    function updateExportButton() {
+        const btn = document.getElementById('exportSelectedBtn');
+        btn.disabled = selectedUserIds.size === 0;
+        if (selectedUserIds.size > 0) {
+            btn.innerHTML = `<i class="bi bi-download me-2"></i>Экспорт выбранных (${selectedUserIds.size})`;
+        } else {
+            btn.innerHTML = `<i class="bi bi-download me-2"></i>Экспорт выбранных`;
+        }
+    }
+    
+    function updateDocZipButton() {
+        const btn = document.getElementById('docZipSelectedBtn');
+        btn.disabled = selectedUserIds.size === 0;
+        if (selectedUserIds.size > 0) {
+            btn.innerHTML = `<i class="bi bi-file-zip me-2"></i>Доки выбранных (${selectedUserIds.size})`;
+        } else {
+            btn.innerHTML = `<i class="bi bi-file-zip me-2"></i>Доки выбранных`;
+        }
+    }
+    
+    async function exportAllUsers() {
+        if (!confirm('Экспортировать данные ВСЕХ пользователей?')) return;
+        
+        try {
+            const response = await fetch('/api/admin/users/export-all', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка экспорта');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = 'all_users_data.xlsx';
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Экспорт всех пользователей успешно завершен', 'success');
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast('Ошибка при экспорте', 'danger');
+        }
+    }
+    
+    async function exportSelectedUsers() {
+        if (selectedUserIds.size === 0) {
+            showToast('Выберите хотя бы одного пользователя', 'warning');
+            return;
+        }
+        
+        const ids = Array.from(selectedUserIds).join(',');
+        
+        try {
+            const response = await fetch(`/api/admin/users/export-selected?user_ids=${ids}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка экспорта');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `selected_users_${selectedUserIds.size}.xlsx`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast(`Экспорт ${selectedUserIds.size} пользователей успешно завершен`, 'success');
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast('Ошибка при экспорте', 'danger');
+        }
+    }
+    
+    async function exportSingleUser(userId) {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/export`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка экспорта');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `user_${userId}_data.xlsx`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Экспорт пользователя успешно завершен', 'success');
+        } catch (error) {
+            console.error('Export error:', error);
+            showToast('Ошибка при экспорте', 'danger');
+        }
+    }
+    
+    // ============================================================
+    // ФУНКЦИИ ДЛЯ РАБОТЫ С ДОКУМЕНТАМИ
+    // ============================================================
+    
+    async function downloadUserDocuments(userId) {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/documents/download`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка скачивания документов');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `user_${userId}_documents.zip`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Документы скачаны успешно', 'success');
+        } catch (error) {
+            console.error('Download documents error:', error);
+            showToast(error.message || 'Ошибка при скачивании документов', 'danger');
+        }
+    }
+    
+    async function downloadAllDocuments() {
+        if (!confirm('Скачать документы ВСЕХ пользователей?')) return;
+        
+        try {
+            const response = await fetch('/api/admin/users/documents/download-all', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка скачивания документов');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = 'all_users_documents.zip';
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Документы всех пользователей скачаны успешно', 'success');
+        } catch (error) {
+            console.error('Download all documents error:', error);
+            showToast(error.message || 'Ошибка при скачивании документов', 'danger');
+        }
+    }
+    
+    async function downloadSelectedDocuments() {
+        if (selectedUserIds.size === 0) {
+            showToast('Выберите хотя бы одного пользователя', 'warning');
+            return;
+        }
+        
+        const ids = Array.from(selectedUserIds).join(',');
+        
+        try {
+            const response = await fetch(`/api/admin/users/documents/download-selected?user_ids=${ids}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка скачивания документов');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `selected_users_documents_${selectedUserIds.size}.zip`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast(`Документы ${selectedUserIds.size} пользователей скачаны успешно`, 'success');
+        } catch (error) {
+            console.error('Download selected documents error:', error);
+            showToast(error.message || 'Ошибка при скачивании документов', 'danger');
+        }
+    }
+    
+    async function downloadSingleDocument(userId, docType) {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/documents/${docType}/download`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Ошибка скачивания документа');
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // Определяем расширение файла из Content-Type
+        const contentType = response.headers.get('Content-Type') || '';
+        let extension = 'pdf'; // по умолчанию
+        
+        if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
+            extension = 'jpg';
+        } else if (contentType.includes('image/png')) {
+            extension = 'png';
+        } else if (contentType.includes('image/gif')) {
+            extension = 'gif';
+        } else if (contentType.includes('application/pdf')) {
+            extension = 'pdf';
+        } else if (contentType.includes('image/webp')) {
+            extension = 'webp';
+        }
+        
+        // Также пробуем получить имя файла из Content-Disposition
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `document_${docType}.${extension}`;
+        
+        if (contentDisposition) {
+            // Пробуем получить имя с расширением из заголовка
+            const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+            if (match) {
+                filename = decodeURIComponent(match[1]);
+            } else {
+                const simpleMatch = contentDisposition.match(/filename=([^;]+)/);
+                if (simpleMatch) {
+                    filename = simpleMatch[1].trim();
+                }
+            }
+        }
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showToast('Документ скачан успешно', 'success');
+    } catch (error) {
+        console.error('Download single document error:', error);
+        showToast(error.message || 'Ошибка при скачивании документа', 'danger');
+    }
+}
+    
+    async function deleteUserDocument(userId, docType) {
+        const docLabels = {
+            'snils': 'СНИЛС',
+            'diploma': 'Диплом',
+            'passport': 'Паспорт',
+            'inn': 'ИНН',
+            'marriage': 'Свидетельство о браке'
+        };
+        const label = docLabels[docType] || docType;
+        
+        if (!confirm(`Удалить документ "${label}" у пользователя?`)) return;
+        
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/documents/${docType}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка удаления документа');
+            }
+            
+            showToast(`Документ "${label}" удален успешно`, 'success');
+            // Обновляем список документов
+            loadUserDocuments(userId);
+        } catch (error) {
+            console.error('Delete document error:', error);
+            showToast(error.message || 'Ошибка при удалении документа', 'danger');
+        }
     }
     
     loadStats();

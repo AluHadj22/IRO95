@@ -16,6 +16,7 @@ def format_price(price):
 
 templates.env.globals['formatPrice'] = format_price
 
+
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):
     categories = db.query(models.Category).filter(models.Category.is_active == True).limit(6).all()
@@ -27,29 +28,36 @@ def home(request: Request, db: Session = Depends(get_db)):
         "courses": courses
     })
 
+
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
+
 
 @router.get("/register", response_class=HTMLResponse)
 def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
+
 @router.get("/dashboard", response_class=HTMLResponse)
 def dashboard_page(request: Request):
     return templates.TemplateResponse("dashboard.html", {"request": request})
+
 
 @router.get("/admin", response_class=HTMLResponse)
 def admin_page(request: Request):
     return templates.TemplateResponse("admin_dashboard.html", {"request": request})
 
+
 @router.get("/courses", response_class=HTMLResponse)
 def courses_page(request: Request):
     return templates.TemplateResponse("courses.html", {"request": request})
 
+
 @router.get("/course/{course_id}", response_class=HTMLResponse)
 def course_detail_page(request: Request, course_id: int):
     return templates.TemplateResponse("course_detail.html", {"request": request, "course_id": course_id})
+
 
 @router.get("/course-modules/{course_id}", response_class=HTMLResponse)
 async def course_modules_page(request: Request, course_id: int):
@@ -60,6 +68,14 @@ async def course_modules_page(request: Request, course_id: int):
 async def lesson_page(request: Request, lesson_id: int):
     return templates.TemplateResponse("lesson_detail.html", {"request": request, "lesson_id": lesson_id})
 
+
 @router.get("/lms-admin", response_class=HTMLResponse)
 async def lms_admin_page(request: Request):
     return templates.TemplateResponse("lms_admin.html", {"request": request})
+
+
+# ========== НОВЫЙ МАРШРУТ ДЛЯ СТРАНИЦЫ ПРОФИЛЯ ==========
+@router.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):
+    """Страница профиля пользователя (Мои данные)"""
+    return templates.TemplateResponse("profile.html", {"request": request})

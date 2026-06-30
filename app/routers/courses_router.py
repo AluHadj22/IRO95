@@ -75,7 +75,7 @@ def get_courses(
     for c in courses:
         result.append({
             "id": c.id, "title": c.title, "short_description": c.short_description,
-            "description": c.description, "price": c.price, "image_url": c.image_url,
+            "description": c.description, "image_url": c.image_url,
             "video_url": c.video_url, "video_platform": c.video_platform or "youtube",
             "hashtags": c.hashtags, "keywords": c.keywords,
             "current_participants": c.current_participants, "max_participants": c.max_participants,
@@ -115,7 +115,6 @@ def create_course(
         video_platform=course.video_platform,
         hashtags=course.hashtags,
         keywords=course.keywords,
-        price=course.price,
         max_participants=course.max_participants,
         format_type=course.format_type,
         start_date=course.start_date,
@@ -168,7 +167,7 @@ def get_course(
     
     return {
         "id": course.id, "title": course.title, "description": course.description,
-        "short_description": course.short_description, "price": course.price,
+        "short_description": course.short_description,
         "image_url": course.image_url, "video_url": course.video_url,
         "video_platform": course.video_platform or "youtube",
         "hashtags": course.hashtags, "keywords": course.keywords,
@@ -319,9 +318,6 @@ def register_for_course(
     if course.current_participants >= course.max_participants:
         raise HTTPException(status_code=400, detail="Course is full")
     
-    if float(course.price) > 0:
-        raise HTTPException(status_code=402, detail="Payment required")
-    
     moodle_enrolled = False
     moodle_course_url = None
     moodle_user_id = None
@@ -349,7 +345,7 @@ def register_for_course(
     
     registration = models.CourseRegistration(
         user_id=current_user.id, 
-        course_id=course_id, 
+        course_id=course_id,
         is_paid=True
     )
     course.current_participants += 1
@@ -451,10 +447,6 @@ def check_registration_eligibility(
     # 3. Проверка мест
     if course.current_participants >= course.max_participants:
         return {"eligible": False, "reason": "course_full", "message": "Курс полностью заполнен"}
-    
-    # 4. Проверка оплаты
-    if float(course.price) > 0:
-        return {"eligible": False, "reason": "payment_required", "message": "Требуется оплата курса"}
     
     return {"eligible": True, "message": "Вы можете записаться на курс"}
 
@@ -933,8 +925,6 @@ def get_my_registrations(db: Session = Depends(get_db),
         result.append({
             "course_id": r.course_id,
             "course_title": course.title if course else "Unknown",
-            "price": course.price if course else 0,
-            "is_paid": r.is_paid,
             "registered_at": r.registered_at,
             "progress": progress_percent,
             "is_completed": is_completed,
@@ -955,7 +945,7 @@ def get_my_favorites(db: Session = Depends(get_db),
             result.append({
                 "id": fav.course.id, "title": fav.course.title,
                 "short_description": fav.course.short_description,
-                "price": fav.course.price, "image_url": fav.course.image_url,
+                "image_url": fav.course.image_url,
                 "description": fav.course.description,
                 "moodle_course_id": fav.course.moodle_course_id
             })
@@ -973,7 +963,7 @@ def get_my_watch_later(db: Session = Depends(get_db),
             result.append({
                 "id": wl.course.id, "title": wl.course.title,
                 "short_description": wl.course.short_description,
-                "price": wl.course.price, "image_url": wl.course.image_url,
+                "image_url": wl.course.image_url,
                 "description": wl.course.description,
                 "moodle_course_id": wl.course.moodle_course_id
             })

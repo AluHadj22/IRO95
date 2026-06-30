@@ -20,7 +20,7 @@
     <div class="hero-waves"></div>
 </div>
 
-<!-- Остальной контент без изменений -->
+<!-- Категории -->
 <div class="container mt-5">
     <div class="text-center mb-5">
         <h2 class="fw-bold">Популярные направления</h2>
@@ -42,6 +42,7 @@
     </div>
 </div>
 
+<!-- Новые курсы -->
 <div class="container mt-5 mb-5">
     <div class="text-center mb-5">
         <h2 class="fw-bold">Новые курсы</h2>
@@ -63,7 +64,6 @@
                     <h5 class="card-title">{{ course.title }}</h5>
                     <p class="card-text text-muted small">{{ course.short_description[:80] if course.short_description else (course.description[:80] if course.description else "Описание курса") }}...</p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="fw-bold text-primary">{{ formatPrice(course.price) }}</span>
                         <a href="/course/{{ course.id }}" class="btn btn-primary btn-sm">Подробнее <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>

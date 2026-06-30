@@ -8,14 +8,6 @@ from app import models, auth
 router = APIRouter(tags=["Public"])
 templates = Jinja2Templates(directory="app/templates")
 
-# Добавляем функцию форматирования цены в шаблоны
-def format_price(price):
-    if price == 0:
-        return "Бесплатно"
-    return f"{int(price)} ₽"
-
-templates.env.globals['formatPrice'] = format_price
-
 
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):

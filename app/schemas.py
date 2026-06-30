@@ -111,7 +111,6 @@ class CourseCreate(BaseModel):
     video_platform: str = "youtube"
     hashtags: Optional[str] = None
     keywords: Optional[str] = None
-    price: float = 0.0
     max_participants: int = 100
     format_type: str = "online"
     start_date: Optional[datetime] = None
@@ -131,7 +130,6 @@ class CourseUpdate(BaseModel):
     video_platform: Optional[str] = None
     hashtags: Optional[str] = None
     keywords: Optional[str] = None
-    price: Optional[float] = None
     max_participants: Optional[int] = None
     format_type: Optional[str] = None
     start_date: Optional[datetime] = None
@@ -153,7 +151,6 @@ class CourseResponse(BaseModel):
     video_platform: Optional[str] = "youtube"
     hashtags: Optional[str]
     keywords: Optional[str]
-    price: float
     max_participants: int
     current_participants: int
     format_type: str = "online"
@@ -168,18 +165,6 @@ class CourseResponse(BaseModel):
     
     class Config:
         from_attributes = True
-
-
-# ========== ОПЛАТА ==========
-
-class PaymentRequest(BaseModel):
-    course_id: int
-
-
-class PaymentResponse(BaseModel):
-    success: bool
-    message: str
-    payment_id: Optional[str] = None
 
 
 # ========== УВЕДОМЛЕНИЯ ==========

@@ -21,6 +21,13 @@
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
     
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
     async function loadRegistrations() {
         const response = await fetch('/api/courses/my/registrations', {
             headers: { 'Authorization': 'Bearer ' + token }
@@ -34,7 +41,7 @@
                 <div class="text-center py-5">
                     <i class="bi bi-inbox fs-1 text-muted"></i>
                     <p class="mt-3">Вы не записаны ни на один курс</p>
-                    <a href="/courses" class="btn btn-gradient">Смотреть курсы</a>
+                    <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
                 </div>
             `;
         } else {
@@ -45,16 +52,12 @@
                         <div class="card shadow-lg border-0">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="card-title mb-0">${course.course_title}</h5>
-                                    <span class="badge ${course.is_paid ? 'bg-success' : 'bg-warning'} rounded-pill">
-                                        ${course.is_paid ? 'Оплачен' : 'Требуется оплата'}
-                                    </span>
+                                    <h5 class="card-title mb-0">${escapeHtml(course.course_title)}</h5>
                                 </div>
                                 <p class="text-muted small mt-2">
                                     <i class="bi bi-calendar"></i> Записан: ${new Date(course.registered_at).toLocaleDateString()}
                                 </p>
-                                <p class="fw-bold text-primary mt-2">${formatPrice(course.price)}</p>
-                                <a href="/course/${course.course_id}" class="btn btn-gradient btn-sm mt-2">
+                                <a href="/course/${course.course_id}" class="btn btn-primary btn-sm mt-2">
                                     Подробнее <i class="bi bi-arrow-right"></i>
                                 </a>
                             </div>

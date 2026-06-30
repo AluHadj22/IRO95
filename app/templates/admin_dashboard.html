@@ -759,7 +759,7 @@
                         <table class="table mb-0">
                             <thead>
                                 <tr>
-                                    <th>ID</th><th>Название</th><th>Категория</th><th>Цена</th>
+                                    <th>ID</th><th>Название</th><th>Категория</th>
                                     <th>Формат</th><th>Участники</th><th>Moodle</th><th>Статус</th><th>Действия</th>
                                 </tr>
                             </thead>
@@ -905,8 +905,7 @@
                             <input type="text" class="form-control" id="course_title" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Цена (руб)</label>
-                            <input type="number" class="form-control" id="course_price" value="0" step="100">
+                            <!-- Поле цены удалено -->
                         </div>
                     </div>
                     <div class="mb-3">
@@ -1087,7 +1086,6 @@
             const match = !query || fio.includes(query) || email.includes(query) || id.includes(query);
             row.style.display = match ? '' : 'none';
             
-            // Скрываем детали, если строка скрыта
             if (!match) {
                 const detailsRow = row.nextElementSibling;
                 if (detailsRow && detailsRow.classList.contains('user-details-row')) {
@@ -1367,7 +1365,7 @@
         const tbody = document.getElementById('coursesList');
         
         if (!courses || courses.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p></td></tr>';
         } else {
             const formatMap = {
                 'full_time': 'Очный',
@@ -1381,7 +1379,6 @@
                     <td>${c.id}</td>
                     <td><i class="bi bi-book me-2" style="color: var(--primary);"></i>${c.title}</td>
                     <td>${c.category_name || '-'}</td>
-                    <td class="fw-bold" style="color: var(--primary);">${c.price === 0 ? 'Бесплатно' : c.price + ' ₽'}</td>
                     <td><span class="badge-info">${formatMap[c.format_type] || 'Онлайн'}</span></td>
                     <td>${c.current_participants}/${c.max_participants}</td>
                     <td>
@@ -1429,7 +1426,7 @@
         const response = await fetch(`/api/admin/courses/${courseId}/registrations`, { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await response.json();
         
-        let html = `<div class="mb-4"><h5>${data.course.title}</h5><p class="text-muted">Цена: <strong>${data.course.price === 0 ? 'Бесплатно' : data.course.price + ' ₽'}</strong></p>`;
+        let html = `<div class="mb-4"><h5>${data.course.title}</h5>`;
         if (data.course.moodle_course_id) {
             html += `<p class="text-muted">Moodle ID: <strong>${data.course.moodle_course_id}</strong></p>`;
         }
@@ -1438,7 +1435,7 @@
         if (!data.registrations || data.registrations.length === 0) {
             html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет регистраций</p></div>';
         } else {
-            html += `<div class="table-responsive"><table class="table table-striped"><thead class="table-light"><tr><th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Оплата</th><th>Дата</th></tr></thead><tbody>`;
+            html += `<div class="table-responsive"><table class="table table-striped"><thead class="table-light"><tr><th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Дата</th></tr></thead><tbody>`;
             data.registrations.forEach((r, idx) => {
                 html += `<tr>
                     <td>${idx + 1}</td>
@@ -1447,7 +1444,6 @@
                     <td>${r.position || '-'}</td>
                     <td>${r.phone || '-'}</td>
                     <td>${r.organization || '-'}</td>
-                    <td><span class="${r.is_paid ? 'badge-success' : 'badge-warning'}">${r.is_paid ? 'Оплачен' : 'Не оплачен'}</span></td>
                     <td>${new Date(r.registered_at).toLocaleDateString()}</td>
                 </tr>`;
             });
@@ -1556,7 +1552,6 @@
             short_description: document.getElementById('course_short_desc').value,
             description: document.getElementById('course_desc').value,
             category_id: parseInt(categoryId),
-            price: parseFloat(document.getElementById('course_price').value) || 0,
             max_participants: parseInt(document.getElementById('course_max').value) || 30,
             image_url: document.getElementById('course_image_url').value || null,
             video_url: document.getElementById('course_video').value || null,
@@ -1793,7 +1788,6 @@
         
         tbody.innerHTML = html;
         
-        // Загружаем документы для каждого пользователя
         users.forEach(user => {
             loadUserDocuments(user.id);
         });
@@ -2165,66 +2159,63 @@
     }
     
     async function downloadSingleDocument(userId, docType) {
-    try {
-        const response = await fetch(`/api/admin/users/${userId}/documents/${docType}/download`, {
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Ошибка скачивания документа');
-        }
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // Определяем расширение файла из Content-Type
-        const contentType = response.headers.get('Content-Type') || '';
-        let extension = 'pdf'; // по умолчанию
-        
-        if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
-            extension = 'jpg';
-        } else if (contentType.includes('image/png')) {
-            extension = 'png';
-        } else if (contentType.includes('image/gif')) {
-            extension = 'gif';
-        } else if (contentType.includes('application/pdf')) {
-            extension = 'pdf';
-        } else if (contentType.includes('image/webp')) {
-            extension = 'webp';
-        }
-        
-        // Также пробуем получить имя файла из Content-Disposition
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = `document_${docType}.${extension}`;
-        
-        if (contentDisposition) {
-            // Пробуем получить имя с расширением из заголовка
-            const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-            if (match) {
-                filename = decodeURIComponent(match[1]);
-            } else {
-                const simpleMatch = contentDisposition.match(/filename=([^;]+)/);
-                if (simpleMatch) {
-                    filename = simpleMatch[1].trim();
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/documents/${docType}/download`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Ошибка скачивания документа');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const contentType = response.headers.get('Content-Type') || '';
+            let extension = 'pdf';
+            
+            if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
+                extension = 'jpg';
+            } else if (contentType.includes('image/png')) {
+                extension = 'png';
+            } else if (contentType.includes('image/gif')) {
+                extension = 'gif';
+            } else if (contentType.includes('application/pdf')) {
+                extension = 'pdf';
+            } else if (contentType.includes('image/webp')) {
+                extension = 'webp';
+            }
+            
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `document_${docType}.${extension}`;
+            
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) {
+                    filename = decodeURIComponent(match[1]);
+                } else {
+                    const simpleMatch = contentDisposition.match(/filename=([^;]+)/);
+                    if (simpleMatch) {
+                        filename = simpleMatch[1].trim();
+                    }
                 }
             }
+            
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showToast('Документ скачан успешно', 'success');
+        } catch (error) {
+            console.error('Download single document error:', error);
+            showToast(error.message || 'Ошибка при скачивании документа', 'danger');
         }
-        
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showToast('Документ скачан успешно', 'success');
-    } catch (error) {
-        console.error('Download single document error:', error);
-        showToast(error.message || 'Ошибка при скачивании документа', 'danger');
     }
-}
     
     async function deleteUserDocument(userId, docType) {
         const docLabels = {
@@ -2250,7 +2241,6 @@
             }
             
             showToast(`Документ "${label}" удален успешно`, 'success');
-            // Обновляем список документов
             loadUserDocuments(userId);
         } catch (error) {
             console.error('Delete document error:', error);

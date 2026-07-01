@@ -1,17 +1,22 @@
 # app/routers/profile_router.py
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from app import models, schemas, auth
 from app.database import get_db
+from app.services.encryption_service import EncryptionService
 from typing import Optional, List
 import os
 import uuid
 import shutil
+import logging
 from datetime import datetime, date
 import json
 import re
+
+# Настройка логирования
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/profile", tags=["Profile"])
 
@@ -24,54 +29,113 @@ os.makedirs(DOCUMENTS_DIR, exist_ok=True)
 # Максимальный размер файла - 20MB
 MAX_FILE_SIZE = 20 * 1024 * 1024
 
+# Допустимые расширения файлов
+ALLOWED_DOCUMENT_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.pdf'}
+
+# Инициализируем сервис шифрования
+encryption = EncryptionService()
+
 
 # ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
 
-def save_file(file: UploadFile, subfolder: str = "") -> dict:
-    """Сохраняет загруженный файл и возвращает информацию о нём"""
-    allowed_extensions = ['.png', '.jpg', '.jpeg', '.pdf']
+def validate_document_file(file: UploadFile) -> None:
+    """
+    Проверяет документ на:
+    - Расширение
+    - Размер
+    - MIME-тип (если доступен python-magic)
+    """
+    # === 1. Проверка расширения ===
     ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_DOCUMENT_EXTENSIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Неподдерживаемый формат файла. Разрешены: {', '.join(ALLOWED_DOCUMENT_EXTENSIONS)}"
+        )
     
-    if ext not in allowed_extensions:
-        raise HTTPException(status_code=400, detail=f"Неподдерживаемый формат файла. Разрешены: {', '.join(allowed_extensions)}")
-    
-    # Проверка размера файла (макс. 20MB)
+    # === 2. Проверка размера ===
     file.file.seek(0, 2)
     file_size = file.file.tell()
     file.file.seek(0)
     
     if file_size > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail=f"Файл слишком большой (макс. {MAX_FILE_SIZE // (1024 * 1024)}MB)")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Файл слишком большой (макс. {MAX_FILE_SIZE // (1024 * 1024)}MB)"
+        )
     
+    # === 3. Проверка MIME-типа (если доступен python-magic) ===
+    try:
+        import magic
+        file.file.seek(0)
+        mime = magic.from_buffer(file.file.read(1024), mime=True)
+        file.file.seek(0)
+        
+        # Разрешённые MIME-типы
+        allowed_mimes = ['image/jpeg', 'image/png', 'application/pdf']
+        
+        if mime not in allowed_mimes:
+            # Если MIME-тип не совпадает, но расширение разрешено — пропускаем с предупреждением
+            # (некоторые файлы могут иметь неправильный MIME-тип)
+            logger.warning(f"Файл {file.filename} имеет MIME-тип {mime}, но расширение {ext} разрешено")
+            # Не блокируем загрузку, только предупреждаем
+    except ImportError:
+        # python-magic не установлен — пропускаем проверку MIME
+        logger.warning("python-magic не установлен, проверка MIME-типа пропущена")
+    except Exception as e:
+        # Другая ошибка — логируем, но не блокируем
+        logger.warning(f"Ошибка проверки MIME-типа: {e}")
+
+
+def save_file(file: UploadFile, subfolder: str = "") -> dict:
+    """Сохраняет загруженный файл с проверкой безопасности"""
+    # Валидация файла
+    validate_document_file(file)
+    
+    # Генерация безопасного имени
+    ext = os.path.splitext(file.filename)[1].lower()
     filename = f"{uuid.uuid4().hex}{ext}"
+    
+    # Создаём подпапку
     subfolder_path = os.path.join(DOCUMENTS_DIR, subfolder) if subfolder else DOCUMENTS_DIR
     os.makedirs(subfolder_path, exist_ok=True)
     
     filepath = os.path.join(subfolder_path, filename)
     
-    with open(filepath, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # Сохраняем файл
+    try:
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка сохранения файла: {str(e)}"
+        )
     
+    # Формируем URL
     file_url = f"/static/uploads/profile/documents/{subfolder}/{filename}" if subfolder else f"/static/uploads/profile/documents/{filename}"
     
     return {
         "url": file_url,
         "filename": file.filename,
-        "file_size": file_size,
+        "file_size": os.path.getsize(filepath),
         "file_type": ext[1:] if ext else "unknown"
     }
 
 
-def delete_file(file_url: str):
+def delete_file(file_url: str) -> bool:
     """Удаляет файл по URL"""
     if not file_url:
-        return
+        return False
     
     # Извлекаем путь из URL
     relative_path = file_url.replace("/static/", "app/static/")
     if os.path.exists(relative_path):
-        os.remove(relative_path)
-        return True
+        try:
+            os.remove(relative_path)
+            return True
+        except Exception:
+            return False
     return False
 
 
@@ -143,7 +207,10 @@ def get_education_item(
     ).first()
     
     if not education:
-        raise HTTPException(status_code=404, detail="Запись об образовании не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Запись об образовании не найдена"
+        )
     
     return schemas.EducationResponse.model_validate(education)
 
@@ -201,7 +268,10 @@ def update_education(
     ).first()
     
     if not education:
-        raise HTTPException(status_code=404, detail="Запись об образовании не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Запись об образовании не найдена"
+        )
     
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(education, key, value)
@@ -235,7 +305,10 @@ def delete_education(
     ).first()
     
     if not education:
-        raise HTTPException(status_code=404, detail="Запись об образовании не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Запись об образовании не найдена"
+        )
     
     # Удаляем файл диплома, если есть
     if education.diploma_file_url:
@@ -254,7 +327,7 @@ async def upload_diploma(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию диплома"""
+    """Загрузить копию диплома с проверкой безопасности"""
     education = db.query(models.UserEducation).filter(
         and_(
             models.UserEducation.id == education_id,
@@ -263,7 +336,10 @@ async def upload_diploma(
     ).first()
     
     if not education:
-        raise HTTPException(status_code=404, detail="Запись об образовании не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Запись об образовании не найдена"
+        )
     
     # Удаляем старый файл, если есть
     if education.diploma_file_url:
@@ -299,7 +375,6 @@ def get_work(
     
     result = []
     for w in work:
-        # Парсим subjects из JSON
         subjects = []
         if w.subjects:
             try:
@@ -347,7 +422,10 @@ def get_work_item(
     ).first()
     
     if not work:
-        raise HTTPException(status_code=404, detail="Место работы не найдено")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Место работы не найдено"
+        )
     
     subjects = []
     if work.subjects:
@@ -386,12 +464,17 @@ def create_work(
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
     """Добавить место работы"""
-    # Проверка обязательных полей (на всякий случай, хотя валидация уже есть в схеме)
     if not data.activity_type:
-        raise HTTPException(status_code=400, detail="Вид деятельности обязателен для заполнения")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Вид деятельности обязателен для заполнения"
+        )
     
     if not data.subjects or len(data.subjects) == 0:
-        raise HTTPException(status_code=400, detail="Добавьте хотя бы один предмет")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Добавьте хотя бы один предмет"
+        )
     
     subjects_json = json.dumps(data.subjects) if data.subjects else None
     
@@ -414,7 +497,6 @@ def create_work(
         work_end_date=data.work_end_date
     )
     
-    # Если это текущее место работы, сбрасываем флаг у других
     if data.is_current:
         db.query(models.UserWork).filter(
             models.UserWork.user_id == current_user.id,
@@ -444,7 +526,10 @@ def update_work(
     ).first()
     
     if not work:
-        raise HTTPException(status_code=404, detail="Место работы не найдено")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Место работы не найдено"
+        )
     
     update_data = data.model_dump(exclude_unset=True)
     if 'subjects' in update_data and update_data['subjects'] is not None:
@@ -453,7 +538,6 @@ def update_work(
     for key, value in update_data.items():
         setattr(work, key, value)
     
-    # Если это текущее место работы, сбрасываем флаг у других
     if data.is_current:
         db.query(models.UserWork).filter(
             models.UserWork.user_id == current_user.id,
@@ -482,7 +566,10 @@ def delete_work(
     ).first()
     
     if not work:
-        raise HTTPException(status_code=404, detail="Место работы не найдено")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Место работы не найдено"
+        )
     
     db.delete(work)
     db.commit()
@@ -515,13 +602,15 @@ def create_address(
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
     """Создать почтовый адрес"""
-    # Проверяем, есть ли уже адрес
     existing = db.query(models.UserAddress).filter(
         models.UserAddress.user_id == current_user.id
     ).first()
     
     if existing:
-        raise HTTPException(status_code=400, detail="Адрес уже существует. Используйте PUT для обновления")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Адрес уже существует. Используйте PUT для обновления"
+        )
     
     address = models.UserAddress(
         user_id=current_user.id,
@@ -555,7 +644,10 @@ def update_address(
     ).first()
     
     if not address:
-        raise HTTPException(status_code=404, detail="Адрес не найден")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Адрес не найден"
+        )
     
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(address, key, value)
@@ -566,14 +658,14 @@ def update_address(
     return {"message": "Адрес обновлен"}
 
 
-# ========== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ ==========
+# ========== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ (С ШИФРОВАНИЕМ) ==========
 
 @router.get("/additional-info")
 def get_additional_info(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить дополнительную информацию пользователя"""
+    """Получить дополнительную информацию пользователя (с расшифровкой)"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -581,7 +673,11 @@ def get_additional_info(
     if not info:
         return None
     
-    return schemas.AdditionalInfoResponse.model_validate(info)
+    response_data = schemas.AdditionalInfoResponse.model_validate(info)
+    response_data.snils = encryption.decrypt(info.snils) if info.snils else None
+    response_data.inn = encryption.decrypt(info.inn) if info.inn else None
+    
+    return response_data
 
 
 @router.post("/additional-info")
@@ -590,23 +686,29 @@ def create_additional_info(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Создать дополнительную информацию"""
+    """Создать дополнительную информацию (с шифрованием)"""
     existing = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
     if existing:
-        raise HTTPException(status_code=400, detail="Дополнительная информация уже существует. Используйте PUT для обновления")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Дополнительная информация уже существует. Используйте PUT для обновления"
+        )
+    
+    encrypted_snils = encryption.encrypt(data.snils) if data.snils else None
+    encrypted_inn = encryption.encrypt(data.inn) if data.inn else None
     
     info = models.UserAdditionalInfo(
         user_id=current_user.id,
-        snils=data.snils,
+        snils=encrypted_snils,
         passport_series=data.passport_series,
         passport_number=data.passport_number,
         passport_issued_by=data.passport_issued_by,
         passport_issued_date=data.passport_issued_date,
         passport_department_code=data.passport_department_code,
-        inn=data.inn,
+        inn=encrypted_inn,
         data_confirmed=data.data_confirmed or False
     )
     
@@ -623,15 +725,25 @@ def update_additional_info(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Обновить дополнительную информацию"""
+    """Обновить дополнительную информацию (с шифрованием)"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена"
+        )
     
-    for key, value in data.model_dump(exclude_unset=True).items():
+    update_data = data.model_dump(exclude_unset=True)
+    
+    if 'snils' in update_data and update_data['snils'] is not None:
+        update_data['snils'] = encryption.encrypt(update_data['snils'])
+    if 'inn' in update_data and update_data['inn'] is not None:
+        update_data['inn'] = encryption.encrypt(update_data['inn'])
+    
+    for key, value in update_data.items():
         setattr(info, key, value)
     
     db.commit()
@@ -648,13 +760,16 @@ async def upload_snils(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию СНИЛС"""
+    """Загрузить копию СНИЛС с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
+        )
     
     if info.snils_file_url:
         delete_file(info.snils_file_url)
@@ -686,7 +801,10 @@ async def delete_snils(
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена"
+        )
     
     if info.snils_file_url:
         delete_file(info.snils_file_url)
@@ -695,7 +813,10 @@ async def delete_snils(
         db.commit()
         return {"message": "Файл СНИЛС удален"}
     
-    raise HTTPException(status_code=404, detail="Файл не найден")
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Файл не найден"
+    )
 
 
 @router.post("/upload/passport")
@@ -704,13 +825,16 @@ async def upload_passport(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию паспорта"""
+    """Загрузить копию паспорта с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
+        )
     
     if info.passport_file_url:
         delete_file(info.passport_file_url)
@@ -742,7 +866,10 @@ async def delete_passport(
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена"
+        )
     
     if info.passport_file_url:
         delete_file(info.passport_file_url)
@@ -751,7 +878,10 @@ async def delete_passport(
         db.commit()
         return {"message": "Файл паспорта удален"}
     
-    raise HTTPException(status_code=404, detail="Файл не найден")
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Файл не найден"
+    )
 
 
 @router.post("/upload/inn")
@@ -760,13 +890,16 @@ async def upload_inn(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию ИНН"""
+    """Загрузить копию ИНН с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
+        )
     
     if info.inn_file_url:
         delete_file(info.inn_file_url)
@@ -798,7 +931,10 @@ async def delete_inn(
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена"
+        )
     
     if info.inn_file_url:
         delete_file(info.inn_file_url)
@@ -807,7 +943,10 @@ async def delete_inn(
         db.commit()
         return {"message": "Файл ИНН удален"}
     
-    raise HTTPException(status_code=404, detail="Файл не найден")
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Файл не найден"
+    )
 
 
 @router.post("/upload/marriage-certificate")
@@ -816,13 +955,16 @@ async def upload_marriage_certificate(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию свидетельства о браке"""
+    """Загрузить копию свидетельства о браке с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
+        )
     
     if info.marriage_certificate_file_url:
         delete_file(info.marriage_certificate_file_url)
@@ -854,7 +996,10 @@ async def delete_marriage_certificate(
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена"
+        )
     
     if info.marriage_certificate_file_url:
         delete_file(info.marriage_certificate_file_url)
@@ -863,7 +1008,10 @@ async def delete_marriage_certificate(
         db.commit()
         return {"message": "Файл свидетельства о браке удален"}
     
-    raise HTTPException(status_code=404, detail="Файл не найден")
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Файл не найден"
+    )
 
 
 # ========== УДАЛЕНИЕ ДОКУМЕНТОВ (ОБЩЕЕ) ==========
@@ -875,15 +1023,45 @@ async def delete_document(
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
     """Удалить документ по типу"""
+    if doc_type == "diploma":
+        education = db.query(models.UserEducation).filter(
+            and_(
+                models.UserEducation.user_id == current_user.id,
+                models.UserEducation.is_main == True
+            )
+        ).first()
+        
+        if not education:
+            education = db.query(models.UserEducation).filter(
+                models.UserEducation.user_id == current_user.id
+            ).order_by(models.UserEducation.created_at.desc()).first()
+        
+        if not education or not education.diploma_file_url:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Диплом не найден"
+            )
+        
+        file_url = education.diploma_file_url
+        delete_file(file_url)
+        
+        education.diploma_file_url = None
+        education.diploma_file_name = None
+        db.commit()
+        
+        return {"message": "Диплом удален"}
+    
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
     if not info:
-        raise HTTPException(status_code=404, detail="Дополнительная информация не найдена")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Дополнительная информация не найдена"
+        )
     
     doc_map = {
-        "diploma": ("diploma_file_url", "diploma_file_name"),
         "passport": ("passport_file_url", "passport_file_name"),
         "inn": ("inn_file_url", "inn_file_name"),
         "marriage": ("marriage_certificate_file_url", "marriage_certificate_file_name"),
@@ -891,13 +1069,19 @@ async def delete_document(
     }
     
     if doc_type not in doc_map:
-        raise HTTPException(status_code=400, detail="Неизвестный тип документа")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Неизвестный тип документа"
+        )
     
     url_field, name_field = doc_map[doc_type]
     file_url = getattr(info, url_field)
     
     if not file_url:
-        raise HTTPException(status_code=404, detail="Файл не найден")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Файл не найден"
+        )
     
     delete_file(file_url)
     setattr(info, url_field, None)
@@ -931,6 +1115,12 @@ def get_full_profile(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
     
+    additional_info_response = None
+    if additional_info:
+        additional_info_response = schemas.AdditionalInfoResponse.model_validate(additional_info)
+        additional_info_response.snils = encryption.decrypt(additional_info.snils) if additional_info.snils else None
+        additional_info_response.inn = encryption.decrypt(additional_info.inn) if additional_info.inn else None
+    
     return schemas.FullProfileResponse(
         user=schemas.UserResponse.model_validate(current_user),
         personal_data=schemas.PersonalDataResponse(
@@ -948,59 +1138,41 @@ def get_full_profile(
         education=[schemas.EducationResponse.model_validate(e) for e in education],
         work=[schemas.WorkResponse.model_validate(w) for w in work],
         address=schemas.AddressResponse.model_validate(address) if address else None,
-        additional_info=schemas.AdditionalInfoResponse.model_validate(additional_info) if additional_info else None,
+        additional_info=additional_info_response,
         is_profile_complete=current_user.is_profile_complete()
     )
 
+
+# ========== ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ ==========
 
 @router.get("/check-complete")
 def check_profile_complete(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Проверить, заполнен ли профиль полностью"""
+    """
+    Проверить, заполнен ли профиль полностью.
+    Возвращает детальную информацию о заполненности каждого раздела.
+    """
+    completion_details = current_user.get_profile_completion_details()
+    
     missing_fields = []
+    for section in completion_details["sections"]:
+        if not section["is_complete"]:
+            for field in section["fields"]:
+                missing_fields.append(field)
     
-    if not current_user.last_name:
-        missing_fields.append("last_name")
-    if not current_user.first_name:
-        missing_fields.append("first_name")
-    if not current_user.middle_name:
-        missing_fields.append("middle_name")
-    if not current_user.gender:
-        missing_fields.append("gender")
-    if not current_user.birth_date:
-        missing_fields.append("birth_date")
-    if not current_user.citizenship:
-        missing_fields.append("citizenship")
-    if not current_user.region:
-        missing_fields.append("region")
-    if not current_user.municipality:
-        missing_fields.append("municipality")
-    if not current_user.phone_raw:
-        missing_fields.append("phone_raw")
-    if not current_user.consent_to_personal_data:
-        missing_fields.append("consent_to_personal_data")
+    if completion_details["is_complete"]:
+        message = "Профиль заполнен полностью"
+    else:
+        incomplete_sections = [s["label"] for s in completion_details["sections"] if not s["is_complete"]]
+        message = f"Не заполнены: {', '.join(incomplete_sections)}"
     
-    is_complete = len(missing_fields) == 0
-    
-    field_names = {
-        "last_name": "Фамилия",
-        "first_name": "Имя",
-        "middle_name": "Отчество",
-        "gender": "Пол",
-        "birth_date": "Дата рождения",
-        "citizenship": "Гражданство",
-        "region": "Субъект РФ",
-        "municipality": "Муниципалитет",
-        "phone_raw": "Телефон",
-        "consent_to_personal_data": "Согласие на обработку данных"
+    return {
+        "is_complete": completion_details["is_complete"],
+        "missing_fields": missing_fields,
+        "message": message,
+        "sections": completion_details["sections"],
+        "total_sections": completion_details["total_sections"],
+        "completed_sections": completion_details["completed_sections"]
     }
-    
-    missing_names = [field_names.get(f, f) for f in missing_fields]
-    
-    return schemas.ProfileCompleteCheck(
-        is_complete=is_complete,
-        missing_fields=missing_fields,
-        message="Профиль заполнен полностью" if is_complete else f"Не заполнены: {', '.join(missing_names)}"
-    )

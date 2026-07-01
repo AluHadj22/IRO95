@@ -1,9 +1,10 @@
 # app/models.py
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, Enum, Float, JSON, Table, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text, Enum, Float, JSON, Table, Date, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
+import json
 
 
 class UserRole(str, enum.Enum):
@@ -20,7 +21,8 @@ class User(Base):
     position = Column(String(255), nullable=True)
     phone = Column(String(50), nullable=True)
     organization = Column(String(500), nullable=True)
-    hashed_password = Column(String(255), nullable=False)
+    # ✅ Увеличена длина для bcrypt хешей (обычно 60 символов, но с запасом)
+    hashed_password = Column(String(300), nullable=False)
     role = Column(Enum(UserRole), default=UserRole.TEACHER)
     is_active = Column(Boolean, default=True)
     is_blocked = Column(Boolean, default=False)
@@ -38,6 +40,8 @@ class User(Base):
     municipality = Column(String(200), nullable=True)
     phone_raw = Column(String(20), nullable=True)  # телефон в формате +7XXXXXXXXXX
     consent_to_personal_data = Column(Boolean, default=False)
+    # ✅ Добавлено время согласия для логирования
+    consent_given_at = Column(DateTime(timezone=True), nullable=True)
     
     # Связи с новыми таблицами
     education = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
@@ -56,6 +60,13 @@ class User(Base):
     activity_logs = relationship("UserActivityLog", back_populates="user", cascade="all, delete-orphan")
     certificates = relationship("Certificate", back_populates="user", cascade="all, delete-orphan")
     
+    # ✅ Индексы для часто запрашиваемых полей
+    __table_args__ = (
+        Index('idx_user_email', 'email'),
+        Index('idx_user_role', 'role'),
+        Index('idx_user_is_blocked', 'is_blocked'),
+    )
+    
     # ========== МЕТОДЫ ПРОВЕРКИ ПРОФИЛЯ ==========
     
     def is_personal_data_complete(self) -> bool:
@@ -66,14 +77,16 @@ class User(Base):
             self.region, self.municipality, self.phone_raw,
             self.consent_to_personal_data
         ]
-        return all(required_fields)
+        return all(field is not None and field != "" for field in required_fields)
     
     def has_education(self) -> bool:
         """Проверяет, есть ли хотя бы одна запись об образовании"""
-        return len(self.education) > 0
+        return self.education is not None and len(self.education) > 0
     
     def has_education_with_diploma(self) -> bool:
         """Проверяет, есть ли запись об образовании с загруженным дипломом"""
+        if not self.education:
+            return False
         for edu in self.education:
             if edu.diploma_file_url:
                 return True
@@ -81,18 +94,19 @@ class User(Base):
     
     def has_work(self) -> bool:
         """Проверяет, есть ли хотя бы одна запись о работе"""
-        return len(self.work) > 0
+        return self.work is not None and len(self.work) > 0
     
     def has_work_with_subjects(self) -> bool:
         """Проверяет, есть ли запись о работе с заполненными предметами"""
-        import json
+        if not self.work:
+            return False
         for work in self.work:
             if work.subjects:
                 try:
                     subjects = json.loads(work.subjects)
                     if subjects and len(subjects) > 0:
                         return True
-                except:
+                except (json.JSONDecodeError, TypeError):
                     pass
         return False
     
@@ -119,22 +133,23 @@ class User(Base):
     def is_profile_complete(self) -> bool:
         """
         ОСНОВНАЯ ПРОВЕРКА: заполнен ли профиль полностью для записи на курсы.
-        Проверяет:
-        1. Личные данные (все обязательные поля)
+        
+        Минимальные требования для записи на курс:
+        1. Личные данные (все обязательные поля со звездочкой)
         2. Образование (хотя бы одна запись)
-        3. Диплом (загружен файл)
-        4. Работа (хотя бы одна запись с предметами)
-        5. СНИЛС (номер и файл)
-        6. Паспорт (файл)
-        7. ИНН (файл)
-        8. Подтверждение данных
+        3. Копия диплома (загружен файл)
+        4. Работа (хотя бы одна запись)
+        5. СНИЛС (заполнен номер)
+        6. Копия СНИЛС (загружен файл)
+        7. Копия паспорта (загружен файл)
+        8. Копия ИНН (загружен файл)
+        9. Подтверждение данных
         """
         return (
             self.is_personal_data_complete() and
             self.has_education() and
             self.has_education_with_diploma() and
             self.has_work() and
-            self.has_work_with_subjects() and
             self.has_snils() and
             self.has_snils_file() and
             self.has_passport_file() and
@@ -207,13 +222,6 @@ class User(Base):
                 "fields": ["Добавьте место работы"],
                 "is_complete": False
             })
-        elif not self.has_work_with_subjects():
-            missing_sections.append({
-                "section": "work",
-                "label": "Место работы",
-                "fields": ["Заполните предметы в месте работы"],
-                "is_complete": False
-            })
         else:
             missing_sections.append({
                 "section": "work",
@@ -227,7 +235,7 @@ class User(Base):
         if not self.has_snils():
             doc_fields.append("Заполните номер СНИЛС")
         if not self.has_snils_file():
-            doc_fields.append("Загрузите файл СНИЛС")
+            doc_fields.append("Загрузите копию СНИЛС")
         if not self.has_passport_file():
             doc_fields.append("Загрузите копию паспорта")
         if not self.has_inn_file():
@@ -313,7 +321,14 @@ class Course(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # ========== ПОЛЕ ДЛЯ MOODLE ==========
-    moodle_course_id = Column(Integer, nullable=True, index=True)  # ID курса в Moodle
+    moodle_course_id = Column(Integer, nullable=True, index=True)
+    
+    # ✅ Индексы для часто запрашиваемых полей
+    __table_args__ = (
+        Index('idx_course_category_id', 'category_id'),
+        Index('idx_course_is_active', 'is_active'),
+        Index('idx_course_moodle_id', 'moodle_course_id'),
+    )
     
     category = relationship("Category", back_populates="courses")
     speakers = relationship("CourseSpeaker", back_populates="course", cascade="all, delete-orphan")
@@ -458,29 +473,18 @@ class UserEducation(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     
-    # Уровень образования (выплывающий список)
-    education_level = Column(String(100), nullable=True)  # СПО; Бакалавриат; Специалитет; Магистратура; Начальное общее; Основное общее; Среднее общее
-    
-    # Данные документа об образовании
-    document_series = Column(String(50), nullable=True)  # Серия документа
-    registration_number = Column(String(50), nullable=True)  # Регистрационный номер
-    qualification = Column(String(500), nullable=True)  # Квалификация по диплому
-    document_number = Column(String(50), nullable=True)  # Номер документа
-    issue_date = Column(Date, nullable=True)  # Дата выдачи
-    
-    # Ученая степень / звание
-    academic_degree = Column(String(50), nullable=True)  # Нет степени; Кандидат наук; Доктор наук
-    academic_title = Column(String(50), nullable=True)  # Нет звания; Доцент; Профессор
-    
-    # Если ФИО в дипломе отличается
+    education_level = Column(String(100), nullable=True)
+    document_series = Column(String(50), nullable=True)
+    registration_number = Column(String(50), nullable=True)
+    qualification = Column(String(500), nullable=True)
+    document_number = Column(String(50), nullable=True)
+    issue_date = Column(Date, nullable=True)
+    academic_degree = Column(String(50), nullable=True)
+    academic_title = Column(String(50), nullable=True)
     diploma_last_name = Column(String(100), nullable=True)
     diploma_first_name = Column(String(100), nullable=True)
     diploma_middle_name = Column(String(100), nullable=True)
-    
-    # Флаг основного образования
     is_main = Column(Boolean, default=False)
-    
-    # Файл с копией диплома
     diploma_file_url = Column(String(500), nullable=True)
     diploma_file_name = Column(String(500), nullable=True)
     
@@ -497,33 +501,18 @@ class UserWork(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     
-    # Место работы (поиск по ИНН или названию)
-    organization = Column(String(500), nullable=True)  # полное название организации
-    organization_inn = Column(String(50), nullable=True)  # ИНН организации
-    
-    # Стаж
-    work_experience_years = Column(Integer, nullable=True)  # Стаж в должности (лет)
-    teaching_experience_years = Column(Integer, nullable=True)  # Педагогический стаж (лет)
-    
-    # Тип организации (выплывающий список)
-    organization_type = Column(String(200), nullable=True)  # 1-10 типы
-    
-    # Должность (зависит от типа организации)
+    organization = Column(String(500), nullable=True)
+    organization_inn = Column(String(50), nullable=True)
+    work_experience_years = Column(Integer, nullable=True)
+    teaching_experience_years = Column(Integer, nullable=True)
+    organization_type = Column(String(200), nullable=True)
     position = Column(String(200), nullable=True)
-    
-    # Дополнительные поля
-    activity_type = Column(String(200), nullable=True)  # Вид деятельности (необязательно)
-    civil_service_status = Column(String(100), nullable=True)  # Статус госслужащего
-    
-    # Предметы (выплывающий список, множественный выбор) - храним как JSON строку
-    subjects = Column(Text, nullable=True)  # JSON строка с массивом предметов
-    
-    # Чекбоксы
-    is_urban = Column(Boolean, default=False)  # городская
-    is_rural = Column(Boolean, default=False)  # сельская
-    is_shnor = Column(Boolean, default=False)  # ШНОР
-    
-    # Текущее место работы
+    activity_type = Column(String(200), nullable=True)
+    civil_service_status = Column(String(100), nullable=True)
+    subjects = Column(Text, nullable=True)
+    is_urban = Column(Boolean, default=False)
+    is_rural = Column(Boolean, default=False)
+    is_shnor = Column(Boolean, default=False)
     is_current = Column(Boolean, default=True)
     work_start_date = Column(Date, nullable=True)
     work_end_date = Column(Date, nullable=True)
@@ -541,15 +530,14 @@ class UserAddress(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     
-    postal_index = Column(String(10), nullable=True)  # Индекс
-    region = Column(String(200), nullable=True)  # Регион/область
-    city = Column(String(200), nullable=True)  # Населенный пункт
-    street = Column(String(300), nullable=True)  # Улица
-    house = Column(String(50), nullable=True)  # Номер дома
-    building = Column(String(50), nullable=True)  # Корпус (необязательно)
-    structure = Column(String(50), nullable=True)  # Строение (необязательно)
-    apartment = Column(String(50), nullable=True)  # Квартира (необязательно)
-    
+    postal_index = Column(String(10), nullable=True)
+    region = Column(String(200), nullable=True)
+    city = Column(String(200), nullable=True)
+    street = Column(String(300), nullable=True)
+    house = Column(String(50), nullable=True)
+    building = Column(String(50), nullable=True)
+    structure = Column(String(50), nullable=True)
+    apartment = Column(String(50), nullable=True)
     is_main = Column(Boolean, default=True)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -565,12 +553,10 @@ class UserAdditionalInfo(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     
-    # СНИЛС (формат: XXX-XXX-XXX XX)
-    snils = Column(String(20), nullable=True)
+    snils = Column(String(255), nullable=True)  # ✅ Увеличена длина для зашифрованных данных
     snils_file_url = Column(String(500), nullable=True)
     snils_file_name = Column(String(500), nullable=True)
     
-    # Паспортные данные
     passport_series = Column(String(10), nullable=True)
     passport_number = Column(String(20), nullable=True)
     passport_issued_by = Column(String(500), nullable=True)
@@ -579,16 +565,13 @@ class UserAdditionalInfo(Base):
     passport_file_url = Column(String(500), nullable=True)
     passport_file_name = Column(String(500), nullable=True)
     
-    # ИНН
-    inn = Column(String(20), nullable=True)
+    inn = Column(String(255), nullable=True)  # ✅ Увеличена длина для зашифрованных данных
     inn_file_url = Column(String(500), nullable=True)
     inn_file_name = Column(String(500), nullable=True)
     
-    # Свидетельство о браке (если была смена ФИО)
     marriage_certificate_file_url = Column(String(500), nullable=True)
     marriage_certificate_file_name = Column(String(500), nullable=True)
     
-    # Подтверждение данных
     data_confirmed = Column(Boolean, default=False)
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())

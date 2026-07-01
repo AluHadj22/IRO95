@@ -10,7 +10,7 @@ CurrentAdmin = Depends(auth.get_current_admin)
 OptionalUser = Depends(auth.get_current_user_optional)
 
 
-# ========== НОВАЯ ЗАВИСИМОСТЬ: ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ ==========
+# ========== ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ ==========
 
 def require_complete_profile(
     current_user: models.User = Depends(auth.get_current_active_user),
@@ -29,11 +29,11 @@ def require_complete_profile(
     Raises:
         HTTPException 403: С деталями о незаполненных разделах
     """
-    if not current_user.is_profile_complete():
-        # Получаем детальную информацию о заполненности профиля
-        completion_details = current_user.get_profile_completion_details()
-        
-        # Формируем список незаполненных разделов для пользователя
+    # Используем новый метод для получения детальной информации
+    completion_details = current_user.get_profile_completion_details()
+    
+    if not completion_details["is_complete"]:
+        # Получаем список незаполненных разделов
         missing_sections = []
         for section in completion_details["sections"]:
             if not section["is_complete"]:

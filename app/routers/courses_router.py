@@ -408,10 +408,9 @@ def check_registration_eligibility(
         return {"eligible": False, "reason": "course_not_found", "message": "Курс не найден"}
     
     # 1. Проверка заполненности профиля с использованием нового метода
-    if not current_user.is_profile_complete():
-        # Получаем детальную информацию о заполненности профиля
-        completion_details = current_user.get_profile_completion_details()
-        
+    completion_details = current_user.get_profile_completion_details()
+    
+    if not completion_details["is_complete"]:
         # Формируем список незаполненных разделов
         missing_sections = []
         for section in completion_details["sections"]:
@@ -431,7 +430,8 @@ def check_registration_eligibility(
             "reason": "profile_incomplete",
             "message": message,
             "missing_sections": missing_sections,
-            "redirect": "/profile"
+            "redirect": "/profile",
+            "completion_details": completion_details  # Добавляем детальную информацию
         }
     
     # 2. Проверка регистрации

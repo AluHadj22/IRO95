@@ -1,8 +1,9 @@
 # app/schemas.py
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, validator, field_validator
 from datetime import datetime, date
 from typing import Optional, List, Any, Union
 from enum import Enum
+import re
 
 
 class UserRole(str, Enum):
@@ -14,12 +15,42 @@ class UserRole(str, Enum):
 
 class UserCreate(BaseModel):
     email: EmailStr
-    full_name: str
-    position: Optional[str] = None
-    phone: Optional[str] = None
-    organization: Optional[str] = None
-    password: str = Field(..., min_length=6)
+    full_name: str = Field(..., min_length=2, max_length=255)
+    position: Optional[str] = Field(None, max_length=255)
+    phone: Optional[str] = Field(None, max_length=50)
+    organization: Optional[str] = Field(None, max_length=500)
+    password: str = Field(..., min_length=8, description="Пароль должен содержать минимум 8 символов")
     admin_code: Optional[str] = None
+    
+    @field_validator('password')
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        """Проверка силы пароля"""
+        if len(v) < 8:
+            raise ValueError('Пароль должен содержать минимум 8 символов')
+        
+        if not re.search(r'\d', v):
+            raise ValueError('Пароль должен содержать хотя бы одну цифру')
+        
+        if not re.search(r'[A-ZА-Я]', v):
+            raise ValueError('Пароль должен содержать хотя бы одну заглавную букву')
+        
+        if not re.search(r'[a-zа-я]', v):
+            raise ValueError('Пароль должен содержать хотя бы одну строчную букву')
+        
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', v):
+            raise ValueError('Пароль должен содержать хотя бы один специальный символ (!@#$%^&*() etc.)')
+        
+        return v
+    
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            cleaned = re.sub(r'[^\d+]', '', v)
+            if not re.match(r'^\+?\d{10,15}$', cleaned):
+                raise ValueError('Неверный формат телефона. Используйте +7XXXXXXXXXX')
+        return v
 
 
 class UserResponse(BaseModel):
@@ -42,11 +73,30 @@ class Token(BaseModel):
     token_type: str
 
 
+# ========== АДМИНСКОЕ ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ ==========
+
+class UserAdminUpdate(BaseModel):
+    full_name: Optional[str] = Field(None, min_length=2, max_length=255)
+    position: Optional[str] = Field(None, max_length=255)
+    phone: Optional[str] = Field(None, max_length=50)
+    organization: Optional[str] = Field(None, max_length=500)
+    is_blocked: Optional[bool] = None
+    
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            cleaned = re.sub(r'[^\d+]', '', v)
+            if not re.match(r'^\+?\d{10,15}$', cleaned):
+                raise ValueError('Неверный формат телефона')
+        return v
+
+
 # ========== КАТЕГОРИИ ==========
 
 class CategoryCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(None, max_length=1000)
 
 
 class CategoryResponse(BaseModel):
@@ -62,10 +112,10 @@ class CategoryResponse(BaseModel):
 # ========== СПИКЕРЫ ==========
 
 class SpeakerCreate(BaseModel):
-    full_name: str
-    bio: Optional[str] = None
-    photo_url: Optional[str] = None
-    position: Optional[str] = None
+    full_name: str = Field(..., min_length=1, max_length=255)
+    bio: Optional[str] = Field(None, max_length=1000)
+    photo_url: Optional[str] = Field(None, max_length=500)
+    position: Optional[str] = Field(None, max_length=255)
 
 
 class SpeakerResponse(BaseModel):
@@ -82,41 +132,57 @@ class SpeakerResponse(BaseModel):
 # ========== КУРСЫ ==========
 
 class CourseCreate(BaseModel):
-    title: str
+    title: str = Field(..., min_length=1, max_length=500)
     description: Optional[str] = None
-    short_description: Optional[str] = None
+    short_description: Optional[str] = Field(None, max_length=200)
     category_id: Optional[int] = None
-    image_url: Optional[str] = None
-    video_url: Optional[str] = None
+    image_url: Optional[str] = Field(None, max_length=500)
+    video_url: Optional[str] = Field(None, max_length=500)
     video_platform: str = "youtube"
-    hashtags: Optional[str] = None
-    keywords: Optional[str] = None
-    max_participants: int = 100
+    hashtags: Optional[str] = Field(None, max_length=500)
+    keywords: Optional[str] = Field(None, max_length=500)
+    max_participants: int = Field(100, ge=1, le=1000)
     format_type: str = "online"
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     is_open_ended: bool = False
     moodle_course_id: Optional[int] = None
     speakers: List[SpeakerCreate] = []
+    
+    @field_validator('end_date')
+    @classmethod
+    def validate_dates(cls, v: Optional[datetime], info) -> Optional[datetime]:
+        if v and info.data.get('start_date'):
+            if v < info.data['start_date']:
+                raise ValueError('Дата окончания не может быть раньше даты начала')
+        return v
 
 
 class CourseUpdate(BaseModel):
-    title: Optional[str] = None
+    title: Optional[str] = Field(None, min_length=1, max_length=500)
     description: Optional[str] = None
-    short_description: Optional[str] = None
+    short_description: Optional[str] = Field(None, max_length=200)
     category_id: Optional[int] = None
-    image_url: Optional[str] = None
-    video_url: Optional[str] = None
+    image_url: Optional[str] = Field(None, max_length=500)
+    video_url: Optional[str] = Field(None, max_length=500)
     video_platform: Optional[str] = None
-    hashtags: Optional[str] = None
-    keywords: Optional[str] = None
-    max_participants: Optional[int] = None
+    hashtags: Optional[str] = Field(None, max_length=500)
+    keywords: Optional[str] = Field(None, max_length=500)
+    max_participants: Optional[int] = Field(None, ge=1, le=1000)
     format_type: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     is_open_ended: Optional[bool] = None
     is_active: Optional[bool] = None
     moodle_course_id: Optional[int] = None
+    
+    @field_validator('end_date')
+    @classmethod
+    def validate_dates(cls, v: Optional[datetime], info) -> Optional[datetime]:
+        if v and info.data.get('start_date'):
+            if v < info.data['start_date']:
+                raise ValueError('Дата окончания не может быть раньше даты начала')
+        return v
 
 
 class CourseResponse(BaseModel):
@@ -165,9 +231,8 @@ class NotificationResponse(BaseModel):
 # --- Личные данные ---
 
 class PersonalDataUpdate(BaseModel):
-    """Обновление личных данных"""
-    last_name: Optional[str] = Field(None, max_length=100)
-    first_name: Optional[str] = Field(None, max_length=100)
+    last_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    first_name: Optional[str] = Field(None, min_length=1, max_length=100)
     middle_name: Optional[str] = Field(None, max_length=100)
     gender: Optional[str] = Field(None, pattern="^(male|female)$")
     birth_date: Optional[date] = None
@@ -176,10 +241,19 @@ class PersonalDataUpdate(BaseModel):
     municipality: Optional[str] = Field(None, max_length=200)
     phone_raw: Optional[str] = Field(None, max_length=20)
     consent_to_personal_data: Optional[bool] = None
+    
+    @field_validator('phone_raw')
+    @classmethod
+    def validate_phone_raw(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            cleaned = re.sub(r'\D', '', v)
+            if len(cleaned) != 10:
+                raise ValueError('Телефон должен содержать ровно 10 цифр (без +7)')
+            return cleaned
+        return v
 
 
 class PersonalDataResponse(BaseModel):
-    """Ответ с личными данными"""
     last_name: Optional[str]
     first_name: Optional[str]
     middle_name: Optional[str]
@@ -197,7 +271,6 @@ class PersonalDataResponse(BaseModel):
 
 # --- Образование ---
 
-# Список допустимых уровней образования
 EDUCATION_LEVELS = [
     "Высшее",
     "Среднее профессиональное",
@@ -206,7 +279,6 @@ EDUCATION_LEVELS = [
 
 
 class EducationCreate(BaseModel):
-    """Создание образования"""
     education_level: Optional[str] = Field(None, max_length=100)
     document_series: Optional[str] = Field(None, max_length=50)
     registration_number: Optional[str] = Field(None, max_length=50)
@@ -228,7 +300,6 @@ class EducationCreate(BaseModel):
 
 
 class EducationUpdate(BaseModel):
-    """Обновление образования"""
     education_level: Optional[str] = Field(None, max_length=100)
     document_series: Optional[str] = Field(None, max_length=50)
     registration_number: Optional[str] = Field(None, max_length=50)
@@ -250,7 +321,6 @@ class EducationUpdate(BaseModel):
 
 
 class EducationResponse(BaseModel):
-    """Ответ с данными об образовании"""
     id: int
     user_id: int
     education_level: Optional[str]
@@ -276,7 +346,6 @@ class EducationResponse(BaseModel):
 
 # --- Работа ---
 
-# Список допустимых видов деятельности
 ACTIVITY_TYPES = [
     "Управленческие кадры",
     "Педагогические работники",
@@ -286,11 +355,10 @@ ACTIVITY_TYPES = [
 
 
 class WorkCreate(BaseModel):
-    """Создание места работы"""
     organization: Optional[str] = Field(None, max_length=500)
     organization_inn: Optional[str] = Field(None, max_length=50)
-    work_experience_years: Optional[int] = Field(None, ge=0)
-    teaching_experience_years: Optional[int] = Field(None, ge=0)
+    work_experience_years: Optional[int] = Field(None, ge=0, le=60)
+    teaching_experience_years: Optional[int] = Field(None, ge=0, le=60)
     organization_type: Optional[str] = Field(None, max_length=200)
     position: Optional[str] = Field(None, max_length=200)
     activity_type: str = Field(..., max_length=200, min_length=1, description="Вид деятельности (обязательно)")
@@ -308,14 +376,20 @@ class WorkCreate(BaseModel):
         if v not in ACTIVITY_TYPES:
             raise ValueError(f"Недопустимый вид деятельности. Допустимые значения: {', '.join(ACTIVITY_TYPES)}")
         return v
+    
+    @validator('work_end_date')
+    def validate_work_dates(cls, v, values):
+        if v and values.get('work_start_date'):
+            if v < values['work_start_date']:
+                raise ValueError('Дата окончания не может быть раньше даты начала')
+        return v
 
 
 class WorkUpdate(BaseModel):
-    """Обновление места работы"""
     organization: Optional[str] = Field(None, max_length=500)
     organization_inn: Optional[str] = Field(None, max_length=50)
-    work_experience_years: Optional[int] = Field(None, ge=0)
-    teaching_experience_years: Optional[int] = Field(None, ge=0)
+    work_experience_years: Optional[int] = Field(None, ge=0, le=60)
+    teaching_experience_years: Optional[int] = Field(None, ge=0, le=60)
     organization_type: Optional[str] = Field(None, max_length=200)
     position: Optional[str] = Field(None, max_length=200)
     activity_type: Optional[str] = Field(None, max_length=200)
@@ -336,7 +410,6 @@ class WorkUpdate(BaseModel):
 
 
 class WorkResponse(BaseModel):
-    """Ответ с данными о работе"""
     id: int
     user_id: int
     organization: Optional[str]
@@ -364,7 +437,6 @@ class WorkResponse(BaseModel):
 # --- Почтовый адрес ---
 
 class AddressCreate(BaseModel):
-    """Создание почтового адреса"""
     postal_index: Optional[str] = Field(None, max_length=10)
     region: Optional[str] = Field(None, max_length=200)
     city: Optional[str] = Field(None, max_length=200)
@@ -374,10 +446,17 @@ class AddressCreate(BaseModel):
     structure: Optional[str] = Field(None, max_length=50)
     apartment: Optional[str] = Field(None, max_length=50)
     is_main: bool = True
+    
+    @field_validator('postal_index')
+    @classmethod
+    def validate_postal_index(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            if not re.match(r'^\d{5,6}$', v):
+                raise ValueError('Индекс должен содержать 5 или 6 цифр')
+        return v
 
 
 class AddressUpdate(BaseModel):
-    """Обновление почтового адреса"""
     postal_index: Optional[str] = Field(None, max_length=10)
     region: Optional[str] = Field(None, max_length=200)
     city: Optional[str] = Field(None, max_length=200)
@@ -390,7 +469,6 @@ class AddressUpdate(BaseModel):
 
 
 class AddressResponse(BaseModel):
-    """Ответ с почтовым адресом"""
     id: int
     user_id: int
     postal_index: Optional[str]
@@ -409,7 +487,7 @@ class AddressResponse(BaseModel):
         from_attributes = True
 
 
-# --- Дополнительная информация ---
+# ========== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ ==========
 
 class AdditionalInfoUpdate(BaseModel):
     """Обновление дополнительной информации"""
@@ -421,6 +499,38 @@ class AdditionalInfoUpdate(BaseModel):
     passport_department_code: Optional[str] = Field(None, max_length=20)
     inn: Optional[str] = Field(None, max_length=20)
     data_confirmed: Optional[bool] = None
+    
+    @field_validator('snils')
+    @classmethod
+    def validate_snils(cls, v: Optional[str]) -> Optional[str]:
+        """
+        ✅ УПРОЩЁННАЯ ВАЛИДАЦИЯ СНИЛС
+        Принимает: 12345678901, 123-456-789-01, 123-456-789 01
+        Возвращает: 123-456-789 01
+        """
+        if not v:
+            return v
+        
+        # Убираем все пробелы, дефисы и другие разделители
+        cleaned = re.sub(r'[\s\-]', '', v)
+        
+        # Проверяем, что только цифры и длина 11
+        if not re.match(r'^\d{11}$', cleaned):
+            raise ValueError('СНИЛС должен содержать 11 цифр')
+        
+        # Форматируем красиво: XXX-XXX-XXX XX
+        formatted = f"{cleaned[:3]}-{cleaned[3:6]}-{cleaned[6:9]} {cleaned[9:11]}"
+        return formatted
+    
+    @field_validator('inn')
+    @classmethod
+    def validate_inn(cls, v: Optional[str]) -> Optional[str]:
+        if v:
+            cleaned = re.sub(r'\D', '', v)
+            if len(cleaned) not in [10, 12]:
+                raise ValueError('ИНН должен содержать 10 или 12 цифр')
+            return cleaned
+        return v
 
 
 class AdditionalInfoResponse(BaseModel):
@@ -453,7 +563,6 @@ class AdditionalInfoResponse(BaseModel):
 # --- Полный профиль ---
 
 class FullProfileResponse(BaseModel):
-    """Полный ответ с профилем пользователя"""
     user: UserResponse
     personal_data: PersonalDataResponse
     education: List[EducationResponse] = []
@@ -469,7 +578,6 @@ class FullProfileResponse(BaseModel):
 # --- Загрузка файлов ---
 
 class FileUploadResponse(BaseModel):
-    """Ответ при загрузке файла"""
     url: str
     filename: str
     file_size: int
@@ -480,7 +588,9 @@ class FileUploadResponse(BaseModel):
 # ========== ПРОВЕРКА ПРОФИЛЯ ==========
 
 class ProfileCompleteCheck(BaseModel):
-    """Проверка заполненности профиля"""
     is_complete: bool
     missing_fields: List[str] = []
     message: str
+    sections: Optional[List[dict]] = None
+    total_sections: Optional[int] = None
+    completed_sections: Optional[int] = None

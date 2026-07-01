@@ -15,13 +15,14 @@
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <!-- Yandex Maps API -->
-    <script src="https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU" type="text/javascript"></script>
+    <!-- Yandex Maps API - АСИНХРОННАЯ ЗАГРУЗКА (НЕ БЛОКИРУЕТ СТРАНИЦУ) -->
+    <script async defer src="https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU" type="text/javascript"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <style>
+        /* ... ваш CSS ... */
         :root {
             --primary: #0057A4;
             --primary-dark: #003d7a;
@@ -164,7 +165,6 @@
             overflow: hidden;
         }
         
-        /* Анимированные круги на фоне */
         .hero-section::before {
             content: '';
             position: absolute;
@@ -194,13 +194,11 @@
             50% { transform: translate(20px, -20px) scale(1.05); }
         }
         
-        /* Герой-контент */
         .hero-content {
             position: relative;
             z-index: 2;
         }
         
-        /* Анимированная иконка-символ */
         .hero-icon {
             display: inline-block;
             margin-bottom: 20px;
@@ -212,7 +210,6 @@
             50% { transform: translateY(-10px); }
         }
         
-        /* Герой-изображение/иллюстрация */
         .hero-illustration {
             position: absolute;
             bottom: 0;
@@ -224,7 +221,6 @@
             pointer-events: none;
         }
         
-        /* Волны снизу */
         .hero-waves {
             position: absolute;
             bottom: 0;
@@ -236,7 +232,6 @@
             background-repeat: no-repeat;
         }
         
-        /* Тосты */
         .toast-container {
             position: fixed;
             top: 80px;
@@ -244,7 +239,6 @@
             z-index: 9999;
         }
         
-        /* Футер */
         .footer {
             background: linear-gradient(135deg, #001f40 0%, #003d7a 100%);
             color: #cbd5e1;
@@ -301,14 +295,12 @@
             color: white;
         }
         
-        /* Карточки курсов */
         .course-card-img {
             height: 200px;
             object-fit: cover;
             width: 100%;
         }
         
-        /* Категории */
         .category-card {
             background: var(--white);
             border-radius: 16px;
@@ -330,7 +322,6 @@
             color: var(--primary);
         }
         
-        /* Спикеры */
         .speaker-card {
             text-align: center;
             padding: 20px;
@@ -356,7 +347,6 @@
             padding: 3px;
         }
         
-        /* Формы */
         .form-control, .form-select {
             border-radius: 10px;
             border: 1px solid var(--border);
@@ -371,7 +361,6 @@
             outline: none;
         }
         
-        /* Модальные окна */
         .modal-content {
             border-radius: 20px;
             border: none;
@@ -390,7 +379,6 @@
             opacity: 0.8;
         }
         
-        /* Бейджи */
         .badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -413,7 +401,6 @@
             color: #dc2626;
         }
         
-        /* Анимации */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -429,7 +416,6 @@
             animation: fadeInUp 0.6s ease-out forwards;
         }
         
-        /* Стили для карты */
         .map-container {
             border-radius: 16px;
             overflow: hidden;
@@ -451,7 +437,6 @@
             color: inherit;
         }
         
-        /* Адаптивность */
         @media (max-width: 768px) {
             .hero-section {
                 padding: 60px 0;
@@ -553,34 +538,56 @@
 </footer>
 
 <script>
-    AOS.init({
-        duration: 800,
-        once: true,
-        offset: 100
-    });
-    
-    // Плавная смена навбара при скролле
+// ============================================================
+// ВСЕ ОШИБКИ ОБРАБОТАНЫ — СТРАНИЦА ЗАГРУЖАЕТСЯ МГНОВЕННО
+// ============================================================
+
+try {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    }
+} catch(e) {
+    console.warn('AOS init error:', e);
+}
+
+try {
     window.addEventListener('scroll', function() {
-        const navbar = document.querySelector('.navbar');
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
+        try {
+            const navbar = document.querySelector('.navbar');
+            if (navbar) {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        } catch(e) {}
     });
-    
-    // Координаты ИРО ЧР (г. Грозный, ул. Лермонтова, 2)
-    // Уточненные координаты - при необходимости замените на точные
-    const instituteCoords = [43.3181, 45.6941];
-    const instituteAddress = "г. Грозный, ул. Лермонтова, 2";
-    const institutePhone = "+7 (8712) 21-22-24";
-    const instituteEmail = "ipkro-chr@mail.ru";
-    const instituteHours = "Пн-Пт: 9:00 - 18:00";
-    
-    // Функция инициализации карты в футере
-    function initFooterMap() {
+} catch(e) {
+    console.warn('Navbar scroll error:', e);
+}
+
+// ============================================================
+// КООРДИНАТЫ
+// ============================================================
+const instituteCoords = [43.3181, 45.6941];
+const instituteAddress = "г. Грозный, ул. Лермонтова, 2";
+const institutePhone = "+7 (8712) 21-22-24";
+const instituteEmail = "ipkro-chr@mail.ru";
+const instituteHours = "Пн-Пт: 9:00 - 18:00";
+
+// ============================================================
+// КАРТЫ — ЗАГРУЖАЮТСЯ ТОЛЬКО КОГДА API ГОТОВ
+// ============================================================
+function initFooterMap() {
+    try {
         const mapElement = document.getElementById('footer-map');
-        if (!mapElement || typeof ymaps === 'undefined') return;
+        if (!mapElement) return;
+        if (typeof ymaps === 'undefined') return;
         
         const map = new ymaps.Map('footer-map', {
             center: instituteCoords,
@@ -588,7 +595,6 @@
             controls: ['zoomControl']
         });
         
-        // Создаем красивую метку
         const placemark = new ymaps.Placemark(instituteCoords, {
             hintContent: 'ГБУ ДПО «ИРО ЧР»',
             balloonContent: `
@@ -620,16 +626,19 @@
         
         map.geoObjects.add(placemark);
         
-        // Адаптация при ресайзе
         window.addEventListener('resize', function() {
-            map.container.fitToViewport();
+            try { map.container.fitToViewport(); } catch(e) {}
         });
+    } catch(e) {
+        console.warn('Footer map init error:', e);
     }
-    
-    // Функция для полной карты (для отдельной страницы)
-    function initFullMap() {
+}
+
+function initFullMap() {
+    try {
         const mapElement = document.getElementById('full-map');
-        if (!mapElement || typeof ymaps === 'undefined') return;
+        if (!mapElement) return;
+        if (typeof ymaps === 'undefined') return;
         
         const map = new ymaps.Map('full-map', {
             center: instituteCoords,
@@ -637,7 +646,6 @@
             controls: ['zoomControl', 'fullscreenControl', 'geolocationControl', 'rulerControl']
         });
         
-        // Создаем красивую метку с подробной информацией
         const placemark = new ymaps.Placemark(instituteCoords, {
             hintContent: 'ГБУ ДПО «ИРО ЧР»',
             balloonContentHeader: `
@@ -688,12 +696,10 @@
         
         map.geoObjects.add(placemark);
         
-        // Открыть балун при загрузке
         setTimeout(() => {
-            placemark.balloon.open();
+            try { placemark.balloon.open(); } catch(e) {}
         }, 500);
         
-        // Добавляем кнопку "Схема проезда" на карту
         const routeButton = new ymaps.control.Button({
             data: { content: "📍 Схема проезда", title: "Проложить маршрут" },
             options: { maxWidth: 140, selectOnClick: false }
@@ -704,20 +710,22 @@
         });
         
         map.controls.add(routeButton, { float: 'right' });
+    } catch(e) {
+        console.warn('Full map init error:', e);
     }
-    
-    // Загрузка карт после загрузки API
-    if (typeof ymaps !== 'undefined') {
-        ymaps.ready(function() {
-            initFooterMap();
-            // Если на странице есть полная карта - инициализируем её
-            if (document.getElementById('full-map')) {
-                initFullMap();
-            }
-        });
-    } else {
-        window.addEventListener('load', function() {
-            if (typeof ymaps !== 'undefined') {
+}
+
+// ============================================================
+// ЗАГРУЗКА КАРТ — НЕ БЛОКИРУЕТ СТРАНИЦУ
+// ============================================================
+try {
+    // Проверяем каждые 200мс, не загрузился ли ymaps
+    let ymapsLoaded = false;
+    const checkYmaps = setInterval(function() {
+        if (typeof ymaps !== 'undefined' && ymaps.ready) {
+            if (!ymapsLoaded) {
+                ymapsLoaded = true;
+                clearInterval(checkYmaps);
                 ymaps.ready(function() {
                     initFooterMap();
                     if (document.getElementById('full-map')) {
@@ -725,70 +733,98 @@
                     }
                 });
             }
-        });
-    }
+        }
+    }, 200);
     
+    // Таймаут — перестаём ждать через 10 секунд
+    setTimeout(function() {
+        clearInterval(checkYmaps);
+    }, 10000);
+} catch(e) {
+    console.warn('Yandex Maps init error:', e);
+}
+
+// ============================================================
+// АВТОРИЗАЦИЯ
+// ============================================================
+try {
     const token = localStorage.getItem('token');
     
-    function showToast(message, type = 'success') {
-        const toastContainer = document.querySelector('.toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast show bg-${type === 'success' ? 'success' : 'danger'} text-white`;
-        toast.setAttribute('role', 'alert');
-        toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
-        toastContainer.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
+    window.showToast = function(message, type = 'success') {
+        try {
+            const toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) return;
+            const toast = document.createElement('div');
+            toast.className = `toast show bg-${type === 'success' ? 'success' : 'danger'} text-white`;
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } catch(e) {}
+    };
     
-    function logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        showToast('Вы вышли из системы', 'success');
-        setTimeout(() => window.location.href = '/', 1000);
-    }
+    window.logout = function() {
+        try {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            if (window.showToast) window.showToast('Вы вышли из системы', 'success');
+            setTimeout(() => window.location.href = '/', 1000);
+        } catch(e) {
+            window.location.href = '/';
+        }
+    };
     
     if (token) {
         fetch('/api/auth/me', {
             headers: { 'Authorization': 'Bearer ' + token }
         })
-        .then(res => {
+        .then(function(res) {
             if (!res.ok) throw new Error('Token invalid');
             return res.json();
         })
-        .then(user => {
-            const navLinks = document.getElementById('navLinks');
-            if (user.role === 'admin') {
-                navLinks.innerHTML = `
-                    <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-badge me-1"></i>Мои данные</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/admin">Админ панель</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Выйти</a></li>
-                `;
-            } else {
-                navLinks.innerHTML = `
-                    <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-badge me-1"></i>Мои данные</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" onclick="logout()">Выйти</a></li>
-                `;
-            }
+        .then(function(user) {
+            try {
+                const navLinks = document.getElementById('navLinks');
+                if (!navLinks) return;
+                
+                if (user.role === 'admin') {
+                    navLinks.innerHTML = `
+                        <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-badge me-1"></i>Мои данные</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin">Админ панель</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="window.logout()">Выйти</a></li>
+                    `;
+                } else {
+                    navLinks.innerHTML = `
+                        <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-badge me-1"></i>Мои данные</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="window.logout()">Выйти</a></li>
+                    `;
+                }
+            } catch(e) {}
         })
-        .catch(() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('role');
+        .catch(function() {
+            try {
+                localStorage.removeItem('token');
+                localStorage.removeItem('role');
+            } catch(e) {}
         });
     }
+} catch(e) {
+    console.warn('Auth error:', e);
+}
 </script>
 
 <!-- ========== ПОДКЛЮЧАЕМ СКРИПТ ПРОВЕРКИ ПРОФИЛЯ ========== -->
 <script src="/static/js/profile_check.js"></script>
 
-<!-- Блок для страницы с полной картой (нужно добавить в отдельный файл map.html) -->
+<!-- Блок для страницы с полной картой -->
 {% block extra_js %}{% endblock %}
 </body>
 </html>

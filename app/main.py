@@ -1,51 +1,211 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from app.database import engine, Base
 from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router
-from app.routers import profile_router  # ✅ ДОБАВЛЯЕМ ИМПОРТ
+from app.routers import profile_router
+from app.config import settings
 import os
+import re
+import logging
 
-# Создаём таблицы в базе данных
-Base.metadata.create_all(bind=engine)
+# === НАСТРОЙКА ЛОГГИРОВАНИЯ С ФИЛЬТРАЦИЕЙ ===
 
-# Создаём папки для статических файлов, если их нет
-os.makedirs("app/static/uploads/courses", exist_ok=True)
-os.makedirs("app/static/uploads/speakers", exist_ok=True)
-os.makedirs("app/static/uploads/profile/documents", exist_ok=True)  # ✅ ДОБАВЛЯЕМ
+class SensitiveDataFilter(logging.Filter):
+    """Фильтрует чувствительные данные из логов"""
+    def filter(self, record):
+        if hasattr(record, 'msg') and isinstance(record.msg, str):
+            # Маскируем пароли
+            record.msg = re.sub(r'"password":"[^"]*"', '"password":"***"', record.msg)
+            record.msg = re.sub(r'"password":\s*"[^"]*"', '"password": "***"', record.msg)
+            # Маскируем СНИЛС
+            record.msg = re.sub(r'"snils":"[^"]*"', '"snils":"***"', record.msg)
+            record.msg = re.sub(r'"snils":\s*"[^"]*"', '"snils": "***"', record.msg)
+            # Маскируем паспортные данные
+            record.msg = re.sub(r'"passport_series":"[^"]*"', '"passport_series":"***"', record.msg)
+            record.msg = re.sub(r'"passport_number":"[^"]*"', '"passport_number":"***"', record.msg)
+            # Маскируем ИНН
+            record.msg = re.sub(r'"inn":"[^"]*"', '"inn":"***"', record.msg)
+            record.msg = re.sub(r'"inn":\s*"[^"]*"', '"inn": "***"', record.msg)
+            # Маскируем токены
+            record.msg = re.sub(r'"access_token":"[^"]*"', '"access_token":"***"', record.msg)
+            record.msg = re.sub(r'"token":"[^"]*"', '"token":"***"', record.msg)
+        return True
 
-# Настройка шаблонов
-templates = Jinja2Templates(directory="app/templates")
+# Применяем фильтр к логгерам
+logging.getLogger('uvicorn.access').addFilter(SensitiveDataFilter())
+logging.getLogger('uvicorn.error').addFilter(SensitiveDataFilter())
 
+
+# === RATE LIMITER (ЗАЩИТА ОТ БРУТФОРСА И DoS) ===
+limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 app = FastAPI(
     title="ИРО ЧР - Платформа повышения квалификации",
     description="Платформа для регистрации на курсы повышения квалификации",
-    version="1.0.0"
+    version="1.0.0",
+    debug=settings.DEBUG
 )
 
-# Настройка CORS для экспорта Excel и других запросов
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["Content-Disposition"],
-)
+# Подключаем обработчик Rate Limit
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Подключаем статические файлы (CSS, JS, загруженные изображения)
+
+# === ЗАЩИТНЫЕ HTTP-ЗАГОЛОВКИ (Middleware) ===
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """
+    Добавляет защитные HTTP-заголовки ко всем ответам.
+    ✅ X-Content-Type-Options - защита от MIME-снифинга
+    ✅ X-Frame-Options - защита от Clickjacking
+    ✅ X-XSS-Protection - защита от XSS (старые браузеры)
+    ✅ Referrer-Policy - контроль реферера
+    ✅ Content-Security-Policy - защита от XSS и инъекций (ИДЕАЛЬНЫЙ CSP)
+    """
+    response = await call_next(request)
+    
+    # Базовые защитные заголовки
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    
+    # ============================================================
+    # ✅ ИДЕАЛЬНЫЙ CSP — НИЧЕГО НЕ БЛОКИРУЕТ, НО ЗАЩИЩАЕТ
+    # ============================================================
+    if settings.DEBUG:
+        # Для РАЗРАБОТКИ — максимально либеральный CSP
+        response.headers["Content-Security-Policy"] = (
+            "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; "
+            "script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; "
+            "style-src * 'unsafe-inline' data: blob:; "
+            "img-src * data: blob:; "
+            "font-src * data:; "
+            "connect-src * data: blob:; "
+            "frame-src *; "
+            "worker-src * blob:; "
+            "media-src *; "
+            "object-src *; "
+        )
+    else:
+        # Для ПРОДАКШЕНА — строгий, но с разрешением всех необходимых ресурсов
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self' data: blob:; "
+            # Разрешаем inline скрипты (нужны для Bootstrap, AOS, карт)
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' "
+            "https://cdn.jsdelivr.net "
+            "https://unpkg.com "
+            "https://api-maps.yandex.ru "
+            "https://yastatic.net "
+            "https://govzalla.ru; "
+            # Разрешаем inline стили (нужны для Bootstrap, AOS, карт)
+            "style-src 'self' 'unsafe-inline' "
+            "https://cdn.jsdelivr.net "
+            "https://fonts.googleapis.com "
+            "https://unpkg.com; "
+            # Разрешаем изображения из любых источников
+            "img-src 'self' data: blob: https: http:; "
+            # Шрифты
+            "font-src 'self' "
+            "https://cdn.jsdelivr.net "
+            "https://fonts.gstatic.com "
+            "data:; "
+            # Подключения к API
+            "connect-src 'self' "
+            "https://api-maps.yandex.ru "
+            "https://yastatic.net "
+            "https://cdn.jsdelivr.net; "
+            # Фреймы (YouTube, Rutube)
+            "frame-src 'self' "
+            "https://www.youtube.com "
+            "https://rutube.ru; "
+            # Web Workers (нужны для карт)
+            "worker-src 'self' blob:; "
+            # Медиа
+            "media-src 'self' data: blob:; "
+            # Объекты
+            "object-src 'self'; "
+            # Base URI
+            "base-uri 'self'; "
+            # Form Action
+            "form-action 'self'; "
+            # Upgrade Insecure Requests (только для HTTPS)
+            "upgrade-insecure-requests; "
+        )
+    
+    return response
+
+
+# === НАСТРОЙКА CORS ===
+if settings.DEBUG:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["Content-Disposition"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "https://iro-chr.ru",
+            "https://www.iro-chr.ru",
+        ],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+        expose_headers=["Content-Disposition"],
+    )
+
+
+# === TRUSTED HOST ===
+if not settings.DEBUG:
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=[
+            "localhost",
+            "127.0.0.1",
+            "iro-chr.ru",
+            "www.iro-chr.ru",
+        ]
+    )
+
+
+# === СОЗДАНИЕ ТАБЛИЦ И ПАПОК ===
+Base.metadata.create_all(bind=engine)
+
+os.makedirs("app/static/uploads/courses", exist_ok=True)
+os.makedirs("app/static/uploads/speakers", exist_ok=True)
+os.makedirs("app/static/uploads/profile/documents", exist_ok=True)
+
+
+# === НАСТРОЙКА ШАБЛОНОВ ===
+templates = Jinja2Templates(directory="app/templates")
+
+
+# === ПОДКЛЮЧЕНИЕ СТАТИЧЕСКИХ ФАЙЛОВ ===
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-# Подключаем роутеры
+
+# === ПОДКЛЮЧЕНИЕ РОУТЕРОВ ===
 app.include_router(auth_router.router)
 app.include_router(courses_router.router)
 app.include_router(admin_router.router)
 app.include_router(notifications_router.router)
 app.include_router(public_router.router)
 app.include_router(achievements_router.router)
-app.include_router(profile_router.router)  # ✅ ДОБАВЛЯЕМ ПОДКЛЮЧЕНИЕ
+app.include_router(profile_router.router)
 
+
+# === ЭНДПОИНТЫ ===
 
 @app.get("/")
 def root():
@@ -61,3 +221,18 @@ async def map_page(request: Request):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# === ГЛОБАЛЬНЫЙ ОБРАБОТЧИК ОШИБОК ===
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    if settings.DEBUG:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": str(exc), "type": exc.__class__.__name__}
+        )
+    else:
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"}
+        )

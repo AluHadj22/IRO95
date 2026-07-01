@@ -817,11 +817,7 @@
                 <h1><i class="bi bi-person-badge me-3"></i>Мои данные</h1>
                 <p>Заполните все разделы профиля для доступа к курсам</p>
             </div>
-            <div class="col-md-5 text-md-end">
-                <div id="profileStatusBadge" class="profile-complete-badge incomplete">
-                    <i class="bi bi-exclamation-circle"></i>
-                    <span>Профиль не заполнен</span>
-                </div>
+            
             </div>
         </div>
     </div>
@@ -2147,7 +2143,7 @@ async function deleteEducation(id) {
 }
 
 // ============================================================
-// ПРОВЕРКА СТАТУСА ДИПЛОМА (ИСПРАВЛЕНО)
+// ПРОВЕРКА СТАТУСА ДИПЛОМА
 // ============================================================
 async function checkDiplomaStatus() {
     try {
@@ -2156,18 +2152,14 @@ async function checkDiplomaStatus() {
         });
         if (response.ok) {
             const eduData = await response.json();
-            // Проверяем, есть ли вообще образование
             if (eduData && eduData.length > 0) {
                 const edu = eduData.find(e => e.is_main) || eduData[0];
-                // Если есть файл диплома — обновляем статус на "Загружен"
                 if (edu && edu.diploma_file_url) {
                     updateDocumentStatus('diploma', edu.diploma_file_url);
                 } else {
-                    // Если нет файла диплома — статус "Не загружен"
                     updateDocumentStatus('diploma', null);
                 }
             } else {
-                // Если нет образования — статус "Не загружен"
                 updateDocumentStatus('diploma', null);
             }
         }
@@ -2542,16 +2534,25 @@ async function loadAdditionalInfo() {
                 document.getElementById('snils').value = data.snils || '';
                 document.getElementById('data_confirmed').checked = data.data_confirmed || false;
 
+                // Обновляем статусы документов
                 updateDocumentStatus('passport', data.passport_file_url);
                 updateDocumentStatus('inn', data.inn_file_url);
                 updateDocumentStatus('marriage', data.marriage_certificate_file_url);
 
+                // Обработка СНИЛС
                 if (data.snils_file_url) {
                     showFilePreview('snils', data.snils_file_name, 'СНИЛС');
                 } else {
                     const preview = document.getElementById('snilsFilePreview');
                     if (preview) preview.style.display = 'none';
                 }
+            } else {
+                // Если нет дополнительной информации - все документы не загружены
+                updateDocumentStatus('passport', null);
+                updateDocumentStatus('inn', null);
+                updateDocumentStatus('marriage', null);
+                const preview = document.getElementById('snilsFilePreview');
+                if (preview) preview.style.display = 'none';
             }
         }
     } catch (error) {
@@ -2560,7 +2561,7 @@ async function loadAdditionalInfo() {
 }
 
 // ============================================================
-// UPDATE DOCUMENT STATUS (ИСПРАВЛЕНО - корректно обрабатывает null)
+// UPDATE DOCUMENT STATUS
 // ============================================================
 function updateDocumentStatus(docType, fileUrl) {
     const statusEl = document.getElementById(`${docType}Status`);
@@ -2849,7 +2850,7 @@ async function confirmAllData() {
 }
 
 // ============================================================
-// ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ (ИСПРАВЛЕНО - показывает незаполненные поля)
+// ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ (ОБНОВЛЕНО)
 // ============================================================
 async function checkProfileComplete() {
     try {
@@ -2859,42 +2860,25 @@ async function checkProfileComplete() {
         if (response.ok) {
             const data = await response.json();
             const badge = document.getElementById('profileStatusBadge');
+            
             if (data.is_complete) {
                 badge.className = 'profile-complete-badge complete';
                 badge.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>Профиль заполнен полностью</span>';
             } else {
                 badge.className = 'profile-complete-badge incomplete';
-                // Показываем детальное сообщение с перечислением незаполненных полей
-                const fields = data.missing_fields || [];
-                let message = 'Профиль не заполнен';
-                if (fields.length > 0) {
-                    // Формируем читаемое сообщение
-                    const fieldLabels = {
-                        'last_name': 'фамилия',
-                        'first_name': 'имя',
-                        'middle_name': 'отчество',
-                        'gender': 'пол',
-                        'birth_date': 'дата рождения',
-                        'citizenship': 'гражданство',
-                        'region': 'субъект РФ',
-                        'municipality': 'муниципалитет',
-                        'phone_raw': 'телефон',
-                        'consent_to_personal_data': 'согласие на обработку данных',
-                        'address': 'адрес',
-                        'education': 'образование',
-                        'work': 'работа',
-                        'snils_number': 'номер СНИЛС',
-                        'snils_file': 'копия СНИЛС',
-                        'diploma_file': 'копия диплома',
-                        'passport_file': 'копия паспорта',
-                        'inn_file': 'копия ИНН',
-                        'marriage_certificate_file': 'свидетельство о браке',
-                        'data_confirmed': 'подтверждение данных'
-                    };
-                    const readableFields = fields.map(f => fieldLabels[f] || f);
-                    message = `Не заполнены: ${readableFields.join(', ')}`;
+                
+                // Используем детальную информацию из ответа
+                if (data.sections) {
+                    const incompleteSections = data.sections.filter(s => !s.is_complete);
+                    if (incompleteSections.length > 0) {
+                        const sectionNames = incompleteSections.map(s => s.label).join(', ');
+                        badge.innerHTML = `<i class="bi bi-exclamation-circle"></i><span>Не заполнены: ${sectionNames}</span>`;
+                    } else {
+                        badge.innerHTML = '<i class="bi bi-exclamation-circle"></i><span>Профиль не заполнен</span>';
+                    }
+                } else {
+                    badge.innerHTML = '<i class="bi bi-exclamation-circle"></i><span>Профиль не заполнен</span>';
                 }
-                badge.innerHTML = `<i class="bi bi-exclamation-circle"></i><span>${message}</span>`;
             }
         }
     } catch (error) {

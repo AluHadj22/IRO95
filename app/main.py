@@ -150,45 +150,32 @@ async def add_security_headers(request: Request, call_next):
     return response
 
 
-# === НАСТРОЙКА CORS ===
-if settings.DEBUG:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-        expose_headers=["Content-Disposition"],
-    )
-else:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=[
-            "https://alu95.ru",          # ← ДОБАВЛЕНО
-            "https://www.alu95.ru",      # ← ДОБАВЛЕНО
-            "https://iro-chr.ru",
-            "https://www.iro-chr.ru",
-        ],
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
-        expose_headers=["Content-Disposition"],
-    )
+# === НАСТРОЙКА CORS (ВРЕМЕННО РАЗРЕШАЕМ ВСЁ ДЛЯ ТЕСТА) ===
+# ⚠️ ВРЕМЕННО для теста разрешаем все источники
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
+)
 
 
-# === TRUSTED HOST ===
-if not settings.DEBUG:
-    app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=[
-            "localhost",
-            "127.0.0.1",
-            "alu95.ru",          # ← ДОБАВЛЕНО
-            "www.alu95.ru",      # ← ДОБАВЛЕНО
-            "iro-chr.ru",
-            "www.iro-chr.ru",
-        ]
-    )
+# === TRUSTED HOST (ВРЕМЕННО ОТКЛЮЧАЕМ ДЛЯ ТЕСТА) ===
+# ⚠️ ВРЕМЕННО отключаем проверку хоста
+# if not settings.DEBUG:
+#     app.add_middleware(
+#         TrustedHostMiddleware,
+#         allowed_hosts=[
+#             "localhost",
+#             "127.0.0.1",
+#             "alu95.ru",
+#             "www.alu95.ru",
+#             "iro-chr.ru",
+#             "www.iro-chr.ru",
+#         ]
+#     )
 
 
 # === СОЗДАНИЕ ТАБЛИЦ И ПАПОК ===

@@ -95,6 +95,7 @@ async def add_security_headers(request: Request, call_next):
         )
     else:
         # Для ПРОДАКШЕНА — строгий, но с поддержкой всех видео-платформ
+        # ✅ УБРАЛИ upgrade-insecure-requests ДЛЯ ТЕСТА НА HTTP
         response.headers["Content-Security-Policy"] = (
             "default-src 'self' data: blob:; "
             # Разрешаем inline скрипты (нужны для Bootstrap, AOS, карт)
@@ -116,8 +117,10 @@ async def add_security_headers(request: Request, call_next):
             "https://cdn.jsdelivr.net "
             "https://fonts.gstatic.com "
             "data:; "
-            # Подключения к API
+            # Подключения к API — ДОБАВЛЯЕМ HTTP АДРЕСА
             "connect-src 'self' "
+            "http://alu95.ru "
+            "http://127.0.0.1:8000 "
             "https://api-maps.yandex.ru "
             "https://yastatic.net "
             "https://cdn.jsdelivr.net; "
@@ -143,8 +146,7 @@ async def add_security_headers(request: Request, call_next):
             "base-uri 'self'; "
             # Form Action
             "form-action 'self'; "
-            # Upgrade Insecure Requests (только для HTTPS)
-            "upgrade-insecure-requests; "
+            # ✅ УБРАЛИ upgrade-insecure-requests
         )
     
     return response
@@ -206,10 +208,7 @@ app.include_router(profile_router.router)
 
 # === ЭНДПОИНТЫ ===
 
-@app.get("/")
-def root():
-    return {"message": "API is running", "status": "healthy"}
-
+# ✅ УБРАЛ ДУБЛИРУЮЩИЙ /, ОСТАВИЛ ТОЛЬКО В public_router
 
 @app.get("/map")
 async def map_page(request: Request):

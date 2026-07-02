@@ -66,7 +66,7 @@ async def add_security_headers(request: Request, call_next):
     ✅ X-Frame-Options - защита от Clickjacking
     ✅ X-XSS-Protection - защита от XSS (старые браузеры)
     ✅ Referrer-Policy - контроль реферера
-    ✅ Content-Security-Policy - защита от XSS и инъекций (ИДЕАЛЬНЫЙ CSP)
+    ✅ Content-Security-Policy - защита от XSS и инъекций
     """
     response = await call_next(request)
     
@@ -77,7 +77,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     
     # ============================================================
-    # ✅ ИДЕАЛЬНЫЙ CSP — НИЧЕГО НЕ БЛОКИРУЕТ, НО ЗАЩИЩАЕТ
+    # ✅ CSP С ПОДДЕРЖКОЙ ВСЕХ ВИДЕО-ПЛАТФОРМ (ВКЛЮЧАЯ АВТОРИЗАЦИЮ VK)
     # ============================================================
     if settings.DEBUG:
         # Для РАЗРАБОТКИ — максимально либеральный CSP
@@ -94,7 +94,7 @@ async def add_security_headers(request: Request, call_next):
             "object-src *; "
         )
     else:
-        # Для ПРОДАКШЕНА — строгий, но с разрешением всех необходимых ресурсов
+        # Для ПРОДАКШЕНА — строгий, но с поддержкой всех видео-платформ
         response.headers["Content-Security-Policy"] = (
             "default-src 'self' data: blob:; "
             # Разрешаем inline скрипты (нужны для Bootstrap, AOS, карт)
@@ -121,14 +121,22 @@ async def add_security_headers(request: Request, call_next):
             "https://api-maps.yandex.ru "
             "https://yastatic.net "
             "https://cdn.jsdelivr.net; "
-            # Фреймы (YouTube, Rutube)
+            # ✅ ВСЕ ВИДЕО-ПЛАТФОРМЫ + АВТОРИЗАЦИЯ VK
             "frame-src 'self' "
             "https://www.youtube.com "
-            "https://rutube.ru; "
+            "https://youtu.be "
+            "https://rutube.ru "
+            "https://vk.com "
+            "https://vkvideo.ru "
+            "https://player.vk.com "
+            "https://www.vk.com "
+            "https://video.vk.com "
+            "https://login.vk.com "
+            "https://api.vk.com; "
             # Web Workers (нужны для карт)
             "worker-src 'self' blob:; "
             # Медиа
-            "media-src 'self' data: blob:; "
+            "media-src 'self' data: blob: https: http:; "
             # Объекты
             "object-src 'self'; "
             # Base URI

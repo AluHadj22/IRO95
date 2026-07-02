@@ -1,8 +1,11 @@
 # app/config.py
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Явно указываем путь к .env для надежности
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 
 class Settings:
@@ -22,6 +25,15 @@ class Settings:
     MOODLE_API_TOKEN: str = os.getenv("MOODLE_API_TOKEN")
     MOODLE_DEFAULT_COURSE_ID: int = int(os.getenv("MOODLE_DEFAULT_COURSE_ID", "2"))
     
+    # === НАСТРОЙКИ SMTP ===
+    SMTP_HOST: str = os.getenv("SMTP_HOST")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER: str = os.getenv("SMTP_USER")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD")
+    SMTP_FROM_EMAIL: str = os.getenv("SMTP_FROM_EMAIL")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "ИРО ЧР - Платформа повышения квалификации")
+    SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+    
     def __init__(self):
         # Проверяем обязательные переменные
         required_vars = {
@@ -31,6 +43,10 @@ class Settings:
             "MOODLE_URL": self.MOODLE_URL,
             "MOODLE_API_TOKEN": self.MOODLE_API_TOKEN,
             "ENCRYPTION_KEY": self.ENCRYPTION_KEY,
+            "SMTP_HOST": self.SMTP_HOST,
+            "SMTP_USER": self.SMTP_USER,
+            "SMTP_PASSWORD": self.SMTP_PASSWORD,
+            "SMTP_FROM_EMAIL": self.SMTP_FROM_EMAIL,
         }
         
         missing = [key for key, value in required_vars.items() if not value]
@@ -64,3 +80,10 @@ class Settings:
 
 
 settings = Settings()
+
+# Выводим настройки для проверки (без паролей)
+print(f"🔍 MOODLE_URL: {settings.MOODLE_URL}")
+print(f"🔍 MOODLE_API_TOKEN: {settings.MOODLE_API_TOKEN[:10]}...")
+print(f"🔍 SMTP_HOST: {settings.SMTP_HOST}")
+print(f"🔍 SMTP_USER: {settings.SMTP_USER}")
+print(f"🔍 SMTP_FROM_EMAIL: {settings.SMTP_FROM_EMAIL}")

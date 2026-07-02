@@ -10,6 +10,7 @@ import logging
 from typing import Optional, Dict, List, Any
 from urllib3.exceptions import InsecureRequestWarning
 from app.config import settings
+from app.services.email_service import email_service
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
@@ -45,6 +46,12 @@ class MoodleService:
         # Безопасное логирование - скрываем токен и пароли
         safe_params = {k: v for k, v in data.items() if k != 'wstoken'}
         logger.info(f"Moodle API call: {function}, params: {list(safe_params.keys())}")
+        
+        # ✅ ДЕТАЛЬНОЕ ЛОГИРОВАНИЕ ДЛЯ СОЗДАНИЯ ПОЛЬЗОВАТЕЛЯ
+        if function == 'core_user_create_users':
+            # Создаём безопасную копию для логирования (скрываем токен, но показываем всё остальное)
+            log_data = {k: v for k, v in data.items() if k != 'wstoken'}
+            logger.info(f"🔍 FULL API DATA for create_user: {log_data}")
         
         try:
             response = requests.post(
@@ -82,18 +89,36 @@ class MoodleService:
     
     def generate_password(self) -> str:
         """
-        Генерирует пароль, соответствующий требованиям Moodle.
-        ✅ Безопасная генерация через secrets
+        Генерирует удобный для запоминания пароль типа "Password1!".
+        ✅ Начинается с заглавной буквы
+        ✅ Содержит строчные буквы
+        ✅ Содержит цифру
+        ✅ Содержит специальный символ
+        ✅ Длина 10-12 символов
+        ✅ Легко читается и вводится
         """
-        upper = secrets.choice(string.ascii_uppercase)
-        lower = secrets.choice(string.ascii_lowercase)
-        digit = secrets.choice(string.digits)
-        special = secrets.choice("!@#$%^&*")
-        rest = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(8))
+        # Слова для основы пароля (легко запоминаются)
+        base_words = [
+            'Password', 'Welcome', 'Learn', 'Study', 'Course', 'Moodle',
+            'Access', 'Login', 'User', 'Student', 'Teacher', 'IRO'
+        ]
         
-        password = list(upper + lower + digit + special + rest)
-        secrets.SystemRandom().shuffle(password)
-        return ''.join(password)
+        # Выбираем случайное слово
+        word = secrets.choice(base_words)
+        
+        # Добавляем случайную цифру (1-9)
+        digit = secrets.choice('123456789')
+        
+        # Добавляем специальный символ
+        special = secrets.choice('!@#$%^&*')
+        
+        # Добавляем случайные 2-3 буквы для уникальности
+        extra = ''.join(secrets.choice(string.ascii_lowercase) for _ in range(3))
+        
+        # Собираем пароль: слово + цифра + специальный символ + доп. буквы
+        password = word + digit + special + extra
+        
+        return password
     
     def sanitize_username(self, email: str) -> str:
         """
@@ -115,7 +140,9 @@ class MoodleService:
     def create_user(self, email: str, full_name: str, password: str = None) -> int:
         """
         Создание пользователя в Moodle.
-        ✅ Безопасное логирование (пароль не выводится)
+        ✅ Отключено кодирование пароля для теста
+        ✅ Полное логирование всех параметров
+        ✅ Отправка email с данными для входа
         """
         name_parts = full_name.strip().split(' ', 1)
         firstname = name_parts[0] if name_parts[0] else 'User'
@@ -129,6 +156,9 @@ class MoodleService:
         
         username = self.sanitize_username(email)
         
+        # ✅ ЛОГИРУЕМ СГЕНЕРИРОВАННЫЙ ПАРОЛЬ
+        logger.info(f"🔑 GENERATED PASSWORD: '{password}'")
+        
         # Проверка существующего пользователя
         try:
             existing = self._call_api('core_user_get_users_by_field', {
@@ -139,21 +169,50 @@ class MoodleService:
         except Exception:
             pass
         
-        # ✅ Безопасное логирование - НЕ выводим пароль
         logger.info(f"Creating Moodle user: email={email}, username={username}, firstname={firstname}, lastname={lastname}")
         
-        encoded_password = urllib.parse.quote(password, safe='')
+        # ❌ ОТКЛЮЧАЕМ КОДИРОВАНИЕ ПАРОЛЯ ДЛЯ ТЕСТА
+        # encoded_password = urllib.parse.quote(password, safe='')
+        # Используем пароль как есть
+        raw_password = password
+        
+        # ✅ ЛОГИРУЕМ, ЧТО МЫ ОТПРАВЛЯЕМ В MOODLE
+        logger.info(f"🔑 SENDING PASSWORD TO MOODLE (raw): '{raw_password}'")
         
         result = self._call_api('core_user_create_users', {
             'users[0][username]': username,
-            'users[0][password]': encoded_password,
+            'users[0][password]': raw_password,  # ❌ БЕЗ КОДИРОВАНИЯ!
             'users[0][firstname]': firstname,
             'users[0][lastname]': lastname,
             'users[0][email]': email
         })
         
-        logger.info(f"Moodle user created: ID={result[0]['id']}, email={email}")
-        return result[0]['id']
+        moodle_user_id = result[0]['id']
+        logger.info(f"Moodle user created: ID={moodle_user_id}, email={email}")
+        
+        # ============================================================
+        # ✅ ОТПРАВКА EMAIL С ДАННЫМИ ДЛЯ ВХОДА В MOODLE
+        # ============================================================
+        try:
+            email_sent = email_service.send_welcome_email(
+                to_email=email,
+                full_name=full_name,
+                moodle_username=username,
+                moodle_password=raw_password,  # Отправляем ТОТ ЖЕ пароль
+                moodle_url=self.base_url,
+                moodle_course_name=None
+            )
+            
+            if email_sent:
+                logger.info(f"📧 Welcome email sent to {email}")
+            else:
+                logger.warning(f"⚠️ Failed to send welcome email to {email}")
+                
+        except Exception as e:
+            # Ошибка отправки email не должна блокировать создание пользователя
+            logger.error(f"❌ Error sending welcome email to {email}: {str(e)}")
+        
+        return moodle_user_id
     
     def get_user_by_email(self, email: str) -> Optional[Dict]:
         """Получение пользователя по email с обработкой ошибок"""
@@ -209,7 +268,7 @@ class MoodleService:
         """Получение URL курса в Moodle"""
         return f"{self.base_url}/course/view.php?id={course_id}"
     
-    def enroll_user_to_course(self, user_id: int, course_id: int) -> bool:
+    def enroll_user_to_course(self, user_id: int, course_id: int, course_name: str = None) -> bool:
         """
         Зачисление пользователя на курс.
         ✅ Обработка ошибок

@@ -164,6 +164,8 @@ else:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
+            "https://alu95.ru",          # ← ДОБАВЛЕНО
+            "https://www.alu95.ru",      # ← ДОБАВЛЕНО
             "https://iro-chr.ru",
             "https://www.iro-chr.ru",
         ],
@@ -181,6 +183,8 @@ if not settings.DEBUG:
         allowed_hosts=[
             "localhost",
             "127.0.0.1",
+            "alu95.ru",          # ← ДОБАВЛЕНО
+            "www.alu95.ru",      # ← ДОБАВЛЕНО
             "iro-chr.ru",
             "www.iro-chr.ru",
         ]

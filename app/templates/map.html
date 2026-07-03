@@ -2,25 +2,293 @@
 
 {% block title %}Карта проезда - ИРО ЧР{% endblock %}
 
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #c9a13b;
+        --primary-dark: #b8860b;
+        --primary-light: #f9d976;
+        --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+        --dark: #1a1a2e;
+        --light: #f8fafc;
+        --gray: #64748b;
+        --white: #ffffff;
+        --border: #e2e8f0;
+    }
+    
+    .map-hero {
+        background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
+        padding: 50px 0 40px;
+        margin-bottom: 30px;
+        border-bottom: 3px solid rgba(201, 161, 59, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .map-hero::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    .map-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -20%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(201, 161, 59, 0.04) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 15s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(20px, -20px) scale(1.05); }
+    }
+    
+    .map-hero h1 {
+        color: white;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .map-hero h1 .gold {
+        color: var(--primary-light);
+    }
+    
+    .map-hero p {
+        color: rgba(255,255,255,0.7);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .map-hero .hero-badge {
+        display: inline-block;
+        background: rgba(201, 161, 59, 0.15);
+        color: var(--primary-light);
+        padding: 6px 20px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid rgba(201, 161, 59, 0.15);
+        margin-bottom: 12px;
+    }
+    
+    .map-hero .hero-icon {
+        display: inline-block;
+        margin-bottom: 16px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .info-badge {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.8);
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(4px);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .info-badge:hover {
+        background: rgba(201, 161, 59, 0.12);
+        border-color: rgba(201, 161, 59, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .info-badge i {
+        color: var(--primary-light);
+        font-size: 1rem;
+    }
+    
+    .map-card {
+        border-radius: 20px !important;
+        border: 1px solid var(--border) !important;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+        transition: all 0.3s ease;
+    }
+    
+    .map-card:hover {
+        box-shadow: 0 8px 32px rgba(201, 161, 59, 0.08) !important;
+        border-color: var(--primary) !important;
+    }
+    
+    .map-container {
+        width: 100%;
+        height: 500px;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .map-container [class*="ymaps"] {
+        border-radius: 16px;
+    }
+    
+    .info-alert {
+        background: #fef9e7 !important;
+        border: 1px solid var(--primary) !important;
+        border-radius: 16px !important;
+        padding: 20px 24px !important;
+        transition: all 0.3s ease;
+    }
+    
+    .info-alert:hover {
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.08);
+    }
+    
+    .info-alert .icon-wrapper {
+        width: 48px;
+        height: 48px;
+        background: var(--primary-gradient);
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: white;
+        font-size: 1.4rem;
+    }
+    
+    .btn-route {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+    
+    .btn-route:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(201, 161, 59, 0.3);
+        color: white;
+    }
+    
+    .btn-route i {
+        margin-right: 8px;
+    }
+    
+    .info-badges {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        position: relative;
+        z-index: 1;
+    }
+    
+    @media (max-width: 768px) {
+        .map-hero {
+            padding: 30px 0 25px;
+        }
+        .map-hero h1 {
+            font-size: 1.8rem;
+        }
+        .map-container {
+            height: 350px;
+        }
+        .info-alert {
+            padding: 16px !important;
+        }
+        .info-alert .d-flex {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+        }
+        .btn-route {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+        .info-badge {
+            font-size: 0.8rem;
+            padding: 6px 14px;
+        }
+        .info-badges {
+            gap: 8px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .map-hero h1 {
+            font-size: 1.4rem;
+        }
+        .map-container {
+            height: 280px;
+        }
+        .info-badge {
+            font-size: 0.7rem;
+            padding: 4px 12px;
+        }
+        .info-badge i {
+            font-size: 0.8rem;
+        }
+        .info-alert .icon-wrapper {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row">
-        <div class="col-12 text-center mb-4" data-aos="fade-up">
-            <h1 class="display-5 fw-bold" style="color: var(--primary);">📍 Как нас найти</h1>
-            <p class="lead text-muted">Институт развития образования Чеченской Республики</p>
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <span class="badge bg-light text-dark p-2"><i class="bi bi-geo-alt text-primary me-1"></i> г. Грозный, ул. Лермонтова, 2</span>
-                <span class="badge bg-light text-dark p-2"><i class="bi bi-telephone text-primary me-1"></i> +7 (8712) 21-22-24</span>
-                <span class="badge bg-light text-dark p-2"><i class="bi bi-envelope text-primary me-1"></i> ipkro-chr@mail.ru</span>
-            </div>
+<!-- Герой-секция -->
+<div class="map-hero">
+    <div class="container text-center">
+        <div class="hero-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#f9d976" opacity="0.95"/>
+            </svg>
+        </div>
+        <div class="hero-badge">Схема проезда</div>
+        <h1 class="display-5 fw-bold">
+            <span class="gold">Как нас</span> найти
+        </h1>
+        <p class="lead mb-3">Институт развития образования Чеченской Республики</p>
+        <div class="info-badges">
+            <span class="info-badge">
+                <i class="bi bi-geo-alt"></i> г. Грозный, ул. Лермонтова, 2
+            </span>
+            <span class="info-badge">
+                <i class="bi bi-telephone"></i> +7 (8712) 21-22-24
+            </span>
+            <span class="info-badge">
+                <i class="bi bi-envelope"></i> ipkro-chr@mail.ru
+            </span>
         </div>
     </div>
-    
+</div>
+
+<div class="container pb-5">
     <div class="row" data-aos="fade-up">
         <div class="col-12">
-            <div class="card shadow-sm border-0">
+            <div class="card map-card shadow-sm border-0">
                 <div class="card-body p-0">
-                    <div id="full-map" style="width: 100%; height: 500px; border-radius: 16px;"></div>
+                    <div class="map-container" id="full-map"></div>
                 </div>
             </div>
         </div>
@@ -28,14 +296,16 @@
     
     <div class="row mt-4" data-aos="fade-up" data-aos-delay="200">
         <div class="col-12">
-            <div class="alert alert-light border rounded-3" style="background: #f8f9fa;">
+            <div class="alert info-alert">
                 <div class="d-flex gap-3 align-items-center flex-wrap flex-md-nowrap">
-                    <i class="bi bi-info-circle-fill fs-2" style="color: var(--primary);"></i>
-                    <div>
-                        <strong class="d-block mb-1">Как добраться:</strong>
-                        <span class="small text-muted">Нажмите на "Построить маршрут", чтобы проложить маршрут</span>
+                    <div class="icon-wrapper">
+                        <i class="bi bi-info-circle"></i>
                     </div>
-                    <a href="https://yandex.ru/maps/?text=Грозный, ул. Лермонтова, 2" target="_blank" class="btn btn-outline-primary btn-sm ms-auto">
+                    <div class="flex-grow-1">
+                        <strong class="d-block mb-1" style="color: var(--dark);">Как добраться:</strong>
+                        <span class="small" style="color: var(--gray);">Нажмите на кнопку ниже, чтобы проложить маршрут в Яндекс.Картах</span>
+                    </div>
+                    <a href="https://yandex.ru/maps/?text=Грозный, ул. Лермонтова, 2" target="_blank" class="btn-route">
                         <i class="bi bi-map"></i> Построить маршрут
                     </a>
                 </div>
@@ -43,4 +313,144 @@
         </div>
     </div>
 </div>
+
+<script>
+    // ============================================================
+    // ИНИЦИАЛИЗАЦИЯ КАРТЫ
+    // ============================================================
+    const instituteCoords = [43.3181, 45.6941];
+    const instituteAddress = "г. Грозный, ул. Лермонтова, 2";
+    const institutePhone = "+7 (8712) 21-22-24";
+    const instituteEmail = "ipkro-chr@mail.ru";
+    const instituteHours = "Пн-Пт: 9:00 - 18:00";
+
+    function initFullMap() {
+        try {
+            const mapElement = document.getElementById('full-map');
+            if (!mapElement) return;
+            if (typeof ymaps === 'undefined') return;
+            
+            const map = new ymaps.Map('full-map', {
+                center: instituteCoords,
+                zoom: 17,
+                controls: ['zoomControl', 'fullscreenControl', 'geolocationControl', 'rulerControl']
+            });
+            
+            const placemark = new ymaps.Placemark(instituteCoords, {
+                hintContent: 'ГБУ ДПО «ИРО ЧР»',
+                balloonContentHeader: `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 35px;" alt="logo">
+                        <strong style="color: #c9a13b; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
+                    </div>
+                `,
+                balloonContentBody: `
+                    <div style="margin-top: 10px;">
+                        <p style="margin: 0 0 4px 0;"><strong>Институт развития образования<br>Чеченской Республики</strong></p>
+                        <hr style="margin: 8px 0;">
+                        <table style="width: 100%; font-size: 13px;">
+                            <tr>
+                                <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #c9a13b;"></i> Адрес:</td>
+                                <td style="padding: 4px 0;">${instituteAddress}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #c9a13b;"></i> Телефон:</td>
+                                <td style="padding: 4px 0;">${institutePhone}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #c9a13b;"></i> Email:</td>
+                                <td style="padding: 4px 0;">${instituteEmail}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #c9a13b;"></i> Часы работы:</td>
+                                <td style="padding: 4px 0;">${instituteHours}</td>
+                            </tr>
+                        </table>
+                        <hr style="margin: 8px 0;">
+                        <p style="font-size: 12px; margin: 0;">
+                            <i class="bi bi-bus-front" style="color: #c9a13b;"></i> Ближайшая остановка: "Институт развития образования" (2 мин пешком)<br>
+                            <i class="bi bi-car-front" style="color: #c9a13b;"></i> Имеется бесплатная парковка для слушателей курсов
+                        </p>
+                    </div>
+                `,
+                balloonContentFooter: `
+                    <div style="margin-top: 10px; text-align: center;">
+                        <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #c9a13b; text-decoration: none; font-weight: 500;">
+                            🚗 Построить маршрут →
+                        </a>
+                    </div>
+                `
+            }, {
+                preset: 'islands#circleIcon',
+                iconColor: '#c9a13b'
+            });
+            
+            map.geoObjects.add(placemark);
+            
+            // Открываем балун через 500мс
+            setTimeout(() => {
+                try { placemark.balloon.open(); } catch(e) {}
+            }, 500);
+            
+            // Кнопка "Схема проезда"
+            const routeButton = new ymaps.control.Button({
+                data: { content: "📍 Схема проезда", title: "Проложить маршрут" },
+                options: { maxWidth: 160, selectOnClick: false }
+            });
+            
+            routeButton.events.add('click', function() {
+                window.open(`https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}`, '_blank');
+            });
+            
+            map.controls.add(routeButton, { float: 'right' });
+            
+            // Адаптация при изменении размера
+            window.addEventListener('resize', function() {
+                try { map.container.fitToViewport(); } catch(e) {}
+            });
+            
+        } catch(e) {
+            console.warn('Full map init error:', e);
+        }
+    }
+
+    // ============================================================
+    // ЗАГРУЗКА КАРТЫ — НЕ БЛОКИРУЕТ СТРАНИЦУ
+    // ============================================================
+    try {
+        let ymapsLoaded = false;
+        const checkYmaps = setInterval(function() {
+            if (typeof ymaps !== 'undefined' && ymaps.ready) {
+                if (!ymapsLoaded) {
+                    ymapsLoaded = true;
+                    clearInterval(checkYmaps);
+                    ymaps.ready(function() {
+                        initFullMap();
+                    });
+                }
+            }
+        }, 200);
+        
+        setTimeout(function() {
+            clearInterval(checkYmaps);
+        }, 10000);
+    } catch(e) {
+        console.warn('Yandex Maps init error:', e);
+    }
+</script>
+
+<!-- AOS для анимаций -->
+<script>
+    try {
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 800,
+                once: true,
+                offset: 50
+            });
+        }
+    } catch(e) {
+        console.warn('AOS init error:', e);
+    }
+</script>
 {% endblock %}

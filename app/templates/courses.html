@@ -4,22 +4,111 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary: #c9a13b;
+        --primary-dark: #b8860b;
+        --primary-light: #f9d976;
+        --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+        --dark: #1a1a2e;
+        --light: #f8fafc;
+        --gray: #64748b;
+        --white: #ffffff;
+        --border: #e2e8f0;
+    }
+    
+    .courses-hero {
+        background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
+        padding: 50px 0 40px;
+        margin-bottom: 30px;
+        border-bottom: 3px solid rgba(201, 161, 59, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .courses-hero::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    .courses-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -20%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(201, 161, 59, 0.04) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 15s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(20px, -20px) scale(1.05); }
+    }
+    
+    .courses-hero h1 {
+        color: white;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .courses-hero h1 .gold {
+        color: var(--primary-light);
+    }
+    
+    .courses-hero p {
+        color: rgba(255,255,255,0.7);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .courses-hero .hero-badge {
+        display: inline-block;
+        background: rgba(201, 161, 59, 0.15);
+        color: var(--primary-light);
+        padding: 6px 20px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid rgba(201, 161, 59, 0.15);
+        margin-bottom: 12px;
+    }
+    
     .filter-sidebar {
         background: white;
         border-radius: 16px;
         border: 1px solid var(--border);
-        padding: 20px;
+        padding: 24px;
         position: sticky;
         top: 90px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        transition: all 0.3s ease;
+    }
+    
+    .filter-sidebar:hover {
+        box-shadow: 0 4px 16px rgba(201,161,59,0.06);
     }
     
     .filter-title {
         font-size: 1.1rem;
-        font-weight: 600;
+        font-weight: 700;
         margin-bottom: 20px;
         padding-bottom: 12px;
         border-bottom: 2px solid var(--primary);
         display: inline-block;
+        color: var(--dark);
+    }
+    
+    .filter-title i {
+        color: var(--primary);
     }
     
     .filter-group {
@@ -27,24 +116,66 @@
     }
     
     .filter-group label {
-        font-weight: 500;
+        font-weight: 600;
         margin-bottom: 10px;
         display: block;
         color: var(--dark);
+        font-size: 0.9rem;
+    }
+    
+    .filter-group label i {
+        color: var(--primary);
     }
     
     .category-check {
         margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 0;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+        padding-left: 4px;
     }
     
-    .category-check input {
-        margin-right: 10px;
+    .category-check:hover {
+        background: #fef9e7;
+    }
+    
+    .category-check input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
+        flex-shrink: 0;
     }
     
     .category-check label {
-        font-weight: normal;
+        font-weight: 400;
         margin-bottom: 0;
         cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--gray);
+        transition: color 0.2s ease;
+    }
+    
+    .category-check:hover label {
+        color: var(--dark);
+    }
+    
+    .category-check .count-badge {
+        background: #f1f5f9;
+        padding: 1px 10px;
+        border-radius: 12px;
+        font-size: 0.65rem;
+        color: var(--gray);
+        margin-left: auto;
+        transition: all 0.2s ease;
+    }
+    
+    .category-check:hover .count-badge {
+        background: #fef9e7;
+        color: var(--primary-dark);
     }
     
     .search-input {
@@ -53,43 +184,230 @@
     
     .search-input i {
         position: absolute;
-        left: 15px;
+        left: 14px;
         top: 50%;
         transform: translateY(-50%);
         color: var(--gray);
+        z-index: 1;
     }
     
     .search-input input {
         padding-left: 40px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+    }
+    
+    .search-input input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(201,161,59,0.12);
+        outline: none;
+    }
+    
+    .filter-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 4px 0;
+        transition: all 0.2s ease;
+        border-radius: 6px;
+        padding-left: 4px;
+    }
+    
+    .filter-check:hover {
+        background: #fef9e7;
+    }
+    
+    .filter-check input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    
+    .filter-check label {
+        font-weight: 400;
+        margin-bottom: 0;
+        cursor: pointer;
+        font-size: 0.9rem;
+        color: var(--gray);
+        transition: color 0.2s ease;
+    }
+    
+    .filter-check:hover label {
+        color: var(--dark);
     }
     
     .clear-filters {
-        margin-top: 20px;
+        margin-top: 16px;
         width: 100%;
+        border: 1.5px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+        border-radius: 10px;
+        padding: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .clear-filters:hover {
+        background: var(--primary-gradient);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(201,161,59,0.2);
     }
     
     .course-card {
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         height: 100%;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        background: white;
+        position: relative;
+    }
+    
+    .course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 2;
     }
     
     .course-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.15);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px -12px rgba(201,161,59,0.15);
+        border-color: var(--primary);
+    }
+    
+    .course-card:hover::before {
+        opacity: 1;
+    }
+    
+    .course-card-img {
+        height: 180px;
+        object-fit: cover;
+        width: 100%;
     }
     
     .course-badge {
         position: absolute;
-        top: 15px;
-        right: 15px;
-        z-index: 1;
+        top: 12px;
+        right: 12px;
+        z-index: 2;
+    }
+    
+    .course-badge .badge {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.65rem;
+        box-shadow: 0 2px 8px rgba(201,161,59,0.2);
     }
     
     .format-badge {
         position: absolute;
-        top: 15px;
-        left: 15px;
-        z-index: 1;
+        top: 12px;
+        left: 12px;
+        z-index: 2;
+    }
+    
+    .format-badge .badge {
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.65rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .badge-format-online {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .badge-format-full_time {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .badge-format-part_time {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .badge-format-full_part_time {
+        background: #fce4ec;
+        color: #b71c1c;
+    }
+    
+    .course-card .card-body {
+        padding: 20px;
+    }
+    
+    .course-card .card-title {
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 1rem;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .course-card .card-text {
+        color: var(--gray);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .course-card .course-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+    }
+    
+    .course-card .course-meta .participants {
+        font-size: 0.75rem;
+        color: var(--gray);
+    }
+    
+    .course-card .course-meta .participants i {
+        color: var(--primary);
+    }
+    
+    .btn-course {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 16px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-course:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(201,161,59,0.3);
+        color: white;
     }
     
     .no-results {
@@ -103,7 +421,7 @@
     .no-results i {
         font-size: 4rem;
         color: var(--gray);
-        opacity: 0.5;
+        opacity: 0.4;
         margin-bottom: 16px;
     }
     
@@ -118,16 +436,100 @@
         color: var(--gray);
         margin-bottom: 20px;
     }
+    
+    .no-results .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 10px;
+        padding: 10px 28px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: white;
+    }
+    
+    .no-results .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(201,161,59,0.3);
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .result-count {
+        font-size: 0.9rem;
+        color: var(--gray);
+        margin-bottom: 16px;
+        padding: 8px 16px;
+        background: #f8fafc;
+        border-radius: 8px;
+        display: inline-block;
+    }
+    
+    .result-count strong {
+        color: var(--primary-dark);
+    }
+    
+    @media (max-width: 768px) {
+        .courses-hero {
+            padding: 30px 0 25px;
+        }
+        .courses-hero h1 {
+            font-size: 1.8rem;
+        }
+        .filter-sidebar {
+            position: relative;
+            top: 0;
+            margin-bottom: 20px;
+        }
+        .filter-sidebar .filter-group {
+            margin-bottom: 16px;
+        }
+        .course-card-img {
+            height: 140px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .courses-hero h1 {
+            font-size: 1.4rem;
+        }
+        .filter-sidebar {
+            padding: 16px;
+        }
+        .course-card .card-body {
+            padding: 16px;
+        }
+        .course-card-img {
+            height: 120px;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4 mb-5">
-    <div class="text-center mb-4">
-        <h1 class="fw-bold">Все курсы</h1>
-        <p class="text-muted">Выберите программу повышения квалификации</p>
+<!-- Герой-секция -->
+<div class="courses-hero">
+    <div class="container text-center">
+        <div class="hero-badge">Система дистанционного обучения</div>
+        <h1 class="fw-bold">
+            <span class="gold">Все</span> курсы
+        </h1>
+        <p class="lead mb-0">Выберите программу повышения квалификации</p>
     </div>
-    
+</div>
+
+<div class="container mt-4 mb-5">
     <div class="row g-4">
         <!-- Фильтры - боковая панель -->
         <div class="col-lg-3">
@@ -152,26 +554,26 @@
                 <!-- Формат обучения -->
                 <div class="filter-group">
                     <label><i class="bi bi-calendar-event me-1"></i>Формат обучения</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="formatOnline">
-                        <label class="form-check-label" for="formatOnline">Онлайн</label>
+                    <div class="filter-check">
+                        <input type="checkbox" id="formatOnline">
+                        <label for="formatOnline">Онлайн</label>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="formatFullTime">
-                        <label class="form-check-label" for="formatFullTime">Очный</label>
+                    <div class="filter-check">
+                        <input type="checkbox" id="formatFullTime">
+                        <label for="formatFullTime">Очный</label>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="formatPartTime">
-                        <label class="form-check-label" for="formatPartTime">Заочный</label>
+                    <div class="filter-check">
+                        <input type="checkbox" id="formatPartTime">
+                        <label for="formatPartTime">Заочный</label>
                     </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="formatFullPartTime">
-                        <label class="form-check-label" for="formatFullPartTime">Очно-заочный</label>
+                    <div class="filter-check">
+                        <input type="checkbox" id="formatFullPartTime">
+                        <label for="formatFullPartTime">Очно-заочный</label>
                     </div>
                 </div>
                 
                 <!-- Кнопка сброса фильтров -->
-                <button class="btn btn-outline-secondary clear-filters" onclick="resetFilters()">
+                <button class="clear-filters" onclick="resetFilters()">
                     <i class="bi bi-arrow-clockwise me-2"></i>Сбросить фильтры
                 </button>
             </div>
@@ -179,10 +581,14 @@
         
         <!-- Список курсов -->
         <div class="col-lg-9">
+            <div id="resultCount" class="result-count">
+                <i class="bi bi-grid-3x3-gap-fill me-2" style="color: var(--primary);"></i>
+                <span id="coursesCount">Загрузка...</span>
+            </div>
             <div class="row g-4" id="coursesList">
                 <div class="text-center py-5">
-                    <div class="spinner-border text-primary"></div>
-                    <p class="mt-3">Загрузка курсов...</p>
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3 text-muted">Загрузка курсов...</p>
                 </div>
             </div>
         </div>
@@ -193,6 +599,7 @@
     const token = localStorage.getItem('token');
     let allCourses = [];
     let allCategories = [];
+    let filteredCount = 0;
     
     function escapeHtml(text) {
         if (!text) return '';
@@ -206,6 +613,13 @@
         'part_time': 'Заочный',
         'full_part_time': 'Очно-заочный',
         'online': 'Онлайн'
+    };
+    
+    const formatBadgeClass = {
+        'online': 'badge-format-online',
+        'full_time': 'badge-format-full_time',
+        'part_time': 'badge-format-part_time',
+        'full_part_time': 'badge-format-full_part_time'
     };
     
     async function loadCategories() {
@@ -233,18 +647,17 @@
         
         let html = '';
         allCategories.forEach(cat => {
+            const count = cat.courses_count || 0;
             html += `
                 <div class="category-check">
-                    <input type="checkbox" class="form-check-input category-checkbox" id="cat_${cat.id}" value="${cat.id}">
-                    <label class="form-check-label" for="cat_${cat.id}">
-                        ${escapeHtml(cat.name)} <span class="text-muted small">(${cat.courses_count || 0})</span>
-                    </label>
+                    <input type="checkbox" class="category-checkbox" id="cat_${cat.id}" value="${cat.id}">
+                    <label for="cat_${cat.id}">${escapeHtml(cat.name)}</label>
+                    <span class="count-badge">${count}</span>
                 </div>
             `;
         });
         container.innerHTML = html;
         
-        // Добавляем обработчики событий на чекбоксы категорий
         document.querySelectorAll('.category-checkbox').forEach(cb => {
             cb.addEventListener('change', filterCourses);
         });
@@ -274,29 +687,36 @@
         
         let filtered = [...allCourses];
         
-        // Фильтр по поиску
         if (searchTerm) {
             filtered = filtered.filter(course => 
                 course.title.toLowerCase().includes(searchTerm) || 
-                (course.description && course.description.toLowerCase().includes(searchTerm))
+                (course.description && course.description.toLowerCase().includes(searchTerm)) ||
+                (course.short_description && course.short_description.toLowerCase().includes(searchTerm))
             );
         }
         
-        // Фильтр по категориям
         if (selectedCategories.length > 0) {
             filtered = filtered.filter(course => 
                 course.category_id && selectedCategories.includes(course.category_id)
             );
         }
         
-        // Фильтр по формату
         if (selectedFormats.length > 0) {
             filtered = filtered.filter(course => 
                 course.format_type && selectedFormats.includes(course.format_type)
             );
         }
         
+        filteredCount = filtered.length;
         renderCourses(filtered);
+        updateResultCount();
+    }
+    
+    function updateResultCount() {
+        const countEl = document.getElementById('coursesCount');
+        if (countEl) {
+            countEl.innerHTML = `<strong>${filteredCount}</strong> ${filteredCount === 1 ? 'курс' : (filteredCount < 5 ? 'курса' : 'курсов')}`;
+        }
     }
     
     async function loadCourses() {
@@ -310,16 +730,21 @@
             }
             
             allCourses = await response.json();
-            filterCourses(); // Применяем фильтры после загрузки
+            filterCourses();
             
         } catch (error) {
             console.error('Error loading courses:', error);
             document.getElementById('coursesList').innerHTML = `
-                <div class="text-center py-5">
-                    <i class="bi bi-exclamation-triangle fs-1 text-danger"></i>
-                    <p class="mt-3">Ошибка загрузки курсов. Пожалуйста, попробуйте позже.</p>
+                <div class="no-results">
+                    <i class="bi bi-exclamation-triangle" style="color: #dc2626;"></i>
+                    <h5>Ошибка загрузки</h5>
+                    <p>Не удалось загрузить курсы. Пожалуйста, попробуйте позже.</p>
+                    <button class="btn btn-primary" onclick="loadCourses()">
+                        <i class="bi bi-arrow-repeat me-2"></i>Повторить
+                    </button>
                 </div>
             `;
+            document.getElementById('coursesCount').textContent = 'Ошибка';
         }
     }
     
@@ -341,29 +766,34 @@
         let html = '';
         courses.forEach(course => {
             const formatText = formatMap[course.format_type] || 'Онлайн';
-            const formatClass = course.format_type === 'online' ? 'bg-info' : 'bg-secondary';
+            const badgeClass = formatBadgeClass[course.format_type] || 'badge-format-online';
+            const categoryName = course.category_name || 'Обучение';
             
             html += `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 position-relative">
+                    <div class="course-card">
                         <div class="format-badge">
-                            <span class="badge ${formatClass}">${formatText}</span>
+                            <span class="badge ${badgeClass}">${formatText}</span>
                         </div>
                         <div class="course-badge">
-                            <span class="badge bg-primary">${course.category_name || "Обучение"}</span>
+                            <span class="badge">${escapeHtml(categoryName)}</span>
                         </div>
                         ${course.image_url ? 
-                            `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}">` :
-                            `<div class="course-card-img bg-secondary d-flex align-items-center justify-content-center">
-                                <i class="bi bi-camera fs-1 text-white"></i>
+                            `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}" loading="lazy">` :
+                            `<div class="course-card-img d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #fef9e7 0%, #fdf2d0 100%);">
+                                <i class="bi bi-book" style="font-size: 3rem; color: var(--primary);"></i>
                             </div>`
                         }
                         <div class="card-body">
                             <h5 class="card-title">${escapeHtml(course.title)}</h5>
-                            <p class="card-text text-muted small">${escapeHtml(course.short_description ? course.short_description.substring(0, 80) : (course.description ? course.description.substring(0, 80) : "Описание курса"))}...</p>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <small class="text-muted"><i class="bi bi-people"></i> ${course.current_participants}/${course.max_participants}</small>
-                                <a href="/course/${course.id}" class="btn btn-primary btn-sm">Подробнее <i class="bi bi-arrow-right"></i></a>
+                            <p class="card-text">${escapeHtml(course.short_description ? course.short_description.substring(0, 80) : (course.description ? course.description.substring(0, 80) : "Описание курса"))}...</p>
+                            <div class="course-meta">
+                                <span class="participants">
+                                    <i class="bi bi-people"></i> ${course.current_participants || 0}/${course.max_participants || 0}
+                                </span>
+                                <a href="/course/${course.id}" class="btn-course">
+                                    Подробнее <i class="bi bi-arrow-right"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -375,45 +805,34 @@
     }
     
     function resetFilters() {
-        // Сброс поиска
         const searchInput = document.getElementById('searchInput');
         if (searchInput) searchInput.value = '';
         
-        // Сброс категорий
         document.querySelectorAll('.category-checkbox').forEach(cb => {
             cb.checked = false;
         });
         
-        // Сброс форматов
         document.getElementById('formatOnline') && (document.getElementById('formatOnline').checked = false);
         document.getElementById('formatFullTime') && (document.getElementById('formatFullTime').checked = false);
         document.getElementById('formatPartTime') && (document.getElementById('formatPartTime').checked = false);
         document.getElementById('formatFullPartTime') && (document.getElementById('formatFullPartTime').checked = false);
         
-        // Применяем фильтры (показываем все курсы)
         filterCourses();
     }
     
-    // Добавляем обработчики событий
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.addEventListener('input', filterCourses);
         }
         
-        // Обработчики для форматов
-        const formatOnline = document.getElementById('formatOnline');
-        const formatFullTime = document.getElementById('formatFullTime');
-        const formatPartTime = document.getElementById('formatPartTime');
-        const formatFullPartTime = document.getElementById('formatFullPartTime');
-        
-        if (formatOnline) formatOnline.addEventListener('change', filterCourses);
-        if (formatFullTime) formatFullTime.addEventListener('change', filterCourses);
-        if (formatPartTime) formatPartTime.addEventListener('change', filterCourses);
-        if (formatFullPartTime) formatFullPartTime.addEventListener('change', filterCourses);
+        const formats = ['formatOnline', 'formatFullTime', 'formatPartTime', 'formatFullPartTime'];
+        formats.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('change', filterCourses);
+        });
     });
     
-    // Загружаем категории и курсы
     loadCategories();
     loadCourses();
 </script>

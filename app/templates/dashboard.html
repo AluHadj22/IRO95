@@ -4,373 +4,604 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary: #c9a13b;
+        --primary-dark: #b8860b;
+        --primary-light: #f9d976;
+        --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+        --dark: #1a1a2e;
+        --light: #f8fafc;
+        --gray: #64748b;
+        --white: #ffffff;
+        --border: #e2e8f0;
+    }
+
+    /* ===== ПЕРЕОПРЕДЕЛЯЕМ НАВБАР ДЛЯ КАБИНЕТА ===== */
+    .navbar {
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(16px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+        border-bottom: 1px solid rgba(201, 161, 59, 0.12) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .navbar.scrolled {
+        background: rgba(255, 255, 255, 0.85) !important;
+        backdrop-filter: blur(20px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+        border-bottom: 2px solid rgba(201, 161, 59, 0.15) !important;
+        box-shadow: 0 4px 40px rgba(201, 161, 59, 0.06) !important;
+    }
+
+    @media (max-width: 991.98px) {
+        .navbar {
+            background: rgba(255, 255, 255, 0.75) !important;
+            backdrop-filter: blur(16px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(16px) saturate(200%) !important;
+        }
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.92) !important;
+        }
+    }
+
+    .navbar .nav-link {
+        color: rgba(30, 41, 59, 0.8) !important;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        padding: 0.5rem 1.2rem !important;
+        border-radius: 10px;
+    }
+
+    .navbar .nav-link::before {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%) scaleX(0);
+        width: 60%;
+        height: 2px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .navbar .nav-link:hover::before,
+    .navbar .nav-link.active::before {
+        transform: translateX(-50%) scaleX(1);
+    }
+
+    .navbar .nav-link:hover {
+        color: var(--primary) !important;
+        background: rgba(201, 161, 59, 0.08);
+    }
+
+    .navbar .nav-link.active {
+        color: var(--primary) !important;
+        background: rgba(201, 161, 59, 0.12);
+    }
+
+    .navbar.scrolled .nav-link {
+        color: var(--gray) !important;
+    }
+
+    .navbar.scrolled .nav-link:hover,
+    .navbar.scrolled .nav-link.active {
+        color: var(--primary) !important;
+    }
+
+    .navbar-brand .title .gold {
+        background: linear-gradient(135deg, #c9a13b, #b8860b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .navbar .navbar-toggler {
+        border: 1.5px solid rgba(201, 161, 59, 0.25);
+        padding: 0.5rem 0.7rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(4px);
+    }
+
+    .navbar .navbar-toggler:hover {
+        border-color: var(--primary);
+        background: rgba(201, 161, 59, 0.05);
+        box-shadow: 0 0 20px rgba(201, 161, 59, 0.08);
+    }
+
+    .navbar .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(201,161,59,0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    @media (max-width: 991.98px) {
+        .navbar .navbar-collapse {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border-radius: 16px;
+            padding: 1rem 0.5rem;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(201, 161, 59, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .navbar .nav-link {
+            padding: 0.6rem 1rem !important;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .navbar .nav-link::before {
+            display: none;
+        }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link.active {
+            background: rgba(201, 161, 59, 0.1) !important;
+        }
+    }
+
+    /* ===== ОСНОВНЫЕ СТИЛИ КАБИНЕТА ===== */
     .dashboard-stats {
-        background: linear-gradient(135deg, #0057A4 0%, #003d7a 50%, #001f40 100%);
+        background: rgba(10, 10, 24, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border-radius: 20px;
         padding: 28px;
         color: white;
         margin-bottom: 28px;
+        border: 1px solid rgba(201, 161, 59, 0.12);
+        position: relative;
+        overflow: hidden;
     }
-    
+
+    .dashboard-stats::before {
+        content: '';
+        position: absolute;
+        top: -80px;
+        right: -60px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
     .stat-item {
         text-align: center;
         padding: 16px;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.04);
         border-radius: 16px;
         backdrop-filter: blur(10px);
         transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        position: relative;
+        z-index: 1;
     }
-    
+
     .stat-item:hover {
         transform: translateY(-3px);
-        background: rgba(255,255,255,0.15);
+        background: rgba(201, 161, 59, 0.08);
+        border-color: rgba(201, 161, 59, 0.15);
     }
-    
+
     .stat-number {
         font-size: 2rem;
         font-weight: 700;
         margin-bottom: 4px;
+        color: var(--primary-light);
     }
-    
+
     .stat-label {
         font-size: 0.8rem;
-        opacity: 0.9;
+        opacity: 0.7;
     }
-    
+
     .nav-pills-custom {
-        background: white;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border-radius: 16px;
         padding: 8px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(201, 161, 59, 0.08);
         position: sticky;
         top: 90px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        transition: all 0.3s ease;
     }
-    
+
+    .nav-pills-custom:hover {
+        border-color: rgba(201, 161, 59, 0.15);
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.04);
+    }
+
     .nav-pills-custom .nav-link {
         border-radius: 12px;
         padding: 12px 16px;
-        color: #64748b;
+        color: var(--gray);
         font-weight: 500;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         margin-bottom: 4px;
         position: relative;
     }
-    
+
     .nav-pills-custom .nav-link i {
         margin-right: 12px;
         font-size: 1.1rem;
         width: 24px;
     }
-    
+
     .nav-pills-custom .nav-link:hover {
-        background: #e0e7ff;
-        color: #0057A4;
+        background: rgba(254, 249, 231, 0.5);
+        color: var(--primary-dark);
     }
-    
+
     .nav-pills-custom .nav-link.active {
-        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        background: var(--primary-gradient);
         color: white;
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.25);
     }
-    
-    .nav-pills-custom .nav-link .notification-badge {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: #ef4444;
-        color: white;
-        border-radius: 50%;
-        padding: 2px 8px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        min-width: 20px;
-        text-align: center;
-    }
-    
+
     .profile-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border-radius: 20px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(201, 161, 59, 0.08);
         overflow: hidden;
         margin-bottom: 24px;
+        transition: all 0.3s ease;
     }
-    
+
+    .profile-card:hover {
+        border-color: rgba(201, 161, 59, 0.15);
+        box-shadow: 0 4px 24px rgba(201, 161, 59, 0.04);
+    }
+
     .profile-header {
-        background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+        background: rgba(254, 249, 231, 0.3);
+        backdrop-filter: blur(8px);
         padding: 32px;
         text-align: center;
+        border-bottom: 2px solid rgba(201, 161, 59, 0.06);
     }
-    
+
     .profile-avatar {
         width: 100px;
         height: 100px;
-        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        background: var(--primary-gradient);
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 16px;
-        box-shadow: 0 8px 20px rgba(0,87,164,0.3);
+        box-shadow: 0 8px 24px rgba(201, 161, 59, 0.2);
+        transition: all 0.3s ease;
     }
-    
+
+    .profile-avatar:hover {
+        transform: scale(1.05) rotate(-3deg);
+    }
+
     .profile-avatar i {
         font-size: 3rem;
         color: white;
     }
-    
+
     .profile-name {
         font-size: 1.5rem;
         font-weight: 700;
         margin-bottom: 4px;
-        color: #1e293b;
+        color: var(--dark);
     }
-    
+
     .profile-email {
-        color: #64748b;
+        color: var(--gray);
         margin-bottom: 0;
     }
-    
+
     .info-row {
         display: flex;
         padding: 16px 24px;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5);
         transition: all 0.2s ease;
     }
-    
+
     .info-row:hover {
-        background: #f8fafc;
+        background: rgba(250, 251, 252, 0.3);
     }
-    
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
     .info-label {
         width: 140px;
         font-weight: 600;
-        color: #1e293b;
+        color: var(--dark);
     }
-    
+
+    .info-label i {
+        color: var(--primary);
+        width: 20px;
+    }
+
     .info-value {
         flex: 1;
-        color: #64748b;
+        color: var(--gray);
     }
-    
+
     /* ========== MOODLE СТИЛИ ========== */
     .moodle-badge-small {
-        background: #f0f7ff;
-        border: 1px solid #b3d4fc;
+        background: rgba(254, 249, 231, 0.5);
+        border: 1px solid var(--primary);
         border-radius: 6px;
         padding: 2px 10px;
-        font-size: 0.65rem;
-        color: #1a56db;
+        font-size: 0.6rem;
+        color: var(--primary-dark);
         display: inline-flex;
         align-items: center;
         gap: 4px;
         margin-left: 8px;
+        font-weight: 500;
     }
     .moodle-badge-small i {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
     }
     .moodle-link-btn-sm {
-        background: #1a56db;
+        background: var(--primary-gradient);
         color: white;
         border: none;
         border-radius: 6px;
-        padding: 4px 12px;
+        padding: 4px 14px;
         font-size: 0.7rem;
         font-weight: 500;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
         gap: 4px;
+        cursor: pointer;
     }
     .moodle-link-btn-sm:hover {
-        background: #0f3b8c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.3);
         color: white;
-        transform: translateY(-1px);
     }
-    
-    /* Прогресс из Moodle */
+    .moodle-link-btn-sm:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
     .moodle-progress-section {
-        background: #f8fafc;
+        background: rgba(248, 250, 252, 0.3);
+        backdrop-filter: blur(4px);
         border-radius: 8px;
         padding: 10px 14px;
         margin-top: 10px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(226, 232, 240, 0.3);
+        transition: all 0.3s ease;
     }
+
+    .moodle-progress-section:hover {
+        border-color: var(--primary);
+        background: rgba(254, 249, 231, 0.3);
+    }
+
     .moodle-progress-label {
         font-size: 0.7rem;
-        color: #64748b;
+        color: var(--gray);
         display: flex;
         justify-content: space-between;
         margin-bottom: 4px;
     }
+
     .moodle-progress-bar {
         height: 6px;
         border-radius: 4px;
-        background: #e2e8f0;
+        background: rgba(226, 232, 240, 0.5);
         overflow: hidden;
     }
+
     .moodle-progress-bar .fill {
         height: 100%;
-        background: linear-gradient(135deg, #059669, #10b981);
+        background: var(--primary-gradient);
         border-radius: 4px;
         transition: width 0.5s ease;
     }
+
     .moodle-progress-bar .fill.completed {
         background: linear-gradient(135deg, #059669, #10b981);
     }
+
     .moodle-progress-bar .fill.in-progress {
-        background: linear-gradient(135deg, #0057A4, #2b7bcf);
+        background: var(--primary-gradient);
     }
+
     .moodle-sync-btn {
         background: none;
         border: none;
-        color: #0057A4;
+        color: var(--primary);
         font-size: 0.7rem;
         cursor: pointer;
         padding: 2px 8px;
         border-radius: 4px;
         transition: all 0.2s ease;
     }
+
     .moodle-sync-btn:hover {
-        background: #e0e7ff;
+        background: rgba(254, 249, 231, 0.5);
+        color: var(--primary-dark);
     }
+
     .moodle-progress-empty {
         font-size: 0.7rem;
         color: #94a3b8;
         font-style: italic;
     }
-    
+
+    /* ========== ДОСТИЖЕНИЯ ========== */
     .badge-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(8px);
         border-radius: 16px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(201, 161, 59, 0.06);
         padding: 20px;
         text-align: center;
         transition: all 0.3s ease;
         height: 100%;
     }
-    
+
     .badge-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1);
-        border-color: #0057A4;
+        box-shadow: 0 12px 24px -12px rgba(201, 161, 59, 0.12);
+        border-color: var(--primary);
     }
-    
+
     .badge-card.locked {
         opacity: 0.5;
         filter: grayscale(0.3);
     }
-    
+
     .badge-icon {
         width: 70px;
         height: 70px;
-        background: #e0e7ff;
+        background: rgba(254, 249, 231, 0.3);
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 16px;
+        transition: all 0.3s ease;
     }
-    
+
+    .badge-card:hover .badge-icon {
+        transform: scale(1.05) rotate(-3deg);
+    }
+
     .badge-icon i {
         font-size: 2rem;
-        color: #0057A4;
+        color: var(--primary);
     }
-    
+
     .badge-card.gold .badge-icon {
-        background: #fef3c7;
+        background: rgba(254, 243, 199, 0.5);
     }
-    
+
     .badge-card.gold .badge-icon i {
         color: #fbbf24;
     }
-    
+
     .badge-card.silver .badge-icon {
-        background: #f3f4f6;
+        background: rgba(243, 244, 246, 0.5);
     }
-    
+
     .badge-card.silver .badge-icon i {
         color: #9ca3af;
     }
-    
+
     .badge-card.bronze .badge-icon {
-        background: #fffbeb;
+        background: rgba(255, 251, 235, 0.5);
     }
-    
+
     .badge-card.bronze .badge-icon i {
         color: #d97706;
     }
-    
+
     .badge-title {
         font-weight: 700;
         margin-bottom: 4px;
-        color: #1e293b;
+        color: var(--dark);
     }
-    
+
     .badge-desc {
         font-size: 0.7rem;
-        color: #64748b;
+        color: var(--gray);
     }
-    
+
     .badge-progress {
         margin-top: 12px;
         font-size: 0.7rem;
-        color: #0057A4;
+        color: var(--primary);
         font-weight: 500;
     }
-    
+
+    /* ========== КУРСЫ ========== */
     .course-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(8px);
         border-radius: 16px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(201, 161, 59, 0.06);
         padding: 20px;
         transition: all 0.3s ease;
         height: 100%;
+        position: relative;
+        overflow: hidden;
     }
-    
+
+    .course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3px;
+        height: 100%;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
     .course-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1);
-        border-color: #0057A4;
+        box-shadow: 0 12px 24px -12px rgba(201, 161, 59, 0.12);
+        border-color: var(--primary);
     }
-    
+
+    .course-card:hover::before {
+        opacity: 1;
+    }
+
     .course-title {
         font-size: 1rem;
         font-weight: 600;
         margin-bottom: 8px;
-        color: #1e293b;
+        color: var(--dark);
     }
-    
+
     .course-meta {
         font-size: 0.7rem;
-        color: #64748b;
+        color: var(--gray);
         margin-bottom: 12px;
     }
-    
+
     .course-meta .deadline {
         color: #dc2626;
     }
-    
+
     .course-meta .deadline.overdue {
         color: #dc2626;
         font-weight: 600;
     }
-    
+
     .course-progress {
         margin: 16px 0;
     }
-    
+
     .progress {
         height: 8px;
         border-radius: 10px;
-        background: #e2e8f0;
+        background: rgba(226, 232, 240, 0.5);
     }
-    
+
     .progress-bar {
-        background: linear-gradient(135deg, #0057A4 0%, #2b7bcf 100%);
+        background: var(--primary-gradient);
         border-radius: 10px;
     }
-    
+
     .course-status {
         display: inline-block;
         padding: 4px 12px;
@@ -378,37 +609,37 @@
         font-size: 0.7rem;
         font-weight: 500;
     }
-    
+
     .status-completed {
         background: #d1fae5;
         color: #059669;
     }
-    
+
     .status-in-progress {
-        background: #e0e7ff;
-        color: #0057A4;
+        background: rgba(254, 249, 231, 0.5);
+        color: var(--primary-dark);
     }
-    
+
     .status-pending {
         background: #fef3c7;
         color: #d97706;
     }
-    
+
     .status-retake {
         background: #fef3c7;
         color: #92400e;
     }
-    
+
     .status-overdue {
         background: #fee2e2;
         color: #dc2626;
     }
-    
+
     .status-no-attempts {
         background: #fee2e2;
         color: #dc2626;
     }
-    
+
     .task-status {
         font-size: 0.65rem;
         padding: 2px 10px;
@@ -416,130 +647,164 @@
         display: inline-block;
         margin-top: 4px;
     }
-    
+
     .task-status.passed {
         background: #d1fae5;
         color: #059669;
     }
-    
+
     .task-status.failed {
         background: #fee2e2;
         color: #dc2626;
     }
-    
+
     .task-status.pending {
         background: #fef3c7;
         color: #d97706;
     }
-    
+
     .task-status.retake {
         background: #fef3c7;
         color: #92400e;
     }
-    
+
     .task-status.overdue {
         background: #fee2e2;
         color: #dc2626;
     }
-    
+
     .task-status.not_started {
         background: #f1f5f9;
-        color: #64748b;
+        color: var(--gray);
     }
-    
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
-        background: white;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(8px);
         border-radius: 16px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid rgba(201, 161, 59, 0.06);
     }
-    
+
     .empty-state i {
         font-size: 4rem;
         color: #cbd5e1;
         margin-bottom: 16px;
     }
-    
+
     .empty-state h5 {
         font-size: 1.1rem;
         font-weight: 600;
         margin-bottom: 8px;
-        color: #1e293b;
+        color: var(--dark);
     }
-    
+
     .empty-state p {
-        color: #64748b;
+        color: var(--gray);
         margin-bottom: 20px;
     }
-    
-    .notification-item {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        padding: 16px 20px;
-        margin-bottom: 12px;
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-    
-    .notification-item:hover {
-        border-color: #0057A4;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    
-    .notification-item.unread {
-        border-left: 4px solid #0057A4;
-        background: #f8fafc;
-    }
-    
-    .notification-item .notification-title {
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 4px;
-    }
-    
-    .notification-item .notification-message {
-        font-size: 0.9rem;
-        color: #64748b;
-    }
-    
-    .notification-item .notification-time {
-        font-size: 0.7rem;
-        color: #94a3b8;
-        margin-top: 4px;
-    }
-    
-    .notification-item .notification-actions {
-        margin-top: 8px;
-    }
-    
-    .mark-read-btn {
-        background: none;
-        border: none;
-        color: #0057A4;
-        font-size: 0.8rem;
-        cursor: pointer;
-        padding: 4px 8px;
-        border-radius: 4px;
-        transition: all 0.2s ease;
-    }
-    
-    .mark-read-btn:hover {
-        background: #e0e7ff;
-    }
-    
-    .unread-count {
-        background: #ef4444;
+
+    .badge-gold {
+        background: var(--primary-gradient);
         color: white;
-        border-radius: 50%;
-        padding: 2px 8px;
+        padding: 4px 12px;
+        border-radius: 20px;
         font-size: 0.7rem;
-        font-weight: 700;
-        min-width: 20px;
-        text-align: center;
-        display: inline-block;
-        margin-left: 8px;
+        font-weight: 500;
+    }
+
+    .btn-outline-primary {
+        border: 1.5px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary-gradient);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(201, 161, 59, 0.15);
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.25);
+        color: white;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-stats {
+            padding: 20px;
+        }
+        .stat-number {
+            font-size: 1.5rem;
+        }
+        .info-row {
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+        .info-label {
+            width: 100%;
+        }
+        .nav-pills-custom {
+            position: relative;
+            top: 0;
+            margin-bottom: 16px;
+        }
+        .nav-pills-custom .nav-link {
+            padding: 10px 12px;
+            font-size: 0.9rem;
+        }
+        .profile-header {
+            padding: 20px;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+        }
+        .profile-avatar i {
+            font-size: 2.5rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-stats {
+            padding: 16px;
+        }
+        .stat-item {
+            padding: 12px;
+        }
+        .stat-number {
+            font-size: 1.2rem;
+        }
+        .course-card {
+            padding: 16px;
+        }
     }
 </style>
 {% endblock %}
@@ -575,7 +840,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row g-4">
         <!-- Боковое меню -->
         <div class="col-lg-3">
@@ -583,25 +848,21 @@
                 <a class="nav-link active" href="#" onclick="showSection('profile'); return false;">
                     <i class="bi bi-person"></i> Профиль
                 </a>
-                <a class="nav-link" href="#" onclick="showSection('notifications'); return false;" id="notificationsNav">
-                    <i class="bi bi-bell"></i> Уведомления
-                    <span class="notification-badge" id="unreadBadge" style="display: none;">0</span>
-                </a>
                 <a class="nav-link" href="#" onclick="showSection('badges'); return false;">
-                    <i class="bi bi-trophy"></i> Достижения
+                    <i class="bi bi-award"></i> Достижения
                 </a>
                 <a class="nav-link" href="#" onclick="showSection('courses'); return false;">
                     <i class="bi bi-journal-bookmark-fill"></i> Мои курсы
                 </a>
                 <a class="nav-link" href="#" onclick="showSection('favorites'); return false;">
-                    <i class="bi bi-heart"></i> Избранное
+                    <i class="bi bi-star"></i> Избранное
                 </a>
                 <a class="nav-link" href="#" onclick="showSection('watchlater'); return false;">
-                    <i class="bi bi-clock-history"></i> Посмотреть позже
+                    <i class="bi bi-clock"></i> Посмотреть позже
                 </a>
             </div>
         </div>
-        
+
         <!-- Контент -->
         <div class="col-lg-9">
             <!-- Профиль -->
@@ -616,12 +877,12 @@
                     </div>
                     <div class="profile-body" id="profileInfo">
                         <div class="text-center p-5">
-                            <div class="spinner-border text-primary"></div>
+                            <div class="spinner-border" style="color: var(--primary);"></div>
                             <p class="mt-3 text-muted">Загрузка данных...</p>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Активность -->
                 <div class="profile-card mt-4">
                     <div class="info-row">
@@ -635,47 +896,49 @@
                     <div class="info-row">
                         <div class="info-label"><i class="bi bi-graph-up me-2"></i>Уровень активности</div>
                         <div class="info-value">
-                            <span class="badge bg-primary" id="activityLevel">Начинающий</span>
+                            <span class="badge-gold" id="activityLevel">Начинающий</span>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Уведомления -->
-            <div id="notificationsSection" style="display: none;">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold mb-0"><i class="bi bi-bell me-2" style="color: #0057A4;"></i>Уведомления</h5>
-                    <button class="btn btn-sm btn-outline-primary" onclick="markAllRead()">
-                        <i class="bi bi-check2-all me-1"></i>Прочитать все
-                    </button>
-                </div>
-                <div id="notificationsList"></div>
-            </div>
-            
+
             <!-- Достижения -->
             <div id="badgesSection" style="display: none;">
+                <h5 class="fw-bold mb-4" style="color: var(--dark);">
+                    <i class="bi bi-award me-2" style="color: var(--primary);"></i> Мои достижения
+                </h5>
                 <div id="badgesList"></div>
             </div>
-            
+
             <!-- Мои курсы -->
             <div id="coursesSection" style="display: none;">
                 <div class="mb-4">
-                    <h5 class="fw-bold mb-3">В процессе</h5>
+                    <h5 class="fw-bold mb-3" style="color: var(--dark);">
+                        <i class="bi bi-play-circle me-2" style="color: var(--primary);"></i> В процессе
+                    </h5>
                     <div id="inProgressCourses"></div>
                 </div>
                 <div class="mb-4">
-                    <h5 class="fw-bold mb-3">Завершённые</h5>
+                    <h5 class="fw-bold mb-3" style="color: var(--dark);">
+                        <i class="bi bi-check-circle me-2" style="color: var(--primary);"></i> Завершённые
+                    </h5>
                     <div id="completedCourses"></div>
                 </div>
             </div>
-            
+
             <!-- Избранное -->
             <div id="favoritesSection" style="display: none;">
+                <h5 class="fw-bold mb-4" style="color: var(--dark);">
+                    <i class="bi bi-star me-2" style="color: var(--primary);"></i> Избранные курсы
+                </h5>
                 <div id="favoritesList"></div>
             </div>
-            
+
             <!-- Посмотреть позже -->
             <div id="watchlaterSection" style="display: none;">
+                <h5 class="fw-bold mb-4" style="color: var(--dark);">
+                    <i class="bi bi-clock me-2" style="color: var(--primary);"></i> Посмотреть позже
+                </h5>
                 <div id="watchlaterList"></div>
             </div>
         </div>
@@ -685,33 +948,26 @@
 <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
-    
+
     let userData = {};
     let userStats = {};
     let userAchievements = [];
     let userCourses = [];
-    let userNotifications = [];
-    let unreadCount = 0;
     let moodleProgressCache = {};
-    
+
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
+
     function formatDate(dateStr) {
         if (!dateStr) return '';
         const date = new Date(dateStr);
-        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
-    
-    function isDateOverdue(dateStr) {
-        if (!dateStr) return false;
-        return new Date(dateStr) < new Date();
-    }
-    
+
     function getTaskStatusBadge(status, isOverdue = false) {
         const map = {
             'passed': '<span class="task-status passed"><i class="bi bi-check-circle me-1"></i>Пройдено</span>',
@@ -722,25 +978,25 @@
             'in_progress': '<span class="task-status not_started"><i class="bi bi-play-circle me-1"></i>В процессе</span>',
             'not_started': '<span class="task-status not_started"><i class="bi bi-circle me-1"></i>Не начато</span>'
         };
-        
+
         if (isOverdue) {
             return '<span class="task-status overdue"><i class="bi bi-clock-history me-1"></i>Просрочено</span>';
         }
-        
+
         return map[status] || map['not_started'];
     }
-    
+
     async function loadProfile() {
         try {
             const response = await fetch('/api/auth/me', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             userData = await response.json();
-            
+
             document.getElementById('profileName').innerText = userData.full_name;
             document.getElementById('profileEmail').innerText = userData.email;
             document.getElementById('registrationDate').innerText = new Date(userData.created_at).toLocaleDateString();
-            
+
             document.getElementById('profileInfo').innerHTML = `
                 <div class="info-row">
                     <div class="info-label"><i class="bi bi-briefcase me-2"></i>Должность</div>
@@ -759,146 +1015,43 @@
             console.error('Error loading profile:', error);
         }
     }
-    
+
     async function loadStats() {
         try {
             const response = await fetch('/api/courses/my/stats', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             userStats = await response.json();
-            
+
             document.getElementById('statCoursesCompleted').innerText = userStats.completed_courses || 0;
             document.getElementById('statCoursesInProgress').innerText = userStats.in_progress_courses || 0;
             document.getElementById('statBadges').innerText = userStats.achievements_count || 0;
             document.getElementById('statHours').innerText = userStats.total_hours || 0;
             document.getElementById('totalHours').innerText = `${userStats.total_hours || 0} часов`;
-            
+
             let activityLevel = 'Начинающий';
             if (userStats.completed_courses >= 10) activityLevel = 'Эксперт';
             else if (userStats.completed_courses >= 5) activityLevel = 'Продвинутый';
             else if (userStats.completed_courses >= 2) activityLevel = 'Активный';
-            document.getElementById('activityLevel').innerHTML = `<span class="badge bg-primary">${activityLevel}</span>`;
+            document.getElementById('activityLevel').innerHTML = activityLevel;
         } catch (error) {
             console.error('Error loading stats:', error);
         }
     }
-    
-    async function loadNotifications() {
-        try {
-            const response = await fetch('/api/notifications/', {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            userNotifications = await response.json();
-            
-            unreadCount = userNotifications.filter(n => !n.is_read).length;
-            updateUnreadBadge();
-            
-            const container = document.getElementById('notificationsList');
-            
-            if (userNotifications.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="bi bi-bell-slash"></i>
-                        <h5>Нет уведомлений</h5>
-                        <p>Здесь будут отображаться ваши уведомления</p>
-                    </div>
-                `;
-            } else {
-                let html = '';
-                userNotifications.forEach(n => {
-                    const isUnread = !n.is_read;
-                    html += `
-                        <div class="notification-item ${isUnread ? 'unread' : ''}" data-id="${n.id}">
-                            <div class="notification-title">${escapeHtml(n.title)}</div>
-                            <div class="notification-message">${escapeHtml(n.message)}</div>
-                            <div class="notification-time">${formatDate(n.created_at)}</div>
-                            ${isUnread ? `
-                                <div class="notification-actions">
-                                    <button class="mark-read-btn" onclick="markAsRead(${n.id}, event)">
-                                        <i class="bi bi-check-circle"></i> Отметить как прочитанное
-                                    </button>
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            }
-        } catch (error) {
-            console.error('Error loading notifications:', error);
-        }
-    }
-    
-    function updateUnreadBadge() {
-        const badge = document.getElementById('unreadBadge');
-        if (unreadCount > 0) {
-            badge.style.display = 'inline-block';
-            badge.textContent = unreadCount;
-        } else {
-            badge.style.display = 'none';
-        }
-    }
-    
-    async function markAsRead(notificationId, event) {
-        if (event) event.stopPropagation();
-        
-        try {
-            const response = await fetch(`/api/notifications/${notificationId}/read`, {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            
-            if (response.ok) {
-                const item = document.querySelector(`.notification-item[data-id="${notificationId}"]`);
-                if (item) {
-                    item.classList.remove('unread');
-                    const actions = item.querySelector('.notification-actions');
-                    if (actions) actions.remove();
-                }
-                unreadCount = Math.max(0, unreadCount - 1);
-                updateUnreadBadge();
-                if (window.showToast) window.showToast('Уведомление отмечено как прочитанное', 'success');
-            }
-        } catch (error) {
-            console.error('Error marking as read:', error);
-        }
-    }
-    
-    async function markAllRead() {
-        try {
-            const response = await fetch('/api/notifications/read-all', {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            
-            if (response.ok) {
-                document.querySelectorAll('.notification-item.unread').forEach(item => {
-                    item.classList.remove('unread');
-                    const actions = item.querySelector('.notification-actions');
-                    if (actions) actions.remove();
-                });
-                unreadCount = 0;
-                updateUnreadBadge();
-                if (window.showToast) window.showToast('Все уведомления отмечены как прочитанные', 'success');
-            }
-        } catch (error) {
-            console.error('Error marking all as read:', error);
-        }
-    }
-    
+
     async function loadAchievements() {
         try {
             const response = await fetch('/api/courses/my/achievements', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             userAchievements = await response.json();
-            
+
             const container = document.getElementById('badgesList');
-            
+
             if (userAchievements.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="bi bi-trophy"></i>
+                        <i class="bi bi-award"></i>
                         <h5>Нет достижений</h5>
                         <p>Завершайте курсы, чтобы получать достижения!</p>
                         <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
@@ -906,15 +1059,15 @@
                 `;
                 return;
             }
-            
+
             const gold = userAchievements.filter(a => a.level === 'gold');
             const silver = userAchievements.filter(a => a.level === 'silver');
             const bronze = userAchievements.filter(a => a.level === 'bronze');
-            
+
             let html = '';
-            
+
             if (gold.length > 0) {
-                html += `<h5 class="fw-bold mb-3" style="color: #d97706;">🏆 Золотые достижения</h5><div class="row g-3 mb-4">`;
+                html += `<h6 class="fw-bold mb-3" style="color: #d97706;"><i class="bi bi-trophy me-2"></i>Золотые достижения</h6><div class="row g-3 mb-4">`;
                 gold.forEach(ach => {
                     html += `
                         <div class="col-md-4 col-sm-6">
@@ -924,16 +1077,16 @@
                                 </div>
                                 <h6 class="badge-title">${escapeHtml(ach.title)}</h6>
                                 <p class="badge-desc">${escapeHtml(ach.description)}</p>
-                                <div class="badge-progress"><i class="bi bi-calendar-check"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
+                                <div class="badge-progress"><i class="bi bi-calendar-check me-1"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
                             </div>
                         </div>
                     `;
                 });
                 html += `</div>`;
             }
-            
+
             if (silver.length > 0) {
-                html += `<h5 class="fw-bold mb-3 text-secondary">🥈 Серебряные достижения</h5><div class="row g-3 mb-4">`;
+                html += `<h6 class="fw-bold mb-3 text-secondary"><i class="bi bi-award me-2"></i>Серебряные достижения</h6><div class="row g-3 mb-4">`;
                 silver.forEach(ach => {
                     html += `
                         <div class="col-md-4 col-sm-6">
@@ -943,16 +1096,16 @@
                                 </div>
                                 <h6 class="badge-title">${escapeHtml(ach.title)}</h6>
                                 <p class="badge-desc">${escapeHtml(ach.description)}</p>
-                                <div class="badge-progress"><i class="bi bi-calendar-check"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
+                                <div class="badge-progress"><i class="bi bi-calendar-check me-1"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
                             </div>
                         </div>
                     `;
                 });
                 html += `</div>`;
             }
-            
+
             if (bronze.length > 0) {
-                html += `<h5 class="fw-bold mb-3" style="color: #cd7b1f;">🥉 Бронзовые достижения</h5><div class="row g-3 mb-4">`;
+                html += `<h6 class="fw-bold mb-3" style="color: #cd7b1f;"><i class="bi bi-star me-2"></i>Бронзовые достижения</h6><div class="row g-3 mb-4">`;
                 bronze.forEach(ach => {
                     html += `
                         <div class="col-md-4 col-sm-6">
@@ -962,52 +1115,52 @@
                                 </div>
                                 <h6 class="badge-title">${escapeHtml(ach.title)}</h6>
                                 <p class="badge-desc">${escapeHtml(ach.description)}</p>
-                                <div class="badge-progress"><i class="bi bi-calendar-check"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
+                                <div class="badge-progress"><i class="bi bi-calendar-check me-1"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
                             </div>
                         </div>
                     `;
                 });
                 html += `</div>`;
             }
-            
+
             container.innerHTML = html;
         } catch (error) {
             console.error('Error loading achievements:', error);
         }
     }
-    
+
     // ========== ЗАГРУЗКА ПРОГРЕССА ИЗ MOODLE ==========
     async function loadMoodleProgress(courseId, containerId) {
         try {
             const response = await fetch(`/api/courses/${courseId}/moodle-progress`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 console.warn('Moodle progress not available for course', courseId);
                 return;
             }
-            
+
             const data = await response.json();
-            
+
             if (data.has_moodle) {
                 moodleProgressCache[courseId] = data;
-                
+
                 const progressContainer = document.getElementById(containerId);
                 if (progressContainer) {
                     const percent = data.progress_percent || 0;
                     const isCompleted = data.is_completed || false;
                     const total = data.total_activities || 0;
                     const completed = data.completed_activities || 0;
-                    
-                    let statusText = isCompleted ? '✅ Завершён' : (percent > 0 ? 'В процессе' : 'Не начат');
+
+                    let statusText = isCompleted ? 'Завершён' : (percent > 0 ? 'В процессе' : 'Не начат');
                     let fillClass = isCompleted ? 'completed' : (percent > 0 ? 'in-progress' : '');
-                    
+
                     progressContainer.innerHTML = `
                         <div class="moodle-progress-section">
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="moodle-progress-label">
-                                    <span><i class="bi bi-box-arrow-up-right me-1" style="color: #1a56db;"></i>Прогресс в Moodle</span>
+                                    <span><i class="bi bi-box-arrow-up-right me-1" style="color: var(--primary);"></i>Прогресс в Moodle</span>
                                     <span>${percent}%</span>
                                 </span>
                                 <button class="moodle-sync-btn" onclick="refreshMoodleProgress(${courseId})" title="Обновить прогресс">
@@ -1033,35 +1186,35 @@
             console.warn('Failed to load Moodle progress:', error);
         }
     }
-    
+
     async function refreshMoodleProgress(courseId) {
         const progressContainer = document.getElementById(`moodle_progress_${courseId}`);
         if (progressContainer) {
             progressContainer.innerHTML = `
                 <div class="moodle-progress-section">
                     <div class="text-center py-1">
-                        <span class="spinner-border spinner-border-sm text-primary" style="width: 1rem; height: 1rem;"></span>
-                        <span class="ms-2" style="font-size: 0.7rem; color: #64748b;">Обновление...</span>
+                        <span class="spinner-border spinner-border-sm" style="color: var(--primary); width: 1rem; height: 1rem;"></span>
+                        <span class="ms-2" style="font-size: 0.7rem; color: var(--gray);">Обновление...</span>
                     </div>
                 </div>
             `;
         }
         await loadMoodleProgress(courseId, `moodle_progress_${courseId}`);
     }
-    
+
     async function loadUserCourses() {
         try {
             const response = await fetch('/api/courses/my/registrations', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             userCourses = await response.json();
-            
+
             const inProgress = userCourses.filter(c => !c.is_completed);
             const completed = userCourses.filter(c => c.is_completed);
-            
+
             renderCourses(inProgress, 'inProgressCourses', false);
             renderCourses(completed, 'completedCourses', true);
-            
+
             // Загружаем прогресс для курсов с Moodle
             userCourses.forEach(course => {
                 if (course.moodle_course_id) {
@@ -1072,11 +1225,11 @@
             console.error('Error loading user courses:', error);
         }
     }
-    
-    // ========== ОБНОВЛЕННАЯ ФУНКЦИЯ РЕНДЕРИНГА КУРСОВ ==========
+
+    // ========== ФУНКЦИЯ РЕНДЕРИНГА КУРСОВ ==========
     function renderCourses(courses, containerId, isCompleted) {
         const container = document.getElementById(containerId);
-        
+
         if (courses.length === 0) {
             container.innerHTML = `
                 <div class="empty-state py-4">
@@ -1086,56 +1239,50 @@
             `;
             return;
         }
-        
+
         let html = `<div class="row g-3">`;
         courses.forEach(course => {
             const progress = course.progress || (isCompleted ? 100 : 0);
             const statusClass = isCompleted ? 'status-completed' : 'status-in-progress';
             const statusText = isCompleted ? 'Завершён' : 'В процессе';
-            
+
             let moodleHtml = '';
             let moodleProgressHtml = '';
-            
+
             if (course.moodle_course_id) {
                 moodleHtml = `
                     <span class="moodle-badge-small" title="Курс привязан к Moodle">
                         <i class="bi bi-box-arrow-up-right"></i> Moodle
                     </span>
                 `;
-                
+
                 moodleProgressHtml = `
                     <div id="moodle_progress_${course.course_id}">
                         <div class="moodle-progress-section">
                             <div class="text-center py-1">
-                                <span class="spinner-border spinner-border-sm text-primary" style="width: 1rem; height: 1rem;"></span>
-                                <span class="ms-2" style="font-size: 0.7rem; color: #64748b;">Загрузка прогресса...</span>
+                                <span class="spinner-border spinner-border-sm" style="color: var(--primary); width: 1rem; height: 1rem;"></span>
+                                <span class="ms-2" style="font-size: 0.7rem; color: var(--gray);">Загрузка прогресса...</span>
                             </div>
                         </div>
                     </div>
                 `;
-            }
-            
-            let taskStatusHtml = '';
-            if (!isCompleted) {
-                taskStatusHtml = `
-                    <div style="margin-top: 8px;">
-                        <span class="task-status pending"><i class="bi bi-clock-history me-1"></i>Есть задание</span>
+            } else {
+                moodleProgressHtml = `
+                    <div class="moodle-progress-section">
+                        <span class="moodle-progress-empty"><i class="bi bi-info-circle me-1"></i>Прогресс недоступен</span>
                     </div>
                 `;
             }
-            
+
             let moodleLinkHtml = '';
             if (course.moodle_course_id) {
                 moodleLinkHtml = `
-                    <a href="/api/courses/${course.course_id}/moodle-link" 
-                       class="moodle-link-btn-sm"
-                       target="_blank"
-                       onclick="event.preventDefault(); openMoodleCourse(${course.course_id}, this);">
-                        <i class="bi bi-box-arrow-up-right"></i> Moodle
-                    </a>
+                    <button class="moodle-link-btn-sm" onclick="openMoodleCourse(${course.course_id}, this)">
+                        <i class="bi bi-box-arrow-up-right"></i> Перейти в Moodle
+                    </button>
                 `;
             }
-            
+
             html += `
                 <div class="col-md-6">
                     <div class="course-card">
@@ -1159,11 +1306,10 @@
                                     <div class="progress-bar" style="width: ${progress}%"></div>
                                 </div>
                             </div>
-                            ${taskStatusHtml}
                         ` : ''}
                         ${moodleProgressHtml}
                         <div class="mt-3 d-flex gap-2 flex-wrap">
-                            <a href="/course-modules/${course.course_id}" class="btn btn-outline-primary btn-sm">
+                            <a href="/course-modules/${course.course_id}" class="btn btn-outline-primary">
                                 ${isCompleted ? 'Посмотреть детали' : 'Продолжить обучение'} <i class="bi bi-arrow-right"></i>
                             </a>
                             ${moodleLinkHtml}
@@ -1175,7 +1321,7 @@
         html += `</div>`;
         container.innerHTML = html;
     }
-    
+
     // ========== ФУНКЦИЯ ОТКРЫТИЯ MOODLE ==========
     async function openMoodleCourse(courseId, element) {
         const token = localStorage.getItem('token');
@@ -1183,35 +1329,34 @@
             if (window.showToast) window.showToast('Войдите в систему', 'danger');
             return;
         }
-        
+
         const originalText = element.innerHTML;
         element.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
         element.disabled = true;
-        
+
         try {
             const response = await fetch(`/api/courses/${courseId}/moodle-link`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.detail || 'Ошибка получения ссылки');
             }
-            
+
             const data = await response.json();
-            
+
             if (data.has_moodle && data.moodle_course_url) {
                 window.open(data.moodle_course_url, '_blank');
                 if (window.showToast) window.showToast('Открываем курс в Moodle...', 'success');
-                // Обновляем прогресс после возвращения
                 setTimeout(() => refreshMoodleProgress(courseId), 2000);
             } else {
                 if (window.showToast) window.showToast('Курс не привязан к Moodle', 'warning');
             }
-            
+
             element.innerHTML = originalText;
             element.disabled = false;
-            
+
         } catch (error) {
             console.error('Moodle link error:', error);
             if (window.showToast) window.showToast(error.message || 'Ошибка при открытии Moodle', 'danger');
@@ -1219,20 +1364,20 @@
             element.disabled = false;
         }
     }
-    
+
     async function loadFavorites() {
         try {
             const response = await fetch('/api/courses/my/favorites', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             const data = await response.json();
-            
+
             const container = document.getElementById('favoritesList');
-            
+
             if (data.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="bi bi-heart"></i>
+                        <i class="bi bi-star"></i>
                         <h5>Нет избранных курсов</h5>
                         <p>Добавляйте курсы в избранное, чтобы не потерять их</p>
                         <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
@@ -1241,9 +1386,9 @@
             } else {
                 let html = `<div class="row g-3">`;
                 data.forEach(course => {
-                    const moodleBadge = course.moodle_course_id ? 
+                    const moodleBadge = course.moodle_course_id ?
                         `<span class="moodle-badge-small"><i class="bi bi-box-arrow-up-right"></i> Moodle</span>` : '';
-                    
+
                     html += `
                         <div class="col-md-6">
                             <div class="course-card">
@@ -1251,7 +1396,7 @@
                                 ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height: 120px; object-fit: cover; width: 100%;">` : ''}
                                 <p class="course-meta">${escapeHtml(course.short_description || (course.description ? course.description.substring(0, 80) + '...' : 'Нет описания'))}</p>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <a href="/course-modules/${course.id}" class="btn btn-primary btn-sm">
+                                    <a href="/course-modules/${course.id}" class="btn btn-primary">
                                         Начать обучение <i class="bi bi-arrow-right"></i>
                                     </a>
                                 </div>
@@ -1266,20 +1411,20 @@
             console.error('Error loading favorites:', error);
         }
     }
-    
+
     async function loadWatchLater() {
         try {
             const response = await fetch('/api/courses/my/watch-later', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             const data = await response.json();
-            
+
             const container = document.getElementById('watchlaterList');
-            
+
             if (data.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="bi bi-clock-history"></i>
+                        <i class="bi bi-clock"></i>
                         <h5>Нет отложенных курсов</h5>
                         <p>Добавляйте курсы в "Посмотреть позже", чтобы вернуться к ним</p>
                         <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
@@ -1288,9 +1433,9 @@
             } else {
                 let html = `<div class="row g-3">`;
                 data.forEach(course => {
-                    const moodleBadge = course.moodle_course_id ? 
+                    const moodleBadge = course.moodle_course_id ?
                         `<span class="moodle-badge-small"><i class="bi bi-box-arrow-up-right"></i> Moodle</span>` : '';
-                    
+
                     html += `
                         <div class="col-md-6">
                             <div class="course-card">
@@ -1298,7 +1443,7 @@
                                 ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height: 120px; object-fit: cover; width: 100%;">` : ''}
                                 <p class="course-meta">${escapeHtml(course.short_description || (course.description ? course.description.substring(0, 80) + '...' : 'Нет описания'))}</p>
                                 <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <a href="/course-modules/${course.id}" class="btn btn-primary btn-sm">
+                                    <a href="/course-modules/${course.id}" class="btn btn-primary">
                                         Начать обучение <i class="bi bi-arrow-right"></i>
                                     </a>
                                 </div>
@@ -1313,65 +1458,51 @@
             console.error('Error loading watch later:', error);
         }
     }
-    
+
     function showSection(section) {
         document.getElementById('profileSection').style.display = 'none';
-        document.getElementById('notificationsSection').style.display = 'none';
         document.getElementById('badgesSection').style.display = 'none';
         document.getElementById('coursesSection').style.display = 'none';
         document.getElementById('favoritesSection').style.display = 'none';
         document.getElementById('watchlaterSection').style.display = 'none';
-        
+
         document.querySelectorAll('.nav-pills-custom .nav-link').forEach(link => {
             link.classList.remove('active');
         });
-        
+
+        const linkMap = {
+            'profile': 0,
+            'badges': 1,
+            'courses': 2,
+            'favorites': 3,
+            'watchlater': 4
+        };
+
+        const links = document.querySelectorAll('.nav-pills-custom .nav-link');
+        if (linkMap[section] !== undefined) {
+            links[linkMap[section]].classList.add('active');
+        }
+
         if (section === 'profile') {
             document.getElementById('profileSection').style.display = 'block';
-            document.querySelector('.nav-pills-custom .nav-link:nth-child(1)').classList.add('active');
             loadProfile();
             loadStats();
-        } else if (section === 'notifications') {
-            document.getElementById('notificationsSection').style.display = 'block';
-            document.querySelector('.nav-pills-custom .nav-link:nth-child(2)').classList.add('active');
-            loadNotifications();
         } else if (section === 'badges') {
             document.getElementById('badgesSection').style.display = 'block';
-            document.querySelector('.nav-pills-custom .nav-link:nth-child(3)').classList.add('active');
             loadAchievements();
         } else if (section === 'courses') {
             document.getElementById('coursesSection').style.display = 'block';
-            document.querySelector('.nav-pills-custom .nav-link:nth-child(4)').classList.add('active');
             loadUserCourses();
             loadStats();
         } else if (section === 'favorites') {
             document.getElementById('favoritesSection').style.display = 'block';
-            document.querySelector('.nav-pills-custom .nav-link:nth-child(5)').classList.add('active');
             loadFavorites();
         } else if (section === 'watchlater') {
             document.getElementById('watchlaterSection').style.display = 'block';
-            document.querySelector('.nav-pills-custom .nav-link:nth-child(6)').classList.add('active');
             loadWatchLater();
         }
     }
-    
-    // Периодически обновляем уведомления (каждые 30 секунд)
-    setInterval(() => {
-        if (document.getElementById('notificationsSection').style.display !== 'none') {
-            loadNotifications();
-        } else {
-            fetch('/api/notifications/', {
-                headers: { 'Authorization': 'Bearer ' + token }
-            })
-            .then(res => res.json())
-            .then(data => {
-                unreadCount = data.filter(n => !n.is_read).length;
-                updateUnreadBadge();
-            })
-            .catch(() => {});
-        }
-    }, 30000);
-    
+
     // Обновляем прогресс из Moodle каждые 60 секунд
     setInterval(() => {
         userCourses.forEach(course => {
@@ -1380,10 +1511,10 @@
             }
         });
     }, 60000);
-    
+
+    // Инициализация
     loadProfile();
     loadStats();
     loadUserCourses();
-    loadNotifications();
 </script>
 {% endblock %}

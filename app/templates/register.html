@@ -2,123 +2,628 @@
 
 {% block title %}Регистрация - ИРО ЧР{% endblock %}
 
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #c9a13b;
+        --primary-dark: #b8860b;
+        --primary-light: #f9d976;
+        --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+        --dark: #1a1a2e;
+        --light: #f8fafc;
+        --gray: #64748b;
+        --white: #ffffff;
+        --border: #e2e8f0;
+        --success: #10b981;
+        --danger: #ef4444;
+    }
+    
+    .register-hero {
+        background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
+        padding: 40px 0 50px;
+        margin-bottom: 30px;
+        border-bottom: 3px solid rgba(201, 161, 59, 0.3);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .register-hero::before {
+        content: '';
+        position: absolute;
+        top: -30%;
+        right: -10%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    .register-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -20%;
+        left: -5%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(201, 161, 59, 0.04) 0%, transparent 70%);
+        border-radius: 50%;
+        animation: float 15s ease-in-out infinite reverse;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(20px, -20px) scale(1.05); }
+    }
+    
+    .register-hero h1 {
+        color: white;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .register-hero h1 .gold {
+        color: var(--primary-light);
+    }
+    
+    .register-hero p {
+        color: rgba(255,255,255,0.7);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .register-hero .hero-badge {
+        display: inline-block;
+        background: rgba(201, 161, 59, 0.15);
+        color: var(--primary-light);
+        padding: 6px 20px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid rgba(201, 161, 59, 0.15);
+        margin-bottom: 12px;
+    }
+    
+    .register-hero .hero-icon {
+        display: inline-block;
+        margin-bottom: 12px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .register-card {
+        border-radius: 20px !important;
+        border: 1px solid var(--border) !important;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+        transition: all 0.3s ease;
+        background: var(--white);
+    }
+    
+    .register-card:hover {
+        box-shadow: 0 8px 32px rgba(201, 161, 59, 0.08) !important;
+        border-color: var(--primary) !important;
+    }
+    
+    .register-card .card-header {
+        background: linear-gradient(135deg, #fef9e7 0%, #fdf2d0 100%) !important;
+        border-bottom: 2px solid rgba(201, 161, 59, 0.15);
+        padding: 24px 20px;
+        position: relative;
+    }
+    
+    .register-card .card-header .header-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.2);
+    }
+    
+    .register-card .card-header .header-icon i {
+        font-size: 1.6rem;
+        color: white;
+    }
+    
+    .register-card .card-header h3 {
+        color: var(--dark);
+        font-weight: 700;
+        margin: 0;
+        font-size: 1.4rem;
+    }
+    
+    .register-card .card-header p {
+        color: var(--gray);
+        font-size: 0.9rem;
+        margin: 4px 0 0 0;
+    }
+    
+    .register-card .card-body {
+        padding: 32px 28px;
+    }
+    
+    .register-card .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+    }
+    
+    .register-card .form-label i {
+        color: var(--primary);
+        margin-right: 6px;
+        width: 18px;
+    }
+    
+    .register-card .form-label .required {
+        color: var(--danger);
+        font-weight: 700;
+    }
+    
+    .register-card .form-control {
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    
+    .register-card .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(201, 161, 59, 0.12);
+        outline: none;
+    }
+    
+    .register-card .form-control::placeholder {
+        color: #b0b8c4;
+        font-size: 0.9rem;
+    }
+    
+    .register-card .form-control.is-valid {
+        border-color: var(--success);
+    }
+    
+    .register-card .form-control.is-invalid {
+        border-color: var(--danger);
+    }
+    
+    .register-card .input-group .form-control {
+        border-radius: 10px 0 0 10px;
+    }
+    
+    .register-card .input-group .btn-outline-secondary {
+        border-radius: 0 10px 10px 0;
+        border: 1px solid var(--border);
+        border-left: none;
+        background: var(--white);
+        color: var(--gray);
+        transition: all 0.3s ease;
+        padding: 12px 16px;
+    }
+    
+    .register-card .input-group .btn-outline-secondary:hover {
+        background: #fef9e7;
+        color: var(--primary-dark);
+        border-color: var(--primary);
+    }
+    
+    .register-card .input-group .btn-outline-secondary:focus {
+        box-shadow: none;
+    }
+    
+    .btn-register {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-register::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255,255,255,0.15);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.5s ease;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(201, 161, 59, 0.3);
+        color: white;
+    }
+    
+    .btn-register:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn-register:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    
+    .register-card .login-link {
+        color: var(--gray);
+        font-size: 0.95rem;
+    }
+    
+    .register-card .login-link a {
+        color: var(--primary-dark);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+    }
+    
+    .register-card .login-link a:hover {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+    
+    /* ===== ТРЕБОВАНИЯ К ПАРОЛЮ ===== */
+    #passwordRequirements {
+        background: #f8fafc;
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        margin-top: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    #passwordRequirements:hover {
+        border-color: var(--primary);
+    }
+    
+    #passwordRequirements .requirement-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 3px 0;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+    
+    #passwordRequirements .requirement-item .req-icon {
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        width: 18px;
+        text-align: center;
+    }
+    
+    #passwordRequirements .requirement-item .req-icon.pending {
+        color: var(--gray);
+    }
+    
+    #passwordRequirements .requirement-item .req-icon.valid {
+        color: var(--success);
+    }
+    
+    #passwordRequirements .requirement-item .req-icon.invalid {
+        color: var(--danger);
+    }
+    
+    #passwordRequirements .requirement-item .req-text {
+        color: var(--gray);
+        transition: color 0.3s ease;
+    }
+    
+    #passwordRequirements .requirement-item .req-text.valid {
+        color: var(--success);
+    }
+    
+    #passwordRequirements .requirement-item .req-text.invalid {
+        color: var(--danger);
+    }
+    
+    /* ===== ЧЕКБОКСЫ ===== */
+    .register-card .form-check {
+        margin-bottom: 8px;
+    }
+    
+    .register-card .form-check-input {
+        accent-color: var(--primary);
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        cursor: pointer;
+    }
+    
+    .register-card .form-check-label {
+        font-size: 0.9rem;
+        color: var(--gray);
+        cursor: pointer;
+    }
+    
+    .register-card .form-check-label a {
+        color: var(--primary-dark);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border-bottom: 1px dashed transparent;
+    }
+    
+    .register-card .form-check-label a:hover {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+    
+    /* ===== ЗАЩИТА ДАННЫХ ===== */
+    .security-alert {
+        background: #fef9e7 !important;
+        border: 1px solid var(--primary) !important;
+        border-radius: 12px !important;
+        padding: 14px 18px !important;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .security-alert:hover {
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.08);
+    }
+    
+    .security-alert .shield-icon {
+        width: 42px;
+        height: 42px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .security-alert .security-text strong {
+        color: var(--dark);
+        display: block;
+    }
+    
+    .security-alert .security-text span {
+        color: var(--gray);
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .register-hero {
+            padding: 30px 0 25px;
+        }
+        .register-hero h1 {
+            font-size: 1.8rem;
+        }
+        .register-card .card-body {
+            padding: 24px 20px;
+        }
+        .register-card .card-header h3 {
+            font-size: 1.2rem;
+        }
+        .register-card .card-header .header-icon {
+            width: 48px;
+            height: 48px;
+        }
+        .register-card .card-header .header-icon i {
+            font-size: 1.3rem;
+        }
+        .security-alert {
+            flex-direction: column;
+            text-align: center;
+            padding: 16px !important;
+        }
+        .security-alert .security-text strong {
+            display: inline;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .register-hero h1 {
+            font-size: 1.4rem;
+        }
+        .register-hero .hero-badge {
+            font-size: 0.7rem;
+            padding: 4px 14px;
+        }
+        .register-card .card-body {
+            padding: 20px 16px;
+        }
+        .register-card .form-control {
+            padding: 10px 14px;
+            font-size: 0.9rem;
+        }
+        .btn-register {
+            padding: 12px;
+            font-size: 0.95rem;
+        }
+        #passwordRequirements .requirement-item {
+            font-size: 0.7rem;
+        }
+        .register-card .form-check-label {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-5 mb-5">
+<!-- Герой-секция -->
+<div class="register-hero">
+    <div class="container text-center">
+        <div class="hero-icon">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#f9d976" opacity="0.95"/>
+            </svg>
+        </div>
+        <div class="hero-badge">Создание учётной записи</div>
+        <h1 class="display-5 fw-bold">
+            <span class="gold">Регистрация</span>
+        </h1>
+        <p class="lead mb-0">Создайте учётную запись для доступа к системе дистанционного обучения</p>
+    </div>
+</div>
+
+<div class="container mt-4 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-lg border-0">
-                <div class="card-header text-center border-0" style="background-color: #f8f9fa;">
-                    <h3 class="mb-0 fw-bold" style="color: #6c757d;">
-                        <i class="bi bi-person-plus"></i> РЕГИСТРАЦИЯ
-                    </h3>
+            <div class="card register-card">
+                <div class="card-header text-center">
+                    <div class="header-icon">
+                        <i class="bi bi-person-plus"></i>
+                    </div>
+                    <h3>Создание аккаунта</h3>
+                    <p>Заполните все обязательные поля</p>
                 </div>
-                <div class="card-body p-4">
-                    <form id="registerForm">
+                <div class="card-body">
+                    <form id="registerForm" novalidate>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-person"></i> ФИО *</label>
+                                <label class="form-label" for="full_name">
+                                    <i class="bi bi-person"></i> ФИО <span class="required">*</span>
+                                </label>
                                 <input type="text" class="form-control" id="full_name" placeholder="Иванов Иван Иванович" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-envelope"></i> Email *</label>
+                                <label class="form-label" for="email">
+                                    <i class="bi bi-envelope"></i> Email <span class="required">*</span>
+                                </label>
                                 <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-briefcase"></i> Должность</label>
+                                <label class="form-label" for="position">
+                                    <i class="bi bi-briefcase"></i> Должность
+                                </label>
                                 <input type="text" class="form-control" id="position" placeholder="Учитель">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-phone"></i> Телефон</label>
+                                <label class="form-label" for="phone">
+                                    <i class="bi bi-phone"></i> Телефон
+                                </label>
                                 <input type="tel" class="form-control" id="phone" placeholder="+7 (999) 123-45-67">
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-building"></i> Организация</label>
+                            <label class="form-label" for="organization">
+                                <i class="bi bi-building"></i> Организация
+                            </label>
                             <input type="text" class="form-control" id="organization" placeholder="Школа №1">
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-lock"></i> Пароль *</label>
+                                <label class="form-label" for="password">
+                                    <i class="bi bi-lock"></i> Пароль <span class="required">*</span>
+                                </label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="password" placeholder="Введите пароль" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" style="background-color: white;">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                         <i class="bi bi-eye" id="passwordIcon"></i>
                                     </button>
                                 </div>
-                                <!-- ✅ ТРЕБОВАНИЯ К ПАРОЛЮ -->
-                                <div class="mt-2" id="passwordRequirements" style="font-size: 0.8rem;">
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <i class="bi bi-circle" id="reqLength" style="color: #dc3545;"></i>
-                                        <span id="reqLengthText" style="color: #6c757d;">Минимум 8 символов</span>
+                                <!-- Требования к паролю -->
+                                <div id="passwordRequirements">
+                                    <div class="requirement-item">
+                                        <span class="req-icon pending" id="reqLengthIcon"><i class="bi bi-circle"></i></span>
+                                        <span class="req-text" id="reqLengthText">Минимум 8 символов</span>
                                     </div>
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <i class="bi bi-circle" id="reqDigit" style="color: #dc3545;"></i>
-                                        <span id="reqDigitText" style="color: #6c757d;">Хотя бы одна цифра (0-9)</span>
+                                    <div class="requirement-item">
+                                        <span class="req-icon pending" id="reqDigitIcon"><i class="bi bi-circle"></i></span>
+                                        <span class="req-text" id="reqDigitText">Хотя бы одна цифра (0-9)</span>
                                     </div>
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <i class="bi bi-circle" id="reqUppercase" style="color: #dc3545;"></i>
-                                        <span id="reqUppercaseText" style="color: #6c757d;">Хотя бы одна заглавная буква (A-Z)</span>
+                                    <div class="requirement-item">
+                                        <span class="req-icon pending" id="reqUppercaseIcon"><i class="bi bi-circle"></i></span>
+                                        <span class="req-text" id="reqUppercaseText">Хотя бы одна заглавная буква (A-Z)</span>
                                     </div>
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <i class="bi bi-circle" id="reqLowercase" style="color: #dc3545;"></i>
-                                        <span id="reqLowercaseText" style="color: #6c757d;">Хотя бы одна строчная буква (a-z)</span>
+                                    <div class="requirement-item">
+                                        <span class="req-icon pending" id="reqLowercaseIcon"><i class="bi bi-circle"></i></span>
+                                        <span class="req-text" id="reqLowercaseText">Хотя бы одна строчная буква (a-z)</span>
                                     </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-circle" id="reqSpecial" style="color: #dc3545;"></i>
-                                        <span id="reqSpecialText" style="color: #6c757d;">Хотя бы один спецсимвол (!@#$%^&*() etc.)</span>
+                                    <div class="requirement-item">
+                                        <span class="req-icon pending" id="reqSpecialIcon"><i class="bi bi-circle"></i></span>
+                                        <span class="req-text" id="reqSpecialText">Хотя бы один спецсимвол (!@#$%^&*() etc.)</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold" style="color: #6c757d;"><i class="bi bi-shield-lock"></i> Подтверждение *</label>
+                                <label class="form-label" for="confirm">
+                                    <i class="bi bi-shield-lock"></i> Подтверждение <span class="required">*</span>
+                                </label>
                                 <div class="input-group">
-                                    <input type="password" class="form-control" id="confirm" placeholder="повторите пароль" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirm" style="background-color: white;">
+                                    <input type="password" class="form-control" id="confirm" placeholder="Повторите пароль" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirm">
                                         <i class="bi bi-eye" id="confirmIcon"></i>
                                     </button>
+                                </div>
+                                <div id="passwordMatchHint" style="font-size: 0.8rem; margin-top: 6px; color: var(--gray);">
+                                    <i class="bi bi-info-circle me-1"></i> Пароли должны совпадать
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Чекбоксы и ссылки -->
-                        <div class="mb-2">
+                        <!-- Чекбоксы -->
+                        <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agree_policy" required>
                                 <label class="form-check-label" for="agree_policy">
-                                    Я принимаю <a href="/privacy-policy" target="_blank">Политику конфиденциальности</a>
+                                    Я принимаю <a href="/privacy-policy" target="_blank">Политику конфиденциальности</a> <span class="text-danger">*</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agree_terms" required>
                                 <label class="form-check-label" for="agree_terms">
-                                    Я принимаю <a href="/terms" target="_blank">Пользовательское соглашение</a>
+                                    Я принимаю <a href="/terms" target="_blank">Пользовательское соглашение</a> <span class="text-danger">*</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agree_offer" required>
                                 <label class="form-check-label" for="agree_offer">
-                                    Я принимаю условия <a href="/offer" target="_blank">Договора оферты</a>
+                                    Я принимаю условия <a href="/offer" target="_blank">Договора оферты</a> <span class="text-danger">*</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Ремарка с щитом -->
-                        <div class="alert border-0 d-flex align-items-center mb-3" style="background-color: #f8f9fa; border-left: 4px solid #28a745 !important;">
-                            <i class="bi bi-shield-check fs-4 me-2" style="color: #28a745;"></i>
-                            <div>
-                                <strong style="color: #6c757d;">Все данные защищены!</strong> 
-                                <span class="text-muted">Используется надежное шифрование данных.</span>
+                        <!-- Защита данных -->
+                        <div class="security-alert">
+                            <div class="shield-icon">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div class="security-text">
+                                <strong>Все данные защищены!</strong>
+                                <span>Используется надёжное шифрование данных.</span>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn w-100 btn-lg" style="background-color: white; color: #6c757d; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            Зарегистрироваться
+                        <button type="submit" class="btn-register" id="registerBtn">
+                            <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
                         </button>
                     </form>
                     <div class="mt-4 text-center">
-                        <p class="text-muted">Уже есть аккаунт? <a href="/login" class="fw-bold" style="color: #6c757d;">Войдите</a></p>
+                        <p class="login-link">
+                            Уже есть аккаунт? <a href="/login">Войдите в систему</a>
+                        </p>
                     </div>
                 </div>
             </div>
@@ -127,44 +632,6 @@
 </div>
 
 <script>
-// ============================================================
-// ПРОВЕРКА СИЛЫ ПАРOЛЯ В РЕАЛЬНОМ ВРЕМЕНИ
-// ============================================================
-document.getElementById('password').addEventListener('input', function() {
-    const password = this.value;
-    
-    // Проверка каждого требования
-    const hasLength = password.length >= 8;
-    const hasDigit = /\d/.test(password);
-    const hasUppercase = /[A-ZА-Я]/.test(password);
-    const hasLowercase = /[a-zа-я]/.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
-    // Обновляем иконки и цвета
-    updateRequirement('reqLength', 'reqLengthText', hasLength, 'Минимум 8 символов');
-    updateRequirement('reqDigit', 'reqDigitText', hasDigit, 'Хотя бы одна цифра (0-9)');
-    updateRequirement('reqUppercase', 'reqUppercaseText', hasUppercase, 'Хотя бы одна заглавная буква (A-Z)');
-    updateRequirement('reqLowercase', 'reqLowercaseText', hasLowercase, 'Хотя бы одна строчная буква (a-z)');
-    updateRequirement('reqSpecial', 'reqSpecialText', hasSpecial, 'Хотя бы один спецсимвол (!@#$%^&*() etc.)');
-});
-
-function updateRequirement(iconId, textId, isValid, text) {
-    const icon = document.getElementById(iconId);
-    const textEl = document.getElementById(textId);
-    
-    if (isValid) {
-        icon.className = 'bi bi-check-circle-fill';
-        icon.style.color = '#28a745';
-        textEl.style.color = '#28a745';
-        textEl.textContent = '✅ ' + text;
-    } else {
-        icon.className = 'bi bi-circle';
-        icon.style.color = '#dc3545';
-        textEl.style.color = '#6c757d';
-        textEl.textContent = text;
-    }
-}
-
 // ============================================================
 // ПОКАЗ/СКРЫТИЕ ПАРОЛЯ
 // ============================================================
@@ -195,54 +662,116 @@ document.getElementById('toggleConfirm').addEventListener('click', function() {
 });
 
 // ============================================================
+// ПРОВЕРКА СИЛЫ ПАРОЛЯ В РЕАЛЬНОМ ВРЕМЕНИ
+// ============================================================
+const requirements = [
+    { id: 'reqLength', text: 'reqLengthText', test: (p) => p.length >= 8, label: 'Минимум 8 символов' },
+    { id: 'reqDigit', text: 'reqDigitText', test: (p) => /\d/.test(p), label: 'Хотя бы одна цифра (0-9)' },
+    { id: 'reqUppercase', text: 'reqUppercaseText', test: (p) => /[A-ZА-Я]/.test(p), label: 'Хотя бы одна заглавная буква (A-Z)' },
+    { id: 'reqLowercase', text: 'reqLowercaseText', test: (p) => /[a-zа-я]/.test(p), label: 'Хотя бы одна строчная буква (a-z)' },
+    { id: 'reqSpecial', text: 'reqSpecialText', test: (p) => /[!@#$%^&*(),.?":{}|<>]/.test(p), label: 'Хотя бы один спецсимвол (!@#$%^&*() etc.)' }
+];
+
+document.getElementById('password').addEventListener('input', function() {
+    const password = this.value;
+    
+    requirements.forEach(req => {
+        const isValid = req.test(password);
+        const icon = document.getElementById(req.id + 'Icon');
+        const text = document.getElementById(req.text);
+        
+        if (isValid) {
+            icon.className = 'req-icon valid';
+            icon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+            text.className = 'req-text valid';
+            text.textContent = '✅ ' + req.label;
+        } else {
+            icon.className = 'req-icon pending';
+            icon.innerHTML = '<i class="bi bi-circle"></i>';
+            text.className = 'req-text';
+            text.textContent = req.label;
+        }
+    });
+});
+
+// ============================================================
+// ПРОВЕРКА СОВПАДЕНИЯ ПАРОЛЕЙ
+// ============================================================
+document.getElementById('confirm').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirm = this.value;
+    const hint = document.getElementById('passwordMatchHint');
+    
+    if (confirm.length === 0) {
+        hint.innerHTML = '<i class="bi bi-info-circle me-1"></i> Пароли должны совпадать';
+        hint.style.color = 'var(--gray)';
+        this.classList.remove('is-valid', 'is-invalid');
+        return;
+    }
+    
+    if (password === confirm) {
+        hint.innerHTML = '<i class="bi bi-check-circle-fill me-1" style="color: var(--success);"></i> Пароли совпадают';
+        hint.style.color = 'var(--success)';
+        this.classList.remove('is-invalid');
+        this.classList.add('is-valid');
+    } else {
+        hint.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1" style="color: var(--danger);"></i> Пароли не совпадают';
+        hint.style.color = 'var(--danger)';
+        this.classList.remove('is-valid');
+        this.classList.add('is-invalid');
+    }
+});
+
+// ============================================================
 // ОТПРАВКА ФОРМЫ
 // ============================================================
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
+    const btn = document.getElementById('registerBtn');
+    
     // Проверка чекбоксов
     if (!document.getElementById('agree_policy').checked) {
-        showToast('Необходимо принять Политику конфиденциальности', 'danger');
+        if (window.showToast) window.showToast('Необходимо принять Политику конфиденциальности', 'danger');
         return;
     }
     if (!document.getElementById('agree_terms').checked) {
-        showToast('Необходимо принять Пользовательское соглашение', 'danger');
+        if (window.showToast) window.showToast('Необходимо принять Пользовательское соглашение', 'danger');
         return;
     }
     if (!document.getElementById('agree_offer').checked) {
-        showToast('Необходимо принять условия Договора оферты', 'danger');
+        if (window.showToast) window.showToast('Необходимо принять условия Договора оферты', 'danger');
         return;
     }
     
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('confirm').value;
     
-    // Проверка совпадения паролей
     if (password !== confirm) {
-        showToast('Пароли не совпадают', 'danger');
+        if (window.showToast) window.showToast('Пароли не совпадают', 'danger');
         return;
     }
     
-    // ✅ Проверка требований к паролю (на клиенте)
-    const hasLength = password.length >= 8;
-    const hasDigit = /\d/.test(password);
-    const hasUppercase = /[A-ZА-Я]/.test(password);
-    const hasLowercase = /[a-zа-я]/.test(password);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    
-    if (!hasLength || !hasDigit || !hasUppercase || !hasLowercase || !hasSpecial) {
-        showToast('Пароль не соответствует требованиям безопасности. См. подсказки ниже.', 'danger');
+    // Проверка требований к паролю
+    const allValid = requirements.every(req => req.test(password));
+    if (!allValid) {
+        if (window.showToast) window.showToast('Пароль не соответствует требованиям безопасности', 'danger');
         return;
     }
     
     const data = {
-        email: document.getElementById('email').value,
-        full_name: document.getElementById('full_name').value,
-        position: document.getElementById('position').value || null,
-        phone: document.getElementById('phone').value || null,
-        organization: document.getElementById('organization').value || null,
+        email: document.getElementById('email').value.trim(),
+        full_name: document.getElementById('full_name').value.trim(),
+        position: document.getElementById('position').value.trim() || null,
+        phone: document.getElementById('phone').value.trim() || null,
+        organization: document.getElementById('organization').value.trim() || null,
         password: password
     };
+    
+    // Блокируем кнопку
+    btn.disabled = true;
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Регистрация...';
     
     try {
         const response = await fetch('/api/auth/register', {
@@ -253,49 +782,39 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         
         if (response.ok) {
             const result = await response.json();
-            showToast(result.role === 'admin' ? 'Вы зарегистрированы как АДМИНИСТРАТОР!' : 'Регистрация успешна!', 'success');
+            if (window.showToast) {
+                window.showToast(result.role === 'admin' ? 'Вы зарегистрированы как АДМИНИСТРАТОР!' : 'Регистрация успешна!', 'success');
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
             setTimeout(() => window.location.href = '/login', 1500);
         } else {
             const error = await response.json();
-            showToast(error.detail || 'Ошибка регистрации', 'danger');
+            if (window.showToast) window.showToast(error.detail || 'Ошибка регистрации', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
         }
     } catch (error) {
-        showToast('Ошибка соединения с сервером', 'danger');
+        console.error('Registration error:', error);
+        if (window.showToast) window.showToast('Ошибка соединения с сервером', 'danger');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
     }
 });
+
+// ============================================================
+// AOS ДЛЯ АНИМАЦИЙ
+// ============================================================
+try {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 600,
+            once: true,
+            offset: 30
+        });
+    }
+} catch(e) {
+    console.warn('AOS init error:', e);
+}
 </script>
-
-<style>
-/* ✅ Стили для требований к паролю */
-#passwordRequirements {
-    background: #f8f9fa;
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    margin-top: 6px;
-}
-
-#passwordRequirements .d-flex {
-    transition: all 0.2s ease;
-}
-
-#passwordRequirements .bi-circle {
-    font-size: 0.7rem;
-}
-
-#passwordRequirements .bi-check-circle-fill {
-    font-size: 0.7rem;
-}
-
-/* Стили для валидации поля при вводе */
-.form-control.is-valid {
-    border-color: #28a745;
-    background-image: none;
-}
-
-.form-control.is-invalid {
-    border-color: #dc3545;
-    background-image: none;
-}
-</style>
 {% endblock %}

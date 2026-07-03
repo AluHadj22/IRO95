@@ -5,113 +5,307 @@
 {% block extra_css %}
 <style>
     :root {
-        --primary: #0057A4;
-        --primary-dark: #003d7a;
-        --primary-light: #2b7bcf;
-        --primary-gradient: linear-gradient(135deg, #0057A4 0%, #2b7bcf 50%, #4a90d9 100%);
+        --primary: #c9a13b;
+        --primary-dark: #b8860b;
+        --primary-light: #f9d976;
+        --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
         --secondary: #6366f1;
         --success: #10b981;
         --danger: #ef4444;
         --warning: #f59e0b;
         --info: #3b82f6;
-        --dark: #1f2937;
-        --light: #f9fafb;
-        --gray: #6b7280;
+        --dark: #1a1a2e;
+        --light: #f8fafc;
+        --gray: #64748b;
         --white: #ffffff;
-        --border: #e5e7eb;
+        --border: #e2e8f0;
     }
-    
+
+    /* ===== ПЕРЕОПРЕДЕЛЯЕМ НАВБАР ДЛЯ АДМИНКИ ===== */
+    /* Делаем навбар более прозрачным в админке */
+    .navbar {
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(16px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+        border-bottom: 1px solid rgba(201, 161, 59, 0.12) !important;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .navbar.scrolled {
+        background: rgba(255, 255, 255, 0.85) !important;
+        backdrop-filter: blur(20px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+        border-bottom: 2px solid rgba(201, 161, 59, 0.15) !important;
+        box-shadow: 0 4px 40px rgba(201, 161, 59, 0.06) !important;
+    }
+
+    /* На мобильных фон чуть плотнее */
+    @media (max-width: 991.98px) {
+        .navbar {
+            background: rgba(255, 255, 255, 0.75) !important;
+            backdrop-filter: blur(16px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(16px) saturate(200%) !important;
+        }
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.92) !important;
+        }
+    }
+
+    /* Ссылки в навбаре админки — с золотыми акцентами */
+    .navbar .nav-link {
+        color: rgba(30, 41, 59, 0.8) !important;
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        padding: 0.5rem 1.2rem !important;
+        border-radius: 10px;
+    }
+
+    .navbar .nav-link::before {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        left: 50%;
+        transform: translateX(-50%) scaleX(0);
+        width: 60%;
+        height: 2px;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .navbar .nav-link:hover::before,
+    .navbar .nav-link.active::before {
+        transform: translateX(-50%) scaleX(1);
+    }
+
+    .navbar .nav-link:hover {
+        color: var(--primary) !important;
+        background: rgba(201, 161, 59, 0.08);
+    }
+
+    .navbar .nav-link.active {
+        color: var(--primary) !important;
+        background: rgba(201, 161, 59, 0.12);
+    }
+
+    .navbar.scrolled .nav-link {
+        color: var(--gray) !important;
+    }
+
+    .navbar.scrolled .nav-link:hover,
+    .navbar.scrolled .nav-link.active {
+        color: var(--primary) !important;
+    }
+
+    /* Название бренда с золотым акцентом */
+    .navbar-brand .title .gold {
+        background: linear-gradient(135deg, #c9a13b, #b8860b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Бургер-кнопка в админке */
+    .navbar .navbar-toggler {
+        border: 1.5px solid rgba(201, 161, 59, 0.25);
+        padding: 0.5rem 0.7rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(4px);
+    }
+
+    .navbar .navbar-toggler:hover {
+        border-color: var(--primary);
+        background: rgba(201, 161, 59, 0.05);
+        box-shadow: 0 0 20px rgba(201, 161, 59, 0.08);
+    }
+
+    .navbar .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(201,161,59,0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    /* Мобильное меню со стеклянным эффектом */
+    @media (max-width: 991.98px) {
+        .navbar .navbar-collapse {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border-radius: 16px;
+            padding: 1rem 0.5rem;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(201, 161, 59, 0.08);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .navbar .nav-link {
+            padding: 0.6rem 1rem !important;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .navbar .nav-link::before {
+            display: none;
+        }
+
+        .navbar .nav-link:hover,
+        .navbar .nav-link.active {
+            background: rgba(201, 161, 59, 0.1) !important;
+        }
+    }
+
+    /* ===== ОСТАЛЬНЫЕ СТИЛИ АДМИНКИ ===== */
     .admin-sidebar {
-        background: var(--white);
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
         border-radius: 16px;
-        border: 1px solid var(--border);
+        border: 1px solid rgba(201, 161, 59, 0.1);
         padding: 20px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        position: sticky;
+        top: 90px;
+        transition: all 0.3s ease;
     }
-    
+
+    .admin-sidebar:hover {
+        border-color: rgba(201, 161, 59, 0.2);
+        box-shadow: 0 8px 32px rgba(201, 161, 59, 0.06);
+    }
+
     .admin-sidebar .nav-link {
         color: var(--gray);
         padding: 12px 16px;
         margin: 4px 0;
         border-radius: 10px;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
         font-size: 0.9rem;
         font-weight: 500;
+        position: relative;
+        overflow: hidden;
     }
-    
+
     .admin-sidebar .nav-link i {
         margin-right: 12px;
         width: 22px;
         font-size: 1.1rem;
     }
-    
+
     .admin-sidebar .nav-link:hover {
-        background: #e0e7ff;
-        color: var(--primary);
+        background: #fef9e7;
+        color: var(--primary-dark);
     }
-    
+
     .admin-sidebar .nav-link.active {
         background: var(--primary-gradient);
         color: white;
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.25);
     }
-    
+
+    .admin-sidebar .nav-link.active i {
+        color: white;
+    }
+
     .stat-card {
-        background: var(--white);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         border-radius: 16px;
         padding: 24px;
         text-align: center;
-        border: 1px solid var(--border);
-        transition: all 0.3s ease;
+        border: 1px solid rgba(201, 161, 59, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
     }
-    
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
     .stat-card:hover {
         transform: translateY(-4px);
-        border-color: var(--primary-light);
-        box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1);
+        border-color: rgba(201, 161, 59, 0.2);
+        box-shadow: 0 12px 24px -12px rgba(201, 161, 59, 0.15);
+        background: rgba(255, 255, 255, 0.9);
     }
-    
+
+    .stat-card:hover::before {
+        opacity: 1;
+    }
+
     .stat-card i {
         font-size: 2.5rem;
         color: var(--primary);
+        transition: transform 0.3s ease;
     }
-    
+
+    .stat-card:hover i {
+        transform: scale(1.1) rotate(-3deg);
+    }
+
     .stat-card h3 {
         font-size: 2rem;
         font-weight: 700;
         margin: 12px 0 4px;
         color: var(--dark);
     }
-    
+
     .stat-card p {
         color: var(--gray);
         margin: 0;
         font-size: 0.875rem;
     }
-    
+
     .table-card {
-        background: var(--white);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         border-radius: 16px;
-        border: 1px solid var(--border);
+        border: 1px solid rgba(201, 161, 59, 0.08);
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        transition: all 0.3s ease;
     }
-    
+
+    .table-card:hover {
+        border-color: rgba(201, 161, 59, 0.15);
+        box-shadow: 0 4px 20px rgba(201, 161, 59, 0.05);
+    }
+
     .table th {
         font-weight: 600;
         color: var(--gray);
         padding: 16px;
-        background: var(--light);
-        border-bottom: 1px solid var(--border);
+        background: rgba(250, 251, 252, 0.5);
+        border-bottom: 2px solid var(--border);
         font-size: 0.875rem;
     }
-    
+
     .table td {
-        padding: 16px;
+        padding: 14px 16px;
         vertical-align: middle;
         border-bottom: 1px solid var(--border);
         font-size: 0.875rem;
     }
-    
+
+    .table tbody tr {
+        transition: background 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(254, 249, 231, 0.3);
+    }
+
     .btn-primary {
         background: var(--primary-gradient);
         border: none;
@@ -119,116 +313,189 @@
         padding: 10px 24px;
         font-weight: 600;
         font-size: 0.875rem;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
+        color: white;
+        position: relative;
+        overflow: hidden;
     }
-    
+
+    .btn-primary::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.5s ease;
+    }
+
     .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,87,164,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(201, 161, 59, 0.35);
+        color: white;
     }
-    
+
+    .btn-primary:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+
     .btn-sm {
         padding: 6px 12px;
         border-radius: 8px;
         font-size: 0.75rem;
+        transition: all 0.3s ease;
     }
-    
+
+    .btn-sm:hover {
+        transform: translateY(-1px);
+    }
+
+    .btn-success {
+        background: var(--success);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-warning {
+        background: var(--warning);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .btn-warning:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        color: white;
+    }
+
     .badge-success {
         background: #d1fae5;
         color: #059669;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
-    
+
     .badge-danger {
         background: #fee2e2;
         color: #dc2626;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
-    
+
     .badge-warning {
         background: #fed7aa;
         color: #9a3412;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
-    
+
     .badge-info {
         background: #dbeafe;
         color: #1e40af;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
     }
-    
+
+    .badge-gold {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
     .badge-moodle {
         background: #f0f0f0;
         color: #555;
-        padding: 4px 10px;
+        padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.7rem;
         font-weight: 500;
         border: 1px solid #ddd;
     }
-    
+
     .modal-content {
-        border-radius: 16px;
+        border-radius: 20px;
         border: none;
         overflow: hidden;
     }
-    
+
     .modal-header {
         background: var(--primary-gradient);
         color: white;
         border: none;
         padding: 20px 24px;
     }
-    
+
     .modal-header .btn-close {
         filter: brightness(0) invert(1);
         opacity: 0.8;
     }
-    
+
     .modal-body {
         padding: 24px;
     }
-    
-    .form-control, .form-select {
+
+    .form-control,
+    .form-select {
         border-radius: 10px;
         border: 1px solid var(--border);
         padding: 12px 16px;
         font-size: 0.875rem;
         transition: all 0.2s ease;
     }
-    
-    .form-control:focus, .form-select:focus {
+
+    .form-control:focus,
+    .form-select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(0,87,164,0.1);
+        box-shadow: 0 0 0 3px rgba(201, 161, 59, 0.12);
         outline: none;
     }
-    
+
     .form-label {
         font-weight: 500;
         margin-bottom: 8px;
         color: var(--dark);
         font-size: 0.875rem;
     }
-    
+
     .section-title {
         font-size: 1.5rem;
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
         color: var(--dark);
     }
-    
+
     .loading-spinner {
         display: inline-block;
         width: 16px;
@@ -238,11 +505,13 @@
         border-radius: 50%;
         animation: spin 0.6s linear infinite;
     }
-    
+
     @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+            transform: rotate(360deg);
+        }
     }
-    
+
     .image-preview {
         max-width: 150px;
         max-height: 150px;
@@ -250,35 +519,42 @@
         border-radius: 10px;
         border: 1px solid var(--border);
     }
-    
+
     .speaker-item {
-        background: var(--light);
+        background: rgba(248, 250, 252, 0.5);
+        backdrop-filter: blur(4px);
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 16px;
         border: 1px solid var(--border);
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
-    
+
     .speaker-item:hover {
-        border-color: var(--primary-light);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(201, 161, 59, 0.08);
     }
-    
+
     .speaker-photo-preview {
         width: 60px;
         height: 60px;
         border-radius: 50%;
         object-fit: cover;
         margin-top: 8px;
-        border: 2px solid var(--primary);
+        border: 3px solid var(--primary);
         padding: 2px;
+        transition: all 0.3s ease;
     }
-    
+
+    .speaker-photo-preview:hover {
+        border-color: var(--primary-light);
+        transform: scale(1.05);
+    }
+
     .remove-speaker {
         margin-top: 28px;
     }
-    
+
     .btn-outline-primary {
         border: 1.5px solid var(--primary);
         color: var(--primary);
@@ -286,48 +562,57 @@
         border-radius: 8px;
         padding: 6px 12px;
         font-size: 0.75rem;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
-    
+
     .btn-outline-primary:hover {
-        background: var(--primary);
+        background: var(--primary-gradient);
         color: white;
+        transform: translateY(-1px);
     }
-    
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
         color: var(--gray);
     }
-    
+
     .empty-state i {
         font-size: 3rem;
         margin-bottom: 16px;
-        opacity: 0.5;
+        opacity: 0.4;
     }
-    
+
     .formats-group {
-        background: var(--light);
+        background: rgba(248, 250, 252, 0.5);
+        backdrop-filter: blur(4px);
         border-radius: 12px;
-        padding: 16px;
+        padding: 16px 20px;
         margin-bottom: 20px;
+        border-left: 4px solid var(--primary);
+        transition: all 0.3s ease;
     }
-    
+
+    .formats-group:hover {
+        background: rgba(250, 251, 252, 0.7);
+        border-left-color: var(--primary-light);
+    }
+
     .formats-group label {
         font-weight: 600;
         margin-bottom: 12px;
         display: block;
         color: var(--dark);
     }
-    
+
     .help-text {
         font-size: 0.8rem;
         color: var(--gray);
         margin-top: 4px;
     }
-    
+
     .field-note {
-        background: #f8f9fa;
+        background: rgba(254, 249, 231, 0.5);
         padding: 10px 14px;
         border-radius: 8px;
         border-left: 3px solid var(--primary);
@@ -342,17 +627,20 @@
         transition: background 0.15s ease;
     }
     .user-data-table .user-row:hover {
-        background: #f1f5f9;
+        background: rgba(254, 249, 231, 0.3);
     }
     .user-data-table .user-row .expand-icon {
         transition: transform 0.2s ease;
         display: inline-block;
+        margin-left: 6px;
+        color: var(--gray);
     }
     .user-data-table .user-row .expand-icon.expanded {
         transform: rotate(90deg);
+        color: var(--primary);
     }
     .user-data-table .user-details-row {
-        background: #fafbfc;
+        background: rgba(250, 251, 252, 0.3);
     }
     .user-data-table .user-details-row td {
         padding: 0 16px 16px 16px;
@@ -387,18 +675,18 @@
         font-style: italic;
         font-weight: 400;
     }
-    .user-data-table .badge-profile-complete {
+    .badge-profile-complete {
         background: #d1fae5;
         color: #059669;
-        padding: 2px 10px;
+        padding: 2px 12px;
         border-radius: 12px;
         font-size: 0.7rem;
         font-weight: 500;
     }
-    .user-data-table .badge-profile-incomplete {
+    .badge-profile-incomplete {
         background: #fee2e2;
         color: #dc2626;
-        padding: 2px 10px;
+        padding: 2px 12px;
         border-radius: 12px;
         font-size: 0.7rem;
         font-weight: 500;
@@ -411,34 +699,34 @@
         align-items: center;
     }
     .btn-export-all {
-        background: #059669;
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
         color: white;
         border: none;
         border-radius: 10px;
         padding: 8px 20px;
         font-weight: 600;
         font-size: 0.875rem;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
     .btn-export-all:hover {
-        background: #047857;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(5, 150, 105, 0.3);
+        color: white;
     }
     .btn-export-selected {
-        background: #2563eb;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: white;
         border: none;
         border-radius: 10px;
         padding: 8px 20px;
         font-weight: 600;
         font-size: 0.875rem;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
     .btn-export-selected:hover {
-        background: #1d4ed8;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+        color: white;
     }
     .btn-export-selected:disabled {
         opacity: 0.5;
@@ -447,17 +735,19 @@
         box-shadow: none;
     }
     .btn-export-single {
-        background: var(--primary);
+        background: var(--primary-gradient);
         color: white;
         border: none;
         border-radius: 6px;
         padding: 4px 12px;
         font-size: 0.7rem;
         font-weight: 500;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
     .btn-export-single:hover {
-        background: var(--primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(201, 161, 59, 0.25);
+        color: white;
     }
     .user-select-checkbox {
         width: 16px;
@@ -466,7 +756,7 @@
         cursor: pointer;
     }
 
-    /* Стили для документов - обновлены для красивого отображения */
+    /* Стили для документов */
     .doc-status-badge {
         display: inline-block;
         padding: 2px 8px;
@@ -514,47 +804,49 @@
         background: #dc2626;
     }
     .btn-doc-zip {
-        background: #8b5cf6;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
         border: none;
         border-radius: 6px;
         padding: 4px 12px;
         font-size: 0.7rem;
         font-weight: 500;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
     .btn-doc-zip:hover {
-        background: #7c3aed;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        color: white;
     }
     .btn-doc-zip-all {
-        background: #8b5cf6;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
         border: none;
         border-radius: 10px;
         padding: 8px 20px;
         font-weight: 600;
         font-size: 0.875rem;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
     .btn-doc-zip-all:hover {
-        background: #7c3aed;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        color: white;
     }
     .btn-doc-zip-selected {
-        background: #8b5cf6;
+        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
         color: white;
         border: none;
         border-radius: 10px;
         padding: 8px 20px;
         font-weight: 600;
         font-size: 0.875rem;
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
     }
     .btn-doc-zip-selected:hover {
-        background: #7c3aed;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        color: white;
     }
     .btn-doc-zip-selected:disabled {
         opacity: 0.5;
@@ -573,10 +865,15 @@
         align-items: center;
         gap: 4px;
         font-size: 0.75rem;
-        background: #f8fafc;
+        background: rgba(248, 250, 252, 0.5);
         padding: 2px 8px 2px 6px;
         border-radius: 12px;
         border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+    }
+    .document-item:hover {
+        border-color: var(--primary);
+        background: rgba(254, 249, 231, 0.5);
     }
     .document-item .doc-label {
         font-weight: 500;
@@ -616,6 +913,13 @@
     .search-wrapper .form-control {
         padding-right: 40px;
         border-radius: 10px;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(201, 161, 59, 0.1);
+    }
+    .search-wrapper .form-control:focus {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: var(--primary);
     }
     .search-wrapper .search-icon {
         position: absolute;
@@ -640,11 +944,71 @@
     .search-wrapper .clear-search:hover {
         color: var(--dark);
     }
-    .search-wrapper .form-control:not(:placeholder-shown) ~ .clear-search {
+    .search-wrapper .form-control:not(:placeholder-shown)~.clear-search {
         display: block;
     }
-    .search-wrapper .form-control:not(:placeholder-shown) ~ .search-icon {
+    .search-wrapper .form-control:not(:placeholder-shown)~.search-icon {
         display: none;
+    }
+
+    .admin-sidebar .sidebar-divider {
+        border-top: 1px solid var(--border);
+        margin: 8px 0;
+    }
+
+    .admin-sidebar .sidebar-logo {
+        text-align: center;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(201, 161, 59, 0.1);
+        margin-bottom: 12px;
+    }
+    .admin-sidebar .sidebar-logo img {
+        height: 48px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(201, 161, 59, 0.15);
+        transition: all 0.3s ease;
+    }
+    .admin-sidebar .sidebar-logo img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(201, 161, 59, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .admin-sidebar {
+            position: relative;
+            top: 0;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .admin-sidebar .nav {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        .admin-sidebar .nav-link {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+        }
+        .admin-sidebar .nav-link i {
+            margin-right: 6px;
+        }
+        .stat-card h3 {
+            font-size: 1.5rem;
+        }
+        .export-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .export-actions .search-wrapper {
+            max-width: 100%;
+        }
+        .btn-export-all,
+        .btn-export-selected,
+        .btn-doc-zip-all,
+        .btn-doc-zip-selected {
+            width: 100%;
+            text-align: center;
+        }
     }
 </style>
 {% endblock %}
@@ -655,13 +1019,14 @@
         <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 mb-4">
             <div class="admin-sidebar">
-                <div class="text-center mb-4">
-                    <i class="bi bi-shield-lock-check fs-2" style="color: var(--primary);"></i>
-                    <h6 class="mt-2 fw-bold" style="color: var(--dark);">Панель управления</h6>
+                <div class="sidebar-logo">
+                    <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР">
+                    <h6 class="mt-2 fw-bold" style="color: var(--dark); font-size: 0.9rem;">
+                        <span style="color: var(--primary);">✦</span> Панель управления
+                    </h6>
                 </div>
-                <hr class="my-3">
                 <div class="nav flex-column">
-                    <a class="nav-link" href="#" onclick="showSection('dashboard'); return false;">
+                    <a class="nav-link active" href="#" onclick="showSection('dashboard'); return false;">
                         <i class="bi bi-speedometer2"></i> Дашборд
                     </a>
                     <a class="nav-link" href="#" onclick="showSection('categories'); return false;">
@@ -679,7 +1044,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
             <!-- Дашборд -->
@@ -719,7 +1084,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Категории -->
             <div id="categoriesSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -742,7 +1107,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Курсы -->
             <div id="coursesSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
@@ -768,7 +1133,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Пользователи (управление) -->
             <div id="usersSection" style="display: none;">
                 <div class="mb-4">
@@ -790,9 +1155,7 @@
                 </div>
             </div>
 
-            <!-- ============================================================ -->
-            <!-- НОВАЯ ВКЛАДКА: ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ -->
-            <!-- ============================================================ -->
+            <!-- Вкладка: ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ -->
             <div id="userdataSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
@@ -824,7 +1187,7 @@
                     <button class="btn-doc-zip-selected" id="docZipSelectedBtn" onclick="downloadSelectedDocuments()" disabled>
                         <i class="bi bi-file-zip me-2"></i>Доки выбранных
                     </button>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="loadUserData()">
+                    <button class="btn btn-outline-primary btn-sm" onclick="loadUserData()" style="border-color: var(--border); color: var(--gray);">
                         <i class="bi bi-arrow-repeat me-1"></i>Обновить
                     </button>
                 </div>
@@ -916,9 +1279,9 @@
                         <label class="form-label">Полное описание</label>
                         <textarea class="form-control" id="course_desc" rows="3"></textarea>
                     </div>
-                    
-                    <!-- ========== НОВОЕ ПОЛЕ ДЛЯ MOODLE ========== -->
-                    <div class="formats-group" style="border-left: 4px solid #f59e0b;">
+
+                    <!-- Поле для MOODLE -->
+                    <div class="formats-group" style="border-left: 4px solid var(--warning);">
                         <label><i class="bi bi-box-arrow-up-right me-2"></i>Интеграция с Moodle</label>
                         <div class="mb-3">
                             <label class="form-label">ID курса в Moodle</label>
@@ -927,18 +1290,18 @@
                             <div class="help-text">
                                 <i class="bi bi-info-circle me-1"></i>
                                 Укажите ID курса, который был создан в Moodle.
-                                <a href="#" onclick="fetchMoodleCourses(); return false;" class="text-primary">
+                                <a href="#" onclick="fetchMoodleCourses(); return false;" class="text-primary" style="color: var(--primary) !important;">
                                     <i class="bi bi-arrow-repeat me-1"></i>Показать список курсов в Moodle
                                 </a>
                             </div>
-                            <div id="moodleCoursesList" class="mt-2" style="display: none; max-height: 200px; overflow-y: auto; background: #f8f9fa; border-radius: 8px; padding: 10px;">
+                            <div id="moodleCoursesList" class="mt-2" style="display: none; max-height: 200px; overflow-y: auto; background: rgba(254, 249, 231, 0.5); border-radius: 8px; padding: 10px;">
                             </div>
                             <div class="field-note">
                                 <strong>Как это работает:</strong> Если указать ID курса из Moodle, то при записи пользователя на этот курс на платформе, он автоматически будет создан и зачислен на соответствующий курс в Moodle.
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Формат обучения -->
                     <div class="formats-group">
                         <label><i class="bi bi-calendar-event me-2"></i>Формат обучения</label>
@@ -960,7 +1323,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Даты -->
                     <div class="formats-group">
                         <label><i class="bi bi-calendar-range me-2"></i>Даты проведения</label>
@@ -984,7 +1347,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Категория</label>
@@ -997,7 +1360,7 @@
                             <input type="number" class="form-control" id="course_max" value="30">
                         </div>
                     </div>
-                    
+
                     <!-- Загрузка изображения -->
                     <div class="mb-3">
                         <label class="form-label">Изображение курса</label>
@@ -1006,7 +1369,7 @@
                         <div id="course_image_preview"></div>
                         <small class="text-muted">Загрузите изображение для карточки курса (JPG, PNG, WEBP)</small>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">URL видео</label>
@@ -1017,7 +1380,7 @@
                             <input type="text" class="form-control" id="course_hashtags" placeholder="#образование">
                         </div>
                     </div>
-                    
+
                     <!-- Спикеры -->
                     <div class="mb-3">
                         <label class="form-label">Спикеры</label>
@@ -1026,7 +1389,7 @@
                             <i class="bi bi-plus-circle me-1"></i>Добавить спикера
                         </button>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-primary w-100 mt-3">Создать курс</button>
                 </form>
             </div>
@@ -1050,13 +1413,13 @@
 <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
-    
+
     let currentSection = 'dashboard';
     let speakersList = [];
     let usersData = [];
     let filteredUsersData = [];
     let selectedUserIds = new Set();
-    
+
     function showToast(message, type = 'success') {
         const toastContainer = document.querySelector('.toast-container') || (() => {
             const container = document.createElement('div');
@@ -1064,42 +1427,42 @@
             document.body.appendChild(container);
             return container;
         })();
-        
+
         const toast = document.createElement('div');
         toast.className = `toast show bg-${type === 'success' ? 'success' : 'danger'} text-white`;
         toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
         toastContainer.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
-    
+
     // ========== ФУНКЦИЯ ПОИСКА ==========
     function filterUserTable(query) {
         query = query.toLowerCase().trim();
         const rows = document.querySelectorAll('#userDataList .user-row');
         let visibleCount = 0;
-        
+
         rows.forEach(row => {
             const fio = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
             const email = row.querySelector('td:nth-child(4)')?.textContent?.toLowerCase() || '';
             const id = row.querySelector('td:nth-child(2)')?.textContent || '';
-            
+
             const match = !query || fio.includes(query) || email.includes(query) || id.includes(query);
             row.style.display = match ? '' : 'none';
-            
+
             if (!match) {
                 const detailsRow = row.nextElementSibling;
                 if (detailsRow && detailsRow.classList.contains('user-details-row')) {
                     detailsRow.style.display = 'none';
                 }
             }
-            
+
             if (match) visibleCount++;
         });
-        
+
         document.getElementById('userCountInfo').textContent = `Показано: ${visibleCount} из ${usersData.length} пользователей`;
         updateSelectAllState();
     }
-    
+
     function updateSelectAllState() {
         const visibleCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox');
         const checkedCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox:checked');
@@ -1112,39 +1475,39 @@
             selectAll.indeterminate = false;
         }
     }
-    
+
     // ========== ФУНКЦИЯ ПОЛУЧЕНИЯ СПИСКА КУРСОВ ИЗ MOODLE ==========
     async function fetchMoodleCourses() {
         const container = document.getElementById('moodleCoursesList');
         container.style.display = 'block';
         container.innerHTML = '<div class="text-center py-2"><span class="loading-spinner"></span> Загрузка курсов из Moodle...</div>';
-        
+
         try {
             const response = await fetch('/api/admin/moodle-courses', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка загрузки курсов из Moodle');
             }
-            
+
             const courses = await response.json();
-            
+
             if (!courses || courses.length === 0) {
                 container.innerHTML = '<div class="text-center py-2 text-muted">Нет курсов в Moodle</div>';
                 return;
             }
-            
+
             let html = '<ul class="list-unstyled mb-0">';
             courses.forEach(c => {
                 html += `
-                    <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
-                        <span><strong>${c.id}</strong> — ${c.fullname}</span>
-                        <button class="btn btn-sm btn-outline-primary" onclick="document.getElementById('moodle_course_id').value = ${c.id}; document.getElementById('moodleCoursesList').style.display = 'none'; showToast('ID курса ${c.id} выбран', 'success');">
-                            <i class="bi bi-check"></i> Выбрать
-                        </button>
-                    </li>
-                `;
+                            <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                <span><strong>${c.id}</strong> — ${c.fullname}</span>
+                                <button class="btn btn-sm btn-primary" onclick="document.getElementById('moodle_course_id').value = ${c.id}; document.getElementById('moodleCoursesList').style.display = 'none'; showToast('ID курса ${c.id} выбран', 'success');">
+                                    <i class="bi bi-check"></i> Выбрать
+                                </button>
+                            </li>
+                        `;
             });
             html += '</ul>';
             container.innerHTML = html;
@@ -1152,20 +1515,18 @@
             container.innerHTML = `<div class="text-center py-2 text-danger">${error.message}</div>`;
         }
     }
-    
+
     async function exportRegistrations(courseId) {
         try {
             const response = await fetch(`/api/admin/courses/${courseId}/export`, {
                 method: 'GET',
-                headers: { 
-                    'Authorization': 'Bearer ' + token
-                }
+                headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка экспорта');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1175,34 +1536,34 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast('Экспорт успешно завершен', 'success');
         } catch (error) {
             console.error('Export error:', error);
             showToast('Ошибка при экспорте', 'danger');
         }
     }
-    
+
     async function uploadFile(file, endpoint) {
         const formData = new FormData();
         formData.append('file', file);
-        
+
         const response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token },
             body: formData
         });
-        
+
         if (!response.ok) {
             throw new Error('Upload failed');
         }
         return await response.json();
     }
-    
+
     document.getElementById('course_image_file')?.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         try {
             const result = await uploadFile(file, '/api/admin/upload/course-image');
             document.getElementById('course_image_url').value = result.url;
@@ -1213,7 +1574,7 @@
             showToast('Ошибка загрузки изображения', 'danger');
         }
     });
-    
+
     async function uploadSpeakerPhoto(file, index) {
         try {
             const result = await uploadFile(file, '/api/admin/upload/speaker-photo');
@@ -1227,60 +1588,60 @@
             showToast('Ошибка загрузки фото', 'danger');
         }
     }
-    
+
     function addSpeaker() {
         const index = speakersList.length;
         speakersList.push({ full_name: '', position: '', bio: '', photo_url: null });
-        
+
         const container = document.getElementById('speakersContainer');
         const speakerDiv = document.createElement('div');
         speakerDiv.className = 'speaker-item';
         speakerDiv.id = `speaker_${index}`;
         speakerDiv.innerHTML = `
-            <div class="row">
-                <div class="col-md-4 mb-2">
-                    <label class="form-label">ФИО <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
-                </div>
-                <div class="col-md-4 mb-2">
-                    <label class="form-label">Должность</label>
-                    <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'position', this.value)" placeholder="Должность">
-                </div>
-                <div class="col-md-3 mb-2">
-                    <label class="form-label">Фото</label>
-                    <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${index}, this.files[0])">
-                    <div id="speaker_photo_preview_${index}" class="mt-2"></div>
-                </div>
-                <div class="col-md-1 remove-speaker">
-                    <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${index})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="mb-2">
-                <label class="form-label">Биография</label>
-                <textarea class="form-control" rows="2" onchange="updateSpeaker(${index}, 'bio', this.value)" placeholder="Краткая биография спикера"></textarea>
-            </div>
-            <hr>
-        `;
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">ФИО <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">Должность</label>
+                            <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'position', this.value)" placeholder="Должность">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label">Фото</label>
+                            <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${index}, this.files[0])">
+                            <div id="speaker_photo_preview_${index}" class="mt-2"></div>
+                        </div>
+                        <div class="col-md-1 remove-speaker">
+                            <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${index})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Биография</label>
+                        <textarea class="form-control" rows="2" onchange="updateSpeaker(${index}, 'bio', this.value)" placeholder="Краткая биография спикера"></textarea>
+                    </div>
+                    <hr>
+                `;
         container.appendChild(speakerDiv);
     }
-    
+
     function updateSpeaker(index, field, value) {
         if (speakersList[index]) {
             speakersList[index][field] = value;
         }
     }
-    
+
     function removeSpeaker(index) {
         speakersList.splice(index, 1);
         renderSpeakers();
     }
-    
+
     function handleSpeakerPhoto(index, file) {
         if (file) uploadSpeakerPhoto(file, index);
     }
-    
+
     function renderSpeakers() {
         const container = document.getElementById('speakersContainer');
         container.innerHTML = '';
@@ -1288,43 +1649,43 @@
             const speakerDiv = document.createElement('div');
             speakerDiv.className = 'speaker-item';
             speakerDiv.innerHTML = `
-                <div class="row">
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">ФИО <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" value="${escapeHtml(speaker.full_name || '')}" onchange="updateSpeaker(${idx}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
-                    </div>
-                    <div class="col-md-4 mb-2">
-                        <label class="form-label">Должность</label>
-                        <input type="text" class="form-control" value="${escapeHtml(speaker.position || '')}" onchange="updateSpeaker(${idx}, 'position', this.value)" placeholder="Должность">
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <label class="form-label">Фото</label>
-                        <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${idx}, this.files[0])">
-                        <div id="speaker_photo_preview_${idx}" class="mt-2">${speaker.photo_url ? `<img src="${speaker.photo_url}" class="speaker-photo-preview">` : ''}</div>
-                    </div>
-                    <div class="col-md-1 remove-speaker">
-                        <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${idx})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="mb-2">
-                    <label class="form-label">Биография</label>
-                    <textarea class="form-control" rows="2" onchange="updateSpeaker(${idx}, 'bio', this.value)" placeholder="Краткая биография спикера">${escapeHtml(speaker.bio || '')}</textarea>
-                </div>
-                <hr>
-            `;
+                        <div class="row">
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label">ФИО <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" value="${escapeHtml(speaker.full_name || '')}" onchange="updateSpeaker(${idx}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
+                            </div>
+                            <div class="col-md-4 mb-2">
+                                <label class="form-label">Должность</label>
+                                <input type="text" class="form-control" value="${escapeHtml(speaker.position || '')}" onchange="updateSpeaker(${idx}, 'position', this.value)" placeholder="Должность">
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label class="form-label">Фото</label>
+                                <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${idx}, this.files[0])">
+                                <div id="speaker_photo_preview_${idx}" class="mt-2">${speaker.photo_url ? `<img src="${speaker.photo_url}" class="speaker-photo-preview">` : ''}</div>
+                            </div>
+                            <div class="col-md-1 remove-speaker">
+                                <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${idx})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Биография</label>
+                            <textarea class="form-control" rows="2" onchange="updateSpeaker(${idx}, 'bio', this.value)" placeholder="Краткая биография спикера">${escapeHtml(speaker.bio || '')}</textarea>
+                        </div>
+                        <hr>
+                    `;
             container.appendChild(speakerDiv);
         });
     }
-    
+
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
+
     async function loadStats() {
         const response = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
         const stats = await response.json();
@@ -1333,37 +1694,37 @@
         document.getElementById('totalRegistrations').innerText = stats.total_registrations || 0;
         document.getElementById('totalCategories').innerText = stats.total_categories || 0;
     }
-    
+
     async function loadCategories() {
         const response = await fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } });
         const categories = await response.json();
         const tbody = document.getElementById('categoriesList');
-        
+
         if (!categories || categories.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-folder-x"></i><p>Нет категорий</p></td></tr>';
         } else {
             tbody.innerHTML = categories.map(c => `
-                <tr>
-                    <td>${c.id}</td>
-                    <td><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>${c.name}</td>
-                    <td>${c.description || '-'}</td>
-                    <td><span class="badge-info">${c.courses_count || 0}</span></td>
-                    <td><button class="btn btn-sm btn-danger" onclick="deleteCategoryItem(${c.id})"><i class="bi bi-trash"></i></button></td>
-                </tr>
-            `).join('');
+                        <tr>
+                            <td><span class="badge-gold">${c.id}</span></td>
+                            <td><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>${c.name}</td>
+                            <td>${c.description || '-'}</td>
+                            <td><span class="badge-info">${c.courses_count || 0}</span></td>
+                            <td><button class="btn btn-sm btn-danger" onclick="deleteCategoryItem(${c.id})"><i class="bi bi-trash"></i></button></td>
+                        </tr>
+                    `).join('');
         }
-        
+
         const select = document.getElementById('course_category_id');
         if (select && categories.length > 0) {
             select.innerHTML = '<option value="">-- Выберите категорию --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
         }
     }
-    
+
     async function loadCourses() {
         const response = await fetch('/api/admin/courses', { headers: { 'Authorization': 'Bearer ' + token } });
         const courses = await response.json();
         const tbody = document.getElementById('coursesList');
-        
+
         if (!courses || courses.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p></td></tr>';
         } else {
@@ -1373,88 +1734,88 @@
                 'full_part_time': 'Очно-заочный',
                 'online': 'Онлайн'
             };
-            
+
             tbody.innerHTML = courses.map(c => `
-                <tr>
-                    <td>${c.id}</td>
-                    <td><i class="bi bi-book me-2" style="color: var(--primary);"></i>${c.title}</td>
-                    <td>${c.category_name || '-'}</td>
-                    <td><span class="badge-info">${formatMap[c.format_type] || 'Онлайн'}</span></td>
-                    <td>${c.current_participants}/${c.max_participants}</td>
-                    <td>
-                        ${c.moodle_course_id 
-                            ? `<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ${c.moodle_course_id}</span>` 
-                            : `<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>`}
-                    </td>
-                    <td><span class="${c.is_active ? 'badge-success' : 'badge-danger'}">${c.is_active ? 'Активен' : 'Неактивен'}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(${c.id})" title="Регистрации"><i class="bi bi-people"></i></button>
-                        <button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(${c.id}, ${!c.is_active})" title="Изменить статус"><i class="bi bi-power"></i></button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteCourseItem(${c.id})" title="Удалить"><i class="bi bi-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+                        <tr>
+                            <td><span class="badge-gold">${c.id}</span></td>
+                            <td><i class="bi bi-book me-2" style="color: var(--primary);"></i>${c.title}</td>
+                            <td>${c.category_name || '-'}</td>
+                            <td><span class="badge-info">${formatMap[c.format_type] || 'Онлайн'}</span></td>
+                            <td>${c.current_participants}/${c.max_participants}</td>
+                            <td>
+                                ${c.moodle_course_id 
+                                    ? `<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ${c.moodle_course_id}</span>` 
+                                    : `<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>`}
+                            </td>
+                            <td><span class="${c.is_active ? 'badge-success' : 'badge-danger'}">${c.is_active ? 'Активен' : 'Неактивен'}</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(${c.id})" title="Регистрации"><i class="bi bi-people"></i></button>
+                                <button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(${c.id}, ${!c.is_active})" title="Изменить статус"><i class="bi bi-power"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteCourseItem(${c.id})" title="Удалить"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    `).join('');
         }
     }
-    
+
     async function loadUsers() {
         const response = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
         const users = await response.json();
         const tbody = document.getElementById('usersList');
-        
+
         if (!users || users.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p></td></tr>';
         } else {
             tbody.innerHTML = users.map(u => `
-                <tr>
-                    <td>${u.id}</td>
-                    <td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>${u.full_name}</td>
-                    <td>${u.email}</td>
-                    <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Администратор' : 'Преподаватель'}</span></td>
-                    <td><span class="badge-info">${u.registrations_count || 0}</span></td>
-                    <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
-                    <td>${!u.is_blocked ? 
-                        `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
-                        `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`}
-                    </td>
-                </tr>
-            `).join('');
+                        <tr>
+                            <td><span class="badge-gold">${u.id}</span></td>
+                            <td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>${u.full_name}</td>
+                            <td>${u.email}</td>
+                            <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Администратор' : 'Преподаватель'}</span></td>
+                            <td><span class="badge-info">${u.registrations_count || 0}</span></td>
+                            <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
+                            <td>${!u.is_blocked ? 
+                                `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
+                                `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`}
+                            </td>
+                        </tr>
+                    `).join('');
         }
     }
-    
+
     async function viewCourseRegistrations(courseId) {
         const response = await fetch(`/api/admin/courses/${courseId}/registrations`, { headers: { 'Authorization': 'Bearer ' + token } });
         const data = await response.json();
-        
+
         let html = `<div class="mb-4"><h5>${data.course.title}</h5>`;
         if (data.course.moodle_course_id) {
             html += `<p class="text-muted">Moodle ID: <strong>${data.course.moodle_course_id}</strong></p>`;
         }
         html += `</div>`;
-        
+
         if (!data.registrations || data.registrations.length === 0) {
             html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет регистраций</p></div>';
         } else {
             html += `<div class="table-responsive"><table class="table table-striped"><thead class="table-light"><tr><th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Дата</th></tr></thead><tbody>`;
             data.registrations.forEach((r, idx) => {
                 html += `<tr>
-                    <td>${idx + 1}</td>
-                    <td>${r.full_name}</td>
-                    <td>${r.email}</td>
-                    <td>${r.position || '-'}</td>
-                    <td>${r.phone || '-'}</td>
-                    <td>${r.organization || '-'}</td>
-                    <td>${new Date(r.registered_at).toLocaleDateString()}</td>
-                </tr>`;
+                            <td>${idx + 1}</td>
+                            <td>${r.full_name}</td>
+                            <td>${r.email}</td>
+                            <td>${r.position || '-'}</td>
+                            <td>${r.phone || '-'}</td>
+                            <td>${r.organization || '-'}</td>
+                            <td>${new Date(r.registered_at).toLocaleDateString()}</td>
+                        </tr>`;
             });
             html += `</tbody></table></div>`;
             html += `<div class="mt-3 text-center"><button class="btn btn-primary" onclick="exportRegistrations(${courseId})"><i class="bi bi-download me-2"></i>Экспорт в Excel</button></div>`;
         }
-        
+
         document.getElementById('registrationsContent').innerHTML = html;
         new bootstrap.Modal(document.getElementById('registrationsModal')).show();
     }
-    
+
     async function deleteCategoryItem(id) {
         if (!confirm('Вы уверены, что хотите удалить эту категорию?')) return;
         const response = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
@@ -1467,7 +1828,7 @@
             showToast('Ошибка при удалении категории', 'danger');
         }
     }
-    
+
     async function deleteCourseItem(id) {
         if (!confirm('Вы уверены, что хотите удалить этот курс? Действие необратимо.')) return;
         const response = await fetch(`/api/admin/courses/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
@@ -1479,7 +1840,7 @@
             showToast('Ошибка при удалении курса', 'danger');
         }
     }
-    
+
     async function toggleCourseStatusItem(id, isActive) {
         const response = await fetch(`/api/courses/${id}`, {
             method: 'PUT',
@@ -1494,7 +1855,7 @@
             showToast('Ошибка при изменении статуса', 'danger');
         }
     }
-    
+
     async function blockUserItem(id) {
         if (!confirm('Заблокировать этого пользователя?')) return;
         const response = await fetch(`/api/admin/users/${id}/block`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
@@ -1505,7 +1866,7 @@
             showToast('Ошибка при блокировке', 'danger');
         }
     }
-    
+
     async function unblockUserItem(id) {
         if (!confirm('Разблокировать этого пользователя?')) return;
         const response = await fetch(`/api/admin/users/${id}/unblock`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
@@ -1516,12 +1877,13 @@
             showToast('Ошибка при разблокировке', 'danger');
         }
     }
-    
+
     document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = { name: document.getElementById('cat_name').value, description: document.getElementById('cat_desc').value };
         const response = await fetch('/api/admin/categories', {
-            method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
         if (response.ok) {
@@ -1535,18 +1897,18 @@
             showToast(error.detail || 'Ошибка при создании категории', 'danger');
         }
     });
-    
+
     document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const categoryId = document.getElementById('course_category_id').value;
         if (!categoryId) {
             showToast('Пожалуйста, выберите категорию', 'danger');
             return;
         }
-        
+
         const moodleCourseId = document.getElementById('moodle_course_id').value;
-        
+
         const data = {
             title: document.getElementById('course_title').value,
             short_description: document.getElementById('course_short_desc').value,
@@ -1564,12 +1926,13 @@
             moodle_course_id: moodleCourseId ? parseInt(moodleCourseId) : null,
             speakers: speakersList.filter(s => s.full_name.trim())
         };
-        
+
         const response = await fetch('/api/courses/', {
-            method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        
+
         if (response.ok) {
             showToast('Курс успешно создан' + (data.moodle_course_id ? ' и привязан к Moodle!' : ''), 'success');
             bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
@@ -1583,7 +1946,7 @@
             showToast(error.detail || 'Ошибка при создании курса', 'danger');
         }
     });
-    
+
     function showSection(section) {
         currentSection = section;
         document.getElementById('dashboardSection').style.display = 'none';
@@ -1591,7 +1954,15 @@
         document.getElementById('coursesSection').style.display = 'none';
         document.getElementById('usersSection').style.display = 'none';
         document.getElementById('userdataSection').style.display = 'none';
-        
+
+        // Обновляем активный пункт в sidebar
+        document.querySelectorAll('.admin-sidebar .nav-link').forEach(el => el.classList.remove('active'));
+        const links = document.querySelectorAll('.admin-sidebar .nav-link');
+        const sectionMap = { 'dashboard': 0, 'categories': 1, 'courses': 2, 'users': 3, 'userdata': 4 };
+        if (sectionMap[section] !== undefined) {
+            links[sectionMap[section]]?.classList.add('active');
+        }
+
         if (section === 'dashboard') {
             document.getElementById('dashboardSection').style.display = 'block';
             loadStats();
@@ -1609,12 +1980,12 @@
             loadUserData();
         }
     }
-    
+
     function showCreateCategoryModal() {
         document.getElementById('createCategoryForm').reset();
         new bootstrap.Modal(document.getElementById('createCategoryModal')).show();
     }
-    
+
     function showCreateCourseModal() {
         document.getElementById('createCourseForm').reset();
         speakersList = [];
@@ -1623,7 +1994,7 @@
         document.getElementById('course_image_preview').innerHTML = '';
         document.getElementById('moodle_course_id').value = '';
         document.getElementById('moodleCoursesList').style.display = 'none';
-        
+
         fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } })
             .then(res => res.json())
             .then(categories => {
@@ -1632,34 +2003,34 @@
                     select.innerHTML = '<option value="">-- Выберите категорию --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
                 }
             });
-        
+
         new bootstrap.Modal(document.getElementById('createCourseModal')).show();
     }
-    
+
     // ============================================================
     // ФУНКЦИИ ДЛЯ ВКЛАДКИ "ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ"
     // ============================================================
-    
+
     async function loadUserData() {
         const tbody = document.getElementById('userDataList');
         tbody.innerHTML = `
-            <tr>
-                <td colspan="8" class="text-center py-4">
-                    <div class="loading-spinner"></div>
-                    <p class="mt-2 text-muted">Загрузка данных...</p>
-                </td>
-            </tr>
-        `;
-        
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-2 text-muted">Загрузка данных...</p>
+                        </td>
+                    </tr>
+                `;
+
         try {
             const response = await fetch('/api/admin/users/list', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка загрузки данных');
             }
-            
+
             usersData = await response.json();
             filteredUsersData = [...usersData];
             selectedUserIds = new Set();
@@ -1671,138 +2042,138 @@
         } catch (error) {
             console.error('Error loading user data:', error);
             tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4 text-danger">
-                        <i class="bi bi-exclamation-triangle fs-2"></i>
-                        <p class="mt-2">Ошибка загрузки данных: ${error.message}</p>
-                    </td>
-                </tr>
-            `;
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-danger">
+                                <i class="bi bi-exclamation-triangle fs-2"></i>
+                                <p class="mt-2">Ошибка загрузки данных: ${error.message}</p>
+                            </td>
+                        </tr>
+                    `;
         }
     }
-    
+
     function renderUserData(users) {
         const tbody = document.getElementById('userDataList');
-        
+
         if (!users || users.length === 0) {
             tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center py-4 text-muted">
-                        <i class="bi bi-people fs-2"></i>
-                        <p class="mt-2">Нет пользователей</p>
-                    </td>
-                </tr>
-            `;
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                <i class="bi bi-people fs-2"></i>
+                                <p class="mt-2">Нет пользователей</p>
+                            </td>
+                        </tr>
+                    `;
             return;
         }
-        
+
         let html = '';
         users.forEach((user, index) => {
             const isSelected = selectedUserIds.has(user.id);
-            const profileStatus = user.has_complete_profile 
-                ? '<span class="badge-profile-complete">✅ Заполнен</span>' 
-                : '<span class="badge-profile-incomplete">⚠️ Не заполнен</span>';
-            
+            const profileStatus = user.has_complete_profile ?
+                '<span class="badge-profile-complete">✅ Заполнен</span>' :
+                '<span class="badge-profile-incomplete">⚠️ Не заполнен</span>';
+
             const roleLabel = user.role === 'admin' ? 'Администратор' : 'Преподаватель';
             const roleBadge = user.role === 'admin' ? 'badge-danger' : 'badge-info';
-            
+
             html += `
-                <tr class="user-row" data-user-id="${user.id}" onclick="toggleUserDetails(${index})">
-                    <td onclick="event.stopPropagation();">
-                        <input type="checkbox" class="user-select-checkbox user-checkbox" 
-                               data-user-id="${user.id}" ${isSelected ? 'checked' : ''} 
-                               onchange="toggleUserSelection(${user.id}, this.checked)">
-                    </td>
-                    <td>${user.id}</td>
-                    <td>
-                        <strong>${escapeHtml(user.full_name)}</strong>
-                        <span class="expand-icon ${isSelected ? 'expanded' : ''}" id="expandIcon_${index}">
-                            <i class="bi bi-chevron-right"></i>
-                        </span>
-                    </td>
-                    <td>${escapeHtml(user.email)}</td>
-                    <td><span class="${roleBadge}">${roleLabel}</span></td>
-                    <td>${profileStatus}</td>
-                    <td>
-                        <div id="documents_${user.id}">
-                            <span class="text-muted" style="font-size:0.7rem;">Загрузка...</span>
-                        </div>
-                    </td>
-                    <td>
-                        <button class="btn-export-single" onclick="event.stopPropagation(); exportSingleUser(${user.id})" title="Экспортировать данные пользователя">
-                            <i class="bi bi-download"></i> Экспорт
-                        </button>
-                        <button class="btn-doc-zip" onclick="event.stopPropagation(); downloadUserDocuments(${user.id})" title="Скачать документы пользователя">
-                            <i class="bi bi-file-zip"></i> Доки
-                        </button>
-                    </td>
-                </tr>
-                <tr class="user-details-row" id="detailsRow_${index}" style="display: none;">
-                    <td colspan="8">
-                        <div class="details-grid">
-                            <div class="detail-item">
-                                <span class="label">Муниципалитет</span>
-                                <span class="value ${!user.data.municipality ? 'empty' : ''}">${escapeHtml(user.data.municipality) || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Место работы</span>
-                                <span class="value ${!user.data.organization ? 'empty' : ''}">${escapeHtml(user.data.organization) || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Должность</span>
-                                <span class="value ${!user.data.position ? 'empty' : ''}">${escapeHtml(user.data.position) || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">СНИЛС</span>
-                                <span class="value ${!user.data.snils ? 'empty' : ''}">${escapeHtml(user.data.snils) || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Образование</span>
-                                <span class="value ${!user.data.education ? 'empty' : ''}">${escapeHtml(user.data.education) || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Предметы</span>
-                                <span class="value ${!user.data.subjects ? 'empty' : ''}">${escapeHtml(user.data.subjects) || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Педагогический стаж</span>
-                                <span class="value ${!user.data.teaching_experience ? 'empty' : ''}">${user.data.teaching_experience || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Стаж в должности</span>
-                                <span class="value ${!user.data.work_experience ? 'empty' : ''}">${user.data.work_experience || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Телефон</span>
-                                <span class="value ${!user.data.phone ? 'empty' : ''}">${escapeHtml(user.data.phone) || '—'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="label">Дата регистрации</span>
-                                <span class="value">${user.created_at || '—'}</span>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            `;
+                        <tr class="user-row" data-user-id="${user.id}" onclick="toggleUserDetails(${index})">
+                            <td onclick="event.stopPropagation();">
+                                <input type="checkbox" class="user-select-checkbox user-checkbox" 
+                                       data-user-id="${user.id}" ${isSelected ? 'checked' : ''} 
+                                       onchange="toggleUserSelection(${user.id}, this.checked)">
+                            </td>
+                            <td><span class="badge-gold">${user.id}</span></td>
+                            <td>
+                                <strong>${escapeHtml(user.full_name)}</strong>
+                                <span class="expand-icon ${isSelected ? 'expanded' : ''}" id="expandIcon_${index}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </span>
+                            </td>
+                            <td>${escapeHtml(user.email)}</td>
+                            <td><span class="${roleBadge}">${roleLabel}</span></td>
+                            <td>${profileStatus}</td>
+                            <td>
+                                <div id="documents_${user.id}">
+                                    <span class="text-muted" style="font-size:0.7rem;">Загрузка...</span>
+                                </div>
+                            </td>
+                            <td>
+                                <button class="btn-export-single" onclick="event.stopPropagation(); exportSingleUser(${user.id})" title="Экспортировать данные пользователя">
+                                    <i class="bi bi-download"></i> Экспорт
+                                </button>
+                                <button class="btn-doc-zip" onclick="event.stopPropagation(); downloadUserDocuments(${user.id})" title="Скачать документы пользователя">
+                                    <i class="bi bi-file-zip"></i> Доки
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="user-details-row" id="detailsRow_${index}" style="display: none;">
+                            <td colspan="8">
+                                <div class="details-grid">
+                                    <div class="detail-item">
+                                        <span class="label">Муниципалитет</span>
+                                        <span class="value ${!user.data.municipality ? 'empty' : ''}">${escapeHtml(user.data.municipality) || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Место работы</span>
+                                        <span class="value ${!user.data.organization ? 'empty' : ''}">${escapeHtml(user.data.organization) || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Должность</span>
+                                        <span class="value ${!user.data.position ? 'empty' : ''}">${escapeHtml(user.data.position) || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">СНИЛС</span>
+                                        <span class="value ${!user.data.snils ? 'empty' : ''}">${escapeHtml(user.data.snils) || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Образование</span>
+                                        <span class="value ${!user.data.education ? 'empty' : ''}">${escapeHtml(user.data.education) || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Предметы</span>
+                                        <span class="value ${!user.data.subjects ? 'empty' : ''}">${escapeHtml(user.data.subjects) || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Педагогический стаж</span>
+                                        <span class="value ${!user.data.teaching_experience ? 'empty' : ''}">${user.data.teaching_experience || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Стаж в должности</span>
+                                        <span class="value ${!user.data.work_experience ? 'empty' : ''}">${user.data.work_experience || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Телефон</span>
+                                        <span class="value ${!user.data.phone ? 'empty' : ''}">${escapeHtml(user.data.phone) || '—'}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="label">Дата регистрации</span>
+                                        <span class="value">${user.created_at || '—'}</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
         });
-        
+
         tbody.innerHTML = html;
-        
+
         users.forEach(user => {
             loadUserDocuments(user.id);
         });
     }
-    
+
     async function loadUserDocuments(userId) {
         try {
             const response = await fetch(`/api/admin/users/${userId}/documents`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка загрузки документов');
             }
-            
+
             const data = await response.json();
             renderUserDocuments(userId, data);
         } catch (error) {
@@ -1813,16 +2184,16 @@
             }
         }
     }
-    
+
     function renderUserDocuments(userId, data) {
         const container = document.getElementById(`documents_${userId}`);
         if (!container) return;
-        
+
         if (!data.has_any_document) {
             container.innerHTML = '<span class="text-muted" style="font-size:0.7rem;">Нет документов</span>';
             return;
         }
-        
+
         let html = '<div class="documents-container">';
         const docLabels = {
             'snils': 'СНИЛС',
@@ -1831,28 +2202,28 @@
             'inn': 'ИНН',
             'marriage': 'Св-во о браке'
         };
-        
+
         for (const [docType, docInfo] of Object.entries(data.documents)) {
             if (docInfo.exists) {
                 const label = docLabels[docType] || docType;
                 html += `
-                    <div class="document-item">
-                        <span class="doc-label" onclick="event.stopPropagation(); downloadSingleDocument(${userId}, '${docType}')" title="Скачать ${label}">
-                            ${label}
-                        </span>
-                        <span class="doc-actions-inline">
-                            <button class="doc-delete-btn" onclick="event.stopPropagation(); deleteUserDocument(${userId}, '${docType}')" title="Удалить документ">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </span>
-                    </div>
-                `;
+                            <div class="document-item">
+                                <span class="doc-label" onclick="event.stopPropagation(); downloadSingleDocument(${userId}, '${docType}')" title="Скачать ${label}">
+                                    ${label}
+                                </span>
+                                <span class="doc-actions-inline">
+                                    <button class="doc-delete-btn" onclick="event.stopPropagation(); deleteUserDocument(${userId}, '${docType}')" title="Удалить документ">
+                                        <i class="bi bi-x"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        `;
             }
         }
         html += '</div>';
         container.innerHTML = html;
     }
-    
+
     function toggleUserDetails(index) {
         const row = document.getElementById(`detailsRow_${index}`);
         const icon = document.getElementById(`expandIcon_${index}`);
@@ -1864,7 +2235,7 @@
             }
         }
     }
-    
+
     function toggleUserSelection(userId, checked) {
         if (checked) {
             selectedUserIds.add(userId);
@@ -1875,11 +2246,11 @@
         updateDocZipButton();
         updateSelectAllState();
     }
-    
+
     function toggleSelectAll() {
         const checked = document.getElementById('selectAllUsers').checked;
         const visibleRows = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"])');
-        
+
         visibleRows.forEach(row => {
             const cb = row.querySelector('.user-checkbox');
             if (cb) {
@@ -1892,11 +2263,11 @@
                 }
             }
         });
-        
+
         updateExportButton();
         updateDocZipButton();
     }
-    
+
     function updateExportButton() {
         const btn = document.getElementById('exportSelectedBtn');
         btn.disabled = selectedUserIds.size === 0;
@@ -1906,7 +2277,7 @@
             btn.innerHTML = `<i class="bi bi-download me-2"></i>Экспорт выбранных`;
         }
     }
-    
+
     function updateDocZipButton() {
         const btn = document.getElementById('docZipSelectedBtn');
         btn.disabled = selectedUserIds.size === 0;
@@ -1916,24 +2287,24 @@
             btn.innerHTML = `<i class="bi bi-file-zip me-2"></i>Доки выбранных`;
         }
     }
-    
+
     async function exportAllUsers() {
         if (!confirm('Экспортировать данные ВСЕХ пользователей?')) return;
-        
+
         try {
             const response = await fetch('/api/admin/users/export-all', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка экспорта');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
+
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = 'all_users_data.xlsx';
             if (contentDisposition) {
@@ -1947,36 +2318,36 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast('Экспорт всех пользователей успешно завершен', 'success');
         } catch (error) {
             console.error('Export error:', error);
             showToast('Ошибка при экспорте', 'danger');
         }
     }
-    
+
     async function exportSelectedUsers() {
         if (selectedUserIds.size === 0) {
             showToast('Выберите хотя бы одного пользователя', 'warning');
             return;
         }
-        
+
         const ids = Array.from(selectedUserIds).join(',');
-        
+
         try {
             const response = await fetch(`/api/admin/users/export-selected?user_ids=${ids}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка экспорта');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
+
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `selected_users_${selectedUserIds.size}.xlsx`;
             if (contentDisposition) {
@@ -1990,29 +2361,29 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast(`Экспорт ${selectedUserIds.size} пользователей успешно завершен`, 'success');
         } catch (error) {
             console.error('Export error:', error);
             showToast('Ошибка при экспорте', 'danger');
         }
     }
-    
+
     async function exportSingleUser(userId) {
         try {
             const response = await fetch(`/api/admin/users/${userId}/export`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка экспорта');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
+
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `user_${userId}_data.xlsx`;
             if (contentDisposition) {
@@ -2026,34 +2397,34 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast('Экспорт пользователя успешно завершен', 'success');
         } catch (error) {
             console.error('Export error:', error);
             showToast('Ошибка при экспорте', 'danger');
         }
     }
-    
+
     // ============================================================
     // ФУНКЦИИ ДЛЯ РАБОТЫ С ДОКУМЕНТАМИ
     // ============================================================
-    
+
     async function downloadUserDocuments(userId) {
         try {
             const response = await fetch(`/api/admin/users/${userId}/documents/download`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документов');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
+
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `user_${userId}_documents.zip`;
             if (contentDisposition) {
@@ -2067,32 +2438,32 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast('Документы скачаны успешно', 'success');
         } catch (error) {
             console.error('Download documents error:', error);
             showToast(error.message || 'Ошибка при скачивании документов', 'danger');
         }
     }
-    
+
     async function downloadAllDocuments() {
         if (!confirm('Скачать документы ВСЕХ пользователей?')) return;
-        
+
         try {
             const response = await fetch('/api/admin/users/documents/download-all', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документов');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
+
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = 'all_users_documents.zip';
             if (contentDisposition) {
@@ -2106,37 +2477,37 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast('Документы всех пользователей скачаны успешно', 'success');
         } catch (error) {
             console.error('Download all documents error:', error);
             showToast(error.message || 'Ошибка при скачивании документов', 'danger');
         }
     }
-    
+
     async function downloadSelectedDocuments() {
         if (selectedUserIds.size === 0) {
             showToast('Выберите хотя бы одного пользователя', 'warning');
             return;
         }
-        
+
         const ids = Array.from(selectedUserIds).join(',');
-        
+
         try {
             const response = await fetch(`/api/admin/users/documents/download-selected?user_ids=${ids}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документов');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
+
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `selected_users_documents_${selectedUserIds.size}.zip`;
             if (contentDisposition) {
@@ -2150,33 +2521,33 @@
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast(`Документы ${selectedUserIds.size} пользователей скачаны успешно`, 'success');
         } catch (error) {
             console.error('Download selected documents error:', error);
             showToast(error.message || 'Ошибка при скачивании документов', 'danger');
         }
     }
-    
+
     async function downloadSingleDocument(userId, docType) {
         try {
             const response = await fetch(`/api/admin/users/${userId}/documents/${docType}/download`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документа');
             }
-            
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
+
             const contentType = response.headers.get('Content-Type') || '';
             let extension = 'pdf';
-            
+
             if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
                 extension = 'jpg';
             } else if (contentType.includes('image/png')) {
@@ -2188,10 +2559,10 @@
             } else if (contentType.includes('image/webp')) {
                 extension = 'webp';
             }
-            
+
             const contentDisposition = response.headers.get('Content-Disposition');
             let filename = `document_${docType}.${extension}`;
-            
+
             if (contentDisposition) {
                 const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
                 if (match) {
@@ -2203,20 +2574,20 @@
                     }
                 }
             }
-            
+
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            
+
             showToast('Документ скачан успешно', 'success');
         } catch (error) {
             console.error('Download single document error:', error);
             showToast(error.message || 'Ошибка при скачивании документа', 'danger');
         }
     }
-    
+
     async function deleteUserDocument(userId, docType) {
         const docLabels = {
             'snils': 'СНИЛС',
@@ -2226,20 +2597,20 @@
             'marriage': 'Свидетельство о браке'
         };
         const label = docLabels[docType] || docType;
-        
+
         if (!confirm(`Удалить документ "${label}" у пользователя?`)) return;
-        
+
         try {
             const response = await fetch(`/api/admin/users/${userId}/documents/${docType}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.detail || 'Ошибка удаления документа');
             }
-            
+
             showToast(`Документ "${label}" удален успешно`, 'success');
             loadUserDocuments(userId);
         } catch (error) {
@@ -2247,7 +2618,8 @@
             showToast(error.message || 'Ошибка при удалении документа', 'danger');
         }
     }
-    
+
+    // Инициализация
     loadStats();
 </script>
 {% endblock %}

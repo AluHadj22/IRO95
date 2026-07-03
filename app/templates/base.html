@@ -22,22 +22,25 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <style>
-        /* ... ваш CSS ... */
+        /* ============================================================
+           НОВЫЙ ДИЗАЙН В СТИЛИСТИКЕ ИРО ЧР (ЗОЛОТИСТЫЕ АКЦЕНТЫ)
+           ============================================================ */
         :root {
-            --primary: #0057A4;
-            --primary-dark: #003d7a;
-            --primary-light: #2b7bcf;
-            --primary-gradient: linear-gradient(135deg, #0057A4 0%, #2b7bcf 50%, #4a90d9 100%);
-            --secondary: #1e73be;
+            --primary: #c9a13b;
+            --primary-dark: #b8860b;
+            --primary-light: #f9d976;
+            --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+            --secondary: #1e293b;
             --accent: #f5a623;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --dark: #1e293b;
+            --dark: #1a1a2e;
             --light: #f8fafc;
             --gray: #64748b;
             --white: #ffffff;
             --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(201, 161, 59, 0.15);
         }
         
         * {
@@ -51,19 +54,47 @@
             background: var(--light);
             color: var(--dark);
             overflow-x: hidden;
+            padding-top: 76px; /* отступ под фиксированный навбар */
         }
         
-        /* Навбар */
+        /* ============================================================
+           КРАСИВЫЙ ПРОЗРАЧНЫЙ НАВБАР
+           ============================================================ */
         .navbar {
-            background: var(--white) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            padding: 0.75rem 0;
-            transition: all 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1030;
+            padding: 1rem 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            border-bottom: 1px solid rgba(201, 161, 59, 0.1);
+            box-shadow: none;
         }
         
+        /* При скролле — более плотный фон с золотистым отливом */
         .navbar.scrolled {
             padding: 0.5rem 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.92) !important;
+            backdrop-filter: blur(16px) saturate(200%);
+            -webkit-backdrop-filter: blur(16px) saturate(200%);
+            border-bottom: 2px solid rgba(201, 161, 59, 0.2);
+            box-shadow: 0 4px 30px rgba(201, 161, 59, 0.08);
+        }
+        
+        /* На мобильных — фон чуть плотнее для читаемости */
+        @media (max-width: 991.98px) {
+            .navbar {
+                background: rgba(255, 255, 255, 0.85) !important;
+                backdrop-filter: blur(16px) saturate(200%);
+                -webkit-backdrop-filter: blur(16px) saturate(200%);
+            }
+            .navbar.scrolled {
+                background: rgba(255, 255, 255, 0.95) !important;
+            }
         }
         
         .navbar-brand {
@@ -73,59 +104,192 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
         }
         
         .navbar-brand img {
             height: 50px;
             width: auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(201, 161, 59, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled .navbar-brand img {
+            height: 44px;
+            box-shadow: 0 2px 12px rgba(201, 161, 59, 0.2);
         }
         
         .navbar-brand span {
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
         }
         
         .navbar-brand .title {
             font-size: 1.1rem;
             line-height: 1.2;
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled .navbar-brand .title {
+            font-size: 1rem;
+        }
+        
+        .navbar-brand .title .gold {
+            color: var(--primary);
+            background: linear-gradient(135deg, #c9a13b, #b8860b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .navbar-brand .subtitle {
             font-size: 0.7rem;
             font-weight: 400;
             color: var(--gray);
+            transition: all 0.3s ease;
         }
         
+        .navbar.scrolled .navbar-brand .subtitle {
+            font-size: 0.6rem;
+        }
+        
+        /* Ссылки навбара — прозрачные с эффектом стекла */
         .nav-link {
-            color: var(--gray) !important;
+            color: rgba(30, 41, 59, 0.85) !important;
             font-weight: 500;
-            transition: all 0.2s ease;
-            padding: 0.5rem 1rem !important;
-            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.5rem 1.2rem !important;
+            border-radius: 10px;
             position: relative;
+            letter-spacing: 0.2px;
+        }
+        
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 60%;
+            height: 2px;
+            background: var(--primary-gradient);
+            border-radius: 2px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-link:hover::before,
+        .nav-link.active::before {
+            transform: translateX(-50%) scaleX(1);
         }
         
         .nav-link:hover {
             color: var(--primary) !important;
-            background: rgba(0,87,164,0.05);
+            background: rgba(201, 161, 59, 0.08);
+            transform: translateY(-1px);
         }
         
-        /* Карточки */
+        .nav-link.active {
+            color: var(--primary) !important;
+            background: rgba(201, 161, 59, 0.12);
+        }
+        
+        .navbar.scrolled .nav-link {
+            color: var(--gray) !important;
+        }
+        
+        .navbar.scrolled .nav-link:hover,
+        .navbar.scrolled .nav-link.active {
+            color: var(--primary) !important;
+        }
+        
+        /* Бургер-кнопка — стилизована под золото */
+        .navbar-toggler {
+            border: 1.5px solid rgba(201, 161, 59, 0.3);
+            padding: 0.5rem 0.7rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }
+        
+        .navbar-toggler:hover {
+            border-color: var(--primary);
+            background: rgba(201, 161, 59, 0.05);
+            box-shadow: 0 0 20px rgba(201, 161, 59, 0.1);
+        }
+        
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(201,161,59,0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+        
+        /* Мобильное меню — стеклянный эффект */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(20px) saturate(200%);
+                -webkit-backdrop-filter: blur(20px) saturate(200%);
+                border-radius: 16px;
+                padding: 1rem 0.5rem;
+                margin-top: 0.5rem;
+                border: 1px solid rgba(201, 161, 59, 0.1);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.04);
+            }
+            
+            .nav-link {
+                padding: 0.6rem 1rem !important;
+                border-radius: 10px;
+                text-align: center;
+            }
+            
+            .nav-link::before {
+                display: none;
+            }
+            
+            .nav-link:hover,
+            .nav-link.active {
+                background: rgba(201, 161, 59, 0.1) !important;
+            }
+        }
+        
+        /* ===== КАРТОЧКИ ===== */
         .card {
             border: none;
             border-radius: 16px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
             background: var(--white);
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -12px rgba(0,0,0,0.15);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px -12px rgba(201, 161, 59, 0.2);
+            border-color: var(--primary);
         }
         
-        /* Кнопки */
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        /* ===== КНОПКИ ===== */
         .btn-primary {
             background: var(--primary-gradient);
             border: none;
@@ -133,11 +297,33 @@
             padding: 10px 24px;
             font-weight: 600;
             transition: all 0.3s ease;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.15);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,87,164,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(201, 161, 59, 0.35);
+            color: white;
+        }
+        
+        .btn-primary:hover::after {
+            width: 300px;
+            height: 300px;
         }
         
         .btn-outline-primary {
@@ -151,18 +337,20 @@
         }
         
         .btn-outline-primary:hover {
-            background: var(--primary);
+            background: var(--primary-gradient);
             color: white;
             transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(201, 161, 59, 0.2);
         }
         
-        /* Герой-секция */
+        /* ===== ГЕРОЙ-СЕКЦИЯ ===== */
         .hero-section {
-            background: linear-gradient(135deg, #0057A4 0%, #003d7a 50%, #001f40 100%);
+            background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
             color: white;
             padding: 80px 0;
             position: relative;
             overflow: hidden;
+            border-bottom: 3px solid rgba(201, 161, 59, 0.3);
         }
         
         .hero-section::before {
@@ -172,7 +360,7 @@
             right: -10%;
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(201, 161, 59, 0.08) 0%, transparent 70%);
             border-radius: 50%;
             animation: float 20s ease-in-out infinite;
         }
@@ -184,7 +372,7 @@
             left: -5%;
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
             border-radius: 50%;
             animation: float 15s ease-in-out infinite reverse;
         }
@@ -217,7 +405,7 @@
             width: 40%;
             min-width: 250px;
             max-width: 400px;
-            opacity: 0.15;
+            opacity: 0.1;
             pointer-events: none;
         }
         
@@ -232,6 +420,28 @@
             background-repeat: no-repeat;
         }
         
+        .hero-section .gold-badge {
+            display: inline-block;
+            background: rgba(201, 161, 59, 0.2);
+            color: var(--primary-light);
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(201, 161, 59, 0.2);
+            backdrop-filter: blur(4px);
+        }
+        
+        .hero-section h1 {
+            font-weight: 800;
+        }
+        
+        .hero-section h1 .gold {
+            color: var(--primary-light);
+        }
+        
+        /* ===== ТОСТЫ ===== */
         .toast-container {
             position: fixed;
             top: 80px;
@@ -239,27 +449,57 @@
             z-index: 9999;
         }
         
+        .toast {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        
+        .toast.bg-success {
+            background: var(--primary-gradient) !important;
+        }
+        
+        .toast.bg-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+        }
+        
+        /* ===== ФУТЕР ===== */
         .footer {
-            background: linear-gradient(135deg, #001f40 0%, #003d7a 100%);
-            color: #cbd5e1;
+            background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
+            color: rgba(255,255,255,0.7);
             margin-top: 60px;
+            border-top: 3px solid rgba(201, 161, 59, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -60px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(201, 161, 59, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
         
         .footer h5 {
-            color: white;
+            color: var(--primary-light);
             font-size: 1rem;
             margin-bottom: 1rem;
             font-weight: 600;
         }
         
         .footer a {
-            color: #cbd5e1;
+            color: rgba(255,255,255,0.6);
             text-decoration: none;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
         }
         
         .footer a:hover {
-            color: var(--accent);
+            color: var(--primary-light);
         }
         
         .footer .social-icons a {
@@ -268,24 +508,26 @@
             justify-content: center;
             width: 42px;
             height: 42px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.06);
             border-radius: 50%;
             text-align: center;
             margin-right: 10px;
             transition: all 0.3s ease;
             font-size: 1.1rem;
             text-decoration: none;
-            color: #cbd5e1;
+            color: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
         }
         
         .footer .social-icons a:hover {
-            background: var(--accent);
+            background: var(--primary-gradient);
             transform: translateY(-3px);
             color: white;
+            box-shadow: 0 8px 20px rgba(201, 161, 59, 0.2);
         }
         
         .footer .social-icons .vk-link {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
             letter-spacing: 0.5px;
         }
@@ -295,6 +537,23 @@
             color: white;
         }
         
+        .footer hr {
+            border-color: rgba(255,255,255,0.06);
+        }
+        
+        .footer .map-container {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(201, 161, 59, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .footer .map-container:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 24px rgba(201, 161, 59, 0.1);
+        }
+        
+        /* ===== КАРТОЧКИ КУРСОВ ===== */
         .course-card-img {
             height: 200px;
             object-fit: cover;
@@ -306,15 +565,33 @@
             border-radius: 16px;
             padding: 24px;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid var(--border);
             height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .category-card:hover {
             transform: translateY(-5px);
-            border-color: var(--primary-light);
-            box-shadow: 0 12px 24px -12px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+            box-shadow: 0 12px 24px -12px rgba(201, 161, 59, 0.15);
+        }
+        
+        .category-card:hover::before {
+            opacity: 1;
         }
         
         .category-card i {
@@ -322,19 +599,21 @@
             color: var(--primary);
         }
         
+        /* ===== СПИКЕРЫ ===== */
         .speaker-card {
             text-align: center;
             padding: 20px;
             background: var(--white);
             border-radius: 16px;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid var(--border);
+            position: relative;
         }
         
         .speaker-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px -12px rgba(0,0,0,0.12);
-            border-color: var(--primary-light);
+            box-shadow: 0 12px 24px -12px rgba(201, 161, 59, 0.15);
+            border-color: var(--primary);
         }
         
         .speaker-img {
@@ -345,8 +624,15 @@
             margin-bottom: 15px;
             border: 3px solid var(--primary);
             padding: 3px;
+            transition: all 0.3s ease;
         }
         
+        .speaker-card:hover .speaker-img {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 6px rgba(201, 161, 59, 0.1);
+        }
+        
+        /* ===== ФОРМЫ ===== */
         .form-control, .form-select {
             border-radius: 10px;
             border: 1px solid var(--border);
@@ -357,10 +643,11 @@
         
         .form-control:focus, .form-select:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0,87,164,0.1);
+            box-shadow: 0 0 0 3px rgba(201, 161, 59, 0.1);
             outline: none;
         }
         
+        /* ===== МОДАЛКИ ===== */
         .modal-content {
             border-radius: 20px;
             border: none;
@@ -379,6 +666,7 @@
             opacity: 0.8;
         }
         
+        /* ===== БЭДЖИ ===== */
         .badge {
             padding: 4px 12px;
             border-radius: 20px;
@@ -387,8 +675,8 @@
         }
         
         .badge-primary {
-            background: #e0e7ff;
-            color: var(--primary);
+            background: #fef9e7;
+            color: var(--primary-dark);
         }
         
         .badge-success {
@@ -401,6 +689,12 @@
             color: #dc2626;
         }
         
+        .badge-gold {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        /* ===== АНИМАЦИИ ===== */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -416,6 +710,20 @@
             animation: fadeInUp 0.6s ease-out forwards;
         }
         
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .shimmer-text {
+            background: linear-gradient(90deg, #c9a13b, #f9d976, #c9a13b);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 2s ease-in-out infinite;
+        }
+        
+        /* ===== КАРТА ===== */
         .map-container {
             border-radius: 16px;
             overflow: hidden;
@@ -425,7 +733,7 @@
         
         .map-container:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 30px rgba(201, 161, 59, 0.15);
         }
         
         .map-card-link {
@@ -437,7 +745,405 @@
             color: inherit;
         }
         
+        /* ============================================================
+           ЧАТ-БОТ — АНИМИРОВАННАЯ ИКОНКА В ПРАВОМ НИЖНЕМ УГЛУ
+           ============================================================ */
+        .chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Кнопка-иконка чата */
+        .chatbot-toggle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 24px rgba(201, 161, 59, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: chatbot-pulse 2s ease-in-out infinite;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.08) rotate(-5deg);
+            box-shadow: 0 8px 40px rgba(201, 161, 59, 0.45);
+        }
+
+        /* Пульсирующая анимация — привлекает внимание */
+        @keyframes chatbot-pulse {
+            0%, 100% {
+                box-shadow: 0 4px 24px rgba(201, 161, 59, 0.35);
+            }
+            50% {
+                box-shadow: 0 4px 40px rgba(201, 161, 59, 0.55), 0 0 60px rgba(201, 161, 59, 0.15);
+            }
+        }
+
+        /* Кольцо вокруг иконки — дополнительная анимация */
+        .chatbot-toggle::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(201, 161, 59, 0.2);
+            animation: chatbot-ring 2.5s ease-in-out infinite;
+        }
+
+        @keyframes chatbot-ring {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(1.15);
+                opacity: 0;
+            }
+        }
+
+        /* Бейдж с уведомлением */
+        .chatbot-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: chatbot-badge-bounce 1.5s ease-in-out infinite;
+            border: 2px solid white;
+        }
+
+        @keyframes chatbot-badge-bounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        /* Окно чата */
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 400px;
+            max-width: 92vw;
+            max-height: 550px;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border-radius: 20px;
+            border: 1px solid rgba(201, 161, 59, 0.12);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            display: none;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: bottom right;
+        }
+
+        .chatbot-window.open {
+            display: block;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Шапка чата */
+        .chatbot-header {
+            background: var(--primary-gradient);
+            padding: 16px 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chatbot-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chatbot-header-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            backdrop-filter: blur(4px);
+        }
+
+        .chatbot-header-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .chatbot-header-subtitle {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+            line-height: 1;
+        }
+
+        .chatbot-close:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(90deg);
+        }
+
+        /* Тело чата — список вопросов */
+        .chatbot-body {
+            padding: 16px 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(248, 250, 252, 0.3);
+        }
+
+        .chatbot-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .chatbot-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .chatbot-body::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* Приветствие */
+        .chatbot-greeting {
+            text-align: center;
+            padding: 8px 0 16px 0;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+            margin-bottom: 16px;
+        }
+
+        .chatbot-greeting .greeting-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .chatbot-greeting h6 {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 2px;
+        }
+
+        .chatbot-greeting p {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 0;
+        }
+
+        /* Карточка вопроса */
+        .chatbot-question {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(201, 161, 59, 0.06);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .chatbot-question:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: var(--primary);
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(201, 161, 59, 0.06);
+        }
+
+        .chatbot-question .q-icon {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .chatbot-question .q-text {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--dark);
+            flex: 1;
+        }
+
+        .chatbot-question .q-arrow {
+            color: var(--gray);
+            font-size: 0.7rem;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .chatbot-question:hover .q-arrow {
+            color: var(--primary);
+            transform: translateX(3px);
+        }
+
+        .chatbot-question .q-content {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(226, 232, 240, 0.3);
+            font-size: 0.85rem;
+            color: var(--gray);
+            line-height: 1.6;
+            background: rgba(248, 250, 252, 0.3);
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+
+        .chatbot-question .q-content.show {
+            display: block;
+        }
+
+        .chatbot-question .q-content strong {
+            color: var(--dark);
+        }
+
+        .chatbot-question .q-content .step {
+            display: block;
+            padding: 4px 0 4px 20px;
+            position: relative;
+        }
+
+        .chatbot-question .q-content .step::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        .chatbot-question .q-content .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Футер чата */
+        .chatbot-footer {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(226, 232, 240, 0.3);
+            text-align: center;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .chatbot-footer .chatbot-email {
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .chatbot-footer .chatbot-email a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .chatbot-footer .chatbot-email a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* Адаптив */
+        @media (max-width: 480px) {
+            .chatbot-window {
+                width: 100vw;
+                max-width: 100vw;
+                max-height: 80vh;
+                bottom: 76px;
+                right: -10px;
+                border-radius: 16px;
+            }
+
+            .chatbot-toggle {
+                width: 56px;
+                height: 56px;
+                font-size: 24px;
+            }
+
+            .chatbot-body {
+                max-height: 50vh;
+                padding: 12px 16px;
+            }
+
+            .chatbot-question {
+                padding: 12px 14px;
+            }
+
+            .chatbot-question .q-text {
+                font-size: 0.8rem;
+            }
+
+            .chatbot-header {
+                padding: 14px 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .chatbot-toggle {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+
+            .chatbot-container {
+                bottom: 16px;
+                right: 16px;
+            }
+
+            .chatbot-window {
+                bottom: 70px;
+                right: -4px;
+            }
+        }
+
+        /* ===== АДАПТИВ ===== */
         @media (max-width: 768px) {
+            body {
+                padding-top: 68px;
+            }
+            
             .hero-section {
                 padding: 60px 0;
             }
@@ -456,7 +1162,7 @@
             
             .hero-illustration {
                 width: 60%;
-                opacity: 0.1;
+                opacity: 0.05;
             }
         }
     </style>
@@ -467,22 +1173,24 @@
 <!-- Тосты -->
 <div class="toast-container"></div>
 
-<!-- Навбар -->
-<nav class="navbar navbar-expand-lg sticky-top">
+<!-- ============================================================
+     КРАСИВЫЙ ПРОЗРАЧНЫЙ НАВБАР (glassmorphism)
+     ============================================================ -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 50px;">
+            <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР">
             <span>
-                <span class="title fw-bold">ГБУ ДПО «ИРО ЧР»</span>
+                <span class="title fw-bold">ГБУ ДПО <span class="gold">«ИРО ЧР»</span></span>
                 <span class="subtitle">Институт развития образования Чеченской Республики</span>
             </span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto" id="navLinks">
-                <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/">Главная</a></li>
                 <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
                 <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
                 <li class="nav-item"><a class="nav-link" href="/login">Вход</a></li>
@@ -494,7 +1202,104 @@
 
 <!-- Основной контент -->
 <main>
-    {% block content %}{% endblock %}
+    {% block content %}
+    <!-- ===== ГЕРОЙ-СЕКЦИЯ (ПРИМЕР) ===== -->
+    <section class="hero-section">
+        <div class="hero-waves"></div>
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-lg-8" data-aos="fade-right">
+                    <div class="hero-icon">
+                        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#f9d976"/>
+                            <circle cx="12" cy="12" r="2" fill="#f9d976" opacity="0.3"/>
+                        </svg>
+                    </div>
+                    <div class="gold-badge mb-3">★ Система дистанционного обучения</div>
+                    <h1 class="display-4 fw-bold mb-3">
+                        ГБУ ДПО <span class="gold">«Институт развития образования</span><br>
+                        <span class="gold">Чеченской Республики»</span>
+                    </h1>
+                    <p class="lead mb-4" style="opacity: 0.9; font-weight: 300;">
+                        Повышение квалификации и профессиональная переподготовка<br>
+                        педагогических работников
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/courses" class="btn btn-primary btn-lg px-5">
+                            <i class="bi bi-book me-2"></i>Каталог курсов
+                        </a>
+                        <a href="/map" class="btn btn-outline-light btn-lg px-4">
+                            <i class="bi bi-geo-alt me-2"></i>Как нас найти
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 d-none d-lg-block" data-aos="fade-left">
+                    <div style="background: rgba(255,255,255,0.05); border-radius: 20px; padding: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(201,161,59,0.15);">
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
+                                <span style="font-size: 1.5rem;">📍</span>
+                                <span style="font-size: 0.9rem;">г. Грозный, ул. Лермонтова, 2</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
+                                <span style="font-size: 1.5rem;">📞</span>
+                                <span style="font-size: 0.9rem;">+7 (8712) 21-22-24</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
+                                <span style="font-size: 1.5rem;">✉</span>
+                                <span style="font-size: 0.9rem;">ipkro-chr@mail.ru</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
+                                <span style="font-size: 1.5rem;">🕐</span>
+                                <span style="font-size: 0.9rem;">Пн–пт 9:00–18:00</span>
+                            </div>
+                            <hr style="border-color: rgba(255,255,255,0.06); margin: 4px 0;">
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <span style="background: rgba(201,161,59,0.15); padding: 4px 16px; border-radius: 20px; font-size: 0.7rem; color: #f9d976;">Повышение квалификации</span>
+                                <span style="background: rgba(201,161,59,0.15); padding: 4px 16px; border-radius: 20px; font-size: 0.7rem; color: #f9d976;">Профпереподготовка</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== ИНФОРМАЦИОННЫЕ КАРТОЧКИ ===== -->
+    <section class="container py-5">
+        <div class="row g-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card h-100 p-4 text-center">
+                    <div style="width: 60px; height: 60px; background: rgba(201,161,59,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <i class="bi bi-mortarboard-fill" style="font-size: 2rem; color: var(--primary);"></i>
+                    </div>
+                    <h5 class="fw-bold">Образовательная деятельность</h5>
+                    <p class="text-muted small">Реализуем программы повышения квалификации и профессиональной переподготовки</p>
+                    <span class="badge badge-gold mt-2">Подробнее →</span>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card h-100 p-4 text-center">
+                    <div style="width: 60px; height: 60px; background: rgba(201,161,59,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <i class="bi bi-people-fill" style="font-size: 2rem; color: var(--primary);"></i>
+                    </div>
+                    <h5 class="fw-bold">Квалифицированные кадры</h5>
+                    <p class="text-muted small">Опытные преподаватели и эксперты в области образования</p>
+                    <span class="badge badge-gold mt-2">Подробнее →</span>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="card h-100 p-4 text-center">
+                    <div style="width: 60px; height: 60px; background: rgba(201,161,59,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <i class="bi bi-laptop-fill" style="font-size: 2rem; color: var(--primary);"></i>
+                    </div>
+                    <h5 class="fw-bold">Дистанционное обучение</h5>
+                    <p class="text-muted small">Современные технологии для эффективного обучения в любой точке</p>
+                    <span class="badge badge-gold mt-2">Подробнее →</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endblock %}
 </main>
 
 <!-- Футер -->
@@ -502,9 +1307,9 @@
     <div class="container py-5">
         <div class="row">
             <div class="col-md-4 mb-4">
-                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 60px; margin-bottom: 15px;">
+                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 60px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 16px rgba(201,161,59,0.15);">
                 <h5>ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
-                <p class="small">Повышение квалификации педагогических работников</p>
+                <p class="small" style="opacity: 0.6;">Повышение квалификации педагогических работников</p>
                 <div class="social-icons mt-3">
                     <a href="https://vk.com/public215702903" target="_blank" title="ВКонтакте" class="vk-link">ВК</a>
                     <a href="https://govzalla.ru/" target="_blank" title="Сайт организации"><i class="bi bi-globe2"></i></a>
@@ -512,10 +1317,10 @@
             </div>
             <div class="col-md-3 mb-4">
                 <h5>Контакты</h5>
-                <p class="small mb-2"><i class="bi bi-geo-alt me-2"></i>г. Грозный, ул. Лермонтова, 2</p>
-                <p class="small mb-2"><i class="bi bi-telephone me-2"></i>+7 (8712) 21-22-24</p>
-                <p class="small mb-2"><i class="bi bi-envelope me-2"></i>ipkro-chr@mail.ru</p>
-                <p class="small"><i class="bi bi-clock me-2"></i>Пн-Пт: 9:00 - 18:00</p>
+                <p class="small mb-2"><i class="bi bi-geo-alt me-2" style="color: var(--primary-light);"></i>г. Грозный, ул. Лермонтова, 2</p>
+                <p class="small mb-2"><i class="bi bi-telephone me-2" style="color: var(--primary-light);"></i>+7 (8712) 21-22-24</p>
+                <p class="small mb-2"><i class="bi bi-envelope me-2" style="color: var(--primary-light);"></i>ipkro-chr@mail.ru</p>
+                <p class="small"><i class="bi bi-clock me-2" style="color: var(--primary-light);"></i>Пн-Пт: 9:00 - 18:00</p>
             </div>
             <div class="col-md-5 mb-4">
                 <h5>Мы на карте</h5>
@@ -523,19 +1328,134 @@
                     <div class="map-container" id="footer-map" style="width: 100%; height: 200px; border-radius: 12px; cursor: pointer;"></div>
                 </a>
                 <p class="small mt-2 text-center">
-                    <i class="bi bi-geo-alt me-1"></i> г. Грозный, ул. Лермонтова, 2 
-                    <a href="/map" class="text-white-50 ms-2">(открыть на полный экран →)</a>
+                    <i class="bi bi-geo-alt me-1" style="color: var(--primary-light);"></i> г. Грозный, ул. Лермонтова, 2 
+                    <a href="/map" class="text-white-50 ms-2" style="opacity: 0.6;">(открыть на полный экран →)</a>
                 </p>
             </div>
         </div>
-        <hr class="my-3" style="border-color: rgba(255,255,255,0.1);">
+        <hr class="my-3">
         <div class="row">
             <div class="col-md-12 text-center">
-                <p class="mb-0 small">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
+                <p class="mb-0 small" style="opacity: 0.4;">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
             </div>
         </div>
     </div>
 </footer>
+
+<!-- ============================================================
+     ЧАТ-БОТ — ВСПЛЫВАЮЩЕЕ ОКНО С ЧАСТЫМИ ВОПРОСАМИ
+     ============================================================ -->
+<div class="chatbot-container" id="chatbotContainer">
+    <!-- Кнопка-триггер -->
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Помощь">
+        <i class="bi bi-chat-dots-fill"></i>
+        <span class="chatbot-badge">?</span>
+    </button>
+
+    <!-- Окно чата -->
+    <div class="chatbot-window" id="chatbotWindow">
+        <!-- Шапка -->
+        <div class="chatbot-header">
+            <div class="chatbot-header-left">
+                <div class="chatbot-header-avatar">
+                    <i class="bi bi-robot"></i>
+                </div>
+                <div>
+                    <div class="chatbot-header-title">Помощник ИРО ЧР</div>
+                    <div class="chatbot-header-subtitle">Часто задаваемые вопросы</div>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Закрыть">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- Тело -->
+        <div class="chatbot-body" id="chatbotBody">
+            <div class="chatbot-greeting">
+                <span class="greeting-icon">👋</span>
+                <h6>Здравствуйте!</h6>
+                <p>Выберите вопрос, чтобы получить ответ</p>
+            </div>
+
+            <!-- Вопрос 1 -->
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-search"></i></span>
+                    <span class="q-text">Как найти нужный курс?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Чтобы найти интересующий вас курс:</p>
+                    <span class="step">Перейдите в раздел <strong class="highlight">«Курсы»</strong> в верхней навигационной панели.</span>
+                    <span class="step">Используйте поиск по <strong>названию</strong> или <strong>ключевым словам</strong>.</span>
+                    <span class="step">Отфильтруйте курсы по <strong>категории</strong>, чтобы быстрее найти нужный.</span>
+                    <span class="step">Нажмите на карточку курса, чтобы ознакомиться с программой и записаться.</span>
+                </div>
+            </div>
+
+            <!-- Вопрос 2 -->
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-play-circle"></i></span>
+                    <span class="q-text">Я записался на курс. Как начать обучение?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Для начала обучения выполните следующие шаги:</p>
+                    <span class="step">Перейдите в раздел <strong class="highlight">«Кабинет»</strong> в верхней навигационной панели.</span>
+                    <span class="step">В личном кабинете откройте вкладку <strong class="highlight">«Мои курсы»</strong>.</span>
+                    <span class="step">Найдите запись о курсе, на который вы записались, и нажмите кнопку <strong class="highlight">«Перейти в Moodle»</strong>.</span>
+                    <span class="step">На странице входа в Moodle введите данные, которые были отправлены на вашу <strong>электронную почту</strong> при регистрации.</span>
+                    <span class="step">После успешного входа вы попадёте на страницу курса и сможете приступить к обучению.</span>
+                </div>
+            </div>
+
+            <!-- Вопрос 3 -->
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-exclamation-triangle"></i></span>
+                    <span class="q-text">Не могу записаться на курс. В чём причина?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Наиболее частой причиной является <strong>незаполненный профиль</strong>.</p>
+                    <span class="step">Перед записью на курс необходимо заполнить раздел <strong class="highlight">«Мои данные»</strong> в личном кабинете.</span>
+                    <span class="step">Укажите вашу <strong>должность, место работы, контактный телефон</strong> и другую запрашиваемую информацию.</span>
+                    <span class="step">После сохранения данных попробуйте записаться на курс снова.</span>
+                    <span class="step">Если проблема сохраняется, обратитесь в <strong>техническую поддержку</strong> через форму обратной связи.</span>
+                </div>
+            </div>
+
+            <!-- Вопрос 4 -->
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-file-text"></i></span>
+                    <span class="q-text">Как отозвать согласие на обработку данных?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Для отзыва согласия на обработку персональных данных:</p>
+                    <span class="step">Направьте <strong>письменное заявление</strong> на официальную электронную почту организации:</span>
+                    <span class="step" style="text-align: center; font-weight: 600; color: var(--primary); font-size: 1rem; padding: 8px 0;">
+                        <i class="bi bi-envelope-fill me-2"></i>ipkro-chr@mail.ru
+                    </span>
+                    <span class="step">В письме укажите ваши <strong>ФИО</strong> и <strong>контактные данные</strong> для идентификации.</span>
+                    <span class="step">Сотрудники организации рассмотрят ваше обращение в установленном порядке.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Футер -->
+        <div class="chatbot-footer">
+            <div class="chatbot-email">
+                <i class="bi bi-envelope me-1"></i>
+                Не нашли ответ? Напишите нам:
+                <a href="mailto:ipkro-chr@mail.ru">ipkro-chr@mail.ru</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
 // ============================================================
@@ -554,19 +1474,22 @@ try {
     console.warn('AOS init error:', e);
 }
 
+// ============================================================
+// ЭФФЕКТ ПРОЗРАЧНОГО НАВБАРА ПРИ СКРОЛЛЕ
+// ============================================================
 try {
     window.addEventListener('scroll', function() {
         try {
-            const navbar = document.querySelector('.navbar');
+            const navbar = document.getElementById('mainNav');
             if (navbar) {
-                if (window.scrollY > 50) {
+                if (window.scrollY > 30) {
                     navbar.classList.add('scrolled');
                 } else {
                     navbar.classList.remove('scrolled');
                 }
             }
         } catch(e) {}
-    });
+    }, { passive: true });
 } catch(e) {
     console.warn('Navbar scroll error:', e);
 }
@@ -599,29 +1522,29 @@ function initFooterMap() {
             hintContent: 'ГБУ ДПО «ИРО ЧР»',
             balloonContent: `
                 <div style="font-family: 'Inter', sans-serif; min-width: 200px;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #0057A4; padding-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #c9a13b; padding-bottom: 8px;">
                         <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 40px;" alt="logo">
-                        <strong style="color: #0057A4; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
+                        <strong style="color: #c9a13b; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
                     </div>
                     <p style="margin: 0 0 5px 0; font-size: 12px;">
                         <strong>Институт развития образования<br>Чеченской Республики</strong>
                     </p>
                     <hr style="margin: 8px 0;">
                     <p style="margin: 5px 0; font-size: 12px;">
-                        <i class="bi bi-geo-alt" style="color: #0057A4;"></i> ${instituteAddress}<br>
-                        <i class="bi bi-telephone" style="color: #0057A4;"></i> ${institutePhone}<br>
-                        <i class="bi bi-envelope" style="color: #0057A4;"></i> ${instituteEmail}<br>
-                        <i class="bi bi-clock" style="color: #0057A4;"></i> ${instituteHours}
+                        <i class="bi bi-geo-alt" style="color: #c9a13b;"></i> ${instituteAddress}<br>
+                        <i class="bi bi-telephone" style="color: #c9a13b;"></i> ${institutePhone}<br>
+                        <i class="bi bi-envelope" style="color: #c9a13b;"></i> ${instituteEmail}<br>
+                        <i class="bi bi-clock" style="color: #c9a13b;"></i> ${instituteHours}
                     </p>
                     <hr style="margin: 8px 0;">
-                    <a href="/map" style="color: #0057A4; text-decoration: none; font-size: 12px; font-weight: 500;">
+                    <a href="/map" style="color: #c9a13b; text-decoration: none; font-size: 12px; font-weight: 500;">
                         Подробная карта →
                     </a>
                 </div>
             `
         }, {
-            preset: 'islands#blueCircleIcon',
-            iconColor: '#0057A4'
+            preset: 'islands#circleIcon',
+            iconColor: '#c9a13b'
         });
         
         map.geoObjects.add(placemark);
@@ -651,7 +1574,7 @@ function initFullMap() {
             balloonContentHeader: `
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 35px;" alt="logo">
-                    <strong style="color: #0057A4; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
+                    <strong style="color: #c9a13b; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
                 </div>
             `,
             balloonContentBody: `
@@ -659,19 +1582,19 @@ function initFullMap() {
                     <p><strong>Институт развития образования<br>Чеченской Республики</strong></p>
                     <table style="width: 100%; font-size: 13px;">
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #0057A4;"></i> Адрес:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #c9a13b;"></i> Адрес:</td>
                             <td style="padding: 4px 0;">${instituteAddress}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #0057A4;"></i> Телефон:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #c9a13b;"></i> Телефон:</td>
                             <td style="padding: 4px 0;">${institutePhone}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #0057A4;"></i> Email:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #c9a13b;"></i> Email:</td>
                             <td style="padding: 4px 0;">${instituteEmail}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #0057A4;"></i> Часы работы:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #c9a13b;"></i> Часы работы:</td>
                             <td style="padding: 4px 0;">${instituteHours}</td>
                         </tr>
                     </table>
@@ -684,14 +1607,14 @@ function initFullMap() {
             `,
             balloonContentFooter: `
                 <div style="margin-top: 10px; text-align: center;">
-                    <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #0057A4; text-decoration: none;">
+                    <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #c9a13b; text-decoration: none;">
                         🚗 Построить маршрут →
                     </a>
                 </div>
             `
         }, {
-            preset: 'islands#blueCircleIcon',
-            iconColor: '#0057A4'
+            preset: 'islands#circleIcon',
+            iconColor: '#c9a13b'
         });
         
         map.geoObjects.add(placemark);
@@ -719,7 +1642,6 @@ function initFullMap() {
 // ЗАГРУЗКА КАРТ — НЕ БЛОКИРУЕТ СТРАНИЦУ
 // ============================================================
 try {
-    // Проверяем каждые 200мс, не загрузился ли ymaps
     let ymapsLoaded = false;
     const checkYmaps = setInterval(function() {
         if (typeof ymaps !== 'undefined' && ymaps.ready) {
@@ -736,7 +1658,6 @@ try {
         }
     }, 200);
     
-    // Таймаут — перестаём ждать через 10 секунд
     setTimeout(function() {
         clearInterval(checkYmaps);
     }, 10000);
@@ -819,6 +1740,126 @@ try {
 } catch(e) {
     console.warn('Auth error:', e);
 }
+
+// ============================================================
+// ЧАТ-БОТ — УПРАВЛЕНИЕ ПОКАЗОМ И АНИМАЦИЕЙ
+// ============================================================
+
+function toggleChatbot() {
+    const window = document.getElementById('chatbotWindow');
+    const toggle = document.getElementById('chatbotToggle');
+    
+    if (window.classList.contains('open')) {
+        window.classList.remove('open');
+        toggle.classList.remove('active');
+        // Сбрасываем анимацию пульсации
+        toggle.style.animation = 'none';
+        setTimeout(() => {
+            toggle.style.animation = '';
+        }, 10);
+    } else {
+        window.classList.add('open');
+        toggle.classList.add('active');
+        // Останавливаем пульсацию когда окно открыто
+        toggle.style.animation = 'none';
+        // Прокручиваем к началу списка
+        document.getElementById('chatbotBody').scrollTop = 0;
+    }
+}
+
+function toggleQuestion(element) {
+    const content = element.querySelector('.q-content');
+    const arrow = element.querySelector('.q-arrow i');
+    
+    if (content.classList.contains('show')) {
+        content.classList.remove('show');
+        if (arrow) {
+            arrow.className = 'bi bi-chevron-down';
+        }
+    } else {
+        // Закрываем все остальные ответы
+        document.querySelectorAll('.chatbot-question .q-content').forEach(c => {
+            c.classList.remove('show');
+        });
+        document.querySelectorAll('.chatbot-question .q-arrow i').forEach(a => {
+            a.className = 'bi bi-chevron-down';
+        });
+        
+        content.classList.add('show');
+        if (arrow) {
+            arrow.className = 'bi bi-chevron-up';
+        }
+        
+        // Прокручиваем к вопросу
+        setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+    }
+}
+
+// Закрытие чата при клике вне его области
+document.addEventListener('click', function(event) {
+    const container = document.getElementById('chatbotContainer');
+    const window = document.getElementById('chatbotWindow');
+    
+    if (window.classList.contains('open')) {
+        const isClickInside = container.contains(event.target);
+        if (!isClickInside) {
+            toggleChatbot();
+        }
+    }
+});
+
+// Обработка клавиши Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const window = document.getElementById('chatbotWindow');
+        if (window.classList.contains('open')) {
+            toggleChatbot();
+        }
+    }
+});
+
+// Открываем чат через 3 секунды после загрузки страницы (если не открыт)
+// Привлекает внимание пользователя
+let chatbotTimeout = setTimeout(() => {
+    const window = document.getElementById('chatbotWindow');
+    if (!window.classList.contains('open')) {
+        // Показываем кратковременную анимацию привлечения внимания
+        const toggle = document.getElementById('chatbotToggle');
+        toggle.style.animation = 'none';
+        setTimeout(() => {
+            toggle.style.animation = 'chatbot-pulse 1.5s ease-in-out 2';
+        }, 10);
+        
+        // Встряхиваем иконку для привлечения внимания
+        toggle.style.transform = 'scale(1.1) rotate(-10deg)';
+        setTimeout(() => {
+            toggle.style.transform = '';
+        }, 300);
+    }
+}, 3000);
+
+// Сбрасываем таймер при взаимодействии с чатом
+document.getElementById('chatbotToggle').addEventListener('click', function() {
+    clearTimeout(chatbotTimeout);
+});
+
+// Отслеживаем прокрутку для привлечения внимания
+let scrollTriggered = false;
+window.addEventListener('scroll', function() {
+    if (!scrollTriggered && window.scrollY > window.innerHeight * 0.5) {
+        scrollTriggered = true;
+        const window = document.getElementById('chatbotWindow');
+        if (!window.classList.contains('open')) {
+            const toggle = document.getElementById('chatbotToggle');
+            toggle.style.animation = 'none';
+            setTimeout(() => {
+                toggle.style.animation = 'chatbot-pulse 1s ease-in-out 3';
+            }, 10);
+        }
+    }
+}, { passive: true });
 </script>
 
 <!-- ========== ПОДКЛЮЧАЕМ СКРИПТ ПРОВЕРКИ ПРОФИЛЯ ========== -->

@@ -16,23 +16,28 @@ logger = logging.getLogger(__name__)
 
 class AIService:
     """
-    Сервис для работы с ИИ через OpenRouter API.
+    Сервис для работы с ИИ через Cloudflare Workers AI API.
     """
     
     def __init__(self):
-        self.api_key = os.getenv("OPENROUTER_API_KEY")
-        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
-        self.model = "openrouter/free"
-        self.request_timeout = 25
+        self.api_key = os.getenv("CLOUDFLARE_API_KEY")
+        self.account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID")
+        self.base_url = f"https://api.cloudflare.com/client/v4/accounts/{self.account_id}/ai/run/" if self.account_id else None
+        self.model = "@cf/meta/llama-3.1-8b-instruct"
+        self.request_timeout = 30  # Увеличил таймаут
         self.context_timeout = 3
         self.max_retries = 2
         self.retry_delay = 2
         self.executor = ThreadPoolExecutor(max_workers=3)
-        self._rate_limited_until = None  # Время до которого действует блокировка
-        self._rate_limit_duration = 120  # Блокировка на 2 минуты
+        self._rate_limited_until = None
+        self._rate_limit_duration = 120
         
         if not self.api_key:
-            logger.warning("OPENROUTER_API_KEY не найден в .env файле")
+            logger.warning("CLOUDFLARE_API_KEY не найден в .env файле")
+        if not self.account_id:
+            logger.warning("CLOUDFLARE_ACCOUNT_ID не найден в .env файле")
+        
+        logger.info(f"Cloudflare AI initialized with model: {self.model}")
     
     def _is_rate_limited(self) -> bool:
         """Проверяет, активна ли блокировка."""
@@ -45,14 +50,15 @@ class AIService:
         if self._rate_limited_until:
             remaining = int((self._rate_limited_until - datetime.now()).total_seconds())
             if remaining > 0:
-                return f'⏳ Достигнут лимит запросов к бесплатному ИИ. Попробуйте через {remaining} секунд. Или обратитесь в поддержку: ipkro-chr@mail.ru'
-        return '⛔ Достигнут лимит запросов к бесплатному ИИ. Пожалуйста, обратитесь в поддержку: ipkro-chr@mail.ru'
+                return f'⏳ Достигнут лимит запросов к ИИ. Попробуйте через {remaining} секунд. Или обратитесь в поддержку: ipkro-chr@mail.ru'
+        return '⛔ Достигнут лимит запросов к ИИ. Пожалуйста, обратитесь в поддержку: ipkro-chr@mail.ru'
     
     def _clean_response(self, response_text: str) -> str:
         """Очищает ответ от размышлений модели."""
         if not response_text:
             return "Извините, я не смог сформулировать ответ."
         
+        # Убираем маркеры размышлений
         reasoning_markers = [
             'Хорошо,', 'Давайте', 'Подумаем', 'Разберем', 'Анализирую', 
             'Рассуждаю', 'Мне нужно', 'Я должен', 'Я подумаю', 'Сначала', 
@@ -136,23 +142,25 @@ class AIService:
             logger.warning(f"Context is empty, using fallback")
             context = "Информация о курсах временно недоступна."
         
-        system_prompt = f"""Ты - ИИ-ассистент платформы ИРО ЧР.
+        system_prompt = f"""Ты - ИИ-ассистент платформы ИРО ЧР. Отвечай ТОЛЬКО на основе информации из КОНТЕКСТА.
 
-ТЫ ОБЯЗАН ИСПОЛЬЗОВАТЬ КОНТЕКСТ ДЛЯ ОТВЕТОВ! НЕ ИГНОРИРУЙ ЕГО!
+ВАЖНО: ИСПОЛЬЗУЙ ТОЛЬКО ДАННЫЕ ИЗ КОНТЕКСТА! НЕ ПРИДУМЫВАЙ НИЧЕГО СВОЕГО!
 
-КОНТЕКСТ (ЭТО ТВОЙ ЕДИНСТВЕННЫЙ ИСТОЧНИК ИНФОРМАЦИИ):
+=== КОНТЕКСТ (ЕДИНСТВЕННЫЙ ИСТОЧНИК ИНФОРМАЦИИ) ===
 {context}
+=== КОНЕЦ КОНТЕКСТА ===
 
-СТРОГИЕ ПРАВИЛА (ВЫПОЛНЯЙ ОБЯЗАТЕЛЬНО):
-1. Если в контексте ЕСТЬ курсы - ОБЯЗАТЕЛЬНО перечисли их с названиями, описаниями и преподавателями
-2. Если в контексте ЕСТЬ преподаватели - ОБЯЗАТЕЛЬНО назови их
-3. Если пользователь спросил "какие курсы доступны" - смотри в раздел "ТЕКУЩИЕ КУРСЫ" в контексте и отвечай оттуда
+ПРАВИЛА ОТВЕТОВ (ВЫПОЛНЯЙ СТРОГО):
+1. Отвечай ТОЛЬКО на основе информации из контекста
+2. Если в контексте есть курсы - перечисли их с названиями, описаниями, датами
+3. Если в контексте есть преподаватели - назови их
 4. НЕ ПРИДУМЫВАЙ информацию, которой нет в контексте
 5. НЕ ОТВЕЧАЙ "информация отсутствует", если в контексте есть данные
 6. Отвечай кратко, по делу, без лишней воды
 7. НЕ ПОКАЗЫВАЙ СВОИ РАЗМЫШЛЕНИЯ
+8. ЕСЛИ В КОНТЕКСТЕ НЕТ ОТВЕТА - скажи: "Информация по вашему вопросу в базе данных не найдена. Обратитесь в поддержку: ipkro-chr@mail.ru"
 
-НАЧНИ ОТВЕТ СРАЗУ!"""
+НАЧНИ ОТВЕТ СРАЗУ! НЕ ИСПОЛЬЗУЙ ФРАЗЫ ТИПА "НА ОСНОВЕ КОНТЕКСТА" ИЛИ "В КОНТЕКСТЕ УКАЗАНО"!"""
         
         return system_prompt
     
@@ -194,7 +202,7 @@ class AIService:
     
     def chat(self, user_message: str, history: List[Dict[str, str]] = None, db: Session = None) -> Dict[str, Any]:
         """Отправляет сообщение в ИИ."""
-        if not self.api_key:
+        if not self.api_key or not self.account_id:
             return {
                 'response': '⚠️ Сервис ИИ временно недоступен. Обратитесь в поддержку: ipkro-chr@mail.ru',
                 'model': 'offline',
@@ -208,7 +216,6 @@ class AIService:
                 'timestamp': datetime.now().isoformat()
             }
         
-        # Проверяем, не заблокирован ли сервис
         if self._is_rate_limited():
             return {
                 'response': self._get_rate_limit_message(),
@@ -219,15 +226,18 @@ class AIService:
         system_prompt = self._get_system_prompt(db)
         logger.info(f"System prompt length: {len(system_prompt)}")
         
+        # Формируем сообщения
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "system", "content": self._get_safety_rules()}
+            {"role": "user", "content": user_message}
         ]
         
+        # Добавляем историю если есть
         if history:
-            messages.extend(history[-3:])
-        
-        messages.append({"role": "user", "content": user_message})
+            # Берем последние 3 сообщения из истории
+            for msg in history[-3:]:
+                if msg.get('role') == 'user' or msg.get('role') == 'assistant':
+                    messages.insert(-1, {"role": msg['role'], "content": msg['content']})
         
         for attempt in range(self.max_retries + 1):
             try:
@@ -252,11 +262,10 @@ class AIService:
                 except Exception as e:
                     error_msg = str(e)
                     if "429" in error_msg or "rate limit" in error_msg.lower():
-                        # Устанавливаем блокировку на 2 минуты
                         self._rate_limited_until = datetime.now() + timedelta(seconds=self._rate_limit_duration)
                         logger.warning(f"Rate limit exceeded. Blocked until {self._rate_limited_until}")
                         return {
-                            'response': f'⏳ Достигнут лимит запросов к бесплатному ИИ. Попробуйте через {self._rate_limit_duration} секунд. Или обратитесь в поддержку: ipkro-chr@mail.ru',
+                            'response': f'⏳ Достигнут лимит запросов к ИИ. Попробуйте через {self._rate_limit_duration} секунд. Или обратитесь в поддержку: ipkro-chr@mail.ru',
                             'model': 'rate_limited',
                             'timestamp': datetime.now().isoformat()
                         }
@@ -287,47 +296,62 @@ class AIService:
         }
     
     def _make_api_request(self, messages: List[Dict[str, str]]) -> Optional[Dict[str, Any]]:
-        """Выполняет запрос к OpenRouter API."""
+        """Выполняет запрос к Cloudflare Workers AI API."""
         try:
             headers = {
                 "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json; charset=utf-8",
-                "HTTP-Referer": "https://iro-chr.ru",
-                "X-Title": "IRO-CHR AI Assistant"
+                "Content-Type": "application/json; charset=utf-8"
             }
             
             payload = {
-                "model": self.model,
-                "messages": messages,
-                "temperature": 0.1,
-                "max_tokens": 600,
-                "stream": False
+                "messages": messages
             }
             
-            json_data = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+            url = f"{self.base_url}{self.model}"
+            
+            logger.info(f"Sending request to Cloudflare AI: {url}")
+            logger.debug(f"Messages count: {len(messages)}")
             
             response = requests.post(
-                self.base_url,
+                url,
                 headers=headers,
-                data=json_data,
+                json=payload,
                 timeout=self.request_timeout
             )
             
             if response.status_code == 200:
                 data = response.json()
-                ai_message = data['choices'][0]['message']['content']
-                model_used = data.get('model', self.model)
-                
-                return {
-                    'response': ai_message,
-                    'model': model_used,
-                    'timestamp': datetime.now().isoformat()
-                }
+                if data.get('success'):
+                    ai_message = data.get('result', {}).get('response', '')
+                    if not ai_message:
+                        if 'result' in data and isinstance(data['result'], dict):
+                            ai_message = data['result'].get('response', '')
+                    
+                    logger.info(f"AI response received, length: {len(ai_message)}")
+                    
+                    return {
+                        'response': ai_message,
+                        'model': self.model,
+                        'timestamp': datetime.now().isoformat()
+                    }
+                else:
+                    error_msg = data.get('errors', [{}])[0].get('message', 'Unknown error')
+                    error_code = data.get('errors', [{}])[0].get('code', '')
+                    logger.error(f"Cloudflare API error: {error_msg} (code: {error_code})")
+                    
+                    if "rate" in error_msg.lower():
+                        raise Exception("429 Rate limit exceeded")
+                    
+                    return {
+                        'response': f'⚠️ Ошибка ИИ: {error_msg}',
+                        'model': 'error',
+                        'timestamp': datetime.now().isoformat()
+                    }
             elif response.status_code == 429:
                 logger.error(f"Rate limit exceeded (429)")
                 raise Exception("429 Rate limit exceeded")
             else:
-                logger.error(f"OpenRouter API error: {response.status_code}")
+                logger.error(f"Cloudflare API error: {response.status_code} - {response.text}")
                 return {
                     'response': '⚠️ Сервис ИИ временно недоступен. Попробуйте позже.',
                     'model': 'error',

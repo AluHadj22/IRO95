@@ -1,0 +1,806 @@
+/* ============================================================
+   СТИЛИ ДЛЯ ЛИЧНОГО КАБИНЕТА
+   ============================================================ */
+
+:root {
+    --primary: #c9a13b;
+    --primary-dark: #b8860b;
+    --primary-light: #f9d976;
+    --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+    --dark: #1a1a2e;
+    --light: #f8fafc;
+    --gray: #64748b;
+    --white: #ffffff;
+    --border: #e2e8f0;
+}
+
+/* ===== ПЕРЕОПРЕДЕЛЯЕМ НАВБАР ДЛЯ КАБИНЕТА ===== */
+.navbar {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(201, 161, 59, 0.12) !important;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
+    border-bottom: 2px solid rgba(201, 161, 59, 0.15) !important;
+    box-shadow: 0 4px 40px rgba(201, 161, 59, 0.06) !important;
+}
+
+@media (max-width: 991.98px) {
+    .navbar {
+        background: rgba(255, 255, 255, 0.75) !important;
+        backdrop-filter: blur(16px) saturate(200%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(200%) !important;
+    }
+    .navbar.scrolled {
+        background: rgba(255, 255, 255, 0.92) !important;
+    }
+}
+
+.navbar .nav-link {
+    color: rgba(30, 41, 59, 0.8) !important;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    padding: 0.5rem 1.2rem !important;
+    border-radius: 10px;
+}
+
+.navbar .nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 60%;
+    height: 2px;
+    background: var(--primary-gradient);
+    border-radius: 2px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar .nav-link:hover::before,
+.navbar .nav-link.active::before {
+    transform: translateX(-50%) scaleX(1);
+}
+
+.navbar .nav-link:hover {
+    color: var(--primary) !important;
+    background: rgba(201, 161, 59, 0.08);
+}
+
+.navbar .nav-link.active {
+    color: var(--primary) !important;
+    background: rgba(201, 161, 59, 0.12);
+}
+
+.navbar.scrolled .nav-link {
+    color: var(--gray) !important;
+}
+
+.navbar.scrolled .nav-link:hover,
+.navbar.scrolled .nav-link.active {
+    color: var(--primary) !important;
+}
+
+.navbar-brand .title .gold {
+    background: linear-gradient(135deg, #c9a13b, #b8860b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.navbar .navbar-toggler {
+    border: 1.5px solid rgba(201, 161, 59, 0.25);
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(4px);
+}
+
+.navbar .navbar-toggler:hover {
+    border-color: var(--primary);
+    background: rgba(201, 161, 59, 0.05);
+    box-shadow: 0 0 20px rgba(201, 161, 59, 0.08);
+}
+
+.navbar .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(201,161,59,0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+@media (max-width: 991.98px) {
+    .navbar .navbar-collapse {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px) saturate(200%);
+        -webkit-backdrop-filter: blur(20px) saturate(200%);
+        border-radius: 16px;
+        padding: 1rem 0.5rem;
+        margin-top: 0.5rem;
+        border: 1px solid rgba(201, 161, 59, 0.08);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+    }
+
+    .navbar .nav-link {
+        padding: 0.6rem 1rem !important;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .navbar .nav-link::before {
+        display: none;
+    }
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link.active {
+        background: rgba(201, 161, 59, 0.1) !important;
+    }
+}
+
+/* ===== ОСНОВНЫЕ СТИЛИ КАБИНЕТА ===== */
+.dashboard-stats {
+    background: rgba(10, 10, 24, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 28px;
+    color: white;
+    margin-bottom: 28px;
+    border: 1px solid rgba(201, 161, 59, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-stats::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -60px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    position: relative;
+    z-index: 1;
+}
+
+.stat-item:hover {
+    transform: translateY(-3px);
+    background: rgba(201, 161, 59, 0.08);
+    border-color: rgba(201, 161, 59, 0.15);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--primary-light);
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.nav-pills-custom {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    padding: 8px;
+    border: 1px solid rgba(201, 161, 59, 0.08);
+    position: sticky;
+    top: 90px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
+}
+
+.nav-pills-custom:hover {
+    border-color: rgba(201, 161, 59, 0.15);
+    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.04);
+}
+
+.nav-pills-custom .nav-link {
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: var(--gray);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: 4px;
+    position: relative;
+}
+
+.nav-pills-custom .nav-link i {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    width: 24px;
+}
+
+.nav-pills-custom .nav-link:hover {
+    background: rgba(254, 249, 231, 0.5);
+    color: var(--primary-dark);
+}
+
+.nav-pills-custom .nav-link.active {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.25);
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(201, 161, 59, 0.08);
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: all 0.3s ease;
+}
+
+.profile-card:hover {
+    border-color: rgba(201, 161, 59, 0.15);
+    box-shadow: 0 4px 24px rgba(201, 161, 59, 0.04);
+}
+
+.profile-header {
+    background: rgba(254, 249, 231, 0.3);
+    backdrop-filter: blur(8px);
+    padding: 32px;
+    text-align: center;
+    border-bottom: 2px solid rgba(201, 161, 59, 0.06);
+}
+
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(201, 161, 59, 0.2);
+    transition: all 0.3s ease;
+}
+
+.profile-avatar:hover {
+    transform: scale(1.05) rotate(-3deg);
+}
+
+.profile-avatar i {
+    font-size: 3rem;
+    color: white;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--dark);
+}
+
+.profile-email {
+    color: var(--gray);
+    margin-bottom: 0;
+}
+
+.info-row {
+    display: flex;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+    transition: all 0.2s ease;
+}
+
+.info-row:hover {
+    background: rgba(250, 251, 252, 0.3);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    width: 140px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.info-label i {
+    color: var(--primary);
+    width: 20px;
+}
+
+.info-value {
+    flex: 1;
+    color: var(--gray);
+}
+
+/* ========== MOODLE СТИЛИ ========== */
+.moodle-badge-small {
+    background: rgba(254, 249, 231, 0.5);
+    border: 1px solid var(--primary);
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 0.6rem;
+    color: var(--primary-dark);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    font-weight: 500;
+}
+.moodle-badge-small i {
+    font-size: 0.65rem;
+}
+.moodle-link-btn-sm {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 14px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+.moodle-link-btn-sm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.3);
+    color: white;
+}
+.moodle-link-btn-sm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.moodle-progress-section {
+    background: rgba(248, 250, 252, 0.3);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 10px;
+    border: 1px solid rgba(226, 232, 240, 0.3);
+    transition: all 0.3s ease;
+}
+
+.moodle-progress-section:hover {
+    border-color: var(--primary);
+    background: rgba(254, 249, 231, 0.3);
+}
+
+.moodle-progress-label {
+    font-size: 0.7rem;
+    color: var(--gray);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.moodle-progress-bar {
+    height: 6px;
+    border-radius: 4px;
+    background: rgba(226, 232, 240, 0.5);
+    overflow: hidden;
+}
+
+.moodle-progress-bar .fill {
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.moodle-progress-bar .fill.completed {
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.moodle-progress-bar .fill.in-progress {
+    background: var(--primary-gradient);
+}
+
+.moodle-sync-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.moodle-sync-btn:hover {
+    background: rgba(254, 249, 231, 0.5);
+    color: var(--primary-dark);
+}
+
+.moodle-progress-empty {
+    font-size: 0.7rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* ========== ДОСТИЖЕНИЯ ========== */
+.badge-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    border: 1px solid rgba(201, 161, 59, 0.06);
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.badge-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -12px rgba(201, 161, 59, 0.12);
+    border-color: var(--primary);
+}
+
+.badge-card.locked {
+    opacity: 0.5;
+    filter: grayscale(0.3);
+}
+
+.badge-icon {
+    width: 70px;
+    height: 70px;
+    background: rgba(254, 249, 231, 0.3);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.badge-card:hover .badge-icon {
+    transform: scale(1.05) rotate(-3deg);
+}
+
+.badge-icon i {
+    font-size: 2rem;
+    color: var(--primary);
+}
+
+.badge-card.gold .badge-icon {
+    background: rgba(254, 243, 199, 0.5);
+}
+
+.badge-card.gold .badge-icon i {
+    color: #fbbf24;
+}
+
+.badge-card.silver .badge-icon {
+    background: rgba(243, 244, 246, 0.5);
+}
+
+.badge-card.silver .badge-icon i {
+    color: #9ca3af;
+}
+
+.badge-card.bronze .badge-icon {
+    background: rgba(255, 251, 235, 0.5);
+}
+
+.badge-card.bronze .badge-icon i {
+    color: #d97706;
+}
+
+.badge-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--dark);
+}
+
+.badge-desc {
+    font-size: 0.7rem;
+    color: var(--gray);
+}
+
+.badge-progress {
+    margin-top: 12px;
+    font-size: 0.7rem;
+    color: var(--primary);
+    font-weight: 500;
+}
+
+/* ========== КУРСЫ ========== */
+.course-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    border: 1px solid rgba(201, 161, 59, 0.06);
+    padding: 20px;
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--primary-gradient);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -12px rgba(201, 161, 59, 0.12);
+    border-color: var(--primary);
+}
+
+.course-card:hover::before {
+    opacity: 1;
+}
+
+.course-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark);
+}
+
+.course-meta {
+    font-size: 0.7rem;
+    color: var(--gray);
+    margin-bottom: 12px;
+}
+
+.course-meta .deadline {
+    color: #dc2626;
+}
+
+.course-meta .deadline.overdue {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.course-progress {
+    margin: 16px 0;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    background: rgba(226, 232, 240, 0.5);
+}
+
+.progress-bar {
+    background: var(--primary-gradient);
+    border-radius: 10px;
+}
+
+.course-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.status-completed {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-in-progress {
+    background: rgba(254, 249, 231, 0.5);
+    color: var(--primary-dark);
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.status-retake {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-overdue {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.status-no-attempts {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.task-status {
+    font-size: 0.65rem;
+    padding: 2px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.task-status.passed {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.task-status.failed {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.task-status.pending {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.task-status.retake {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.task-status.overdue {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.task-status.not_started {
+    background: #f1f5f9;
+    color: var(--gray);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    border: 1px solid rgba(201, 161, 59, 0.06);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #cbd5e1;
+    margin-bottom: 16px;
+}
+
+.empty-state h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--dark);
+}
+
+.empty-state p {
+    color: var(--gray);
+    margin-bottom: 20px;
+}
+
+.badge-gold {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    border: 1.5px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(201, 161, 59, 0.15);
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.25);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .dashboard-stats {
+        padding: 20px;
+    }
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    .info-row {
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 16px;
+    }
+    .info-label {
+        width: 100%;
+    }
+    .nav-pills-custom {
+        position: relative;
+        top: 0;
+        margin-bottom: 16px;
+    }
+    .nav-pills-custom .nav-link {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    .profile-header {
+        padding: 20px;
+    }
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+    }
+    .profile-avatar i {
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-stats {
+        padding: 16px;
+    }
+    .stat-item {
+        padding: 12px;
+    }
+    .stat-number {
+        font-size: 1.2rem;
+    }
+    .course-card {
+        padding: 16px;
+    }
+}

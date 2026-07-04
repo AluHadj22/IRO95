@@ -8,13 +8,12 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from app.database import engine, Base
-from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router
+from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router,ai_router
 from app.routers import profile_router
 from app.config import settings
 import os
 import re
 import logging
-from app.routers import ai_router #Импорт для ИИ
 
 # === НАСТРОЙКА ЛОГГИРОВАНИЯ С ФИЛЬТРАЦИЕЙ ===
 
@@ -206,8 +205,6 @@ app.include_router(public_router.router)
 app.include_router(achievements_router.router)
 app.include_router(profile_router.router)
 app.include_router(ai_router.router)
-
-
 
 # === ЭНДПОИНТЫ ===
 

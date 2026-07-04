@@ -1,0 +1,465 @@
+/* ============================================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ РЕГИСТРАЦИИ
+   ============================================================ */
+
+:root {
+    --primary: #c9a13b;
+    --primary-dark: #b8860b;
+    --primary-light: #f9d976;
+    --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+    --dark: #1a1a2e;
+    --light: #f8fafc;
+    --gray: #64748b;
+    --white: #ffffff;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --danger: #ef4444;
+}
+
+.register-hero {
+    background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
+    padding: 40px 0 50px;
+    margin-bottom: 30px;
+    border-bottom: 3px solid rgba(201, 161, 59, 0.3);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.register-hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 20s ease-in-out infinite;
+}
+
+.register-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(201, 161, 59, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 15s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.05); }
+}
+
+.register-hero h1 {
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.register-hero h1 .gold {
+    color: var(--primary-light);
+}
+
+.register-hero p {
+    color: rgba(255,255,255,0.7);
+    position: relative;
+    z-index: 1;
+}
+
+.register-hero .hero-badge {
+    display: inline-block;
+    background: rgba(201, 161, 59, 0.15);
+    color: var(--primary-light);
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid rgba(201, 161, 59, 0.15);
+    margin-bottom: 12px;
+}
+
+.register-hero .hero-icon {
+    display: inline-block;
+    margin-bottom: 12px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.register-card {
+    border-radius: 20px !important;
+    border: 1px solid var(--border) !important;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+    transition: all 0.3s ease;
+    background: var(--white);
+}
+
+.register-card:hover {
+    box-shadow: 0 8px 32px rgba(201, 161, 59, 0.08) !important;
+    border-color: var(--primary) !important;
+}
+
+.register-card .card-header {
+    background: linear-gradient(135deg, #fef9e7 0%, #fdf2d0 100%) !important;
+    border-bottom: 2px solid rgba(201, 161, 59, 0.15);
+    padding: 24px 20px;
+    position: relative;
+}
+
+.register-card .card-header .header-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.2);
+}
+
+.register-card .card-header .header-icon i {
+    font-size: 1.6rem;
+    color: white;
+}
+
+.register-card .card-header h3 {
+    color: var(--dark);
+    font-weight: 700;
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.register-card .card-header p {
+    color: var(--gray);
+    font-size: 0.9rem;
+    margin: 4px 0 0 0;
+}
+
+.register-card .card-body {
+    padding: 32px 28px;
+}
+
+.register-card .form-label {
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+}
+
+.register-card .form-label i {
+    color: var(--primary);
+    margin-right: 6px;
+    width: 18px;
+}
+
+.register-card .form-label .required {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.register-card .form-control {
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.register-card .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(201, 161, 59, 0.12);
+    outline: none;
+}
+
+.register-card .form-control::placeholder {
+    color: #b0b8c4;
+    font-size: 0.9rem;
+}
+
+.register-card .form-control.is-valid {
+    border-color: var(--success);
+}
+
+.register-card .form-control.is-invalid {
+    border-color: var(--danger);
+}
+
+.register-card .input-group .form-control {
+    border-radius: 10px 0 0 10px;
+}
+
+.register-card .input-group .btn-outline-secondary {
+    border-radius: 0 10px 10px 0;
+    border: 1px solid var(--border);
+    border-left: none;
+    background: var(--white);
+    color: var(--gray);
+    transition: all 0.3s ease;
+    padding: 12px 16px;
+}
+
+.register-card .input-group .btn-outline-secondary:hover {
+    background: #fef9e7;
+    color: var(--primary-dark);
+    border-color: var(--primary);
+}
+
+.register-card .input-group .btn-outline-secondary:focus {
+    box-shadow: none;
+}
+
+.btn-register {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-register::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.5s ease;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201, 161, 59, 0.3);
+    color: white;
+}
+
+.btn-register:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-register:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.register-card .login-link {
+    color: var(--gray);
+    font-size: 0.95rem;
+}
+
+.register-card .login-link a {
+    color: var(--primary-dark);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.register-card .login-link a:hover {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* ===== ТРЕБОВАНИЯ К ПАРОЛЮ ===== */
+#passwordRequirements {
+    background: #f8fafc;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: 8px;
+    transition: all 0.3s ease;
+}
+
+#passwordRequirements:hover {
+    border-color: var(--primary);
+}
+
+#passwordRequirements .requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 0;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+#passwordRequirements .requirement-item .req-icon {
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+}
+
+#passwordRequirements .requirement-item .req-icon.pending {
+    color: var(--gray);
+}
+
+#passwordRequirements .requirement-item .req-icon.valid {
+    color: var(--success);
+}
+
+#passwordRequirements .requirement-item .req-icon.invalid {
+    color: var(--danger);
+}
+
+#passwordRequirements .requirement-item .req-text {
+    color: var(--gray);
+    transition: color 0.3s ease;
+}
+
+#passwordRequirements .requirement-item .req-text.valid {
+    color: var(--success);
+}
+
+#passwordRequirements .requirement-item .req-text.invalid {
+    color: var(--danger);
+}
+
+/* ===== ЧЕКБОКСЫ ===== */
+.register-card .form-check {
+    margin-bottom: 8px;
+}
+
+.register-card .form-check-input {
+    accent-color: var(--primary);
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    cursor: pointer;
+}
+
+.register-card .form-check-label {
+    font-size: 0.9rem;
+    color: var(--gray);
+    cursor: pointer;
+}
+
+.register-card .form-check-label a {
+    color: var(--primary-dark);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-bottom: 1px dashed transparent;
+}
+
+.register-card .form-check-label a:hover {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+/* ===== ЗАЩИТА ДАННЫХ ===== */
+.security-alert {
+    background: #fef9e7 !important;
+    border: 1px solid var(--primary) !important;
+    border-radius: 12px !important;
+    padding: 14px 18px !important;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.security-alert:hover {
+    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.08);
+}
+
+.security-alert .shield-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--primary-gradient);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.security-alert .security-text strong {
+    color: var(--dark);
+    display: block;
+}
+
+.security-alert .security-text span {
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .register-hero {
+        padding: 30px 0 25px;
+    }
+    .register-hero h1 {
+        font-size: 1.8rem;
+    }
+    .register-card .card-body {
+        padding: 24px 20px;
+    }
+    .register-card .card-header h3 {
+        font-size: 1.2rem;
+    }
+    .register-card .card-header .header-icon {
+        width: 48px;
+        height: 48px;
+    }
+    .register-card .card-header .header-icon i {
+        font-size: 1.3rem;
+    }
+    .security-alert {
+        flex-direction: column;
+        text-align: center;
+        padding: 16px !important;
+    }
+    .security-alert .security-text strong {
+        display: inline;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-hero h1 {
+        font-size: 1.4rem;
+    }
+    .register-hero .hero-badge {
+        font-size: 0.7rem;
+        padding: 4px 14px;
+    }
+    .register-card .card-body {
+        padding: 20px 16px;
+    }
+    .register-card .form-control {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+    .btn-register {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+    #passwordRequirements .requirement-item {
+        font-size: 0.7rem;
+    }
+    .register-card .form-check-label {
+        font-size: 0.8rem;
+    }
+}

@@ -92,6 +92,19 @@ class UserAdminUpdate(BaseModel):
         return v
 
 
+# ========== УПРАВЛЕНИЕ РОЛЯМИ (ДОБАВЛЕНО) ==========
+
+class UserRoleUpdate(BaseModel):
+    """
+    Схема для изменения роли пользователя администратором.
+    Используется в эндпоинте PUT /api/admin/users/{user_id}/role
+    """
+    role: UserRole
+    
+    class Config:
+        use_enum_values = True
+
+
 # ========== КАТЕГОРИИ ==========
 
 class CategoryCreate(BaseModel):

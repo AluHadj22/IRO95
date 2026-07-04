@@ -14,6 +14,7 @@ from app.config import settings
 import os
 import re
 import logging
+from app.routers import ai_router #Импорт для ИИ
 
 # === НАСТРОЙКА ЛОГГИРОВАНИЯ С ФИЛЬТРАЦИЕЙ ===
 
@@ -204,6 +205,8 @@ app.include_router(notifications_router.router)
 app.include_router(public_router.router)
 app.include_router(achievements_router.router)
 app.include_router(profile_router.router)
+app.include_router(ai_router.router)
+
 
 
 # === ЭНДПОИНТЫ ===

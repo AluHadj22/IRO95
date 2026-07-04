@@ -465,6 +465,76 @@ def update_user(
 
 
 # ============================================================
+# ✅ НОВЫЙ ЭНДПОИНТ: ИЗМЕНЕНИЕ РОЛИ ПОЛЬЗОВАТЕЛЯ
+# ============================================================
+
+@router.put("/users/{user_id}/role")
+def change_user_role(
+    user_id: int,
+    role_update: schemas.UserRoleUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Изменение роли пользователя.
+    ✅ Только для администраторов
+    ✅ Нельзя изменить роль самому себе
+    ✅ Защита от потери последнего администратора
+    ✅ Возвращает детальный ответ
+    """
+    # Находим пользователя
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден"
+        )
+    
+    # Запрещаем изменять роль самому себе
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя изменить свою собственную роль"
+        )
+    
+    # Проверяем, не пытаемся ли удалить последнего администратора
+    admin_count = db.query(models.User).filter(
+        models.User.role == models.UserRole.ADMIN
+    ).count()
+    
+    # Если пользователь - админ, и мы пытаемся его понизить, и он последний админ
+    if user.role == models.UserRole.ADMIN and admin_count <= 1 and role_update.role != models.UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить последнего администратора. Сначала назначьте другого администратора."
+        )
+    
+    # Сохраняем старую роль для ответа
+    old_role = user.role.value
+    
+    # Обновляем роль
+    user.role = role_update.role
+    db.commit()
+    db.refresh(user)
+    
+    # Формируем понятное описание новой роли
+    role_names = {
+        "admin": "Администратор",
+        "teacher": "Преподаватель"
+    }
+    
+    return {
+        "message": f"Роль пользователя изменена с '{role_names.get(old_role, old_role)}' на '{role_names.get(user.role.value, user.role.value)}'",
+        "user_id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "old_role": old_role,
+        "new_role": user.role.value,
+        "new_role_display": role_names.get(user.role.value, user.role.value)
+    }
+
+
+# ============================================================
 # ЭКСПОРТ ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ
 # ============================================================
 

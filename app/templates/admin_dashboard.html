@@ -1010,6 +1010,39 @@
             text-align: center;
         }
     }
+
+    /* Стили для кнопки управления ролями */
+    .btn-role {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 0.65rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .btn-role:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(201, 161, 59, 0.25);
+        color: white;
+    }
+    .btn-role.btn-role-danger {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    }
+    .btn-role.btn-role-danger:hover {
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    .btn-role.btn-role-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    .btn-role.btn-role-warning:hover {
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
 </style>
 {% endblock %}
 
@@ -1138,7 +1171,7 @@
             <div id="usersSection" style="display: none;">
                 <div class="mb-4">
                     <h2 class="section-title">Управление пользователями</h2>
-                    <p class="text-muted">Блокировка и разблокировка пользователей</p>
+                    <p class="text-muted">Блокировка, разблокировка и управление правами пользователей</p>
                 </div>
                 <div class="table-card">
                     <div class="table-responsive">
@@ -1410,6 +1443,29 @@
     </div>
 </div>
 
+<!-- Модальное окно управления ролью -->
+<div class="modal fade" id="roleModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" id="roleModalHeader">
+                <h5 class="modal-title text-white" id="roleModalTitle">
+                    <i class="bi bi-person-plus me-2"></i>Управление ролью
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="roleModalBody">
+                <!-- Контент заполняется динамически -->
+            </div>
+            <div class="modal-footer" id="roleModalFooter">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button class="btn" id="roleConfirmBtn" disabled>
+                    <span id="roleConfirmText">Подтвердить</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
@@ -1433,6 +1489,13 @@
         toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
         toastContainer.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     // ========== ФУНКЦИЯ ПОИСКА ==========
@@ -1679,13 +1742,6 @@
         });
     }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     async function loadStats() {
         const response = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
         const stats = await response.json();
@@ -1774,9 +1830,16 @@
                             <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Администратор' : 'Преподаватель'}</span></td>
                             <td><span class="badge-info">${u.registrations_count || 0}</span></td>
                             <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
-                            <td>${!u.is_blocked ? 
-                                `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
-                                `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`}
+                            <td>
+                                ${!u.is_blocked ? 
+                                    `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
+                                    `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`
+                                }
+                                <button class="btn btn-sm ${u.role === 'admin' ? 'btn-role btn-role-danger' : 'btn-role'}" 
+                                        onclick="openRoleModal(${u.id}, '${escapeHtml(u.full_name)}', '${u.role}')" 
+                                        title="${u.role === 'admin' ? 'Забрать права администратора' : 'Сделать администратором'}">
+                                    <i class="bi ${u.role === 'admin' ? 'bi-person-x' : 'bi-person-plus'}"></i>
+                                </button>
                             </td>
                         </tr>
                     `).join('');
@@ -1875,6 +1938,128 @@
             await loadUsers();
         } else {
             showToast('Ошибка при разблокировке', 'danger');
+        }
+    }
+
+    // ============================================================
+    // ФУНКЦИЯ УПРАВЛЕНИЯ РОЛЬЮ (ИСПРАВЛЕННАЯ)
+    // ============================================================
+
+    function openRoleModal(userId, fullName, currentRole) {
+        const isAdmin = currentRole === 'admin';
+        const newRole = isAdmin ? 'teacher' : 'admin';
+        const icon = isAdmin ? 'bi-person-x' : 'bi-person-plus';
+        const color = isAdmin ? 'danger' : 'success';
+        const headerBg = isAdmin ? 'linear-gradient(135deg, #dc2626, #b91c1c)' : 'var(--primary-gradient)';
+        const roleNames = {
+            'admin': 'Администратор',
+            'teacher': 'Преподаватель'
+        };
+        const newRoleName = roleNames[newRole] || newRole;
+
+        // Заполняем модальное окно
+        document.getElementById('roleModalHeader').style.background = headerBg;
+        document.getElementById('roleModalTitle').innerHTML = `
+            <i class="bi ${icon} me-2"></i>
+            ${isAdmin ? 'Удаление прав администратора' : 'Назначение администратора'}
+        `;
+
+        document.getElementById('roleModalBody').innerHTML = `
+            <p class="mb-0">
+                <strong>Пользователь:</strong> ${escapeHtml(fullName)}<br>
+                <strong>Текущая роль:</strong> ${roleNames[currentRole] || currentRole}
+            </p>
+            <div class="alert ${isAdmin ? 'alert-danger' : 'alert-warning'} mt-3">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                ${isAdmin 
+                    ? 'Вы действительно хотите <strong>забрать права администратора</strong> у этого пользователя?' 
+                    : 'Вы действительно хотите <strong>назначить этого пользователя администратором</strong>?'}
+                <br><span class="text-muted small">Новая роль: <strong>${newRoleName}</strong></span>
+            </div>
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="confirmRoleChange">
+                <label class="form-check-label" for="confirmRoleChange">
+                    Я подтверждаю это действие
+                </label>
+            </div>
+        `;
+
+        // Сохраняем userId и newRole в data-атрибутах модального окна
+        const modal = document.getElementById('roleModal');
+        modal.dataset.userId = userId;
+        modal.dataset.newRole = newRole;
+
+        // Получаем элементы
+        const confirmCheckbox = document.getElementById('confirmRoleChange');
+        const confirmBtn = document.getElementById('roleConfirmBtn');
+        
+        // Убираем старые обработчики (создаём новую кнопку)
+        const newBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+        
+        // Настраиваем новую кнопку
+        const freshBtn = document.getElementById('roleConfirmBtn');
+        freshBtn.className = `btn btn-${color}`;
+        document.getElementById('roleConfirmText').textContent = isAdmin ? 'Забрать права' : 'Назначить админа';
+        freshBtn.disabled = true;
+
+        // Обработчик для чекбокса
+        confirmCheckbox.addEventListener('change', function() {
+            freshBtn.disabled = !this.checked;
+        });
+
+        // Обработчик для кнопки
+        freshBtn.addEventListener('click', function() {
+            const userId = parseInt(modal.dataset.userId);
+            const newRole = modal.dataset.newRole;
+            changeUserRole(userId, newRole);
+        });
+
+        // Показываем модальное окно
+        const modalInstance = new bootstrap.Modal(document.getElementById('roleModal'));
+        modalInstance.show();
+    }
+
+    async function changeUserRole(userId, newRole) {
+        const btn = document.getElementById('roleConfirmBtn');
+        const textSpan = document.getElementById('roleConfirmText');
+        
+        // Блокируем кнопку и показываем спиннер
+        btn.disabled = true;
+        textSpan.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сохранение...';
+
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/role`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: newRole })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showToast(result.message || 'Роль успешно изменена', 'success');
+                // Закрываем модальное окно
+                const modal = bootstrap.Modal.getInstance(document.getElementById('roleModal'));
+                if (modal) modal.hide();
+                // Обновляем данные
+                await loadUsers();
+                await loadUserData();
+                await loadStats();
+            } else {
+                const error = await response.json();
+                showToast(error.detail || 'Ошибка изменения роли', 'danger');
+                // Разблокируем кнопку при ошибке
+                btn.disabled = false;
+                textSpan.textContent = 'Повторить';
+            }
+        } catch (error) {
+            console.error('Role change error:', error);
+            showToast('Ошибка соединения с сервером', 'danger');
+            btn.disabled = false;
+            textSpan.textContent = 'Повторить';
         }
     }
 

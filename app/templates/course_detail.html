@@ -3,14 +3,642 @@
 {% block title %}Курс - ГБУ ДПО «ИРО ЧР»{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/course_detail.css">
+<style>
+/* ===== ПЕРЕОПРЕДЕЛЕНИЕ ВСЕХ ЦВЕТОВ ===== */
+:root {
+    --primary: #1a4f7a !important;
+    --primary-dark: #0d3b5e !important;
+    --primary-light: #3a7ca5 !important;
+    --primary-gradient: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
+    --dark: #0d1b2a !important;
+    --light: #f7fafc !important;
+    --gray: #718096 !important;
+    --white: #ffffff !important;
+    --border: #e2e8f0 !important;
+}
+
+/* ===== ШРИФТЫ ===== */
+.course-page * {
+    font-family: 'Inter', sans-serif;
+}
+
+.course-page h1, 
+.course-page h2, 
+.course-page h3, 
+.course-page h4, 
+.course-page h5,
+.course-page .section-title,
+.course-page .modal-title {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.course-page .lead,
+.course-page .speaker-position,
+.course-page .course-description,
+.course-page .info-box p {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-size: 1.05rem !important;
+    line-height: 1.7 !important;
+}
+
+/* ===== ГЕРОЙ ===== */
+.course-hero-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-bottom: 3px solid rgba(26, 79, 122, 0.08);
+}
+
+.course-placeholder {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
+    border-bottom: 3px solid rgba(26, 79, 122, 0.08);
+}
+
+.course-placeholder i {
+    font-size: 4rem;
+    color: #1a4f7a;
+    opacity: 0.3;
+}
+
+/* ===== КАРТОЧКА КУРСА ===== */
+.course-page .card {
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.3s ease !important;
+    background: var(--white) !important;
+}
+
+.course-page .card:hover {
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.06) !important;
+}
+
+.course-page .card-body {
+    padding: 28px !important;
+}
+
+/* ===== MOODLE БЭДЖ ===== */
+.moodle-badge {
+    display: inline-block;
+    background: rgba(26, 79, 122, 0.08);
+    color: #1a4f7a;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    border: 1px solid rgba(26, 79, 122, 0.06);
+}
+
+.moodle-badge i {
+    margin-right: 8px;
+}
+
+/* ===== ТЕГИ ===== */
+.badge-category {
+    display: inline-block;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    color: white;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.04em;
+}
+
+.badge-format {
+    display: inline-block;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.04em;
+}
+
+.badge-format-online {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-format-full_time {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.badge-format-part_time {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-format-full_part_time {
+    background: #fce4ec;
+    color: #b71c1c;
+}
+
+.badge-hashtag {
+    display: inline-block;
+    background: rgba(26, 79, 122, 0.06);
+    color: #1a4f7a;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    margin: 2px 3px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== ЗАГОЛОВКИ СЕКЦИЙ ===== */
+.section-title {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 1.15rem !important;
+    color: #0d1b2a !important;
+    margin-bottom: 12px !important;
+    letter-spacing: 0.02em !important;
+}
+
+.section-title i {
+    color: #1a4f7a;
+    margin-right: 10px;
+}
+
+/* ===== ОПИСАНИЕ ===== */
+.course-description {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: 1.05rem !important;
+    line-height: 1.8 !important;
+    color: #3a4a5a !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    white-space: pre-line;
+}
+
+/* ===== ВИДЕО ===== */
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #0d1b2a;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ===== КНОПКИ ИЗБРАННОГО ===== */
+.btn-outline-favorite {
+    background: transparent;
+    border: 1.5px solid #e2e8f0;
+    color: #4a5a6a;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.03em;
+}
+
+.btn-outline-favorite:hover {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.04);
+}
+
+.btn-outline-favorite.active {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.08);
+}
+
+.btn-outline-favorite:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-outline-watch {
+    background: transparent;
+    border: 1.5px solid #e2e8f0;
+    color: #4a5a6a;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.03em;
+}
+
+.btn-outline-watch:hover {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.04);
+}
+
+.btn-outline-watch.active {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.08);
+}
+
+.btn-outline-watch:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ===== СПИКЕРЫ ===== */
+.speaker-card {
+    text-align: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+}
+
+.speaker-card:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: #1a4f7a;
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.06);
+}
+
+.speaker-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #1a4f7a;
+    margin-bottom: 10px;
+}
+
+.speaker-name {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    color: #0d1b2a !important;
+    letter-spacing: 0.02em !important;
+}
+
+.speaker-position {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: 0.9rem !important;
+    color: #4a5a6a !important;
+    font-weight: 500 !important;
+    font-style: italic !important;
+    letter-spacing: 0.03em !important;
+}
+
+.speaker-bio {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: 0.85rem !important;
+    color: #5a6a7a !important;
+    margin-top: 6px;
+    font-weight: 400 !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+.sticky-sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.course-info-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.course-info-card hr {
+    border-color: var(--border);
+    margin: 16px 0;
+}
+
+.course-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.course-info-item .label {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 600 !important;
+    color: #4a5a6a !important;
+    font-size: 0.9rem !important;
+    letter-spacing: 0.03em !important;
+}
+
+.course-info-item .label i {
+    color: #1a4f7a;
+}
+
+.course-info-item .value {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    color: #0d1b2a !important;
+    font-size: 0.9rem !important;
+}
+
+/* ===== КНОПКА ЗАПИСИ ===== */
+.btn-register {
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 1rem !important;
+    letter-spacing: 0.03em !important;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25) !important;
+}
+
+.btn-register:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-register.registered {
+    background: #10b981 !important;
+}
+
+.btn-register.registered:hover {
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* ===== ИНФО БОКС ===== */
+.info-box {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(26, 79, 122, 0.04);
+    border-radius: 8px;
+    border-left: 3px solid #1a4f7a;
+}
+
+.info-box p {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: 0.85rem !important;
+    color: #4a5a6a !important;
+    margin-bottom: 6px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.info-box p:last-child {
+    margin-bottom: 0 !important;
+}
+
+.info-box .info-icon {
+    color: #1a4f7a;
+}
+
+/* ===== МОДАЛЬНОЕ ОКНО ===== */
+.profile-incomplete-modal .modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.profile-incomplete-modal .modal-header {
+    border-bottom: 2px solid #1a4f7a;
+    padding: 20px 24px;
+}
+
+.profile-incomplete-modal .modal-title {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    color: #0d1b2a !important;
+    font-size: 1.2rem !important;
+}
+
+.profile-incomplete-modal .modal-title i {
+    color: #dc2626;
+}
+
+.profile-incomplete-modal .modal-body {
+    padding: 24px;
+}
+
+.profile-incomplete-modal .modal-footer {
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+}
+
+.progress-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.progress-text {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    color: #0d1b2a !important;
+    min-width: 40px;
+}
+
+.progress-bar-mini {
+    flex: 1;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar-mini .fill {
+    height: 100%;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.missing-sections-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+}
+
+.missing-sections-list li {
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    border-left: 3px solid #dc2626;
+}
+
+.section-label {
+    display: block;
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    color: #0d1b2a !important;
+    margin-bottom: 4px;
+}
+
+.section-fields {
+    display: inline-block;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.75rem !important;
+    color: #4a5a6a !important;
+    background: rgba(26, 79, 122, 0.06);
+    padding: 2px 10px;
+    border-radius: 4px;
+}
+
+.field-item {
+    display: inline-block;
+    background: rgba(26, 79, 122, 0.04);
+    padding: 0 8px;
+    margin: 1px 2px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    color: #1a4f7a;
+}
+
+.alert-info-custom {
+    padding: 12px 16px;
+    background: rgba(26, 79, 122, 0.06);
+    border-radius: 8px;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: 0.9rem !important;
+    color: #4a5a6a !important;
+    margin-top: 12px;
+    font-weight: 500 !important;
+    border: 1px solid rgba(26, 79, 122, 0.06);
+}
+
+.alert-info-custom i {
+    color: #1a4f7a;
+    margin-right: 8px;
+}
+
+.btn-close-modal {
+    padding: 8px 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    color: #4a5a6a !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-close-modal:hover {
+    background: rgba(26, 79, 122, 0.04);
+    border-color: #1a4f7a;
+}
+
+.btn-go-profile {
+    padding: 8px 24px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
+    color: white !important;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-go-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 992px) {
+    .sticky-sidebar {
+        position: relative;
+        top: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .course-hero-image,
+    .course-placeholder {
+        height: 200px;
+    }
+    
+    .course-page .card-body {
+        padding: 20px !important;
+    }
+    
+    .btn-outline-favorite,
+    .btn-outline-watch {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+    }
+    
+    .speaker-img {
+        width: 64px;
+        height: 64px;
+    }
+}
+
+@media (max-width: 480px) {
+    .course-hero-image,
+    .course-placeholder {
+        height: 150px;
+    }
+    
+    .course-page .card-body {
+        padding: 16px !important;
+    }
+    
+    .course-info-card {
+        padding: 16px;
+    }
+    
+    .section-title {
+        font-size: 1rem !important;
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-4" id="courseContainer">
     <div class="text-center py-5">
         <div class="spinner-border" style="color: var(--primary); width: 3rem; height: 3rem;"></div>
-        <p class="mt-3 text-muted">Загрузка курса...</p>
+        <p class="mt-3 text-muted" style="font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-weight: 500;">Загрузка курса...</p>
     </div>
 </div>
 
@@ -60,9 +688,9 @@
                     <div class="bg-light rounded-circle d-inline-flex p-4 mb-4">
                         <i class="bi bi-exclamation-triangle fs-1" style="color: #dc2626;"></i>
                     </div>
-                    <h3 class="fw-bold mb-3" style="color: var(--dark);">Курс не найден</h3>
-                    <p class="text-muted mb-4">Запрашиваемый курс не существует или был удалён</p>
-                    <a href="/courses" class="btn" style="background: var(--primary-gradient); color: white; border: none; border-radius: 10px; padding: 10px 28px; font-weight: 600;">
+                    <h3 class="fw-bold mb-3" style="color: #0d1b2a; font-family: 'Playfair Display', serif;">Курс не найден</h3>
+                    <p class="text-muted mb-4" style="font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;">Запрашиваемый курс не существует или был удалён</p>
+                    <a href="/courses" class="btn" style="background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%); color: white; border: none; border-radius: 8px; padding: 10px 28px; font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 1rem; letter-spacing: 0.03em;">
                         <i class="bi bi-arrow-left me-2"></i>Вернуться к курсам
                     </a>
                 </div>
@@ -96,8 +724,8 @@
             speakersHtml = `
                 <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border: 1px solid var(--border);">
                     <div class="card-header bg-white border-0 pt-4 pb-0" style="border-radius: 16px 16px 0 0;">
-                        <h4 class="mb-0 fw-bold" style="color: var(--dark);">
-                            <i class="bi bi-people-fill me-2" style="color: var(--primary);"></i>
+                        <h4 class="mb-0 fw-bold" style="color: #0d1b2a; font-family: 'Playfair Display', serif;">
+                            <i class="bi bi-people-fill me-2" style="color: #1a4f7a;"></i>
                             Эксперты курса
                         </h4>
                     </div>
@@ -108,7 +736,7 @@
                 speakersHtml += `
                     <div class="col-md-6 col-lg-4">
                         <div class="speaker-card">
-                            <img src="${speaker.photo_url || 'https://ui-avatars.com/api/?background=c9a13b&color=fff&rounded=true&size=100&bold=true&name=' + encodeURIComponent(speaker.full_name.split(' ')[0])}" 
+                            <img src="${speaker.photo_url || 'https://ui-avatars.com/api/?background=1a4f7a&color=fff&rounded=true&size=100&bold=true&name=' + encodeURIComponent(speaker.full_name.split(' ')[0])}" 
                                  class="speaker-img" 
                                  alt="${escapeHtml(speaker.full_name)}">
                             <div class="speaker-name">${escapeHtml(speaker.full_name)}</div>
@@ -127,20 +755,20 @@
         
         // ========== ОСНОВНОЙ HTML ==========
         const html = `
-            <div class="row g-4">
+            <div class="row g-4 course-page">
                 <div class="col-lg-8">
                     <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border: 1px solid var(--border); overflow: hidden;">
                         ${course.image_url ? 
                             `<img src="${course.image_url}" class="course-hero-image" alt="${escapeHtml(course.title)}" loading="lazy">` : 
                             `<div class="course-placeholder">
                                 <i class="bi bi-book"></i>
-                                <p class="text-muted mt-2">Изображение отсутствует</p>
+                                <p class="text-muted mt-2" style="font-family: 'Cormorant Garamond', serif; font-size: 1rem;">Изображение отсутствует</p>
                             </div>`
                         }
                         <div class="card-body p-4">
                             ${moodleHtml}
                             
-                            <h1 class="fw-bold mb-3" style="color: var(--dark);">${escapeHtml(course.title)}</h1>
+                            <h1 class="fw-bold mb-3" style="color: #0d1b2a; font-family: 'Playfair Display', serif; font-weight: 700;">${escapeHtml(course.title)}</h1>
                             
                             <div class="d-flex flex-wrap gap-3 mb-4">
                                 <button class="btn-outline-favorite ${course.is_favorite ? 'active' : ''}" id="favoriteBtn" onclick="toggleFavorite()" ${!isAuthenticated ? 'disabled' : ''}>
@@ -182,8 +810,8 @@
                     <div class="sticky-sidebar">
                         <div class="course-info-card">
                             <div class="text-center mb-4">
-                                <div style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">${course.current_participants || 0}</div>
-                                <span class="text-muted">из ${course.max_participants || 0} мест занято</span>
+                                <div style="font-size: 2.5rem; font-weight: 700; color: #1a4f7a; font-family: 'Playfair Display', serif;">${course.current_participants || 0}</div>
+                                <span class="text-muted" style="font-family: 'Cormorant Garamond', serif; font-size: 0.95rem;">из ${course.max_participants || 0} мест занято</span>
                             </div>
                             
                             <hr>
@@ -203,7 +831,7 @@
                             ${course.moodle_course_id ? `
                                 <div class="course-info-item">
                                     <span class="label"><i class="bi bi-box-arrow-up-right me-2"></i>Moodle</span>
-                                    <span class="value" style="color: var(--primary);">ID: ${course.moodle_course_id}</span>
+                                    <span class="value" style="color: #1a4f7a;">ID: ${course.moodle_course_id}</span>
                                 </div>
                             ` : ''}
                             
@@ -216,7 +844,7 @@
                             <div class="info-box">
                                 <p><i class="bi bi-info-circle info-icon me-1"></i> После успешной записи вы получите уведомление на email.</p>
                                 <p><i class="bi bi-folder info-icon me-1"></i> Все материалы курса будут доступны в личном кабинете Moodle.</p>
-                                <p><i class="bi bi-folder info-icon me-1"></i> Чтобы перейти в Moodle - перейдите в ваш Кабинет(Раздел-Мои курсы).</p>
+                                <p><i class="bi bi-folder info-icon me-1"></i> Чтобы перейти в Moodle - перейдите в ваш Кабинет (Раздел-Мои курсы).</p>
                             </div>
                         </div>
                     </div>
@@ -458,12 +1086,12 @@
                                 <div class="progress-bar-mini">
                                     <div class="fill" style="width: ${progressPercent}%"></div>
                                 </div>
-                                <span class="progress-text" style="font-weight: 400; color: var(--gray); font-size: 0.75rem;">
+                                <span class="progress-text" style="font-weight: 400; color: #718096; font-size: 0.75rem;">
                                     ${completedSections}/${totalSections}
                                 </span>
                             </div>
                             
-                            <p style="font-weight: 500; color: var(--dark);">
+                            <p style="font-weight: 500; color: #0d1b2a; font-family: 'Cormorant Garamond', serif; font-size: 1rem;">
                                 Для записи на курсы необходимо заполнить все разделы профиля:
                             </p>
                             <ul class="missing-sections-list">

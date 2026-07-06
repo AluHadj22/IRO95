@@ -8,8 +8,9 @@ import json
 
 
 class UserRole(str, enum.Enum):
-    TEACHER = "teacher"
-    ADMIN = "admin"
+    """Технические роли пользователей в системе (определяют права доступа)"""
+    TEACHER = "teacher"      # Обычный пользователь
+    ADMIN = "admin"          # Администратор (полный доступ)
 
 
 class User(Base):
@@ -18,7 +19,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
     full_name = Column(String(255), nullable=False)
-    position = Column(String(255), nullable=True)
+    position = Column(String(255), nullable=True)  # Должность: Учитель, Завуч, Директор или своя
     phone = Column(String(50), nullable=True)
     organization = Column(String(500), nullable=True)
     # ✅ Увеличена длина для bcrypt хешей (обычно 60 символов, но с запасом)
@@ -66,6 +67,34 @@ class User(Base):
         Index('idx_user_role', 'role'),
         Index('idx_user_is_blocked', 'is_blocked'),
     )
+    
+    # ========== МЕТОДЫ ДЛЯ РАБОТЫ С РОЛЯМИ ==========
+    
+    @property
+    def is_admin(self) -> bool:
+        """Проверяет, является ли пользователь администратором"""
+        return self.role == UserRole.ADMIN
+    
+    @property
+    def is_teacher(self) -> bool:
+        """Проверяет, является ли пользователь учителем (техническая роль)"""
+        return self.role == UserRole.TEACHER
+    
+    def get_role_display(self) -> str:
+        """
+        Возвращает понятное отображение технической роли на русском языке.
+        """
+        role_names = {
+            UserRole.TEACHER: "Преподаватель",
+            UserRole.ADMIN: "Администратор"
+        }
+        return role_names.get(self.role, "Неизвестно")
+    
+    def get_position_display(self) -> str:
+        """
+        Возвращает должность пользователя или 'Не указана', если поле пустое.
+        """
+        return self.position or "Не указана"
     
     # ========== МЕТОДЫ ПРОВЕРКИ ПРОФИЛЯ ==========
     
@@ -578,3 +607,27 @@ class UserAdditionalInfo(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     user = relationship("User", back_populates="additional_info")
+
+
+# ========== МОДЕЛЬ ДЛЯ СБРОСА ПАРОЛЯ ==========
+
+class PasswordResetToken(Base):
+    """Токены для сброса пароля"""
+    __tablename__ = "password_reset_tokens"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    token = Column(String(255), unique=True, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    used = Column(Boolean, default=False)
+    
+    # Связь с пользователем
+    user = relationship("User", foreign_keys=[user_id])
+    
+    # Индексы для быстрого поиска
+    __table_args__ = (
+        Index('idx_reset_token', 'token'),
+        Index('idx_reset_user_id', 'user_id'),
+        Index('idx_reset_expires_at', 'expires_at'),
+    )

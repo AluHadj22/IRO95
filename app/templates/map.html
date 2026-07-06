@@ -3,16 +3,335 @@
 {% block title %}Карта проезда - ИРО ЧР{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/map.css">
+<style>
+/* ============================================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ КАРТЫ (ВСТРОЕННЫЕ)
+   ============================================================ */
+
+:root {
+    --primary: #1a4f7a;
+    --primary-dark: #0d3b5e;
+    --primary-light: #3a7ca5;
+    --primary-gradient: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    --dark: #0d1b2a;
+    --light: #f7fafc;
+    --gray: #718096;
+    --white: #ffffff;
+    --border: #e2e8f0;
+}
+
+/* ===== ШРИФТЫ ===== */
+.map-page * {
+    font-family: 'Inter', sans-serif;
+}
+
+.map-page h1,
+.map-page h2,
+.map-page h3,
+.map-page h4,
+.map-page h5,
+.map-page .hero-badge {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.map-page .lead,
+.map-page .info-badge,
+.map-page .small,
+.map-page .info-alert strong {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-size: 1.05rem !important;
+}
+
+/* ===== ГЕРОЙ-СЕКЦИЯ (СВЕТЛАЯ) ===== */
+.map-hero {
+    background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
+    padding: 60px 0 50px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid rgba(26, 79, 122, 0.08);
+}
+
+.map-hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: floatHero 20s ease-in-out infinite;
+}
+
+.map-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.03) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: floatHero 15s ease-in-out infinite reverse;
+}
+
+@keyframes floatHero {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.05); }
+}
+
+.map-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-icon {
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.hero-icon svg path {
+    fill: var(--primary);
+}
+
+.hero-badge {
+    display: inline-block;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
+    padding: 8px 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(26, 79, 122, 0.08);
+    margin-bottom: 16px;
+}
+
+.map-hero h1 {
+    color: #0d1b2a;
+    font-size: 3rem;
+}
+
+.map-hero h1 .gold {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-style: italic !important;
+    color: var(--primary);
+    letter-spacing: 0.03em !important;
+}
+
+.map-hero .lead {
+    color: #1a2a3a;
+    opacity: 0.7;
+    font-size: 1.3rem;
+    font-style: italic;
+}
+
+/* ===== ИНФО БЭДЖИ ===== */
+.info-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 24px;
+    margin-top: 16px;
+}
+
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #3a4a5a;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(26, 79, 122, 0.06);
+    backdrop-filter: blur(4px);
+    font-family: 'Inter', sans-serif !important;
+}
+
+.info-badge i {
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+/* ===== КАРТА ===== */
+.map-card {
+    border-radius: 16px !important;
+    overflow: hidden;
+    border: 1px solid rgba(26, 79, 122, 0.08) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.3s ease !important;
+}
+
+.map-card:hover {
+    border-color: rgba(26, 79, 122, 0.15) !important;
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.06) !important;
+}
+
+.map-container {
+    width: 100%;
+    height: 500px;
+    border-radius: 16px;
+}
+
+/* ===== ИНФО-АЛЕРТ ===== */
+.info-alert {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 16px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+.info-alert:hover {
+    border-color: rgba(26, 79, 122, 0.1);
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.04);
+}
+
+.info-alert .icon-wrapper {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(26, 79, 122, 0.08);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.info-alert .icon-wrapper i {
+    color: var(--primary);
+    font-size: 1.4rem;
+}
+
+.info-alert strong {
+    color: var(--dark);
+    font-size: 0.95rem;
+}
+
+.info-alert .small {
+    color: var(--gray);
+    font-size: 0.85rem !important;
+}
+
+/* ===== КНОПКА МАРШРУТА ===== */
+.btn-route {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-route:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
+    color: white;
+}
+
+.btn-route i {
+    font-size: 1.1rem;
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 768px) {
+    .map-hero {
+        padding: 40px 0 30px;
+    }
+    .map-hero h1 {
+        font-size: 2.2rem;
+    }
+    .map-hero .lead {
+        font-size: 1.1rem;
+    }
+    .map-container {
+        height: 350px;
+    }
+    .info-badges {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    .info-badge {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.8rem;
+        padding: 5px 14px;
+    }
+    .info-alert .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+    .info-alert .icon-wrapper {
+        margin: 0 auto;
+    }
+    .btn-route {
+        width: 100%;
+        justify-content: center;
+        margin-top: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .map-hero {
+        padding: 30px 0 20px;
+    }
+    .map-hero h1 {
+        font-size: 1.8rem;
+    }
+    .map-hero .lead {
+        font-size: 0.95rem;
+    }
+    .hero-badge {
+        font-size: 0.65rem !important;
+        padding: 6px 18px;
+    }
+    .hero-icon svg {
+        width: 48px;
+        height: 48px;
+    }
+    .map-container {
+        height: 280px;
+    }
+    .info-alert {
+        padding: 12px 16px;
+    }
+    .btn-route {
+        font-size: 0.8rem;
+        padding: 8px 16px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция -->
+<!-- Герой-секция (светлая) -->
 <div class="map-hero">
     <div class="container text-center">
         <div class="hero-icon">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#f9d976" opacity="0.95"/>
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#1a4f7a" opacity="0.9"/>
             </svg>
         </div>
         <div class="hero-badge">Схема проезда</div>
@@ -34,10 +353,10 @@
     </div>
 </div>
 
-<div class="container pb-5">
+<div class="container pb-5 map-page">
     <div class="row" data-aos="fade-up">
         <div class="col-12">
-            <div class="card map-card shadow-sm border-0">
+            <div class="map-card shadow-sm border-0">
                 <div class="card-body p-0">
                     <div class="map-container" id="full-map"></div>
                 </div>
@@ -47,14 +366,14 @@
     
     <div class="row mt-4" data-aos="fade-up" data-aos-delay="200">
         <div class="col-12">
-            <div class="alert info-alert">
+            <div class="info-alert">
                 <div class="d-flex gap-3 align-items-center flex-wrap flex-md-nowrap">
                     <div class="icon-wrapper">
                         <i class="bi bi-info-circle"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <strong class="d-block mb-1" style="color: var(--dark);">Как добраться:</strong>
-                        <span class="small" style="color: var(--gray);">Нажмите на кнопку ниже, чтобы проложить маршрут в Яндекс.Картах</span>
+                        <strong class="d-block mb-1">Как добраться:</strong>
+                        <span class="small">Нажмите на кнопку ниже, чтобы проложить маршрут в Яндекс.Картах</span>
                     </div>
                     <a href="https://yandex.ru/maps/?text=Грозный, ул. Лермонтова, 2" target="_blank" class="btn-route">
                         <i class="bi bi-map"></i> Построить маршрут
@@ -92,7 +411,7 @@
                 balloonContentHeader: `
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 35px;" alt="logo">
-                        <strong style="color: #c9a13b; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
+                        <strong style="color: #1a4f7a; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
                     </div>
                 `,
                 balloonContentBody: `
@@ -101,39 +420,39 @@
                         <hr style="margin: 8px 0;">
                         <table style="width: 100%; font-size: 13px;">
                             <tr>
-                                <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #c9a13b;"></i> Адрес:</td>
+                                <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #1a4f7a;"></i> Адрес:</td>
                                 <td style="padding: 4px 0;">${instituteAddress}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #c9a13b;"></i> Телефон:</td>
+                                <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #1a4f7a;"></i> Телефон:</td>
                                 <td style="padding: 4px 0;">${institutePhone}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #c9a13b;"></i> Email:</td>
+                                <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #1a4f7a;"></i> Email:</td>
                                 <td style="padding: 4px 0;">${instituteEmail}</td>
                             </tr>
                             <tr>
-                                <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #c9a13b;"></i> Часы работы:</td>
+                                <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #1a4f7a;"></i> Часы работы:</td>
                                 <td style="padding: 4px 0;">${instituteHours}</td>
                             </tr>
                         </table>
                         <hr style="margin: 8px 0;">
                         <p style="font-size: 12px; margin: 0;">
-                            <i class="bi bi-bus-front" style="color: #c9a13b;"></i> Ближайшая остановка: "Институт развития образования" (2 мин пешком)<br>
-                            <i class="bi bi-car-front" style="color: #c9a13b;"></i> Имеется бесплатная парковка для слушателей курсов
+                            <i class="bi bi-bus-front" style="color: #1a4f7a;"></i> Ближайшая остановка: "Институт развития образования" (2 мин пешком)<br>
+                            <i class="bi bi-car-front" style="color: #1a4f7a;"></i> Имеется бесплатная парковка для слушателей курсов
                         </p>
                     </div>
                 `,
                 balloonContentFooter: `
                     <div style="margin-top: 10px; text-align: center;">
-                        <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #c9a13b; text-decoration: none; font-weight: 500;">
+                        <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #1a4f7a; text-decoration: none; font-weight: 500;">
                             🚗 Построить маршрут →
                         </a>
                     </div>
                 `
             }, {
                 preset: 'islands#circleIcon',
-                iconColor: '#c9a13b'
+                iconColor: '#1a4f7a'
             });
             
             map.geoObjects.add(placemark);

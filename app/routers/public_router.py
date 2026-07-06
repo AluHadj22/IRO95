@@ -55,3 +55,28 @@ def course_detail_page(request: Request, course_id: int):
 async def profile_page(request: Request):
     """Страница профиля пользователя (Мои данные)"""
     return templates.TemplateResponse("profile.html", {"request": request})
+
+@router.get("/forgot-password", response_class=HTMLResponse)
+async def forgot_password_page(request: Request):
+    """
+    Страница запроса сброса пароля.
+    """
+    return templates.TemplateResponse("forgot_password.html", {"request": request})
+
+
+@router.get("/reset-password", response_class=HTMLResponse)
+async def reset_password_page(request: Request, token: str = None):
+    """
+    Страница установки нового пароля.
+    """
+    if not token:
+        # Если токен не передан - перенаправляем на страницу запроса сброса
+        return templates.TemplateResponse("forgot_password.html", {
+            "request": request,
+            "error": "Токен не указан. Пожалуйста, запросите сброс пароля заново."
+        })
+    
+    return templates.TemplateResponse("reset_password.html", {
+        "request": request,
+        "token": token
+    })

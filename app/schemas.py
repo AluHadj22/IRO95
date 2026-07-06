@@ -7,8 +7,19 @@ import re
 
 
 class UserRole(str, Enum):
+    """Технические роли пользователей в системе (определяют права доступа)"""
     TEACHER = "teacher"
     ADMIN = "admin"
+
+
+# ========== ДОЛЖНОСТИ (ПОЗИЦИИ) ==========
+
+POSITION_TYPES = [
+    "Учитель",
+    "Завуч",
+    "Директор",
+    "Иное"
+]
 
 
 # ========== АУТЕНТИФИКАЦИЯ ==========
@@ -21,6 +32,8 @@ class UserCreate(BaseModel):
     organization: Optional[str] = Field(None, max_length=500)
     password: str = Field(..., min_length=8, description="Пароль должен содержать минимум 8 символов")
     admin_code: Optional[str] = None
+    position_type: Optional[str] = Field(None, description="Тип должности: Учитель, Завуч, Директор, Иное")
+    position_custom: Optional[str] = Field(None, max_length=255, description="Своя должность, если выбрано 'Иное'")
     
     @field_validator('password')
     @classmethod
@@ -50,6 +63,20 @@ class UserCreate(BaseModel):
             cleaned = re.sub(r'[^\d+]', '', v)
             if not re.match(r'^\+?\d{10,15}$', cleaned):
                 raise ValueError('Неверный формат телефона. Используйте +7XXXXXXXXXX')
+        return v
+    
+    @field_validator('position_type')
+    @classmethod
+    def validate_position_type(cls, v: Optional[str]) -> Optional[str]:
+        if v and v not in POSITION_TYPES:
+            raise ValueError(f"Недопустимый тип должности. Допустимые значения: {', '.join(POSITION_TYPES)}")
+        return v
+    
+    @field_validator('position_custom')
+    @classmethod
+    def validate_position_custom(cls, v: Optional[str], info) -> Optional[str]:
+        if info.data.get('position_type') == 'Иное' and not v:
+            raise ValueError('Пожалуйста, укажите вашу должность')
         return v
 
 
@@ -92,7 +119,7 @@ class UserAdminUpdate(BaseModel):
         return v
 
 
-# ========== УПРАВЛЕНИЕ РОЛЯМИ (ДОБАВЛЕНО) ==========
+# ========== УПРАВЛЕНИЕ РОЛЯМИ ==========
 
 class UserRoleUpdate(BaseModel):
     """

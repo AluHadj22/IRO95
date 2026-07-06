@@ -2,25 +2,33 @@
    СТИЛИ ДЛЯ СТРАНИЦЫ КУРСОВ
    ============================================================ */
 
-:root {
-    --primary: #c9a13b;
-    --primary-dark: #b8860b;
-    --primary-light: #f9d976;
-    --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
-    --dark: #1a1a2e;
-    --light: #f8fafc;
-    --gray: #64748b;
+/* ===== ПОДКЛЮЧЕНИЕ КАЛЛИГРАФИЧЕСКИХ ШРИФТОВ ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700&display=swap');
+
+/* ===== ПЕРЕОПРЕДЕЛЯЕМ ПЕРЕМЕННЫЕ ДЛЯ ЕДИНОГО СТИЛЯ ===== */
+.courses-hero,
+.filter-sidebar,
+.course-card,
+.courses-section {
+    --primary: #1a4f7a;
+    --primary-dark: #0d3b5e;
+    --primary-light: #3a7ca5;
+    --primary-gradient: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    --dark: #0d1b2a;
+    --light: #f7fafc;
+    --gray: #718096;
     --white: #ffffff;
     --border: #e2e8f0;
 }
 
+/* ===== ГЕРОЙ-СЕКЦИЯ (как на главной - светлая) ===== */
 .courses-hero {
-    background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
-    padding: 50px 0 40px;
+    background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
+    padding: 60px 0 50px;
     margin-bottom: 30px;
-    border-bottom: 3px solid rgba(201, 161, 59, 0.3);
     position: relative;
     overflow: hidden;
+    border-bottom: 2px solid rgba(26, 79, 122, 0.08);
 }
 
 .courses-hero::before {
@@ -30,7 +38,7 @@
     right: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.04) 0%, transparent 70%);
     border-radius: 50%;
     animation: float 20s ease-in-out infinite;
 }
@@ -42,7 +50,7 @@
     left: -5%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(201, 161, 59, 0.04) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.03) 0%, transparent 70%);
     border-radius: 50%;
     animation: float 15s ease-in-out infinite reverse;
 }
@@ -53,56 +61,93 @@
 }
 
 .courses-hero h1 {
-    color: white;
+    color: #0d1b2a;
     position: relative;
     z-index: 1;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 700;
+    font-size: 3.2rem;
+    letter-spacing: 0.02em;
 }
 
-.courses-hero h1 .gold {
-    color: var(--primary-light);
+.courses-hero h1 .accent {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--primary);
+    letter-spacing: 0.03em;
 }
 
 .courses-hero p {
-    color: rgba(255,255,255,0.7);
+    color: #1a2a3a;
+    opacity: 0.7;
     position: relative;
     z-index: 1;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    letter-spacing: 0.04em;
+    font-weight: 500;
 }
 
 .courses-hero .hero-badge {
     display: inline-block;
-    background: rgba(201, 161, 59, 0.15);
-    color: var(--primary-light);
-    padding: 6px 20px;
-    border-radius: 20px;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 700;
     font-size: 0.8rem;
-    font-weight: 500;
-    border: 1px solid rgba(201, 161, 59, 0.15);
-    margin-bottom: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
+    padding: 8px 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(26, 79, 122, 0.08);
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
 }
 
+.courses-hero .hero-waves {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23f7fafc" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+    background-size: cover;
+    background-repeat: no-repeat;
+    pointer-events: none;
+}
+
+/* ===== БОКОВАЯ ПАНЕЛЬ ФИЛЬТРОВ (стекло) ===== */
 .filter-sidebar {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 24px;
     position: sticky;
     top: 90px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     transition: all 0.3s ease;
 }
 
 .filter-sidebar:hover {
-    box-shadow: 0 4px 16px rgba(201,161,59,0.06);
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.06);
+    border-color: rgba(26, 79, 122, 0.08);
 }
 
 .filter-title {
-    font-size: 1.1rem;
+    font-family: 'Playfair Display', 'Georgia', serif;
     font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.03em;
     margin-bottom: 20px;
     padding-bottom: 12px;
     border-bottom: 2px solid var(--primary);
     display: inline-block;
-    color: var(--dark);
+    color: #0d1b2a;
 }
 
 .filter-title i {
@@ -114,30 +159,33 @@
 }
 
 .filter-group label {
-    font-weight: 600;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
     margin-bottom: 10px;
     display: block;
-    color: var(--dark);
-    font-size: 0.9rem;
+    color: #0d1b2a;
 }
 
 .filter-group label i {
     color: var(--primary);
 }
 
+/* ===== КАТЕГОРИИ В ФИЛЬТРЕ ===== */
 .category-check {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 4px 0;
+    padding: 4px 8px;
     transition: all 0.2s ease;
     border-radius: 6px;
-    padding-left: 4px;
+    cursor: pointer;
 }
 
 .category-check:hover {
-    background: #fef9e7;
+    background: rgba(26, 79, 122, 0.04);
 }
 
 .category-check input[type="checkbox"] {
@@ -149,33 +197,38 @@
 }
 
 .category-check label {
-    font-weight: 400;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
     margin-bottom: 0;
     cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--gray);
+    color: #3a4a5a;
     transition: color 0.2s ease;
 }
 
 .category-check:hover label {
-    color: var(--dark);
+    color: #0d1b2a;
 }
 
 .category-check .count-badge {
-    background: #f1f5f9;
+    background: rgba(26, 79, 122, 0.06);
     padding: 1px 10px;
     border-radius: 12px;
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     color: var(--gray);
     margin-left: auto;
     transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
 }
 
 .category-check:hover .count-badge {
-    background: #fef9e7;
-    color: var(--primary-dark);
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
 }
 
+/* ===== ПОИСК ===== */
 .search-input {
     position: relative;
 }
@@ -191,29 +244,34 @@
 
 .search-input input {
     padding-left: 40px;
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid var(--border);
     transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.6);
 }
 
 .search-input input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(201,161,59,0.12);
+    box-shadow: 0 0 0 3px rgba(26, 79, 122, 0.1);
     outline: none;
+    background: white;
 }
 
+/* ===== ФИЛЬТР ФОРМАТА ===== */
 .filter-check {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 4px 0;
+    padding: 4px 8px;
     transition: all 0.2s ease;
     border-radius: 6px;
-    padding-left: 4px;
+    cursor: pointer;
 }
 
 .filter-check:hover {
-    background: #fef9e7;
+    background: rgba(26, 79, 122, 0.04);
 }
 
 .filter-check input[type="checkbox"] {
@@ -225,45 +283,54 @@
 }
 
 .filter-check label {
-    font-weight: 400;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
     margin-bottom: 0;
     cursor: pointer;
-    font-size: 0.9rem;
-    color: var(--gray);
+    color: #3a4a5a;
     transition: color 0.2s ease;
 }
 
 .filter-check:hover label {
-    color: var(--dark);
+    color: #0d1b2a;
 }
 
+/* ===== КНОПКА СБРОСА ===== */
 .clear-filters {
     margin-top: 16px;
     width: 100%;
     border: 1.5px solid var(--primary);
     color: var(--primary);
     background: transparent;
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px;
-    font-weight: 500;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .clear-filters:hover {
     background: var(--primary-gradient);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(201,161,59,0.2);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.2);
 }
 
+/* ===== КАРТОЧКИ КУРСОВ ===== */
 .course-card {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
-    background: white;
+    background: var(--white);
     position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .course-card::before {
@@ -281,7 +348,7 @@
 
 .course-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 16px 40px -12px rgba(201,161,59,0.15);
+    box-shadow: 0 16px 40px -12px rgba(26, 79, 122, 0.12);
     border-color: var(--primary);
 }
 
@@ -306,10 +373,13 @@
     background: var(--primary-gradient);
     color: white;
     padding: 4px 14px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-weight: 500;
-    font-size: 0.65rem;
-    box-shadow: 0 2px 8px rgba(201,161,59,0.2);
+    font-size: 0.7rem;
+    box-shadow: 0 2px 8px rgba(26, 79, 122, 0.15);
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .format-badge {
@@ -321,10 +391,13 @@
 
 .format-badge .badge {
     padding: 4px 14px;
-    border-radius: 20px;
+    border-radius: 4px;
     font-weight: 500;
-    font-size: 0.65rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-size: 0.7rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 700;
+    letter-spacing: 0.04em;
 }
 
 .badge-format-online {
@@ -352,9 +425,11 @@
 }
 
 .course-card .card-title {
-    font-weight: 600;
-    color: var(--dark);
-    font-size: 1rem;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    color: #0d1b2a;
     margin-bottom: 8px;
     line-height: 1.4;
     display: -webkit-box;
@@ -364,9 +439,12 @@
 }
 
 .course-card .card-text {
-    color: var(--gray);
-    font-size: 0.85rem;
-    line-height: 1.5;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+    color: #3a4a5a;
+    font-weight: 500;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -383,6 +461,7 @@
 }
 
 .course-card .course-meta .participants {
+    font-family: 'Inter', sans-serif;
     font-size: 0.75rem;
     color: var(--gray);
 }
@@ -391,28 +470,54 @@
     color: var(--primary);
 }
 
+/* ===== КНОПКА КУРСА ===== */
 .btn-course {
     background: var(--primary-gradient);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     padding: 6px 16px;
-    font-weight: 500;
-    font-size: 0.8rem;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
     transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .btn-course:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(201,161,59,0.3);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
     color: white;
 }
 
+/* ===== РЕЗУЛЬТАТ ПОИСКА ===== */
+.result-count {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: #3a4a5a;
+    margin-bottom: 16px;
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid var(--border);
+}
+
+.result-count strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* ===== НЕТ РЕЗУЛЬТАТОВ ===== */
 .no-results {
     text-align: center;
     padding: 60px 20px;
-    background: white;
-    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
     border: 1px solid var(--border);
 }
 
@@ -424,32 +529,41 @@
 }
 
 .no-results h5 {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: 0.02em;
     margin-bottom: 8px;
-    color: var(--dark);
+    color: #0d1b2a;
 }
 
 .no-results p {
-    color: var(--gray);
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    color: #4a5a6a;
     margin-bottom: 20px;
 }
 
 .no-results .btn-primary {
     background: var(--primary-gradient);
     border: none;
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 10px 28px;
-    font-weight: 600;
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
     transition: all 0.3s ease;
     color: white;
 }
 
 .no-results .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(201,161,59,0.3);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
 }
 
+/* ===== ЛОАДЕР ===== */
 .loading-spinner {
     display: inline-block;
     width: 40px;
@@ -464,51 +578,71 @@
     to { transform: rotate(360deg); }
 }
 
-.result-count {
-    font-size: 0.9rem;
-    color: var(--gray);
-    margin-bottom: 16px;
-    padding: 8px 16px;
-    background: #f8fafc;
-    border-radius: 8px;
-    display: inline-block;
-}
-
-.result-count strong {
-    color: var(--primary-dark);
+/* ===== АДАПТИВ ===== */
+@media (max-width: 992px) {
+    .filter-sidebar {
+        position: relative;
+        top: 0;
+        margin-bottom: 24px;
+    }
 }
 
 @media (max-width: 768px) {
     .courses-hero {
-        padding: 30px 0 25px;
+        padding: 40px 0 30px;
     }
     .courses-hero h1 {
-        font-size: 1.8rem;
+        font-size: 2.4rem;
+    }
+    .courses-hero p {
+        font-size: 1.1rem;
     }
     .filter-sidebar {
-        position: relative;
-        top: 0;
-        margin-bottom: 20px;
-    }
-    .filter-sidebar .filter-group {
-        margin-bottom: 16px;
+        padding: 18px;
     }
     .course-card-img {
         height: 140px;
     }
-}
-
-@media (max-width: 480px) {
-    .courses-hero h1 {
-        font-size: 1.4rem;
-    }
-    .filter-sidebar {
-        padding: 16px;
-    }
     .course-card .card-body {
         padding: 16px;
     }
+}
+
+@media (max-width: 480px) {
+    .courses-hero {
+        padding: 30px 0 20px;
+    }
+    .courses-hero h1 {
+        font-size: 1.8rem;
+    }
+    .courses-hero p {
+        font-size: 0.95rem;
+    }
+    .courses-hero .hero-badge {
+        font-size: 0.65rem;
+        padding: 6px 18px;
+    }
+    .filter-sidebar {
+        padding: 14px;
+    }
+    .filter-title {
+        font-size: 1rem;
+    }
     .course-card-img {
-        height: 120px;
+        height: 110px;
+    }
+    .course-card .card-title {
+        font-size: 0.95rem;
+    }
+    .course-card .card-text {
+        font-size: 0.85rem;
+    }
+    .btn-course {
+        font-size: 0.75rem;
+        padding: 5px 12px;
+    }
+    .result-count {
+        font-size: 0.85rem;
+        padding: 8px 14px;
     }
 }

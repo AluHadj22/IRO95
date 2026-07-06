@@ -3,16 +3,637 @@
 {% block title %}Регистрация - ИРО ЧР{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/register.css">
+<style>
+/* ============================================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ РЕГИСТРАЦИИ (ВСТРОЕННЫЕ)
+   ============================================================ */
+
+:root {
+    --primary: #1a4f7a;
+    --primary-dark: #0d3b5e;
+    --primary-light: #3a7ca5;
+    --primary-gradient: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    --dark: #0d1b2a;
+    --light: #f7fafc;
+    --gray: #718096;
+    --white: #ffffff;
+    --border: #e2e8f0;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+}
+
+/* ===== ШРИФТЫ ===== */
+.register-page * {
+    font-family: 'Inter', sans-serif;
+}
+
+.register-page h1,
+.register-page h2,
+.register-page h3,
+.register-page h4,
+.register-page h5,
+.register-page .hero-badge,
+.register-page .card-header h3 {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.register-page .lead,
+.register-page .card-header p,
+.register-page .login-link,
+.register-page .security-text span,
+.register-page .requirement-item .req-text {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.register-page .security-text strong {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+}
+
+/* ===== ГЕРОЙ-СЕКЦИЯ (СВЕТЛАЯ) ===== */
+.register-hero {
+    background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
+    padding: 50px 0 40px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid rgba(26, 79, 122, 0.08);
+}
+
+.register-hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: floatHero 20s ease-in-out infinite;
+}
+
+.register-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.03) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: floatHero 15s ease-in-out infinite reverse;
+}
+
+@keyframes floatHero {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.05); }
+}
+
+.register-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-icon {
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.hero-icon svg path {
+    fill: var(--primary);
+}
+
+.hero-badge {
+    display: inline-block;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
+    padding: 8px 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(26, 79, 122, 0.08);
+    margin-bottom: 16px;
+}
+
+.register-hero h1 {
+    color: #0d1b2a;
+    font-size: 3rem;
+}
+
+.register-hero h1 .gold {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-style: italic !important;
+    color: var(--primary);
+    letter-spacing: 0.03em !important;
+}
+
+.register-hero .lead {
+    color: #1a2a3a;
+    opacity: 0.7;
+    font-size: 1.2rem;
+    font-style: italic;
+}
+
+/* ===== КАРТОЧКА РЕГИСТРАЦИИ ===== */
+.register-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.register-card:hover {
+    border-color: rgba(26, 79, 122, 0.1);
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.04);
+}
+
+.register-card .card-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 24px 24px 18px;
+    border: none;
+    text-align: center;
+}
+
+.register-card .card-header .header-icon {
+    font-size: 2.6rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 6px;
+}
+
+.register-card .card-header h3 {
+    color: white;
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+}
+
+.register-card .card-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.register-card .card-body {
+    padding: 28px 24px;
+}
+
+/* ===== ФОРМА ===== */
+.form-label {
+    font-weight: 500;
+    color: var(--dark);
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.form-label i {
+    color: var(--primary);
+    margin-right: 6px;
+}
+
+.required {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 79, 122, 0.1);
+    outline: none;
+    background: white;
+}
+
+.form-control::placeholder {
+    color: var(--gray);
+    opacity: 0.5;
+}
+
+.form-control.is-valid {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* ===== ВЫБОР ДОЛЖНОСТИ ===== */
+.position-group {
+    background: rgba(26, 79, 122, 0.03);
+    border-radius: 12px;
+    padding: 16px 18px;
+    border: 1px solid rgba(26, 79, 122, 0.06);
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+.position-group:hover {
+    border-color: rgba(26, 79, 122, 0.12);
+    background: rgba(26, 79, 122, 0.05);
+}
+
+.position-group .form-label {
+    margin-bottom: 8px;
+}
+
+.position-group .form-select {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.position-group .form-select:focus {
+    background: white;
+}
+
+#position_custom_container {
+    margin-top: 10px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== КНОПКИ ПОКАЗА ПАРОЛЯ ===== */
+.input-group .btn-outline-secondary {
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--gray);
+    transition: all 0.3s ease;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background: rgba(26, 79, 122, 0.06);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.input-group .btn-outline-secondary:focus {
+    box-shadow: none;
+}
+
+.input-group .form-control {
+    border-radius: 10px 0 0 10px;
+}
+
+.input-group .form-control:focus {
+    border-color: var(--primary);
+}
+
+.input-group .form-control:focus + .btn-outline-secondary {
+    border-color: var(--primary);
+}
+
+/* ===== ТРЕБОВАНИЯ К ПАРОЛЮ ===== */
+#passwordRequirements {
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: rgba(26, 79, 122, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(26, 79, 122, 0.06);
+}
+
+.requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    font-size: 0.8rem;
+}
+
+.req-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    color: var(--gray);
+    font-size: 0.7rem;
+}
+
+.req-icon.pending {
+    color: var(--gray);
+}
+
+.req-icon.valid {
+    color: var(--success);
+}
+
+.req-text {
+    color: var(--gray);
+    font-size: 0.8rem !important;
+    transition: all 0.3s ease;
+}
+
+.req-text.valid {
+    color: var(--success);
+}
+
+/* ===== ПОДСКАЗКА СОВПАДЕНИЯ ===== */
+#passwordMatchHint {
+    font-size: 0.8rem !important;
+    margin-top: 6px;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ===== ЧЕКБОКСЫ ===== */
+.form-check {
+    margin-bottom: 10px;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    margin-top: 3px;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: var(--dark);
+    cursor: pointer;
+}
+
+.form-check-label a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.form-check-label a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.form-check-label .text-danger {
+    color: var(--danger) !important;
+}
+
+/* ===== ЗАЩИТА ДАННЫХ ===== */
+.security-alert {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(26, 79, 122, 0.04);
+    border-radius: 10px;
+    border-left: 4px solid var(--primary);
+    margin: 16px 0 20px;
+}
+
+.security-alert .shield-icon {
+    font-size: 1.8rem;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.security-alert .security-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.security-alert .security-text strong {
+    color: var(--dark);
+    font-size: 0.9rem;
+}
+
+.security-alert .security-text span {
+    color: var(--gray);
+    font-size: 0.85rem;
+}
+
+/* ===== КНОПКА РЕГИСТРАЦИИ ===== */
+.btn-register {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-register::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.5s ease;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
+}
+
+.btn-register:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-register:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ===== ССЫЛКА ВХОДА ===== */
+.login-link {
+    color: var(--gray);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.login-link a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.login-link a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 768px) {
+    .register-hero {
+        padding: 40px 0 30px;
+    }
+    .register-hero h1 {
+        font-size: 2.2rem;
+    }
+    .register-hero .lead {
+        font-size: 1.1rem;
+    }
+    .register-card .card-header {
+        padding: 20px 16px 14px;
+    }
+    .register-card .card-header .header-icon {
+        font-size: 2.2rem;
+    }
+    .register-card .card-header h3 {
+        font-size: 1.2rem;
+    }
+    .register-card .card-header p {
+        font-size: 0.9rem;
+    }
+    .register-card .card-body {
+        padding: 20px 16px;
+    }
+    .form-control, .form-select {
+        font-size: 0.85rem;
+        padding: 8px 14px;
+    }
+    .btn-register {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    #passwordRequirements {
+        padding: 8px 12px;
+    }
+    .requirement-item {
+        font-size: 0.75rem;
+    }
+    .security-alert {
+        padding: 12px 14px;
+        gap: 10px;
+    }
+    .security-alert .shield-icon {
+        font-size: 1.4rem;
+    }
+    .position-group {
+        padding: 12px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-hero {
+        padding: 30px 0 20px;
+    }
+    .register-hero h1 {
+        font-size: 1.8rem;
+    }
+    .register-hero .lead {
+        font-size: 0.95rem;
+    }
+    .hero-badge {
+        font-size: 0.65rem !important;
+        padding: 6px 18px;
+    }
+    .hero-icon svg {
+        width: 44px;
+        height: 44px;
+    }
+    .register-card .card-header {
+        padding: 16px 12px 10px;
+    }
+    .register-card .card-header .header-icon {
+        font-size: 1.8rem;
+    }
+    .register-card .card-header h3 {
+        font-size: 1rem;
+    }
+    .register-card .card-header p {
+        font-size: 0.8rem;
+    }
+    .register-card .card-body {
+        padding: 16px 12px;
+    }
+    .form-label {
+        font-size: 0.8rem;
+    }
+    .form-control, .form-select {
+        font-size: 0.8rem;
+        padding: 7px 12px;
+    }
+    .btn-register {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    .form-check-label {
+        font-size: 0.8rem;
+    }
+    .login-link {
+        font-size: 0.85rem;
+    }
+    #passwordRequirements {
+        padding: 6px 10px;
+    }
+    .requirement-item {
+        font-size: 0.7rem;
+        gap: 4px;
+    }
+    .security-alert {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+    .security-alert .security-text strong {
+        font-size: 0.8rem;
+    }
+    .security-alert .security-text span {
+        font-size: 0.75rem;
+    }
+    .position-group {
+        padding: 10px 12px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция -->
+<!-- Герой-секция (светлая) -->
 <div class="register-hero">
     <div class="container text-center">
         <div class="hero-icon">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#f9d976" opacity="0.95"/>
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#1a4f7a" opacity="0.9"/>
             </svg>
         </div>
         <div class="hero-badge">Создание учётной записи</div>
@@ -23,7 +644,7 @@
     </div>
 </div>
 
-<div class="container mt-4 mb-5">
+<div class="container mt-4 mb-5 register-page">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card register-card">
@@ -41,43 +662,63 @@
                                 <label class="form-label" for="full_name">
                                     <i class="bi bi-person"></i> ФИО <span class="required">*</span>
                                 </label>
-                                <input type="text" class="form-control" id="full_name" placeholder="Иванов Иван Иванович" required>
+                                <input type="text" class="form-control" id="full_name" placeholder="Иванов Иван Иванович" required autocomplete="name">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="email">
                                     <i class="bi bi-envelope"></i> Email <span class="required">*</span>
                                 </label>
-                                <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required>
+                                <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required autocomplete="email">
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label" for="position">
-                                    <i class="bi bi-briefcase"></i> Должность
+
+                        <!-- ===== ВЫБОР ДОЛЖНОСТИ ===== -->
+                        <div class="position-group">
+                            <label class="form-label">
+                                <i class="bi bi-briefcase"></i> Ваша должность <span class="required">*</span>
+                            </label>
+                            <select class="form-select" id="position_type" required>
+                                <option value="">Выберите должность</option>
+                                <option value="Учитель">Учитель</option>
+                                <option value="Завуч">Завуч</option>
+                                <option value="Директор">Директор</option>
+                                <option value="Иное">Иное (ввести свою)</option>
+                            </select>
+                            <div id="position_custom_container" style="display: none; margin-top: 10px;">
+                                <label class="form-label" style="font-size: 0.8rem;">
+                                    Укажите вашу должность <span class="required">*</span>
                                 </label>
-                                <input type="text" class="form-control" id="position" placeholder="Учитель">
+                                <input type="text" class="form-control" id="position_custom" 
+                                       placeholder="Например: Методист, Социальный педагог, Психолог...">
                             </div>
+                            <small class="help-text" style="font-size: 0.75rem; color: var(--gray); margin-top: 6px; display: block;">
+                                <i class="bi bi-info-circle"></i> Выберите свою должность или укажите свою
+                            </small>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="phone">
                                     <i class="bi bi-phone"></i> Телефон
                                 </label>
-                                <input type="tel" class="form-control" id="phone" placeholder="+7 (999) 123-45-67">
+                                <input type="tel" class="form-control" id="phone" placeholder="+7 (999) 123-45-67" autocomplete="tel">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label" for="organization">
+                                    <i class="bi bi-building"></i> Организация
+                                </label>
+                                <input type="text" class="form-control" id="organization" placeholder="Школа №1" autocomplete="organization">
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="organization">
-                                <i class="bi bi-building"></i> Организация
-                            </label>
-                            <input type="text" class="form-control" id="organization" placeholder="Школа №1">
-                        </div>
+
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label" for="password">
                                     <i class="bi bi-lock"></i> Пароль <span class="required">*</span>
                                 </label>
                                 <div class="input-group">
-                                    <input type="password" class="form-control" id="password" placeholder="Введите пароль" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <input type="password" class="form-control" id="password" placeholder="Введите пароль" required autocomplete="new-password">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Показать/скрыть пароль">
                                         <i class="bi bi-eye" id="passwordIcon"></i>
                                     </button>
                                 </div>
@@ -110,8 +751,8 @@
                                     <i class="bi bi-shield-lock"></i> Подтверждение <span class="required">*</span>
                                 </label>
                                 <div class="input-group">
-                                    <input type="password" class="form-control" id="confirm" placeholder="Повторите пароль" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirm">
+                                    <input type="password" class="form-control" id="confirm" placeholder="Повторите пароль" required autocomplete="new-password">
+                                    <button class="btn btn-outline-secondary" type="button" id="toggleConfirm" aria-label="Показать/скрыть пароль">
                                         <i class="bi bi-eye" id="confirmIcon"></i>
                                     </button>
                                 </div>
@@ -170,6 +811,24 @@
 </div>
 
 <script>
+// ============================================================
+// ПОКАЗ/СКРЫТИЕ ПОЛЯ ДЛЯ СВОЕЙ ДОЛЖНОСТИ
+// ============================================================
+document.getElementById('position_type').addEventListener('change', function() {
+    const customContainer = document.getElementById('position_custom_container');
+    const customInput = document.getElementById('position_custom');
+    
+    if (this.value === 'Иное') {
+        customContainer.style.display = 'block';
+        customInput.required = true;
+        customInput.focus();
+    } else {
+        customContainer.style.display = 'none';
+        customInput.required = false;
+        customInput.value = '';
+    }
+});
+
 // ============================================================
 // ПОКАЗ/СКРЫТИЕ ПАРОЛЯ
 // ============================================================
@@ -297,13 +956,28 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         return;
     }
     
+    // ============================================================
+    // ФОРМИРУЕМ ДАННЫЕ ДЛЯ ОТПРАВКИ
+    // ============================================================
+    const positionType = document.getElementById('position_type').value;
+    const positionCustom = document.getElementById('position_custom').value.trim();
+    
+    let positionValue = null;
+    if (positionType === 'Иное') {
+        positionValue = positionCustom;
+    } else if (positionType) {
+        positionValue = positionType;
+    }
+    
     const data = {
         email: document.getElementById('email').value.trim(),
         full_name: document.getElementById('full_name').value.trim(),
-        position: document.getElementById('position').value.trim() || null,
+        position: positionValue,
         phone: document.getElementById('phone').value.trim() || null,
         organization: document.getElementById('organization').value.trim() || null,
-        password: password
+        password: password,
+        position_type: positionType || null,
+        position_custom: positionCustom || null
     };
     
     // Блокируем кнопку

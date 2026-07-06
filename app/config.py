@@ -17,6 +17,12 @@ class Settings:
     ADMIN_SECRET_CODE: str = os.getenv("ADMIN_SECRET_CODE")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
+    # === БАЗОВЫЙ URL ДЛЯ ССЫЛОК ===
+    BASE_URL: str = os.getenv("BASE_URL", "http://localhost:8000")
+    
+    # === НАСТРОЙКИ СБРОСА ПАРОЛЯ ===
+    RESET_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("RESET_TOKEN_EXPIRE_MINUTES", "60"))
+    
     # === ШИФРОВАНИЕ ДАННЫХ ===
     ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY")
     
@@ -87,3 +93,5 @@ print(f"🔍 MOODLE_API_TOKEN: {settings.MOODLE_API_TOKEN[:10]}...")
 print(f"🔍 SMTP_HOST: {settings.SMTP_HOST}")
 print(f"🔍 SMTP_USER: {settings.SMTP_USER}")
 print(f"🔍 SMTP_FROM_EMAIL: {settings.SMTP_FROM_EMAIL}")
+print(f"🔍 BASE_URL: {settings.BASE_URL}")
+print(f"🔍 RESET_TOKEN_EXPIRE_MINUTES: {settings.RESET_TOKEN_EXPIRE_MINUTES}")

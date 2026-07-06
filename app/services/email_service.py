@@ -934,6 +934,263 @@ class EmailService:
         """
         
         return self.send_email(admin_email, subject, html_content, text_content)
+    
+    def send_password_reset_email(
+        self,
+        to_email: str,
+        full_name: str,
+        reset_link: str
+    ) -> bool:
+        """
+        Отправляет письмо со ссылкой для сброса пароля.
+        
+        Args:
+            to_email: Email получателя
+            full_name: Полное имя пользователя
+            reset_link: Ссылка для сброса пароля
+        """
+        subject = "Восстановление пароля - ИРО ЧР"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {{
+                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                    color: #1a1a2e;
+                    line-height: 1.6;
+                    background: #f8fafc;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .email-wrapper {{
+                    max-width: 560px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background: #f8fafc;
+                }}
+                .email-container {{
+                    background: #ffffff;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    border: 1px solid #e2e8f0;
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+                }}
+                .header {{
+                    background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
+                    padding: 24px 28px;
+                    border-bottom: 3px solid rgba(201, 161, 59, 0.3);
+                    text-align: center;
+                }}
+                .header h2 {{
+                    color: #ffffff;
+                    margin: 0;
+                    font-weight: 700;
+                    font-size: 1.2rem;
+                }}
+                .header .gold {{
+                    color: #c9a13b;
+                }}
+                .header .logo-img {{
+                    height: 48px;
+                    width: auto;
+                    border-radius: 10px;
+                    margin-bottom: 12px;
+                    box-shadow: 0 2px 12px rgba(201, 161, 59, 0.2);
+                }}
+                .body {{
+                    padding: 28px 32px;
+                }}
+                .greeting {{
+                    font-size: 1.2rem;
+                    font-weight: 700;
+                    color: #1a1a2e;
+                    margin-bottom: 4px;
+                }}
+                .greeting-sub {{
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    margin-bottom: 16px;
+                }}
+                .alert-box {{
+                    background: rgba(245, 158, 11, 0.06);
+                    border-left: 4px solid #f59e0b;
+                    padding: 12px 16px;
+                    border-radius: 8px;
+                    margin: 12px 0 16px;
+                    font-size: 0.85rem;
+                    color: #92400e;
+                }}
+                .alert-box strong {{
+                    color: #78350f;
+                }}
+                .btn-wrapper {{
+                    text-align: center;
+                    margin: 24px 0 16px;
+                }}
+                .btn-primary {{
+                    display: inline-block;
+                    background: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
+                    color: #ffffff !important;
+                    padding: 12px 36px;
+                    border-radius: 10px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.25);
+                }}
+                .btn-primary:hover {{
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(201, 161, 59, 0.35);
+                    color: #ffffff !important;
+                }}
+                .info-text {{
+                    font-size: 0.85rem;
+                    color: #64748b;
+                    margin: 8px 0;
+                }}
+                .info-text a {{
+                    color: #c9a13b;
+                    text-decoration: none;
+                }}
+                .info-text a:hover {{
+                    text-decoration: underline;
+                }}
+                .divider {{
+                    border: none;
+                    border-top: 1px solid #f1f5f9;
+                    margin: 20px 0;
+                }}
+                .warning-text {{
+                    font-size: 0.8rem;
+                    color: #94a3b8;
+                    text-align: center;
+                    margin-top: 8px;
+                }}
+                .footer {{
+                    padding: 16px 28px;
+                    border-top: 1px solid #f1f5f9;
+                    text-align: center;
+                    font-size: 0.7rem;
+                    color: #94a3b8;
+                }}
+                .footer .gold-text {{
+                    color: #c9a13b;
+                }}
+                @media (max-width: 480px) {{
+                    .email-wrapper {{
+                        padding: 10px;
+                    }}
+                    .header {{
+                        padding: 20px 16px;
+                    }}
+                    .body {{
+                        padding: 20px 16px;
+                    }}
+                    .btn-primary {{
+                        padding: 10px 20px;
+                        font-size: 0.85rem;
+                        display: block;
+                        width: 100%;
+                        text-align: center;
+                    }}
+                    .greeting {{
+                        font-size: 1rem;
+                    }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="email-wrapper">
+                <div class="email-container">
+                    <div class="header">
+                        <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" class="logo-img">
+                        <h2>ГБУ ДПО <span class="gold">«ИРО ЧР»</span></h2>
+                    </div>
+                    
+                    <div class="body">
+                        <div class="greeting">Здравствуйте, {full_name}!</div>
+                        <div class="greeting-sub">Вы запросили сброс пароля на платформе повышения квалификации ИРО ЧР.</div>
+                        
+                        <div class="alert-box">
+                            <strong>🔐 ВАЖНО!</strong> Ссылка для сброса пароля действует 60 минут.
+                        </div>
+                        
+                        <p style="color: #1a1a2e; font-weight: 500;">
+                            Чтобы установить новый пароль, нажмите на кнопку ниже:
+                        </p>
+                        
+                        <div class="btn-wrapper">
+                            <a href="{reset_link}" class="btn-primary">
+                                🔑 Сбросить пароль
+                            </a>
+                        </div>
+                        
+                        <p style="text-align: center; font-size: 0.85rem; color: #94a3b8; margin-top: 8px;">
+                            Или перейдите по ссылке:<br>
+                            <a href="{reset_link}" style="word-break: break-all; color: #c9a13b; text-decoration: none;">
+                                {reset_link}
+                            </a>
+                        </p>
+                        
+                        <hr class="divider">
+                        
+                        <div class="info-text">
+                            <strong>⚠️ Если вы не запрашивали сброс пароля</strong><br>
+                            Пожалуйста, проигнорируйте это письмо. Ваш пароль останется без изменений.
+                            Если вы подозреваете, что кто-то пытается получить доступ к вашему аккаунту,
+                            свяжитесь с поддержкой: <a href="mailto:ipkro-chr@mail.ru">ipkro-chr@mail.ru</a>
+                        </div>
+                        
+                        <div class="warning-text">
+                            <i>💡</i> Ссылка действительна 60 минут. После истечения срока запросите сброс повторно.
+                        </div>
+                    </div>
+                    
+                    <div class="footer">
+                        © {datetime.now().year} <span class="gold-text">ИРО ЧР</span> — Институт развития образования Чеченской Республики
+                        <br>
+                        <span style="font-size: 0.65rem; opacity: 0.6;">Это письмо сгенерировано автоматически, пожалуйста, не отвечайте на него.</span>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        text_content = f"""
+        ========================================
+        ГБУ ДПО «ИРО ЧР» - Институт развития образования Чеченской Республики
+        ========================================
+
+        Здравствуйте, {full_name}!
+
+        Вы запросили сброс пароля на платформе повышения квалификации ИРО ЧР.
+
+        ⚠️ ВАЖНО! Ссылка для сброса пароля действует 60 минут.
+
+        Чтобы установить новый пароль, перейдите по ссылке:
+        {reset_link}
+
+        ----------------------------------------------------
+        Если вы не запрашивали сброс пароля, пожалуйста, проигнорируйте это письмо.
+        Ваш пароль останется без изменений.
+
+        Если вы подозреваете, что кто-то пытается получить доступ к вашему аккаунту,
+        свяжитесь с поддержкой: ipkro-chr@mail.ru
+
+        💡 Ссылка действительна 60 минут. После истечения срока запросите сброс повторно.
+        ========================================
+
+        © {datetime.now().year} ИРО ЧР - Институт развития образования Чеченской Республики
+        Это письмо сгенерировано автоматически, пожалуйста, не отвечайте на него.
+        """
+        
+        return self.send_email(to_email, subject, html_content, text_content)
 
 
 # Создаем глобальный экземпляр сервиса

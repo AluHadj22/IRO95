@@ -3,16 +3,492 @@
 {% block title %}Вход - ИРО ЧР{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/login.css">
+<style>
+/* ============================================================
+   СТИЛИ ДЛЯ СТРАНИЦЫ ВХОДА (ВСТРОЕННЫЕ)
+   ============================================================ */
+
+:root {
+    --primary: #1a4f7a;
+    --primary-dark: #0d3b5e;
+    --primary-light: #3a7ca5;
+    --primary-gradient: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    --dark: #0d1b2a;
+    --light: #f7fafc;
+    --gray: #718096;
+    --white: #ffffff;
+    --border: #e2e8f0;
+}
+
+/* ===== ШРИФТЫ ===== */
+.login-page * {
+    font-family: 'Inter', sans-serif;
+}
+
+.login-page h1,
+.login-page h2,
+.login-page h3,
+.login-page h4,
+.login-page h5,
+.login-page .hero-badge,
+.login-page .card-header h3 {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.login-page .lead,
+.login-page .card-header p,
+.login-page .register-link,
+.login-page .forgot-link,
+.login-page .demo-hint {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-size: 1.05rem !important;
+}
+
+/* ===== ГЕРОЙ-СЕКЦИЯ (СВЕТЛАЯ) ===== */
+.login-hero {
+    background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
+    padding: 50px 0 40px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 2px solid rgba(26, 79, 122, 0.08);
+}
+
+.login-hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.04) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: floatHero 20s ease-in-out infinite;
+}
+
+.login-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.03) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: floatHero 15s ease-in-out infinite reverse;
+}
+
+@keyframes floatHero {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.05); }
+}
+
+.login-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-icon {
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.hero-icon svg path {
+    fill: var(--primary);
+}
+
+.hero-badge {
+    display: inline-block;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
+    padding: 8px 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(26, 79, 122, 0.08);
+    margin-bottom: 16px;
+}
+
+.login-hero h1 {
+    color: #0d1b2a;
+    font-size: 3rem;
+}
+
+.login-hero h1 .gold {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-style: italic !important;
+    color: var(--primary);
+    letter-spacing: 0.03em !important;
+}
+
+.login-hero .lead {
+    color: #1a2a3a;
+    opacity: 0.7;
+    font-size: 1.2rem;
+    font-style: italic;
+}
+
+/* ===== КАРТОЧКА ВХОДА ===== */
+.login-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.login-card:hover {
+    border-color: rgba(26, 79, 122, 0.1);
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.04);
+}
+
+.login-card .card-header {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 28px 24px 20px;
+    border: none;
+    text-align: center;
+}
+
+.login-card .card-header .header-icon {
+    font-size: 2.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+}
+
+.login-card .card-header h3 {
+    color: white;
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+}
+
+.login-card .card-header p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.login-card .card-body {
+    padding: 28px 24px;
+}
+
+/* ===== ФОРМА ===== */
+.form-label {
+    font-weight: 500;
+    color: var(--dark);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.form-label i {
+    color: var(--primary);
+    margin-right: 6px;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26, 79, 122, 0.1);
+    outline: none;
+    background: white;
+}
+
+.form-control::placeholder {
+    color: var(--gray);
+    opacity: 0.5;
+}
+
+/* ===== КНОПКА ПОКАЗА ПАРОЛЯ ===== */
+.input-group .btn-outline-secondary {
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--gray);
+    transition: all 0.3s ease;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background: rgba(26, 79, 122, 0.06);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.input-group .btn-outline-secondary:focus {
+    box-shadow: none;
+}
+
+.input-group .form-control {
+    border-radius: 10px 0 0 10px;
+}
+
+.input-group .form-control:focus {
+    border-color: var(--primary);
+}
+
+.input-group .form-control:focus + .btn-outline-secondary {
+    border-color: var(--primary);
+}
+
+/* ===== ССЫЛКА "ЗАБЫЛИ ПАРОЛЬ?" ===== */
+.forgot-link {
+    display: block;
+    text-align: right;
+    margin-top: 4px;
+    margin-bottom: 16px;
+}
+
+.forgot-link a {
+    color: var(--gray);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+}
+
+.forgot-link a:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.forgot-link a i {
+    font-size: 0.75rem;
+    margin-right: 4px;
+}
+
+/* ===== КНОПКА ВХОДА ===== */
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.5s ease;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
+}
+
+.btn-login:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-login:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ===== РАЗДЕЛИТЕЛЬ ===== */
+.login-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--gray);
+    font-size: 0.8rem;
+    margin: 20px 0 16px;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+}
+
+.login-divider::before {
+    margin-right: 16px;
+}
+
+.login-divider::after {
+    margin-left: 16px;
+}
+
+/* ===== ССЫЛКА РЕГИСТРАЦИИ ===== */
+.register-link {
+    color: var(--gray);
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.register-link a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.register-link a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+/* ===== ПОДСКАЗКА ===== */
+.demo-hint {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(26, 79, 122, 0.04);
+    border-radius: 10px;
+    border-left: 3px solid var(--primary);
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-top: 4px;
+}
+
+.demo-hint i {
+    color: var(--primary);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 768px) {
+    .login-hero {
+        padding: 40px 0 30px;
+    }
+    .login-hero h1 {
+        font-size: 2.2rem;
+    }
+    .login-hero .lead {
+        font-size: 1.1rem;
+    }
+    .login-card .card-header {
+        padding: 22px 16px 16px;
+    }
+    .login-card .card-header .header-icon {
+        font-size: 2.2rem;
+    }
+    .login-card .card-header h3 {
+        font-size: 1.2rem;
+    }
+    .login-card .card-body {
+        padding: 22px 16px;
+    }
+    .form-control {
+        font-size: 0.85rem;
+        padding: 8px 14px;
+    }
+    .btn-login {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+    .forgot-link a {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-hero {
+        padding: 30px 0 20px;
+    }
+    .login-hero h1 {
+        font-size: 1.8rem;
+    }
+    .login-hero .lead {
+        font-size: 0.95rem;
+    }
+    .hero-badge {
+        font-size: 0.65rem !important;
+        padding: 6px 18px;
+    }
+    .hero-icon svg {
+        width: 44px;
+        height: 44px;
+    }
+    .login-card .card-header {
+        padding: 18px 12px 12px;
+    }
+    .login-card .card-header .header-icon {
+        font-size: 1.8rem;
+    }
+    .login-card .card-header h3 {
+        font-size: 1rem;
+    }
+    .login-card .card-header p {
+        font-size: 0.85rem;
+    }
+    .login-card .card-body {
+        padding: 18px 12px;
+    }
+    .form-label {
+        font-size: 0.8rem;
+    }
+    .form-control {
+        font-size: 0.8rem;
+        padding: 7px 12px;
+    }
+    .btn-login {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    .register-link {
+        font-size: 0.85rem;
+    }
+    .forgot-link a {
+        font-size: 0.75rem;
+    }
+    .demo-hint {
+        font-size: 0.75rem;
+        padding: 10px 12px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция -->
+<!-- Герой-секция (светлая) -->
 <div class="login-hero">
     <div class="container text-center">
         <div class="hero-icon">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="#f9d976" opacity="0.95"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="#1a4f7a" opacity="0.9"/>
             </svg>
         </div>
         <div class="hero-badge">Система дистанционного обучения</div>
@@ -23,7 +499,7 @@
     </div>
 </div>
 
-<div class="container mt-4 mb-5">
+<div class="container mt-4 mb-5 login-page">
     <div class="row justify-content-center">
         <div class="col-md-5">
             <div class="card login-card">
@@ -40,19 +516,27 @@
                             <label class="form-label" for="email">
                                 <i class="bi bi-envelope"></i> Email
                             </label>
-                            <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required>
+                            <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required autocomplete="email">
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="password">
                                 <i class="bi bi-lock"></i> Пароль
                             </label>
                             <div class="input-group">
-                                <input type="password" class="form-control" id="password" placeholder="••••••" required>
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <input type="password" class="form-control" id="password" placeholder="••••••" required autocomplete="current-password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Показать/скрыть пароль">
                                     <i class="bi bi-eye" id="passwordIcon"></i>
                                 </button>
                             </div>
                         </div>
+                        
+                        <!-- ✅ ССЫЛКА "ЗАБЫЛИ ПАРОЛЬ?" -->
+                        <div class="forgot-link">
+                            <a href="/forgot-password">
+                                <i class="bi bi-question-circle"></i> Забыли пароль?
+                            </a>
+                        </div>
+                        
                         <button type="submit" class="btn-login" id="loginBtn">
                             <i class="bi bi-box-arrow-in-right me-2"></i>Войти
                         </button>

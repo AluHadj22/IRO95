@@ -4,54 +4,187 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="/static/css/index.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
+<style>
+    /* КАЛЛИГРАФИЧЕСКИЕ ШРИФТЫ - УВЕЛИЧЕННЫЙ РАЗМЕР И НАСЫЩЕННОСТЬ */
+    .hero-title {
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-weight: 700;
+        font-size: 3.8rem;
+        letter-spacing: 0.02em;
+        line-height: 1.1;
+        color: #0d1b2a;
+        text-shadow: 0 1px 2px rgba(255,255,255,0.3);
+    }
+    .hero-title .accent {
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-weight: 700;
+        font-style: italic;
+        color: var(--primary);
+        letter-spacing: 0.03em;
+    }
+    .hero-subtitle {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-weight: 500;
+        font-size: 1.9rem;
+        font-style: italic;
+        letter-spacing: 0.04em;
+        opacity: 0.85;
+        color: #1a2a3a;
+    }
+    .hero-region {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-weight: 400;
+        font-size: 1.4rem;
+        font-style: italic;
+        letter-spacing: 0.06em;
+        opacity: 0.6;
+        color: #2a3a4a;
+    }
+    .section-title {
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-weight: 700;
+        font-size: 2.4rem;
+        letter-spacing: 0.03em;
+        color: #0d1b2a;
+    }
+    .section-subtitle {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-size: 1.3rem;
+        font-style: italic;
+        letter-spacing: 0.04em;
+        color: #3a4a5a;
+        font-weight: 500;
+    }
+    .card-title {
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-weight: 700;
+        font-size: 1.15rem;
+        letter-spacing: 0.02em;
+        color: #0d1b2a;
+    }
+    .card-text {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        letter-spacing: 0.02em;
+        color: #3a4a5a;
+        font-weight: 500;
+    }
+    .category-card h5 {
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-weight: 700;
+        font-size: 1.15rem;
+        letter-spacing: 0.02em;
+        color: #0d1b2a;
+    }
+    .category-card p {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-size: 1rem;
+        line-height: 1.6;
+        letter-spacing: 0.02em;
+        color: #4a5a6a;
+        font-weight: 500;
+    }
+    .info-text {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-size: 1.05rem;
+        font-style: italic;
+        letter-spacing: 0.03em;
+        line-height: 1.8;
+        color: #3a4a5a;
+        font-weight: 500;
+    }
+    .accent-badge {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-weight: 700;
+        font-size: 0.8rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        background: rgba(26, 79, 122, 0.1);
+        color: var(--primary);
+        padding: 8px 28px;
+        border-radius: 4px;
+        border: 1px solid rgba(26, 79, 122, 0.08);
+    }
+    .stat-number {
+        font-family: 'Playfair Display', 'Georgia', serif;
+        font-weight: 700;
+        font-size: 2.6rem;
+        letter-spacing: 0.03em;
+    }
+    .stat-label {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-size: 0.95rem;
+        font-style: italic;
+        letter-spacing: 0.04em;
+        opacity: 0.85;
+    }
+    .btn-italic {
+        font-family: 'Cormorant Garamond', 'Georgia', serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.04em;
+        font-style: italic;
+    }
+    .hero-section h1 {
+        color: #0d1b2a;
+    }
+    .hero-section .lead {
+        color: #1a2a3a;
+        opacity: 0.85;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- ===== ГЕРОЙ-СЕКЦИЯ В СТИЛЕ ИРО ЧР ===== -->
+<!-- ===== ГЕРОЙ-СЕКЦИЯ (СВЕТЛАЯ) ===== -->
 <div class="hero-section">
     <div class="container text-center position-relative hero-content">
         <div class="hero-icon">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#f9d976" opacity="0.95"/>
-                <circle cx="12" cy="12" r="2" fill="#f9d976" opacity="0.3"/>
+            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#1a4f7a" opacity="0.9"/>
             </svg>
         </div>
-        <div class="gold-badge mb-3">★ Система дистанционного обучения</div>
-        <h1 class="display-4 fw-bold mb-3 animate__animated animate__fadeInUp">
-            Добро пожаловать в <span class="gold">ИРО ЧР</span>
+        <div class="accent-badge mb-3">Система дистанционного обучения</div>
+        <h1 class="hero-title mb-3">
+            Добро пожаловать в <span class="accent">ИРО ЧР</span>
         </h1>
-        <p class="lead fs-4 mb-2" style="opacity: 0.9; font-weight: 300;">Центр повышения квалификации педагогических работников</p>
-        <p class="fs-5 mb-4" style="opacity: 0.7;">Чеченской Республики</p>
+        <p class="hero-subtitle mb-2">
+            Центр повышения квалификации педагогических работников
+        </p>
+        <p class="hero-region mb-4">
+            Чеченской Республики
+        </p>
         <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a href="/courses" class="btn btn-primary btn-lg">
-                <i class="bi bi-book me-2"></i>Смотреть курсы
+            <a href="/courses" class="btn btn-primary btn-lg btn-italic px-5">
+                <i class="bi bi-book me-2"></i>Каталог курсов
             </a>
-            <a href="/register" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-person-plus me-2"></i>Начать обучение
+            <a href="/register" class="btn btn-outline-primary btn-lg btn-italic px-4">
+                <i class="bi bi-person-plus me-2"></i>Регистрация
             </a>
         </div>
     </div>
-    <!-- Волны внизу -->
     <div class="hero-waves"></div>
 </div>
 
 <!-- ===== КАТЕГОРИИ ===== -->
 <div class="container mt-5">
     <div class="text-center mb-5" data-aos="fade-up">
-        <h2 class="fw-bold" style="color: var(--dark);">
-            <span style="color: var(--primary);">★</span> Популярные направления
+        <h2 class="section-title" style="color: #0d1b2a;">
+            Популярные направления
         </h2>
-        <p class="text-muted" style="font-size: 1.05rem;">Выберите интересующую вас категорию</p>
+        <p class="section-subtitle">Выберите интересующую вас категорию</p>
     </div>
     <div class="row g-4">
         {% for category in categories %}
         <div class="col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
             <div class="category-card h-100">
                 <i class="bi bi-folder-fill" style="font-size: 2.8rem; color: var(--primary);"></i>
-                <h5 class="mt-3 fw-bold">{{ category.name }}</h5>
-                <p class="text-muted small" style="line-height: 1.5;">{{ category.description[:60] if category.description else 'Курсы повышения квалификации' }}</p>
-                <a href="/courses?category={{ category.id }}" class="btn btn-outline-primary btn-sm mt-2">
-                    Смотреть курсы <i class="bi bi-arrow-right"></i>
+                <h5 class="mt-3">{{ category.name }}</h5>
+                <p>{{ category.description[:60] if category.description else 'Курсы повышения квалификации' }}</p>
+                <a href="/courses?category={{ category.id }}" class="btn btn-outline-primary btn-sm mt-2" style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.03em;">
+                    Подробнее <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -62,10 +195,10 @@
 <!-- ===== НОВЫЕ КУРСЫ ===== -->
 <div class="container mt-5 mb-5">
     <div class="text-center mb-5" data-aos="fade-up">
-        <h2 class="fw-bold" style="color: var(--dark);">
-            <span style="color: var(--primary);">✦</span> Новые курсы
+        <h2 class="section-title" style="color: #0d1b2a;">
+            Новые курсы
         </h2>
-        <p class="text-muted" style="font-size: 1.05rem;">Актуальные программы повышения квалификации</p>
+        <p class="section-subtitle">Актуальные программы повышения квалификации</p>
     </div>
     <div class="row g-4">
         {% for course in courses %}
@@ -74,22 +207,22 @@
                 {% if course.image_url %}
                 <img src="{{ course.image_url }}" class="course-card-img" alt="{{ course.title }}" loading="lazy">
                 {% else %}
-                <div class="course-card-img d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #fef9e7, #fdf2d0);">
-                    <i class="bi bi-book fs-1" style="color: var(--primary);"></i>
+                <div class="course-card-img d-flex align-items-center justify-content-center" style="background: #f0f4f8;">
+                    <i class="bi bi-book fs-1" style="color: var(--primary); opacity: 0.3;"></i>
                 </div>
                 {% endif %}
                 <div class="card-body">
-                    <span class="badge badge-gold mb-2">{{ course.category.name if course.category else "Обучение" }}</span>
-                    <h5 class="card-title fw-bold">{{ course.title }}</h5>
-                    <p class="card-text text-muted small" style="line-height: 1.6;">
+                    <span class="badge badge-primary mb-2" style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;">{{ course.category.name if course.category else "Обучение" }}</span>
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <p class="card-text">
                         {{ course.short_description[:80] if course.short_description else (course.description[:80] if course.description else "Описание курса") }}...
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <a href="/course/{{ course.id }}" class="btn btn-primary btn-sm">
+                        <a href="/course/{{ course.id }}" class="btn btn-primary btn-sm" style="font-family: 'Cormorant Garamond', serif; font-weight: 700; font-size: 0.9rem; letter-spacing: 0.03em;">
                             Подробнее <i class="bi bi-arrow-right"></i>
                         </a>
-                        <span style="font-size: 0.7rem; color: var(--gray);">
-                            <i class="bi bi-clock"></i> Новинка
+                        <span style="font-family: 'Cormorant Garamond', serif; font-size: 0.75rem; font-style: italic; color: #5a6a7a; font-weight: 500;">
+                            <i class="bi bi-clock" style="font-size: 0.6rem;"></i> Новый
                         </span>
                     </div>
                 </div>
@@ -98,48 +231,45 @@
         {% endfor %}
     </div>
     <div class="text-center mt-4" data-aos="fade-up">
-        <a href="/courses" class="btn btn-primary btn-lg px-5">
+        <a href="/courses" class="btn btn-primary btn-lg px-5 btn-italic">
             Все курсы <i class="bi bi-arrow-right ms-2"></i>
         </a>
     </div>
 </div>
 
-<!-- ===== ДОПОЛНИТЕЛЬНЫЙ БЛОК: ИНФОРМАЦИЯ ОБ ИНСТИТУТЕ ===== -->
+<!-- ===== ИНФОРМАЦИЯ ОБ ИНСТИТУТЕ ===== -->
 <div class="container mt-4 mb-5" data-aos="fade-up">
-    <div class="card p-4 p-md-5" style="background: var(--white); border-left: 6px solid var(--primary); border-radius: 20px;">
+    <div class="card p-4 p-md-5" style="background: var(--white); border-left: 4px solid var(--primary); border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <h3 style="color: var(--dark); font-weight: 700;">
-                    <span style="color: var(--primary);">🏛</span> ГБУ ДПО «Институт развития образования<br>Чеченской Республики»
+                <h3 style="color: #0d1b2a; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; letter-spacing: 0.02em;">
+                    ГБУ ДПО «Институт развития образования Чеченской Республики»
                 </h3>
-                <p style="color: var(--gray); font-size: 1rem; line-height: 1.8; max-width: 90%;">
+                <p class="info-text" style="color: #3a4a5a; max-width: 90%; font-weight: 500;">
                     Институт осуществляет образовательную деятельность по программам повышения квалификации 
                     и профессиональной переподготовки педагогических работников с применением электронного 
                     обучения и дистанционных технологий.
                 </p>
             </div>
             <div class="col-lg-4 text-center mt-4 mt-lg-0">
-                <div style="background: var(--primary-gradient); border-radius: 20px; padding: 25px; color: white; box-shadow: 0 8px 24px rgba(201,161,59,0.2);">
-                    <div style="font-size: 2.5rem; font-weight: 800;">{{ courses|length }}+</div>
-                    <div style="opacity: 0.9; font-size: 0.9rem;">активных курсов</div>
+                <div style="background: var(--primary-gradient); border-radius: 10px; padding: 20px; color: white;">
+                    <div class="stat-number">{{ courses|length }}+</div>
+                    <div class="stat-label">активных курсов</div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===== ПОДКЛЮЧАЕМ AOS ДЛЯ ЭТОЙ СТРАНИЦЫ ===== -->
 <script>
     try {
         if (typeof AOS !== 'undefined') {
             AOS.init({
-                duration: 800,
+                duration: 600,
                 once: true,
-                offset: 50
+                offset: 40
             });
         }
-    } catch(e) {
-        console.warn('AOS init error:', e);
-    }
+    } catch(e) {}
 </script>
 {% endblock %}

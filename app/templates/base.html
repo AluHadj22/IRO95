@@ -5,47 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ГБУ ДПО «ИРО ЧР» - Повышение квалификации{% endblock %}</title>
     
-    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <!-- Yandex Maps API - АСИНХРОННАЯ ЗАГРУЗКА (НЕ БЛОКИРУЕТ СТРАНИЦУ) -->
     <script async defer src="https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU" type="text/javascript"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
-    <!-- ============================================================
-         ✅ ОСНОВНЫЕ СТИЛИ ПЛАТФОРМЫ (ПЕРЕНЕСЕНЫ ВО ВНЕШНИЙ ФАЙЛ)
-         ============================================================ -->
     <link rel="stylesheet" href="/static/css/main.css">
-    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
-<!-- Тосты -->
 <div class="toast-container"></div>
 
-<!-- ============================================================
-     КРАСИВЫЙ ПРОЗРАЧНЫЙ НАВБАР (glassmorphism)
-     ============================================================ -->
 <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
     <div class="container">
         <a class="navbar-brand" href="/">
             <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР">
             <span>
-                <span class="title fw-bold">ГБУ ДПО <span class="gold">«ИРО ЧР»</span></span>
+                <span class="title fw-bold">ГБУ ДПО <span class="accent">«ИРО ЧР»</span></span>
                 <span class="subtitle">Институт развития образования Чеченской Республики</span>
             </span>
         </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -61,27 +46,24 @@
     </div>
 </nav>
 
-<!-- Основной контент -->
 <main>
     {% block content %}
-    <!-- ===== ГЕРОЙ-СЕКЦИЯ (ПРИМЕР) ===== -->
     <section class="hero-section">
         <div class="hero-waves"></div>
         <div class="container hero-content">
             <div class="row align-items-center">
                 <div class="col-lg-8" data-aos="fade-right">
                     <div class="hero-icon">
-                        <svg width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#f9d976"/>
-                            <circle cx="12" cy="12" r="2" fill="#f9d976" opacity="0.3"/>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#1a4f7a"/>
                         </svg>
                     </div>
-                    <div class="gold-badge mb-3">★ Система дистанционного обучения</div>
+                    <div class="accent-badge mb-3">Система дистанционного обучения</div>
                     <h1 class="display-4 fw-bold mb-3">
-                        ГБУ ДПО <span class="gold">«Институт развития образования</span><br>
-                        <span class="gold">Чеченской Республики»</span>
+                        ГБУ ДПО <span class="accent">«Институт развития образования</span><br>
+                        <span class="accent">Чеченской Республики»</span>
                     </h1>
-                    <p class="lead mb-4" style="opacity: 0.9; font-weight: 300;">
+                    <p class="lead mb-4" style="opacity: 0.7; font-weight: 300; color: var(--dark);">
                         Повышение квалификации и профессиональная переподготовка<br>
                         педагогических работников
                     </p>
@@ -89,35 +71,33 @@
                         <a href="/courses" class="btn btn-primary btn-lg px-5">
                             <i class="bi bi-book me-2"></i>Каталог курсов
                         </a>
-                        <a href="/map" class="btn btn-outline-light btn-lg px-4">
+                        <a href="/map" class="btn btn-outline-primary btn-lg px-4">
                             <i class="bi bi-geo-alt me-2"></i>Как нас найти
                         </a>
                     </div>
                 </div>
                 <div class="col-lg-4 d-none d-lg-block" data-aos="fade-left">
-                    <div style="background: rgba(255,255,255,0.05); border-radius: 20px; padding: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(201,161,59,0.15);">
-                        <div style="display: flex; flex-direction: column; gap: 16px;">
-                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
-                                <span style="font-size: 1.5rem;">📍</span>
-                                <span style="font-size: 0.9rem;">г. Грозный, ул. Лермонтова, 2</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
-                                <span style="font-size: 1.5rem;">📞</span>
-                                <span style="font-size: 0.9rem;">+7 (8712) 21-22-24</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
-                                <span style="font-size: 1.5rem;">✉</span>
-                                <span style="font-size: 0.9rem;">ipkro-chr@mail.ru</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.8);">
-                                <span style="font-size: 1.5rem;">🕐</span>
-                                <span style="font-size: 0.9rem;">Пн–пт 9:00–18:00</span>
-                            </div>
-                            <hr style="border-color: rgba(255,255,255,0.06); margin: 4px 0;">
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                <span style="background: rgba(201,161,59,0.15); padding: 4px 16px; border-radius: 20px; font-size: 0.7rem; color: #f9d976;">Повышение квалификации</span>
-                                <span style="background: rgba(201,161,59,0.15); padding: 4px 16px; border-radius: 20px; font-size: 0.7rem; color: #f9d976;">Профпереподготовка</span>
-                            </div>
+                    <div class="info-card">
+                        <div class="info-item">
+                            <span class="info-icon">📍</span>
+                            <span>г. Грозный, ул. Лермонтова, 2</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">📞</span>
+                            <span>+7 (8712) 21-22-24</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">✉</span>
+                            <span>ipkro-chr@mail.ru</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-icon">🕐</span>
+                            <span>Пн–пт 9:00–18:00</span>
+                        </div>
+                        <hr style="border-color: rgba(26,79,122,0.06); margin: 8px 0;">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge-tag">Повышение квалификации</span>
+                            <span class="badge-tag">Профпереподготовка</span>
                         </div>
                     </div>
                 </div>
@@ -125,37 +105,36 @@
         </div>
     </section>
 
-    <!-- ===== ИНФОРМАЦИОННЫЕ КАРТОЧКИ ===== -->
     <section class="container py-5">
         <div class="row g-4">
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="card h-100 p-4 text-center">
-                    <div style="width: 60px; height: 60px; background: rgba(201,161,59,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                        <i class="bi bi-mortarboard-fill" style="font-size: 2rem; color: var(--primary);"></i>
+                <div class="card feature-card h-100 p-4 text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-mortarboard-fill"></i>
                     </div>
                     <h5 class="fw-bold">Образовательная деятельность</h5>
                     <p class="text-muted small">Реализуем программы повышения квалификации и профессиональной переподготовки</p>
-                    <span class="badge badge-gold mt-2">Подробнее →</span>
+                    <span class="badge badge-primary mt-2">Подробнее →</span>
                 </div>
             </div>
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="card h-100 p-4 text-center">
-                    <div style="width: 60px; height: 60px; background: rgba(201,161,59,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                        <i class="bi bi-people-fill" style="font-size: 2rem; color: var(--primary);"></i>
+                <div class="card feature-card h-100 p-4 text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-people-fill"></i>
                     </div>
                     <h5 class="fw-bold">Квалифицированные кадры</h5>
                     <p class="text-muted small">Опытные преподаватели и эксперты в области образования</p>
-                    <span class="badge badge-gold mt-2">Подробнее →</span>
+                    <span class="badge badge-primary mt-2">Подробнее →</span>
                 </div>
             </div>
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="card h-100 p-4 text-center">
-                    <div style="width: 60px; height: 60px; background: rgba(201,161,59,0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-                        <i class="bi bi-laptop-fill" style="font-size: 2rem; color: var(--primary);"></i>
+                <div class="card feature-card h-100 p-4 text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-laptop-fill"></i>
                     </div>
                     <h5 class="fw-bold">Дистанционное обучение</h5>
                     <p class="text-muted small">Современные технологии для эффективного обучения в любой точке</p>
-                    <span class="badge badge-gold mt-2">Подробнее →</span>
+                    <span class="badge badge-primary mt-2">Подробнее →</span>
                 </div>
             </div>
         </div>
@@ -163,59 +142,53 @@
     {% endblock %}
 </main>
 
-<!-- Футер -->
-<footer class="footer">
+<!-- ===== ФУТЕР (СВЕТЛО-СЕРЫЙ) ===== -->
+<footer class="footer-light">
     <div class="container py-5">
         <div class="row">
             <div class="col-md-4 mb-4">
-                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 60px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 16px rgba(201,161,59,0.15);">
-                <h5>ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
-                <p class="small" style="opacity: 0.6;">Повышение квалификации педагогических работников</p>
+                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 56px; margin-bottom: 15px; border-radius: 8px;">
+                <h5 style="color: var(--dark);">ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
+                <p class="small" style="color: var(--gray); opacity: 0.7;">Повышение квалификации педагогических работников</p>
                 <div class="social-icons mt-3">
-                    <a href="https://vk.com/public215702903" target="_blank" title="ВКонтакте" class="vk-link">ВК</a>
-                    <a href="https://govzalla.ru/" target="_blank" title="Сайт организации"><i class="bi bi-globe2"></i></a>
+                    <a href="https://vk.com/public215702903" target="_blank" title="ВКонтакте" class="vk-link" style="color: var(--gray); border-color: var(--border);">ВК</a>
+                    <a href="https://govzalla.ru/" target="_blank" title="Сайт организации" style="color: var(--gray); border-color: var(--border);"><i class="bi bi-globe2"></i></a>
                 </div>
             </div>
             <div class="col-md-3 mb-4">
-                <h5>Контакты</h5>
-                <p class="small mb-2"><i class="bi bi-geo-alt me-2" style="color: var(--primary-light);"></i>г. Грозный, ул. Лермонтова, 2</p>
-                <p class="small mb-2"><i class="bi bi-telephone me-2" style="color: var(--primary-light);"></i>+7 (8712) 21-22-24</p>
-                <p class="small mb-2"><i class="bi bi-envelope me-2" style="color: var(--primary-light);"></i>ipkro-chr@mail.ru</p>
-                <p class="small"><i class="bi bi-clock me-2" style="color: var(--primary-light);"></i>Пн-Пт: 9:00 - 18:00</p>
+                <h5 style="color: var(--dark);">Контакты</h5>
+                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-geo-alt me-2" style="color: var(--primary);"></i>г. Грозный, ул. Лермонтова, 2</p>
+                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-telephone me-2" style="color: var(--primary);"></i>+7 (8712) 21-22-24</p>
+                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-envelope me-2" style="color: var(--primary);"></i>ipkro-chr@mail.ru</p>
+                <p class="small" style="color: var(--gray);"><i class="bi bi-clock me-2" style="color: var(--primary);"></i>Пн-Пт: 9:00 - 18:00</p>
             </div>
             <div class="col-md-5 mb-4">
-                <h5>Мы на карте</h5>
+                <h5 style="color: var(--dark);">Мы на карте</h5>
                 <a href="/map" class="map-card-link">
-                    <div class="map-container" id="footer-map" style="width: 100%; height: 200px; border-radius: 12px; cursor: pointer;"></div>
+                    <div class="map-container" id="footer-map" style="width: 100%; height: 200px; border-radius: 8px; cursor: pointer;"></div>
                 </a>
-                <p class="small mt-2 text-center">
-                    <i class="bi bi-geo-alt me-1" style="color: var(--primary-light);"></i> г. Грозный, ул. Лермонтова, 2 
-                    <a href="/map" class="text-white-50 ms-2" style="opacity: 0.6;">(открыть на полный экран →)</a>
+                <p class="small mt-2 text-center" style="color: var(--gray);">
+                    <i class="bi bi-geo-alt me-1" style="color: var(--primary);"></i> г. Грозный, ул. Лермонтова, 2 
+                    <a href="/map" class="ms-2" style="color: var(--gray); opacity: 0.6;">(открыть на полный экран →)</a>
                 </p>
             </div>
         </div>
-        <hr class="my-3">
+        <hr style="border-color: var(--border);">
         <div class="row">
             <div class="col-md-12 text-center">
-                <p class="mb-0 small" style="opacity: 0.4;">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
+                <p class="mb-0 small" style="color: var(--gray); opacity: 0.5;">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
             </div>
         </div>
     </div>
 </footer>
 
-<!-- ============================================================
-     ЧАТ-БОТ — ВСПЛЫВАЮЩЕЕ ОКНО С ЧАСТЫМИ ВОПРОСАМИ
-     ============================================================ -->
 <div class="chatbot-container" id="chatbotContainer">
-    <!-- Кнопка-триггер -->
     <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Помощь">
         <i class="bi bi-chat-dots-fill"></i>
         <span class="chatbot-badge">?</span>
     </button>
 
-    <!-- Окно чата -->
     <div class="chatbot-window" id="chatbotWindow">
-        <!-- Шапка -->
         <div class="chatbot-header">
             <div class="chatbot-header-left">
                 <div class="chatbot-header-avatar">
@@ -231,15 +204,13 @@
             </button>
         </div>
 
-        <!-- Тело -->
         <div class="chatbot-body" id="chatbotBody">
             <div class="chatbot-greeting">
-                <span class="greeting-icon">👋</span>
+                <span class="greeting-icon"></span>
                 <h6>Здравствуйте!</h6>
                 <p>Выберите вопрос, чтобы получить ответ</p>
             </div>
 
-            <!-- Вопрос 1 -->
             <div class="chatbot-question" onclick="toggleQuestion(this)">
                 <div class="d-flex align-items-center">
                     <span class="q-icon"><i class="bi bi-search"></i></span>
@@ -255,7 +226,6 @@
                 </div>
             </div>
 
-            <!-- Вопрос 2 -->
             <div class="chatbot-question" onclick="toggleQuestion(this)">
                 <div class="d-flex align-items-center">
                     <span class="q-icon"><i class="bi bi-play-circle"></i></span>
@@ -272,7 +242,6 @@
                 </div>
             </div>
 
-            <!-- Вопрос 3 -->
             <div class="chatbot-question" onclick="toggleQuestion(this)">
                 <div class="d-flex align-items-center">
                     <span class="q-icon"><i class="bi bi-exclamation-triangle"></i></span>
@@ -288,7 +257,6 @@
                 </div>
             </div>
 
-            <!-- Вопрос 4 -->
             <div class="chatbot-question" onclick="toggleQuestion(this)">
                 <div class="d-flex align-items-center">
                     <span class="q-icon"><i class="bi bi-file-text"></i></span>
@@ -307,7 +275,6 @@
             </div>
         </div>
 
-        <!-- Футер -->
         <div class="chatbot-footer">
             <div class="chatbot-email">
                 <i class="bi bi-envelope me-1"></i>
@@ -319,10 +286,6 @@
 </div>
 
 <script>
-// ============================================================
-// ВСЕ ОШИБКИ ОБРАБОТАНЫ — СТРАНИЦА ЗАГРУЖАЕТСЯ МГНОВЕННО
-// ============================================================
-
 try {
     if (typeof AOS !== 'undefined') {
         AOS.init({
@@ -331,47 +294,29 @@ try {
             offset: 100
         });
     }
-} catch(e) {
-    console.warn('AOS init error:', e);
-}
+} catch(e) {}
 
-// ============================================================
-// ЭФФЕКТ ПРОЗРАЧНОГО НАВБАРА ПРИ СКРОЛЛЕ
-// ============================================================
 try {
     window.addEventListener('scroll', function() {
         try {
             const navbar = document.getElementById('mainNav');
             if (navbar) {
-                if (window.scrollY > 30) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
+                navbar.classList.toggle('scrolled', window.scrollY > 30);
             }
         } catch(e) {}
     }, { passive: true });
-} catch(e) {
-    console.warn('Navbar scroll error:', e);
-}
+} catch(e) {}
 
-// ============================================================
-// КООРДИНАТЫ
-// ============================================================
 const instituteCoords = [43.3181, 45.6941];
 const instituteAddress = "г. Грозный, ул. Лермонтова, 2";
 const institutePhone = "+7 (8712) 21-22-24";
 const instituteEmail = "ipkro-chr@mail.ru";
 const instituteHours = "Пн-Пт: 9:00 - 18:00";
 
-// ============================================================
-// КАРТЫ — ЗАГРУЖАЮТСЯ ТОЛЬКО КОГДА API ГОТОВ
-// ============================================================
 function initFooterMap() {
     try {
         const mapElement = document.getElementById('footer-map');
-        if (!mapElement) return;
-        if (typeof ymaps === 'undefined') return;
+        if (!mapElement || typeof ymaps === 'undefined') return;
         
         const map = new ymaps.Map('footer-map', {
             center: instituteCoords,
@@ -383,29 +328,29 @@ function initFooterMap() {
             hintContent: 'ГБУ ДПО «ИРО ЧР»',
             balloonContent: `
                 <div style="font-family: 'Inter', sans-serif; min-width: 200px;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #c9a13b; padding-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #1a4f7a; padding-bottom: 8px;">
                         <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 40px;" alt="logo">
-                        <strong style="color: #c9a13b; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
+                        <strong style="color: #1a4f7a; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
                     </div>
                     <p style="margin: 0 0 5px 0; font-size: 12px;">
                         <strong>Институт развития образования<br>Чеченской Республики</strong>
                     </p>
                     <hr style="margin: 8px 0;">
                     <p style="margin: 5px 0; font-size: 12px;">
-                        <i class="bi bi-geo-alt" style="color: #c9a13b;"></i> ${instituteAddress}<br>
-                        <i class="bi bi-telephone" style="color: #c9a13b;"></i> ${institutePhone}<br>
-                        <i class="bi bi-envelope" style="color: #c9a13b;"></i> ${instituteEmail}<br>
-                        <i class="bi bi-clock" style="color: #c9a13b;"></i> ${instituteHours}
+                        <i class="bi bi-geo-alt" style="color: #1a4f7a;"></i> ${instituteAddress}<br>
+                        <i class="bi bi-telephone" style="color: #1a4f7a;"></i> ${institutePhone}<br>
+                        <i class="bi bi-envelope" style="color: #1a4f7a;"></i> ${instituteEmail}<br>
+                        <i class="bi bi-clock" style="color: #1a4f7a;"></i> ${instituteHours}
                     </p>
                     <hr style="margin: 8px 0;">
-                    <a href="/map" style="color: #c9a13b; text-decoration: none; font-size: 12px; font-weight: 500;">
+                    <a href="/map" style="color: #1a4f7a; text-decoration: none; font-size: 12px; font-weight: 500;">
                         Подробная карта →
                     </a>
                 </div>
             `
         }, {
             preset: 'islands#circleIcon',
-            iconColor: '#c9a13b'
+            iconColor: '#1a4f7a'
         });
         
         map.geoObjects.add(placemark);
@@ -413,16 +358,13 @@ function initFooterMap() {
         window.addEventListener('resize', function() {
             try { map.container.fitToViewport(); } catch(e) {}
         });
-    } catch(e) {
-        console.warn('Footer map init error:', e);
-    }
+    } catch(e) {}
 }
 
 function initFullMap() {
     try {
         const mapElement = document.getElementById('full-map');
-        if (!mapElement) return;
-        if (typeof ymaps === 'undefined') return;
+        if (!mapElement || typeof ymaps === 'undefined') return;
         
         const map = new ymaps.Map('full-map', {
             center: instituteCoords,
@@ -435,7 +377,7 @@ function initFullMap() {
             balloonContentHeader: `
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 35px;" alt="logo">
-                    <strong style="color: #c9a13b; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
+                    <strong style="color: #1a4f7a; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
                 </div>
             `,
             balloonContentBody: `
@@ -443,19 +385,19 @@ function initFullMap() {
                     <p><strong>Институт развития образования<br>Чеченской Республики</strong></p>
                     <table style="width: 100%; font-size: 13px;">
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #c9a13b;"></i> Адрес:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #1a4f7a;"></i> Адрес:</td>
                             <td style="padding: 4px 0;">${instituteAddress}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #c9a13b;"></i> Телефон:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #1a4f7a;"></i> Телефон:</td>
                             <td style="padding: 4px 0;">${institutePhone}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #c9a13b;"></i> Email:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #1a4f7a;"></i> Email:</td>
                             <td style="padding: 4px 0;">${instituteEmail}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #c9a13b;"></i> Часы работы:</td>
+                            <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #1a4f7a;"></i> Часы работы:</td>
                             <td style="padding: 4px 0;">${instituteHours}</td>
                         </tr>
                     </table>
@@ -468,14 +410,14 @@ function initFullMap() {
             `,
             balloonContentFooter: `
                 <div style="margin-top: 10px; text-align: center;">
-                    <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #c9a13b; text-decoration: none;">
+                    <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #1a4f7a; text-decoration: none;">
                         🚗 Построить маршрут →
                     </a>
                 </div>
             `
         }, {
             preset: 'islands#circleIcon',
-            iconColor: '#c9a13b'
+            iconColor: '#1a4f7a'
         });
         
         map.geoObjects.add(placemark);
@@ -494,14 +436,9 @@ function initFullMap() {
         });
         
         map.controls.add(routeButton, { float: 'right' });
-    } catch(e) {
-        console.warn('Full map init error:', e);
-    }
+    } catch(e) {}
 }
 
-// ============================================================
-// ЗАГРУЗКА КАРТ — НЕ БЛОКИРУЕТ СТРАНИЦУ
-// ============================================================
 try {
     let ymapsLoaded = false;
     const checkYmaps = setInterval(function() {
@@ -522,13 +459,8 @@ try {
     setTimeout(function() {
         clearInterval(checkYmaps);
     }, 10000);
-} catch(e) {
-    console.warn('Yandex Maps init error:', e);
-}
+} catch(e) {}
 
-// ============================================================
-// АВТОРИЗАЦИЯ
-// ============================================================
 try {
     const token = localStorage.getItem('token');
     
@@ -600,13 +532,7 @@ try {
             } catch(e) {}
         });
     }
-} catch(e) {
-    console.warn('Auth error:', e);
-}
-
-// ============================================================
-// ЧАТ-БОТ — УПРАВЛЕНИЕ ПОКАЗОМ И АНИМАЦИЕЙ
-// ============================================================
+} catch(e) {}
 
 function toggleChatbot() {
     const window = document.getElementById('chatbotWindow');
@@ -615,7 +541,6 @@ function toggleChatbot() {
     if (window.classList.contains('open')) {
         window.classList.remove('open');
         toggle.classList.remove('active');
-        // Сбрасываем анимацию пульсации
         toggle.style.animation = 'none';
         setTimeout(() => {
             toggle.style.animation = '';
@@ -623,9 +548,7 @@ function toggleChatbot() {
     } else {
         window.classList.add('open');
         toggle.classList.add('active');
-        // Останавливаем пульсацию когда окно открыто
         toggle.style.animation = 'none';
-        // Прокручиваем к началу списка
         document.getElementById('chatbotBody').scrollTop = 0;
     }
 }
@@ -640,7 +563,6 @@ function toggleQuestion(element) {
             arrow.className = 'bi bi-chevron-down';
         }
     } else {
-        // Закрываем все остальные ответы
         document.querySelectorAll('.chatbot-question .q-content').forEach(c => {
             c.classList.remove('show');
         });
@@ -653,14 +575,12 @@ function toggleQuestion(element) {
             arrow.className = 'bi bi-chevron-up';
         }
         
-        // Прокручиваем к вопросу
         setTimeout(() => {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
     }
 }
 
-// Закрытие чата при клике вне его области
 document.addEventListener('click', function(event) {
     const container = document.getElementById('chatbotContainer');
     const window = document.getElementById('chatbotWindow');
@@ -673,7 +593,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Обработка клавиши Escape
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         const window = document.getElementById('chatbotWindow');
@@ -683,19 +602,15 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// Открываем чат через 3 секунды после загрузки страницы (если не открыт)
-// Привлекает внимание пользователя
 let chatbotTimeout = setTimeout(() => {
     const window = document.getElementById('chatbotWindow');
     if (!window.classList.contains('open')) {
-        // Показываем кратковременную анимацию привлечения внимания
         const toggle = document.getElementById('chatbotToggle');
         toggle.style.animation = 'none';
         setTimeout(() => {
             toggle.style.animation = 'chatbot-pulse 1.5s ease-in-out 2';
         }, 10);
         
-        // Встряхиваем иконку для привлечения внимания
         toggle.style.transform = 'scale(1.1) rotate(-10deg)';
         setTimeout(() => {
             toggle.style.transform = '';
@@ -703,12 +618,10 @@ let chatbotTimeout = setTimeout(() => {
     }
 }, 3000);
 
-// Сбрасываем таймер при взаимодействии с чатом
 document.getElementById('chatbotToggle').addEventListener('click', function() {
     clearTimeout(chatbotTimeout);
 });
 
-// Отслеживаем прокрутку для привлечения внимания
 let scrollTriggered = false;
 window.addEventListener('scroll', function() {
     if (!scrollTriggered && window.scrollY > window.innerHeight * 0.5) {
@@ -725,10 +638,7 @@ window.addEventListener('scroll', function() {
 }, { passive: true });
 </script>
 
-<!-- ========== ПОДКЛЮЧАЕМ СКРИПТ ПРОВЕРКИ ПРОФИЛЯ ========== -->
 <script src="/static/js/profile_check.js"></script>
-
-<!-- Блок для страницы с полной картой -->
 {% block extra_js %}{% endblock %}
 </body>
 </html>

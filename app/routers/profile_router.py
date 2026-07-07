@@ -1,7 +1,7 @@
 # app/routers/profile_router.py
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
 from app import models, schemas, auth
 from app.database import get_db
@@ -15,37 +15,24 @@ from datetime import datetime, date
 import json
 import re
 
-# Настройка логирования
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/profile", tags=["Profile"])
 
-# Создаём папки для загрузки документов
 UPLOAD_DIR = "app/static/uploads/profile"
 DOCUMENTS_DIR = os.path.join(UPLOAD_DIR, "documents")
 
 os.makedirs(DOCUMENTS_DIR, exist_ok=True)
 
-# Максимальный размер файла - 20MB
 MAX_FILE_SIZE = 20 * 1024 * 1024
-
-# Допустимые расширения файлов
 ALLOWED_DOCUMENT_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.pdf'}
 
-# Инициализируем сервис шифрования
 encryption = EncryptionService()
 
 
 # ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
 
 def validate_document_file(file: UploadFile) -> None:
-    """
-    Проверяет документ на:
-    - Расширение
-    - Размер
-    - MIME-тип (если доступен python-magic)
-    """
-    # === 1. Проверка расширения ===
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in ALLOWED_DOCUMENT_EXTENSIONS:
         raise HTTPException(
@@ -53,7 +40,6 @@ def validate_document_file(file: UploadFile) -> None:
             detail=f"Неподдерживаемый формат файла. Разрешены: {', '.join(ALLOWED_DOCUMENT_EXTENSIONS)}"
         )
     
-    # === 2. Проверка размера ===
     file.file.seek(0, 2)
     file_size = file.file.tell()
     file.file.seek(0)
@@ -64,45 +50,33 @@ def validate_document_file(file: UploadFile) -> None:
             detail=f"Файл слишком большой (макс. {MAX_FILE_SIZE // (1024 * 1024)}MB)"
         )
     
-    # === 3. Проверка MIME-типа (если доступен python-magic) ===
     try:
         import magic
         file.file.seek(0)
         mime = magic.from_buffer(file.file.read(1024), mime=True)
         file.file.seek(0)
         
-        # Разрешённые MIME-типы
         allowed_mimes = ['image/jpeg', 'image/png', 'application/pdf']
         
         if mime not in allowed_mimes:
-            # Если MIME-тип не совпадает, но расширение разрешено — пропускаем с предупреждением
-            # (некоторые файлы могут иметь неправильный MIME-тип)
             logger.warning(f"Файл {file.filename} имеет MIME-тип {mime}, но расширение {ext} разрешено")
-            # Не блокируем загрузку, только предупреждаем
     except ImportError:
-        # python-magic не установлен — пропускаем проверку MIME
         logger.warning("python-magic не установлен, проверка MIME-типа пропущена")
     except Exception as e:
-        # Другая ошибка — логируем, но не блокируем
         logger.warning(f"Ошибка проверки MIME-типа: {e}")
 
 
 def save_file(file: UploadFile, subfolder: str = "") -> dict:
-    """Сохраняет загруженный файл с проверкой безопасности"""
-    # Валидация файла
     validate_document_file(file)
     
-    # Генерация безопасного имени
     ext = os.path.splitext(file.filename)[1].lower()
     filename = f"{uuid.uuid4().hex}{ext}"
     
-    # Создаём подпапку
     subfolder_path = os.path.join(DOCUMENTS_DIR, subfolder) if subfolder else DOCUMENTS_DIR
     os.makedirs(subfolder_path, exist_ok=True)
     
     filepath = os.path.join(subfolder_path, filename)
     
-    # Сохраняем файл
     try:
         with open(filepath, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -112,7 +86,6 @@ def save_file(file: UploadFile, subfolder: str = "") -> dict:
             detail=f"Ошибка сохранения файла: {str(e)}"
         )
     
-    # Формируем URL
     file_url = f"/static/uploads/profile/documents/{subfolder}/{filename}" if subfolder else f"/static/uploads/profile/documents/{filename}"
     
     return {
@@ -124,11 +97,9 @@ def save_file(file: UploadFile, subfolder: str = "") -> dict:
 
 
 def delete_file(file_url: str) -> bool:
-    """Удаляет файл по URL"""
     if not file_url:
         return False
     
-    # Извлекаем путь из URL
     relative_path = file_url.replace("/static/", "app/static/")
     if os.path.exists(relative_path):
         try:
@@ -146,7 +117,6 @@ def get_personal_data(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить личные данные пользователя"""
     return schemas.PersonalDataResponse(
         last_name=current_user.last_name,
         first_name=current_user.first_name,
@@ -167,7 +137,6 @@ def update_personal_data(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Обновить личные данные пользователя"""
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(current_user, key, value)
     
@@ -184,7 +153,6 @@ def get_education(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить данные об образовании пользователя"""
     education = db.query(models.UserEducation).filter(
         models.UserEducation.user_id == current_user.id
     ).order_by(models.UserEducation.is_main.desc()).all()
@@ -198,7 +166,6 @@ def get_education_item(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить запись об образовании по ID"""
     education = db.query(models.UserEducation).filter(
         and_(
             models.UserEducation.id == education_id,
@@ -221,7 +188,6 @@ def create_education(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Добавить запись об образовании"""
     education = models.UserEducation(
         user_id=current_user.id,
         education_level=data.education_level,
@@ -238,7 +204,6 @@ def create_education(
         is_main=data.is_main
     )
     
-    # Если это основное образование, сбрасываем флаг у других
     if data.is_main:
         db.query(models.UserEducation).filter(
             models.UserEducation.user_id == current_user.id,
@@ -259,7 +224,6 @@ def update_education(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Обновить запись об образовании"""
     education = db.query(models.UserEducation).filter(
         and_(
             models.UserEducation.id == education_id,
@@ -276,7 +240,6 @@ def update_education(
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(education, key, value)
     
-    # Если это основное образование, сбрасываем флаг у других
     if data.is_main:
         db.query(models.UserEducation).filter(
             models.UserEducation.user_id == current_user.id,
@@ -296,7 +259,6 @@ def delete_education(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Удалить запись об образовании"""
     education = db.query(models.UserEducation).filter(
         and_(
             models.UserEducation.id == education_id,
@@ -310,7 +272,6 @@ def delete_education(
             detail="Запись об образовании не найдена"
         )
     
-    # Удаляем файл диплома, если есть
     if education.diploma_file_url:
         delete_file(education.diploma_file_url)
     
@@ -327,7 +288,6 @@ async def upload_diploma(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию диплома с проверкой безопасности"""
     education = db.query(models.UserEducation).filter(
         and_(
             models.UserEducation.id == education_id,
@@ -341,7 +301,6 @@ async def upload_diploma(
             detail="Запись об образовании не найдена"
         )
     
-    # Удаляем старый файл, если есть
     if education.diploma_file_url:
         delete_file(education.diploma_file_url)
     
@@ -368,7 +327,6 @@ def get_work(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить данные о работе пользователя"""
     work = db.query(models.UserWork).filter(
         models.UserWork.user_id == current_user.id
     ).order_by(models.UserWork.is_current.desc()).all()
@@ -413,7 +371,6 @@ def get_work_item(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить запись о работе по ID"""
     work = db.query(models.UserWork).filter(
         and_(
             models.UserWork.id == work_id,
@@ -463,7 +420,6 @@ def create_work(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Добавить место работы"""
     if not data.activity_type:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -517,7 +473,6 @@ def update_work(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Обновить место работы"""
     work = db.query(models.UserWork).filter(
         and_(
             models.UserWork.id == work_id,
@@ -557,7 +512,6 @@ def delete_work(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Удалить место работы"""
     work = db.query(models.UserWork).filter(
         and_(
             models.UserWork.id == work_id,
@@ -584,7 +538,6 @@ def get_address(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить почтовый адрес пользователя"""
     address = db.query(models.UserAddress).filter(
         models.UserAddress.user_id == current_user.id
     ).first()
@@ -601,7 +554,6 @@ def create_address(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Создать почтовый адрес"""
     existing = db.query(models.UserAddress).filter(
         models.UserAddress.user_id == current_user.id
     ).first()
@@ -638,7 +590,6 @@ def update_address(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Обновить почтовый адрес"""
     address = db.query(models.UserAddress).filter(
         models.UserAddress.user_id == current_user.id
     ).first()
@@ -665,7 +616,6 @@ def get_additional_info(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить дополнительную информацию пользователя (с расшифровкой)"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -686,7 +636,6 @@ def create_additional_info(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Создать дополнительную информацию (с шифрованием)"""
     existing = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -725,7 +674,6 @@ def update_additional_info(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Обновить дополнительную информацию (с шифрованием)"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -760,7 +708,6 @@ async def upload_snils(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию СНИЛС с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -795,7 +742,6 @@ async def delete_snils(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Удалить копию СНИЛС"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -825,7 +771,6 @@ async def upload_passport(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию паспорта с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -860,7 +805,6 @@ async def delete_passport(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Удалить копию паспорта"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -890,7 +834,6 @@ async def upload_inn(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию ИНН с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -925,7 +868,6 @@ async def delete_inn(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Удалить копию ИНН"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -955,7 +897,6 @@ async def upload_marriage_certificate(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Загрузить копию свидетельства о браке с проверкой безопасности"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -990,7 +931,6 @@ async def delete_marriage_certificate(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Удалить копию свидетельства о браке"""
     info = db.query(models.UserAdditionalInfo).filter(
         models.UserAdditionalInfo.user_id == current_user.id
     ).first()
@@ -1022,7 +962,6 @@ async def delete_document(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Удалить документ по типу"""
     if doc_type == "diploma":
         education = db.query(models.UserEducation).filter(
             and_(
@@ -1091,55 +1030,56 @@ async def delete_document(
     return {"message": f"Документ {doc_type} удален"}
 
 
-# ========== ПОЛНЫЙ ПРОФИЛЬ ==========
+# ========== ПОЛНЫЙ ПРОФИЛЬ (ОПТИМИЗИРОВАННЫЙ) ==========
 
 @router.get("/full")
 def get_full_profile(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить полный профиль пользователя"""
-    education = db.query(models.UserEducation).filter(
-        models.UserEducation.user_id == current_user.id
-    ).all()
+    """
+    Получить полный профиль пользователя.
+    Оптимизировано: все связанные данные загружаются одним запросом с joinedload.
+    """
+    # Загружаем пользователя со всеми связанными данными одним запросом
+    user = db.query(models.User).options(
+        joinedload(models.User.education),
+        joinedload(models.User.work),
+        joinedload(models.User.address),
+        joinedload(models.User.additional_info)
+    ).filter(models.User.id == current_user.id).first()
     
-    work = db.query(models.UserWork).filter(
-        models.UserWork.user_id == current_user.id
-    ).all()
-    
-    address = db.query(models.UserAddress).filter(
-        models.UserAddress.user_id == current_user.id
-    ).first()
-    
-    additional_info = db.query(models.UserAdditionalInfo).filter(
-        models.UserAdditionalInfo.user_id == current_user.id
-    ).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден"
+        )
     
     additional_info_response = None
-    if additional_info:
-        additional_info_response = schemas.AdditionalInfoResponse.model_validate(additional_info)
-        additional_info_response.snils = encryption.decrypt(additional_info.snils) if additional_info.snils else None
-        additional_info_response.inn = encryption.decrypt(additional_info.inn) if additional_info.inn else None
+    if user.additional_info:
+        additional_info_response = schemas.AdditionalInfoResponse.model_validate(user.additional_info)
+        additional_info_response.snils = encryption.decrypt(user.additional_info.snils) if user.additional_info.snils else None
+        additional_info_response.inn = encryption.decrypt(user.additional_info.inn) if user.additional_info.inn else None
     
     return schemas.FullProfileResponse(
-        user=schemas.UserResponse.model_validate(current_user),
+        user=schemas.UserResponse.model_validate(user),
         personal_data=schemas.PersonalDataResponse(
-            last_name=current_user.last_name,
-            first_name=current_user.first_name,
-            middle_name=current_user.middle_name,
-            gender=current_user.gender,
-            birth_date=current_user.birth_date,
-            citizenship=current_user.citizenship,
-            region=current_user.region,
-            municipality=current_user.municipality,
-            phone_raw=current_user.phone_raw,
-            consent_to_personal_data=current_user.consent_to_personal_data or False
+            last_name=user.last_name,
+            first_name=user.first_name,
+            middle_name=user.middle_name,
+            gender=user.gender,
+            birth_date=user.birth_date,
+            citizenship=user.citizenship,
+            region=user.region,
+            municipality=user.municipality,
+            phone_raw=user.phone_raw,
+            consent_to_personal_data=user.consent_to_personal_data or False
         ),
-        education=[schemas.EducationResponse.model_validate(e) for e in education],
-        work=[schemas.WorkResponse.model_validate(w) for w in work],
-        address=schemas.AddressResponse.model_validate(address) if address else None,
+        education=[schemas.EducationResponse.model_validate(e) for e in user.education],
+        work=[schemas.WorkResponse.model_validate(w) for w in user.work],
+        address=schemas.AddressResponse.model_validate(user.address) if user.address else None,
         additional_info=additional_info_response,
-        is_profile_complete=current_user.is_profile_complete()
+        is_profile_complete=user.is_profile_complete()
     )
 
 
@@ -1150,10 +1090,6 @@ def check_profile_complete(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """
-    Проверить, заполнен ли профиль полностью.
-    Возвращает детальную информацию о заполненности каждого раздела.
-    """
     completion_details = current_user.get_profile_completion_details()
     
     missing_fields = []

@@ -10,13 +10,13 @@ from slowapi.errors import RateLimitExceeded
 from app.database import engine, Base
 from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router, ai_router
 from app.routers import profile_router
-from app.routers import password_reset_router  # ✅ ДОБАВЛЕН НОВЫЙ РОУТЕР
+from app.routers import password_reset_router  
 from app.config import settings
 import os
 import re
 import logging
 
-# === НАСТРОЙКА ЛОГГИРОВАНИЯ С ФИЛЬТРАЦИЕЙ ===
+#  НАСТРОЙКА ЛОГГИРОВАНИЯ С ФИЛЬТРАЦИЕЙ
 
 class SensitiveDataFilter(logging.Filter):
     """Фильтрует чувствительные данные из логов"""
@@ -34,7 +34,7 @@ class SensitiveDataFilter(logging.Filter):
             # Маскируем ИНН
             record.msg = re.sub(r'"inn":"[^"]*"', '"inn":"***"', record.msg)
             record.msg = re.sub(r'"inn":\s*"[^"]*"', '"inn": "***"', record.msg)
-            # Маскируем токены
+            # Маскии для токенов (например, access_token, token)
             record.msg = re.sub(r'"access_token":"[^"]*"', '"access_token":"***"', record.msg)
             record.msg = re.sub(r'"token":"[^"]*"', '"token":"***"', record.msg)
         return True
@@ -44,7 +44,7 @@ logging.getLogger('uvicorn.access').addFilter(SensitiveDataFilter())
 logging.getLogger('uvicorn.error').addFilter(SensitiveDataFilter())
 
 
-# === RATE LIMITER (ЗАЩИТА ОТ БРУТФОРСА И DoS) ===
+#  RATE LIMITER (ЗАЩИТА ОТ БРУТФОРСА И DoS) 
 limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 app = FastAPI(
     title="ИРО ЧР - Платформа повышения квалификации",
@@ -58,16 +58,16 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# === ЗАЩИТНЫЕ HTTP-ЗАГОЛОВКИ (Middleware) ===
+#  ЗАЩИТНЫЕ HTTP-ЗАГОЛОВКИ (Middleware) 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     """
     Добавляет защитные HTTP-заголовки ко всем ответам.
-    ✅ X-Content-Type-Options - защита от MIME-снифинга
-    ✅ X-Frame-Options - защита от Clickjacking
-    ✅ X-XSS-Protection - защита от XSS (старые браузеры)
-    ✅ Referrer-Policy - контроль реферера
-    ✅ Content-Security-Policy - защита от XSS и инъекций
+     X-Content-Type-Options - защита от MIME-снифинга
+     X-Frame-Options - защита от Clickjacking
+     X-XSS-Protection - защита от XSS (старые браузеры)
+     Referrer-Policy - контроль реферера
+     Content-Security-Policy - защита от XSS и инъекций
     """
     response = await call_next(request)
     
@@ -77,9 +77,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     
-    # ============================================================
-    # ✅ CSP С ПОДДЕРЖКОЙ ВСЕХ ВИДЕО-ПЛАТФОРМ (ВКЛЮЧАЯ АВТОРИЗАЦИЮ VK)
-    # ============================================================
+    #  CSP С ПОДДЕРЖКОЙ ВСЕХ ВИДЕО-ПЛАТФОРМ (ВКЛЮЧАЯ АВТОРИЗАЦИЮ VK)
     if settings.DEBUG:
         # Для РАЗРАБОТКИ — максимально либеральный CSP
         response.headers["Content-Security-Policy"] = (
@@ -96,7 +94,7 @@ async def add_security_headers(request: Request, call_next):
         )
     else:
         # Для ПРОДАКШЕНА — строгий, но с поддержкой всех видео-платформ
-        # ✅ УБРАЛИ upgrade-insecure-requests ДЛЯ ТЕСТА НА HTTP
+        #  УБРАЛИ upgrade-insecure-requests ДЛЯ ТЕСТА НА HTTP
         response.headers["Content-Security-Policy"] = (
             "default-src 'self' data: blob:; "
             # Разрешаем inline скрипты (нужны для Bootstrap, AOS, карт)
@@ -125,7 +123,7 @@ async def add_security_headers(request: Request, call_next):
             "https://api-maps.yandex.ru "
             "https://yastatic.net "
             "https://cdn.jsdelivr.net; "
-            # ✅ ВСЕ ВИДЕО-ПЛАТФОРМЫ + АВТОРИЗАЦИЯ VK
+            # ВСЕ ВИДЕО-ПЛАТФОРМЫ + АВТОРИЗАЦИЯ VK
             "frame-src 'self' "
             "https://www.youtube.com "
             "https://youtu.be "
@@ -147,17 +145,24 @@ async def add_security_headers(request: Request, call_next):
             "base-uri 'self'; "
             # Form Action
             "form-action 'self'; "
-            # ✅ УБРАЛИ upgrade-insecure-requests
+            
         )
     
     return response
 
 
-# === НАСТРОЙКА CORS (ВРЕМЕННО РАЗРЕШАЕМ ВСЁ ДЛЯ ТЕСТА) ===
-# ⚠️ ВРЕМЕННО для теста разрешаем все источники
+#  НАСТРОЙКА CORS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://alu95.ru",
+        "https://www.alu95.ru",
+        "https://irosdo.ru",
+        "https://www.irosdo.ru",
+        "https://iro-lms.ru",
+        "https://www.iro-lms.ru",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -165,23 +170,24 @@ app.add_middleware(
 )
 
 
-# === TRUSTED HOST (ВРЕМЕННО ОТКЛЮЧАЕМ ДЛЯ ТЕСТА) ===
-# ⚠️ ВРЕМЕННО отключаем проверку хоста
-# if not settings.DEBUG:
-#     app.add_middleware(
-#         TrustedHostMiddleware,
-#         allowed_hosts=[
-#             "localhost",
-#             "127.0.0.1",
-#             "alu95.ru",
-#             "www.alu95.ru",
-#             "iro-chr.ru",
-#             "www.iro-chr.ru",
-#         ]
-#     )
+#  TRUSTED HOST(доп зищта от левых хостов, например, при подмене DNS)
+if not settings.DEBUG:
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=[
+            "localhost",
+            "127.0.0.1",
+            "alu95.ru",
+            "www.alu95.ru",
+            "irosdo.ru",
+            "www.irosdo.ru",
+            "iro-lms.ru",
+            "www.iro-lms.ru",
+        ]
+    )
 
 
-# === СОЗДАНИЕ ТАБЛИЦ И ПАПОК ===
+# СОЗДАНИЕ ТАБЛИЦ И ПАПОК
 Base.metadata.create_all(bind=engine)
 
 os.makedirs("app/static/uploads/courses", exist_ok=True)
@@ -189,15 +195,15 @@ os.makedirs("app/static/uploads/speakers", exist_ok=True)
 os.makedirs("app/static/uploads/profile/documents", exist_ok=True)
 
 
-# === НАСТРОЙКА ШАБЛОНОВ ===
+# НАСТРОЙКА ШАБЛОНОВ
 templates = Jinja2Templates(directory="app/templates")
 
 
-# === ПОДКЛЮЧЕНИЕ СТАТИЧЕСКИХ ФАЙЛОВ ===
+# ПОДКЛЮЧЕНИЕ СТАТИЧЕСКИХ ФАЙЛОВ
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
-# === ПОДКЛЮЧЕНИЕ РОУТЕРОВ ===
+# ПОДКЛЮЧЕНИЕ РОУТЕРОВ 
 app.include_router(auth_router.router)
 app.include_router(courses_router.router)
 app.include_router(admin_router.router)
@@ -206,12 +212,10 @@ app.include_router(public_router.router)
 app.include_router(achievements_router.router)
 app.include_router(profile_router.router)
 app.include_router(ai_router.router)
-app.include_router(password_reset_router.router)  # ✅ ДОБАВЛЕН РОУТЕР ДЛЯ СБРОСА ПАРОЛЯ
+app.include_router(password_reset_router.router)  
 
 
-# === ЭНДПОИНТЫ ===
-
-# ✅ УБРАЛ ДУБЛИРУЮЩИЙ /, ОСТАВИЛ ТОЛЬКО В public_router
+# ЭНДПОИНТЫ 
 
 @app.get("/map")
 async def map_page(request: Request):
@@ -224,7 +228,7 @@ def health():
     return {"status": "ok"}
 
 
-# === ГЛОБАЛЬНЫЙ ОБРАБОТЧИК ОШИБОК ===
+# ГЛОБАЛЬНЫЙ ОБРАБОТЧИК ОШИБОК 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     if settings.DEBUG:

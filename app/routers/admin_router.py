@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import desc, func
 from app import models, schemas, auth
 from app.database import get_db
 from app.services.excel_service import generate_full_registrations_excel
@@ -16,33 +16,19 @@ from datetime import datetime
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
-# Создаем папку для загрузок, если её нет
 UPLOAD_DIR = "app/static/uploads"
 COURSE_IMAGES_DIR = os.path.join(UPLOAD_DIR, "courses")
 SPEAKER_PHOTOS_DIR = os.path.join(UPLOAD_DIR, "speakers")
 
-# Создаем директории рекурсивно
 os.makedirs(COURSE_IMAGES_DIR, exist_ok=True)
 os.makedirs(SPEAKER_PHOTOS_DIR, exist_ok=True)
 
-# Максимальный размер файла - 10MB для изображений
 MAX_FILE_SIZE = 10 * 1024 * 1024
-
-# Допустимые MIME-типы для изображений
 ALLOWED_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp']
 ALLOWED_IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp'}
 
 
-# ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ФАЙЛОВ ==========
-
 def validate_file(file: UploadFile, allowed_mimes: List[str], max_size: int = MAX_FILE_SIZE) -> None:
-    """
-    Проверяет файл на:
-    - MIME-тип (через магические байты)
-    - Размер
-    - Безопасное имя
-    """
-    # Проверка размера
     file.file.seek(0, 2)
     size = file.file.tell()
     file.file.seek(0)
@@ -53,7 +39,6 @@ def validate_file(file: UploadFile, allowed_mimes: List[str], max_size: int = MA
             detail=f"Файл слишком большой (макс. {max_size // (1024 * 1024)}MB)"
         )
     
-    # Проверка MIME-типа через магические байты
     try:
         file.file.seek(0)
         mime = magic.from_buffer(file.file.read(1024), mime=True)
@@ -72,7 +57,6 @@ def validate_file(file: UploadFile, allowed_mimes: List[str], max_size: int = MA
 
 
 def get_safe_filename(original_filename: str, extension: str = None) -> str:
-    """Генерирует безопасное имя файла"""
     if extension is None:
         ext = os.path.splitext(original_filename)[1].lower()
         if ext not in ALLOWED_IMAGE_EXTENSIONS:
@@ -84,23 +68,14 @@ def get_safe_filename(original_filename: str, extension: str = None) -> str:
 
 
 def save_upload_file(file: UploadFile, save_dir: str, allowed_mimes: List[str] = None) -> dict:
-    """
-    Сохраняет загруженный файл с проверкой безопасности.
-    
-    Returns:
-        dict: {'url': str, 'filename': str, 'file_size': int}
-    """
     if allowed_mimes is None:
         allowed_mimes = ALLOWED_IMAGE_MIMES
     
-    # Валидация файла
     validate_file(file, allowed_mimes)
     
-    # Генерация безопасного имени
     safe_filename = get_safe_filename(file.filename)
     filepath = os.path.join(save_dir, safe_filename)
     
-    # Сохранение файла
     try:
         with open(filepath, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -110,7 +85,6 @@ def save_upload_file(file: UploadFile, save_dir: str, allowed_mimes: List[str] =
             detail=f"Ошибка сохранения файла: {str(e)}"
         )
     
-    # Определяем URL
     rel_path = os.path.relpath(save_dir, "app/static/uploads")
     url = f"/static/uploads/{rel_path}/{safe_filename}".replace('\\', '/')
     
@@ -122,14 +96,11 @@ def save_upload_file(file: UploadFile, save_dir: str, allowed_mimes: List[str] =
     }
 
 
-# ========== ЗАГРУЗКА ИЗОБРАЖЕНИЙ ==========
-
 @router.post("/upload/course-image")
 async def upload_course_image(
     file: UploadFile = File(...),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Загрузка изображения для курса с проверкой безопасности"""
     result = save_upload_file(file, COURSE_IMAGES_DIR)
     return {
         "url": result["url"],
@@ -143,7 +114,6 @@ async def upload_speaker_photo(
     file: UploadFile = File(...),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Загрузка фото спикера с проверкой безопасности"""
     result = save_upload_file(file, SPEAKER_PHOTOS_DIR)
     return {
         "url": result["url"],
@@ -151,8 +121,6 @@ async def upload_speaker_photo(
         "message": "Фото загружено"
     }
 
-
-# ========== СТАТИСТИКА ==========
 
 @router.get("/stats")
 def get_admin_stats(
@@ -171,8 +139,6 @@ def get_admin_stats(
         "total_categories": total_categories
     }
 
-
-# ========== КАТЕГОРИИ ==========
 
 @router.get("/categories")
 def get_categories(
@@ -231,7 +197,6 @@ def delete_category(
             detail="Category not found"
         )
     
-    # Обновляем курсы, убирая категорию
     db.query(models.Course).filter(
         models.Course.category_id == category_id
     ).update({models.Course.category_id: None})
@@ -241,14 +206,20 @@ def delete_category(
     return {"message": "Category deleted"}
 
 
-# ========== КУРСЫ ==========
-
 @router.get("/courses")
 def get_all_courses(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    courses = db.query(models.Course).order_by(desc(models.Course.created_at)).all()
+    query = db.query(models.Course).options(
+        joinedload(models.Course.category)
+    )
+    
+    total = query.count()
+    courses = query.order_by(desc(models.Course.created_at)).offset(offset).limit(limit).all()
+    
     result = []
     for c in courses:
         result.append({
@@ -264,7 +235,13 @@ def get_all_courses(
             "created_at": c.created_at,
             "moodle_course_id": c.moodle_course_id
         })
-    return result
+    
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "items": result
+    }
 
 
 @router.delete("/courses/{course_id}")
@@ -280,7 +257,6 @@ def admin_delete_course(
             detail="Course not found"
         )
     
-    # Удаляем связанные данные
     db.query(models.CourseSpeaker).filter(models.CourseSpeaker.course_id == course_id).delete()
     db.query(models.UserFavorite).filter(models.UserFavorite.course_id == course_id).delete()
     db.query(models.UserWatchLater).filter(models.UserWatchLater.course_id == course_id).delete()
@@ -337,7 +313,6 @@ def export_course_registrations(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Экспорт регистраций на курс в Excel с полными данными пользователей"""
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(
@@ -360,22 +335,37 @@ def export_course_registrations(
     )
 
 
-# ========== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ==========
-
 @router.get("/users")
 def get_users(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    users = db.query(models.User).order_by(models.User.id).all()
+    registrations_subquery = db.query(
+        models.CourseRegistration.user_id,
+        func.count(models.CourseRegistration.id).label('registrations_count')
+    ).group_by(models.CourseRegistration.user_id).subquery()
+    
+    query = db.query(
+        models.User,
+        func.coalesce(registrations_subquery.c.registrations_count, 0).label('registrations_count')
+    ).outerjoin(
+        registrations_subquery,
+        models.User.id == registrations_subquery.c.user_id
+    )
+    
+    total = query.count()
+    results = query.order_by(models.User.id).offset(offset).limit(limit).all()
+    
     return [{
         "id": u.id,
         "email": u.email,
         "full_name": u.full_name,
         "role": u.role.value,
         "is_blocked": u.is_blocked,
-        "registrations_count": len(u.registrations)
-    } for u in users]
+        "registrations_count": registrations_count
+    } for u, registrations_count in results]
 
 
 @router.post("/users/{user_id}/block")
@@ -384,7 +374,6 @@ def block_user(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Блокировка пользователя"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -392,7 +381,6 @@ def block_user(
             detail="User not found"
         )
     
-    # Нельзя заблокировать самого себя
     if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -410,7 +398,6 @@ def unblock_user(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Разблокировка пользователя"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -423,7 +410,6 @@ def unblock_user(
     return {"message": "User unblocked"}
 
 
-# ✅ НОВЫЙ ЭНДПОИНТ: ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ (С ОГРАНИЧЕННЫМИ ПОЛЯМИ)
 @router.put("/users/{user_id}")
 def update_user(
     user_id: int,
@@ -431,11 +417,6 @@ def update_user(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """
-    ✅ Обновление пользователя админом.
-    Использует ОГРАНИЧЕННУЮ схему UserAdminUpdate.
-    Защита от Mass Assignment.
-    """
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -443,7 +424,6 @@ def update_user(
             detail="User not found"
         )
     
-    # Обновляем только разрешённые поля
     update_data = user_update.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(user, key, value)
@@ -464,10 +444,6 @@ def update_user(
     }
 
 
-# ============================================================
-# ✅ НОВЫЙ ЭНДПОИНТ: ИЗМЕНЕНИЕ РОЛИ ПОЛЬЗОВАТЕЛЯ
-# ============================================================
-
 @router.put("/users/{user_id}/role")
 def change_user_role(
     user_id: int,
@@ -475,14 +451,6 @@ def change_user_role(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """
-    Изменение роли пользователя.
-    ✅ Только для администраторов
-    ✅ Нельзя изменить роль самому себе
-    ✅ Защита от потери последнего администратора
-    ✅ Возвращает детальный ответ
-    """
-    # Находим пользователя
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -490,34 +458,27 @@ def change_user_role(
             detail="Пользователь не найден"
         )
     
-    # Запрещаем изменять роль самому себе
     if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Нельзя изменить свою собственную роль"
         )
     
-    # Проверяем, не пытаемся ли удалить последнего администратора
     admin_count = db.query(models.User).filter(
         models.User.role == models.UserRole.ADMIN
     ).count()
     
-    # Если пользователь - админ, и мы пытаемся его понизить, и он последний админ
     if user.role == models.UserRole.ADMIN and admin_count <= 1 and role_update.role != models.UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Нельзя удалить последнего администратора. Сначала назначьте другого администратора."
         )
     
-    # Сохраняем старую роль для ответа
     old_role = user.role.value
-    
-    # Обновляем роль
     user.role = role_update.role
     db.commit()
     db.refresh(user)
     
-    # Формируем понятное описание новой роли
     role_names = {
         "admin": "Администратор",
         "teacher": "Преподаватель"
@@ -534,19 +495,17 @@ def change_user_role(
     }
 
 
-# ============================================================
-# ЭКСПОРТ ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ
-# ============================================================
-
 @router.get("/users/list")
 def get_users_with_data(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
     """Получить список пользователей с их данными для отображения в админке"""
     export_service = ExcelExportService(db)
-    users_list = export_service.get_users_list_with_data()
-    return users_list
+    result = export_service.get_users_list_with_data(limit, offset)
+    return result
 
 
 @router.get("/users/export-all")
@@ -554,7 +513,6 @@ def export_all_users(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Экспорт данных всех пользователей в Excel по шаблону"""
     export_service = ExcelExportService(db)
     buffer = export_service.export_users_to_excel()
     
@@ -576,7 +534,6 @@ def export_single_user(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Экспорт данных одного пользователя в Excel по шаблону"""
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -611,7 +568,6 @@ def export_selected_users(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Экспорт данных выбранных пользователей в Excel по шаблону"""
     if not user_ids:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -648,17 +604,12 @@ def export_selected_users(
     )
 
 
-# ============================================================
-# РАБОТА С ДОКУМЕНТАМИ ПОЛЬЗОВАТЕЛЕЙ
-# ============================================================
-
 @router.get("/users/{user_id}/documents")
 def get_user_documents(
     user_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Получить список документов пользователя с их статусами"""
     doc_service = DocumentExportService(db)
     return doc_service.get_user_documents_list(user_id)
 
@@ -669,7 +620,6 @@ def download_user_documents(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Скачать все документы пользователя в ZIP-архиве"""
     doc_service = DocumentExportService(db)
     zip_content, filename = doc_service.create_user_zip(user_id)
     
@@ -691,7 +641,6 @@ def download_selected_users_documents(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Скачать документы выбранных пользователей в ZIP-архиве"""
     if not user_ids:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -732,7 +681,6 @@ def download_all_users_documents(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Скачать документы ВСЕХ пользователей в ZIP-архиве"""
     users = db.query(models.User).all()
     if not users:
         raise HTTPException(
@@ -764,7 +712,6 @@ def download_user_document(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Скачать конкретный документ пользователя"""
     doc_service = DocumentExportService(db)
     content, filename, mime_type = doc_service.get_document_file(user_id, doc_type)
     
@@ -787,7 +734,6 @@ def delete_user_document(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Удалить документ пользователя (админское удаление)"""
     doc_service = DocumentExportService(db)
     result = doc_service.delete_document(user_id, doc_type)
     return result

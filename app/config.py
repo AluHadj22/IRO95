@@ -40,6 +40,13 @@ class Settings:
     SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "ИРО ЧР - Платформа повышения квалификации")
     SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
     
+    # === НАСТРОЙКИ ПУЛА СОЕДИНЕНИЙ БД ===
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "30"))
+    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
+    DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
+    DB_POOL_RECYCLE: int = int(os.getenv("DB_POOL_RECYCLE", "3600"))
+    DB_POOL_PRE_PING: bool = os.getenv("DB_POOL_PRE_PING", "True").lower() == "true"
+    
     def __init__(self):
         # Проверяем обязательные переменные
         required_vars = {
@@ -58,7 +65,7 @@ class Settings:
         missing = [key for key, value in required_vars.items() if not value]
         if missing:
             raise ValueError(
-                f"❌ Обязательные переменные окружения не заданы:\n"
+                f"Обязательные переменные окружения не заданы:\n"
                 f"   {', '.join(missing)}\n\n"
                 f"Добавьте их в файл .env или установите как переменные окружения."
             )
@@ -66,7 +73,7 @@ class Settings:
         # Проверяем длину SECRET_KEY
         if len(self.SECRET_KEY) < 32:
             raise ValueError(
-                f"❌ SECRET_KEY слишком короткий (минимум 32 символа).\n"
+                f"SECRET_KEY слишком короткий (минимум 32 символа).\n"
                 f"Сгенерируйте новый: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
             )
         
@@ -76,11 +83,11 @@ class Settings:
             Fernet(self.ENCRYPTION_KEY.encode())
         except ImportError:
             raise ImportError(
-                "❌ Установите cryptography: pip install cryptography"
+                "Установите cryptography: pip install cryptography"
             )
         except Exception:
             raise ValueError(
-                f"❌ ENCRYPTION_KEY невалидный.\n"
+                f"ENCRYPTION_KEY невалидный.\n"
                 f"Сгенерируйте новый: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
             )
 
@@ -88,10 +95,12 @@ class Settings:
 settings = Settings()
 
 # Выводим настройки для проверки (без паролей)
-print(f"🔍 MOODLE_URL: {settings.MOODLE_URL}")
-print(f"🔍 MOODLE_API_TOKEN: {settings.MOODLE_API_TOKEN[:10]}...")
-print(f"🔍 SMTP_HOST: {settings.SMTP_HOST}")
-print(f"🔍 SMTP_USER: {settings.SMTP_USER}")
-print(f"🔍 SMTP_FROM_EMAIL: {settings.SMTP_FROM_EMAIL}")
-print(f"🔍 BASE_URL: {settings.BASE_URL}")
-print(f"🔍 RESET_TOKEN_EXPIRE_MINUTES: {settings.RESET_TOKEN_EXPIRE_MINUTES}")
+print(f"MOODLE_URL: {settings.MOODLE_URL}")
+print(f"MOODLE_API_TOKEN: {settings.MOODLE_API_TOKEN[:10]}...")
+print(f"SMTP_HOST: {settings.SMTP_HOST}")
+print(f"SMTP_USER: {settings.SMTP_USER}")
+print(f"SMTP_FROM_EMAIL: {settings.SMTP_FROM_EMAIL}")
+print(f"BASE_URL: {settings.BASE_URL}")
+print(f"RESET_TOKEN_EXPIRE_MINUTES: {settings.RESET_TOKEN_EXPIRE_MINUTES}")
+print(f"DB_POOL_SIZE: {settings.DB_POOL_SIZE}")
+print(f"DB_MAX_OVERFLOW: {settings.DB_MAX_OVERFLOW}")

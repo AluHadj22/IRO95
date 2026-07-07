@@ -3,7 +3,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from io import BytesIO
 from typing import List, Dict
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app import models
 from app.services.encryption_service import EncryptionService
 import json
@@ -11,21 +11,12 @@ import re
 import logging
 from datetime import datetime
 
-# Настройка логирования
 logger = logging.getLogger(__name__)
 
-# Инициализируем сервис шифрования
 encryption = EncryptionService()
 
 
-# ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-
 def escape_excel_string(value) -> str:
-    """
-    Экранирует строку для безопасной вставки в Excel.
-    ✅ Защита от формульных инъекций (=, +, -, @)
-    ✅ Защита от HTML-инъекций
-    """
     if value is None:
         return ""
     
@@ -35,42 +26,29 @@ def escape_excel_string(value) -> str:
     if not value:
         return ""
     
-    # Защита от формульных инъекций
     if value and value[0] in '=+-@':
         return "'" + value
     
-    # Защита от HTML-инъекций
     value = value.replace('<', '&lt;').replace('>', '&gt;')
     
     return value
 
 
 def sanitize_snils(snils: str) -> str:
-    """
-    Возвращает СНИЛС в полностью читабельном виде.
-    ✅ Расшифровывает зашифрованный СНИЛС
-    ✅ БЕЗ маскировки — показывает полный номер
-    """
     if not snils:
         return ""
     
-    # Расшифровываем (если зашифрован)
     try:
         decrypted = encryption.decrypt(snils)
         if decrypted:
             return decrypted
     except Exception:
-        # Если не удалось расшифровать - оставляем как есть
         pass
     
     return snils
 
 
 def sanitize_phone(phone: str) -> str:
-    """
-    Санитизация телефона для экспорта.
-    ✅ Приводим к единому формату
-    """
     if not phone:
         return ""
     
@@ -89,7 +67,6 @@ def sanitize_phone(phone: str) -> str:
 
 
 def get_column_letter(col_idx: int) -> str:
-    """Возвращает букву колонки по индексу (1-based)"""
     result = ""
     while col_idx > 0:
         col_idx -= 1
@@ -98,15 +75,11 @@ def get_column_letter(col_idx: int) -> str:
     return result
 
 
-# ========== ОСНОВНЫЕ ФУНКЦИИ ЭКСПОРТА ==========
-
 def generate_registrations_excel(data: List[Dict], course_title: str = "") -> BytesIO:
-    """Генерация Excel файла с регистрациями (упрощенный вариант)"""
     wb = Workbook()
     ws = wb.active
     ws.title = "Регистрации"
     
-    # Стили
     header_font = Font(name='Arial', size=11, bold=True, color='FFFFFF')
     header_fill = PatternFill(start_color='0057A4', end_color='0057A4', fill_type='solid')
     header_alignment = Alignment(horizontal='center', vertical='center')
@@ -118,7 +91,6 @@ def generate_registrations_excel(data: List[Dict], course_title: str = "") -> By
         bottom=Side(style='thin')
     )
     
-    # Заголовок курса
     if course_title:
         ws.merge_cells('A1:G1')
         title_cell = ws['A1']
@@ -126,7 +98,6 @@ def generate_registrations_excel(data: List[Dict], course_title: str = "") -> By
         title_cell.font = Font(name='Arial', size=14, bold=True)
         title_cell.alignment = Alignment(horizontal='center')
     
-    # Заголовки колонок
     headers = ["№", "ФИО", "Email", "Телефон", "Должность", "Организация"]
     start_row = 3 if course_title else 1
     
@@ -137,7 +108,6 @@ def generate_registrations_excel(data: List[Dict], course_title: str = "") -> By
         cell.alignment = header_alignment
         cell.border = thin_border
     
-    # Данные с экранированием
     for idx, row in enumerate(data, start=start_row + 1):
         ws.cell(row=idx, column=1, value=idx - start_row).border = thin_border
         ws.cell(row=idx, column=2, value=escape_excel_string(row.get('full_name', ''))).border = thin_border
@@ -146,7 +116,6 @@ def generate_registrations_excel(data: List[Dict], course_title: str = "") -> By
         ws.cell(row=idx, column=5, value=escape_excel_string(row.get('position', ''))).border = thin_border
         ws.cell(row=idx, column=6, value=escape_excel_string(row.get('organization', ''))).border = thin_border
     
-    # Настройка ширины колонок
     column_widths = [5, 30, 30, 15, 25, 35]
     for i, width in enumerate(column_widths, 1):
         ws.column_dimensions[chr(64 + i)].width = width
@@ -159,18 +128,110 @@ def generate_registrations_excel(data: List[Dict], course_title: str = "") -> By
     return buffer
 
 
+def _get_users_export_data_batch(db: Session, users: List[models.User]) -> Dict[int, Dict[str, str]]:
+    """
+    Собирает данные для списка пользователей за один запрос с joinedload.
+    Исправляет N+1 проблему.
+    """
+    if not users:
+        return {}
+    
+    user_ids = [u.id for u in users]
+    
+    users_with_data = db.query(models.User).options(
+        joinedload(models.User.work),
+        joinedload(models.User.education),
+        joinedload(models.User.additional_info)
+    ).filter(models.User.id.in_(user_ids)).all()
+    
+    users_map = {u.id: u for u in users_with_data}
+    
+    result = {}
+    
+    for user in users:
+        user_data = users_map.get(user.id)
+        if not user_data:
+            continue
+        
+        current_work = None
+        if user_data.work:
+            for w in user_data.work:
+                if w.is_current:
+                    current_work = w
+                    break
+            if not current_work:
+                current_work = user_data.work[0] if user_data.work else None
+        
+        main_education = None
+        if user_data.education:
+            for e in user_data.education:
+                if e.is_main:
+                    main_education = e
+                    break
+            if not main_education:
+                main_education = user_data.education[0] if user_data.education else None
+        
+        additional_info = user_data.additional_info
+        
+        subjects = []
+        if current_work and current_work.subjects:
+            try:
+                subjects = json.loads(current_work.subjects)
+                if not isinstance(subjects, list):
+                    subjects = []
+            except (json.JSONDecodeError, TypeError):
+                subjects = []
+        
+        birth_date_str = ""
+        if user.birth_date:
+            try:
+                birth_date_str = user.birth_date.strftime("%d.%m.%Y")
+            except Exception:
+                birth_date_str = ""
+        
+        gender_str = ""
+        if user.gender == "male":
+            gender_str = "Мужской"
+        elif user.gender == "female":
+            gender_str = "Женский"
+        
+        snils_value = ""
+        if additional_info and additional_info.snils:
+            snils_value = sanitize_snils(additional_info.snils)
+        
+        phone_value = user.phone_raw or user.phone or ""
+        phone_value = sanitize_phone(phone_value)
+        
+        result[user.id] = {
+            "municipality": escape_excel_string(user.municipality),
+            "organization": escape_excel_string(current_work.organization if current_work else ""),
+            "last_name": escape_excel_string(user.last_name),
+            "first_name": escape_excel_string(user.first_name),
+            "middle_name": escape_excel_string(user.middle_name),
+            "birth_date": escape_excel_string(birth_date_str),
+            "gender": escape_excel_string(gender_str),
+            "snils": escape_excel_string(snils_value),
+            "position": escape_excel_string(current_work.position if current_work else ""),
+            "activity_type": escape_excel_string(current_work.activity_type if current_work else ""),
+            "subjects": escape_excel_string("; ".join(subjects) if subjects else ""),
+            "education": escape_excel_string(main_education.education_level if main_education else ""),
+            "document_series": escape_excel_string(main_education.document_series if main_education else ""),
+            "document_number": escape_excel_string(main_education.document_number if main_education else ""),
+            "teaching_experience": current_work.teaching_experience_years if current_work and current_work.teaching_experience_years is not None else "",
+            "work_experience": current_work.work_experience_years if current_work and current_work.work_experience_years is not None else "",
+            "email": escape_excel_string(user.email),
+            "phone": escape_excel_string(phone_value)
+        }
+    
+    return result
+
+
 def generate_full_registrations_excel(
     db: Session, 
     course_id: int, 
     course_title: str = ""
 ) -> BytesIO:
-    """
-    Генерация Excel файла с регистрациями на курс с ПОЛНЫМИ данными пользователей.
-    ✅ Данные экранируются
-    ✅ СНИЛС расшифровывается
-    """
     try:
-        # Получаем все регистрации на курс
         registrations = db.query(models.CourseRegistration, models.User).join(
             models.User
         ).filter(models.CourseRegistration.course_id == course_id).order_by(
@@ -180,11 +241,13 @@ def generate_full_registrations_excel(
         if not registrations:
             return generate_empty_registrations_excel(course_title)
         
-        # Собираем данные для каждого пользователя
+        users = [reg.User for reg in registrations]
+        
+        users_data = _get_users_export_data_batch(db, users)
+        
         data = []
         for idx, (reg, user) in enumerate(registrations, 1):
-            # Получаем данные пользователя
-            user_data = _get_user_export_data(db, user)
+            user_data = users_data.get(user.id, {})
             data.append({
                 "number": idx,
                 "municipality": user_data.get("municipality", ""),
@@ -215,106 +278,11 @@ def generate_full_registrations_excel(
         raise
 
 
-def _get_user_export_data(db: Session, user: models.User) -> Dict[str, str]:
-    """
-    Собирает данные пользователя для экспорта с санитизацией.
-    ✅ Экранирование данных
-    ✅ Расшифровка СНИЛС
-    ✅ Санитизация телефона
-    """
-    # Получаем текущее место работы
-    current_work = db.query(models.UserWork).filter(
-        models.UserWork.user_id == user.id,
-        models.UserWork.is_current == True
-    ).first()
-    
-    if not current_work:
-        current_work = db.query(models.UserWork).filter(
-            models.UserWork.user_id == user.id
-        ).order_by(models.UserWork.created_at.desc()).first()
-    
-    # Получаем основное образование
-    main_education = db.query(models.UserEducation).filter(
-        models.UserEducation.user_id == user.id,
-        models.UserEducation.is_main == True
-    ).first()
-    
-    if not main_education:
-        main_education = db.query(models.UserEducation).filter(
-            models.UserEducation.user_id == user.id
-        ).order_by(models.UserEducation.created_at.desc()).first()
-    
-    # Получаем дополнительную информацию
-    additional_info = db.query(models.UserAdditionalInfo).filter(
-        models.UserAdditionalInfo.user_id == user.id
-    ).first()
-    
-    # Обработка предметов
-    subjects = []
-    if current_work and current_work.subjects:
-        try:
-            subjects = json.loads(current_work.subjects)
-            if not isinstance(subjects, list):
-                subjects = []
-        except (json.JSONDecodeError, TypeError):
-            subjects = []
-    
-    # Форматирование даты рождения
-    birth_date_str = ""
-    if user.birth_date:
-        try:
-            birth_date_str = user.birth_date.strftime("%d.%m.%Y")
-        except Exception:
-            birth_date_str = ""
-    
-    # Форматирование пола
-    gender_str = ""
-    if user.gender == "male":
-        gender_str = "Мужской"
-    elif user.gender == "female":
-        gender_str = "Женский"
-    
-    # Получаем СНИЛС (расшифровываем, БЕЗ маскировки)
-    snils_value = ""
-    if additional_info and additional_info.snils:
-        snils_value = sanitize_snils(additional_info.snils)
-    
-    # Форматирование телефона
-    phone_value = user.phone_raw or user.phone or ""
-    phone_value = sanitize_phone(phone_value)
-    
-    return {
-        "municipality": escape_excel_string(user.municipality),
-        "organization": escape_excel_string(current_work.organization if current_work else ""),
-        "last_name": escape_excel_string(user.last_name),
-        "first_name": escape_excel_string(user.first_name),
-        "middle_name": escape_excel_string(user.middle_name),
-        "birth_date": escape_excel_string(birth_date_str),
-        "gender": escape_excel_string(gender_str),
-        "snils": escape_excel_string(snils_value),  # ✅ Полностью читабельный СНИЛС
-        "position": escape_excel_string(current_work.position if current_work else ""),
-        "activity_type": escape_excel_string(current_work.activity_type if current_work else ""),
-        "subjects": escape_excel_string("; ".join(subjects) if subjects else ""),
-        "education": escape_excel_string(main_education.education_level if main_education else ""),
-        "document_series": escape_excel_string(main_education.document_series if main_education else ""),
-        "document_number": escape_excel_string(main_education.document_number if main_education else ""),
-        "teaching_experience": current_work.teaching_experience_years if current_work and current_work.teaching_experience_years is not None else "",
-        "work_experience": current_work.work_experience_years if current_work and current_work.work_experience_years is not None else "",
-        "email": escape_excel_string(user.email),
-        "phone": escape_excel_string(phone_value)
-    }
-
-
 def generate_full_registrations_excel_from_data(data: List[Dict], course_title: str = "") -> BytesIO:
-    """
-    Генерация Excel файла с ПОЛНЫМИ данными регистраций.
-    ✅ Все данные экранируются
-    """
     wb = Workbook()
     ws = wb.active
     ws.title = "Регистрации"
     
-    # Стили
     header_font = Font(name='Arial', size=10, bold=True, color='FFFFFF')
     header_fill = PatternFill(start_color='0057A4', end_color='0057A4', fill_type='solid')
     header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
@@ -328,7 +296,6 @@ def generate_full_registrations_excel_from_data(data: List[Dict], course_title: 
     
     start_row = 1
     
-    # Заголовок курса (если есть)
     if course_title:
         ws.merge_cells('A1:S1')
         title_cell = ws['A1']
@@ -336,10 +303,7 @@ def generate_full_registrations_excel_from_data(data: List[Dict], course_title: 
         title_cell.font = Font(name='Arial', size=14, bold=True)
         title_cell.alignment = Alignment(horizontal='center')
         start_row = 3
-    else:
-        start_row = 1
     
-    # Заголовки колонок
     headers = [
         "№", "Муниципалитет", "Место работы", "Фамилия", "Имя", "Отчество",
         "Дата рождения", "Пол", "СНИЛС", "Должность", "Вид деятельности",
@@ -347,7 +311,6 @@ def generate_full_registrations_excel_from_data(data: List[Dict], course_title: 
         "Педагогический стаж", "Стаж в должности", "Email", "Телефон"
     ]
     
-    # Индексы колонок (с 1)
     col_indices = {
         "number": 1,
         "municipality": 2,
@@ -370,7 +333,6 @@ def generate_full_registrations_excel_from_data(data: List[Dict], course_title: 
         "phone": 19
     }
     
-    # Заполняем заголовки (с экранированием)
     for col_idx, header in enumerate(headers, 1):
         cell = ws.cell(row=start_row, column=col_idx, value=escape_excel_string(header))
         cell.font = header_font
@@ -378,7 +340,6 @@ def generate_full_registrations_excel_from_data(data: List[Dict], course_title: 
         cell.alignment = header_alignment
         cell.border = thin_border
     
-    # Заполняем данные (уже экранированы в _get_user_export_data)
     for row_idx, row_data in enumerate(data, start=start_row + 1):
         for field, col_idx in col_indices.items():
             value = row_data.get(field, "")
@@ -386,7 +347,6 @@ def generate_full_registrations_excel_from_data(data: List[Dict], course_title: 
             cell.alignment = cell_alignment
             cell.border = thin_border
     
-    # Настройка ширины колонок
     column_widths = {
         1: 5, 2: 30, 3: 40, 4: 20, 5: 20, 6: 20,
         7: 18, 8: 15, 9: 20, 10: 25, 11: 25, 12: 30,
@@ -409,5 +369,4 @@ def generate_full_registrations_excel_from_data(data: List[Dict], course_title: 
 
 
 def generate_empty_registrations_excel(course_title: str = "") -> BytesIO:
-    """Генерирует пустой Excel с заголовками"""
     return generate_full_registrations_excel_from_data([], course_title)

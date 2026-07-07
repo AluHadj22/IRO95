@@ -698,6 +698,79 @@
     box-shadow: none;
 }
 
+/* ===== ПАГИНАЦИЯ ===== */
+.pagination-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    background: rgba(250, 251, 252, 0.3);
+}
+
+.pagination-info {
+    font-size: 0.85rem;
+    color: var(--gray);
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pagination-controls .page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    color: var(--dark);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-controls .page-btn:hover:not(:disabled):not(.active) {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(26, 79, 122, 0.04);
+}
+
+.pagination-controls .page-btn.active {
+    background: var(--primary-gradient);
+    border-color: var(--primary);
+    color: white;
+}
+
+.pagination-controls .page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pagination-controls .page-btn .bi {
+    font-size: 0.9rem;
+}
+
+.pagination-controls .page-btn.pagination-gap {
+    border: none;
+    background: transparent;
+    cursor: default;
+    color: var(--gray);
+}
+
+.pagination-controls .page-btn.pagination-gap:hover {
+    background: transparent;
+    border: none;
+}
+
 /* ===== МОДАЛЬНОЕ ОКНО ===== */
 .modal-content {
     border-radius: 20px;
@@ -1045,6 +1118,10 @@
         width: 100%;
         text-align: center;
     }
+    .pagination-wrapper {
+        flex-direction: column;
+        text-align: center;
+    }
 }
 
 /* ===== ДЕТАЛИ ПОЛЬЗОВАТЕЛЯ ===== */
@@ -1123,7 +1200,8 @@
                 <div class="sidebar-logo">
                     <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР">
                     <h6 class="mt-2 fw-bold">
-                        <span>✦</span> Панель управления                    </h6>
+                        <span></span> Панель управления
+                    </h6>
                 </div>
                 <div class="nav flex-column">
                     <a class="nav-link active" href="#" onclick="showSection('dashboard'); return false;">
@@ -1185,7 +1263,7 @@
                 </div>
             </div>
 
-            <!-- Категории -->
+            <!-- Категории с пагинацией -->
             <div id="categoriesSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
@@ -1205,10 +1283,15 @@
                             <tbody id="categoriesList"></tbody>
                         </table>
                     </div>
+                    <!-- Пагинация категорий -->
+                    <div class="pagination-wrapper" id="categoriesPagination">
+                        <div class="pagination-info" id="categoriesPaginationInfo">Показано: 0 из 0</div>
+                        <div class="pagination-controls" id="categoriesPaginationControls"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Курсы -->
+            <!-- Курсы с пагинацией -->
             <div id="coursesSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
@@ -1231,10 +1314,15 @@
                             <tbody id="coursesList"></tbody>
                         </table>
                     </div>
+                    <!-- Пагинация курсов -->
+                    <div class="pagination-wrapper" id="coursesPagination">
+                        <div class="pagination-info" id="coursesPaginationInfo">Показано: 0 из 0</div>
+                        <div class="pagination-controls" id="coursesPaginationControls"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Пользователи (управление) -->
+            <!-- Пользователи (управление) с пагинацией -->
             <div id="usersSection" style="display: none;">
                 <div class="mb-4">
                     <h2 class="section-title">Управление пользователями</h2>
@@ -1252,6 +1340,11 @@
                             <tbody id="usersList"></tbody>
                         </table>
                     </div>
+                    <!-- Пагинация пользователей -->
+                    <div class="pagination-wrapper" id="usersPagination">
+                        <div class="pagination-info" id="usersPaginationInfo">Показано: 0 из 0</div>
+                        <div class="pagination-controls" id="usersPaginationControls"></div>
+                    </div>
                 </div>
             </div>
 
@@ -1268,7 +1361,7 @@
                 <div class="export-actions">
                     <div class="search-wrapper">
                         <input type="text" class="form-control" id="userSearchInput" 
-                               placeholder="🔍 Поиск по ФИО, email..." 
+                               placeholder="Поиск по ФИО, email..." 
                                oninput="filterUserTable(this.value)">
                         <span class="search-icon"><i class="bi bi-search"></i></span>
                         <button class="clear-search" onclick="document.getElementById('userSearchInput').value=''; filterUserTable('');">
@@ -1287,12 +1380,12 @@
                     <button class="btn-doc-zip-selected" id="docZipSelectedBtn" onclick="downloadSelectedDocuments()" disabled>
                         <i class="bi bi-file-zip me-2"></i>Доки выбранных
                     </button>
-                    <button class="btn btn-outline-primary btn-sm" onclick="loadUserData()">
+                    <button class="btn btn-outline-primary btn-sm" onclick="loadUserData(currentUserdataPage)">
                         <i class="bi bi-arrow-repeat me-1"></i>Обновить
                     </button>
                 </div>
 
-                <!-- Таблица пользователей -->
+                <!-- Таблица пользователей с пагинацией -->
                 <div class="table-card">
                     <div class="table-responsive">
                         <table class="table mb-0 user-data-table" id="userDataTable">
@@ -1319,6 +1412,11 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <!-- Пагинация данных пользователей -->
+                    <div class="pagination-wrapper" id="userdataPagination">
+                        <div class="pagination-info" id="userdataPaginationInfo">Показано: 0 из 0</div>
+                        <div class="pagination-controls" id="userdataPaginationControls"></div>
                     </div>
                 </div>
                 <div class="mt-2 text-muted small" id="userCountInfo"></div>
@@ -1534,15 +1632,26 @@
 </div>
 
 <script>
-    // ... (весь JavaScript код остается без изменений, так как функционал не должен ломаться)
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
 
     let currentSection = 'dashboard';
     let speakersList = [];
-    let usersData = [];
+    
+    // Данные для пагинации
+    let allUsersData = [];
     let filteredUsersData = [];
+    let allCoursesData = [];
+    let filteredCoursesData = [];
+    let allCategoriesData = [];
     let selectedUserIds = new Set();
+    
+    // Параметры пагинации
+    const PAGE_SIZE = 10;
+    let currentCoursesPage = 1;
+    let currentUsersPage = 1;
+    let currentUserdataPage = 1;
+    let currentCategoriesPage = 1;
 
     function showToast(message, type = 'success') {
         const toastContainer = document.querySelector('.toast-container') || (() => {
@@ -1564,6 +1673,63 @@
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // ========== ФУНКЦИИ ПАГИНАЦИИ ==========
+    function renderPagination(containerId, infoId, controlsId, currentPage, totalItems, pageSize, onPageChange) {
+        const totalPages = Math.ceil(totalItems / pageSize);
+        const start = (currentPage - 1) * pageSize + 1;
+        const end = Math.min(currentPage * pageSize, totalItems);
+
+        const infoEl = document.getElementById(infoId);
+        if (infoEl) {
+            if (totalItems === 0) {
+                infoEl.textContent = 'Нет данных';
+            } else {
+                infoEl.textContent = `Показано: ${start}–${end} из ${totalItems}`;
+            }
+        }
+
+        const controls = document.getElementById(controlsId);
+        if (!controls) return;
+
+        if (totalPages <= 1) {
+            controls.innerHTML = '';
+            return;
+        }
+
+        let html = '';
+        
+        html += `<button class="page-btn" onclick="${onPageChange}(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
+            <i class="bi bi-chevron-left"></i>
+        </button>`;
+
+        let pages = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            pages.push(1);
+            if (currentPage > 3) pages.push('gap');
+            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                pages.push(i);
+            }
+            if (currentPage < totalPages - 2) pages.push('gap');
+            pages.push(totalPages);
+        }
+
+        pages.forEach(p => {
+            if (p === 'gap') {
+                html += `<span class="page-btn pagination-gap">…</span>`;
+            } else {
+                html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="${onPageChange}(${p})">${p}</button>`;
+            }
+        });
+
+        html += `<button class="page-btn" onclick="${onPageChange}(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
+            <i class="bi bi-chevron-right"></i>
+        </button>`;
+
+        controls.innerHTML = html;
     }
 
     // ========== ФУНКЦИЯ ПОИСКА ==========
@@ -1590,7 +1756,7 @@
             if (match) visibleCount++;
         });
 
-        document.getElementById('userCountInfo').textContent = `Показано: ${visibleCount} из ${usersData.length} пользователей`;
+        document.getElementById('userCountInfo').textContent = `Показано: ${visibleCount} из ${allUsersData.length} пользователей`;
         updateSelectAllState();
     }
 
@@ -1819,15 +1985,37 @@
         document.getElementById('totalCategories').innerText = stats.total_categories || 0;
     }
 
-    async function loadCategories() {
-        const response = await fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } });
-        const categories = await response.json();
+    // ========== ЗАГРУЗКА КАТЕГОРИЙ С ПАГИНАЦИЕЙ ==========
+    async function loadCategories(page = 1) {
+        currentCategoriesPage = page;
+        try {
+            const response = await fetch('/api/admin/categories', { 
+                headers: { 'Authorization': 'Bearer ' + token } 
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки категорий');
+            }
+            
+            allCategoriesData = await response.json();
+            renderCategoriesPage(page);
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            const tbody = document.getElementById('categoriesList');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Ошибка загрузки: ${error.message}</td></tr>`;
+        }
+    }
+
+    function renderCategoriesPage(page) {
+        const start = (page - 1) * PAGE_SIZE;
+        const end = Math.min(start + PAGE_SIZE, allCategoriesData.length);
+        const pageData = allCategoriesData.slice(start, end);
         const tbody = document.getElementById('categoriesList');
 
-        if (!categories || categories.length === 0) {
+        if (!pageData || pageData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-folder-x"></i><p>Нет категорий</p></td></tr>';
         } else {
-            tbody.innerHTML = categories.map(c => `
+            tbody.innerHTML = pageData.map(c => `
                         <tr>
                             <td><span class="badge-gold">${c.id}</span></td>
                             <td><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>${c.name}</td>
@@ -1839,17 +2027,58 @@
         }
 
         const select = document.getElementById('course_category_id');
-        if (select && categories.length > 0) {
-            select.innerHTML = '<option value="">-- Выберите категорию --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        if (select && allCategoriesData.length > 0) {
+            select.innerHTML = '<option value="">-- Выберите категорию --</option>' + allCategoriesData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        renderPagination(
+            'categoriesPagination',
+            'categoriesPaginationInfo',
+            'categoriesPaginationControls',
+            page,
+            allCategoriesData.length,
+            PAGE_SIZE,
+            'loadCategories'
+        );
+    }
+
+    // ========== ЗАГРУЗКА КУРСОВ С ПАГИНАЦИЕЙ ==========
+    async function loadCourses(page = 1) {
+        currentCoursesPage = page;
+        try {
+            const response = await fetch('/api/admin/courses', { 
+                headers: { 'Authorization': 'Bearer ' + token } 
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки курсов');
+            }
+            
+            const result = await response.json();
+            // Если сервер вернул объект с пагинацией
+            if (result.items) {
+                allCoursesData = result.items;
+                totalCourses = result.total || result.items.length;
+            } else {
+                allCoursesData = result;
+                totalCourses = result.length;
+            }
+            filteredCoursesData = allCoursesData;
+            renderCoursesPage(page);
+        } catch (error) {
+            console.error('Error loading courses:', error);
+            const tbody = document.getElementById('coursesList');
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Ошибка загрузки: ${error.message}</td></tr>`;
         }
     }
 
-    async function loadCourses() {
-        const response = await fetch('/api/admin/courses', { headers: { 'Authorization': 'Bearer ' + token } });
-        const courses = await response.json();
+    function renderCoursesPage(page) {
+        const start = (page - 1) * PAGE_SIZE;
+        const end = Math.min(start + PAGE_SIZE, filteredCoursesData.length);
+        const pageData = filteredCoursesData.slice(start, end);
         const tbody = document.getElementById('coursesList');
 
-        if (!courses || courses.length === 0) {
+        if (!pageData || pageData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p></td></tr>';
         } else {
             const formatMap = {
@@ -1859,7 +2088,7 @@
                 'online': 'Онлайн'
             };
 
-            tbody.innerHTML = courses.map(c => `
+            tbody.innerHTML = pageData.map(c => `
                         <tr>
                             <td><span class="badge-gold">${c.id}</span></td>
                             <td><i class="bi bi-book me-2" style="color: var(--primary);"></i>${c.title}</td>
@@ -1880,37 +2109,76 @@
                         </tr>
                     `).join('');
         }
+
+        renderPagination(
+            'coursesPagination',
+            'coursesPaginationInfo',
+            'coursesPaginationControls',
+            page,
+            filteredCoursesData.length,
+            PAGE_SIZE,
+            'loadCourses'
+        );
     }
 
-    async function loadUsers() {
-        const response = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
-        const users = await response.json();
-        const tbody = document.getElementById('usersList');
+    // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ С ПАГИНАЦИЕЙ ==========
+    async function loadUsers(page = 1) {
+        currentUsersPage = page;
+        try {
+            const response = await fetch('/api/admin/users', { 
+                headers: { 'Authorization': 'Bearer ' + token } 
+            });
+            
+            if (!response.ok) {
+                throw new Error('Ошибка загрузки пользователей');
+            }
+            
+            const users = await response.json();
+            const tbody = document.getElementById('usersList');
 
-        if (!users || users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p></td></tr>';
-        } else {
-            tbody.innerHTML = users.map(u => `
-                        <tr>
-                            <td><span class="badge-gold">${u.id}</span></td>
-                            <td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>${u.full_name}</td>
-                            <td>${u.email}</td>
-                            <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Администратор' : 'Преподаватель'}</span></td>
-                            <td><span class="badge-info">${u.registrations_count || 0}</span></td>
-                            <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
-                            <td>
-                                ${!u.is_blocked ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`
-                                }
-                                <button class="btn btn-sm ${u.role === 'admin' ? 'btn-role btn-role-danger' : 'btn-role'}" 
-                                        onclick="openRoleModal(${u.id}, '${escapeHtml(u.full_name)}', '${u.role}')" 
-                                        title="${u.role === 'admin' ? 'Забрать права администратора' : 'Сделать администратором'}">
-                                    <i class="bi ${u.role === 'admin' ? 'bi-person-x' : 'bi-person-plus'}"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `).join('');
+            const start = (page - 1) * PAGE_SIZE;
+            const end = Math.min(start + PAGE_SIZE, users.length);
+            const pageData = users.slice(start, end);
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p></td></tr>';
+            } else {
+                tbody.innerHTML = pageData.map(u => `
+                            <tr>
+                                <td><span class="badge-gold">${u.id}</span></td>
+                                <td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>${u.full_name}</td>
+                                <td>${u.email}</td>
+                                <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Администратор' : 'Преподаватель'}</span></td>
+                                <td><span class="badge-info">${u.registrations_count || 0}</span></td>
+                                <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
+                                <td>
+                                    ${!u.is_blocked ? 
+                                        `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
+                                        `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`
+                                    }
+                                    <button class="btn btn-sm ${u.role === 'admin' ? 'btn-role btn-role-danger' : 'btn-role'}" 
+                                            onclick="openRoleModal(${u.id}, '${escapeHtml(u.full_name)}', '${u.role}')" 
+                                            title="${u.role === 'admin' ? 'Забрать права администратора' : 'Сделать администратором'}">
+                                        <i class="bi ${u.role === 'admin' ? 'bi-person-x' : 'bi-person-plus'}"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+            }
+
+            renderPagination(
+                'usersPagination',
+                'usersPaginationInfo',
+                'usersPaginationControls',
+                page,
+                users.length,
+                PAGE_SIZE,
+                'loadUsers'
+            );
+        } catch (error) {
+            console.error('Error loading users:', error);
+            const tbody = document.getElementById('usersList');
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки: ${error.message}</td></tr>`;
         }
     }
 
@@ -1952,8 +2220,8 @@
         const response = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Категория успешно удалена', 'success');
-            await loadCategories();
-            await loadCourses();
+            await loadCategories(currentCategoriesPage);
+            await loadCourses(currentCoursesPage);
             await loadStats();
         } else {
             showToast('Ошибка при удалении категории', 'danger');
@@ -1965,7 +2233,7 @@
         const response = await fetch(`/api/admin/courses/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Курс успешно удален', 'success');
-            await loadCourses();
+            await loadCourses(currentCoursesPage);
             await loadStats();
         } else {
             showToast('Ошибка при удалении курса', 'danger');
@@ -1980,7 +2248,7 @@
         });
         if (response.ok) {
             showToast(isActive ? 'Курс активирован' : 'Курс деактивирован', 'success');
-            await loadCourses();
+            await loadCourses(currentCoursesPage);
             await loadStats();
         } else {
             showToast('Ошибка при изменении статуса', 'danger');
@@ -1992,7 +2260,7 @@
         const response = await fetch(`/api/admin/users/${id}/block`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Пользователь заблокирован', 'success');
-            await loadUsers();
+            await loadUsers(currentUsersPage);
         } else {
             showToast('Ошибка при блокировке', 'danger');
         }
@@ -2003,7 +2271,7 @@
         const response = await fetch(`/api/admin/users/${id}/unblock`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Пользователь разблокирован', 'success');
-            await loadUsers();
+            await loadUsers(currentUsersPage);
         } else {
             showToast('Ошибка при разблокировке', 'danger');
         }
@@ -2098,8 +2366,8 @@
                 showToast(result.message || 'Роль успешно изменена', 'success');
                 const modal = bootstrap.Modal.getInstance(document.getElementById('roleModal'));
                 if (modal) modal.hide();
-                await loadUsers();
-                await loadUserData();
+                await loadUsers(currentUsersPage);
+                await loadUserData(currentUserdataPage);
                 await loadStats();
             } else {
                 const error = await response.json();
@@ -2127,7 +2395,7 @@
             showToast('Категория успешно создана', 'success');
             bootstrap.Modal.getInstance(document.getElementById('createCategoryModal')).hide();
             document.getElementById('createCategoryForm').reset();
-            await loadCategories();
+            await loadCategories(currentCategoriesPage);
             await loadStats();
         } else {
             const error = await response.json();
@@ -2176,7 +2444,7 @@
             document.getElementById('createCourseForm').reset();
             speakersList = [];
             renderSpeakers();
-            await loadCourses();
+            await loadCourses(currentCoursesPage);
             await loadStats();
         } else {
             const error = await response.json();
@@ -2204,16 +2472,16 @@
             loadStats();
         } else if (section === 'categories') {
             document.getElementById('categoriesSection').style.display = 'block';
-            loadCategories();
+            loadCategories(currentCategoriesPage);
         } else if (section === 'courses') {
             document.getElementById('coursesSection').style.display = 'block';
-            loadCourses();
+            loadCourses(currentCoursesPage);
         } else if (section === 'users') {
             document.getElementById('usersSection').style.display = 'block';
-            loadUsers();
+            loadUsers(currentUsersPage);
         } else if (section === 'userdata') {
             document.getElementById('userdataSection').style.display = 'block';
-            loadUserData();
+            loadUserData(currentUserdataPage);
         }
     }
 
@@ -2243,7 +2511,9 @@
         new bootstrap.Modal(document.getElementById('createCourseModal')).show();
     }
 
-    async function loadUserData() {
+    // ========== ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ С ПАГИНАЦИЕЙ ==========
+    async function loadUserData(page = 1) {
+        currentUserdataPage = page;
         const tbody = document.getElementById('userDataList');
         tbody.innerHTML = `
                     <tr>
@@ -2255,7 +2525,8 @@
                 `;
 
         try {
-            const response = await fetch('/api/admin/users/list', {
+            const offset = (page - 1) * PAGE_SIZE;
+            const response = await fetch(`/api/admin/users/list?limit=${PAGE_SIZE}&offset=${offset}`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
 
@@ -2263,14 +2534,29 @@
                 throw new Error('Ошибка загрузки данных');
             }
 
-            usersData = await response.json();
-            filteredUsersData = [...usersData];
+            const result = await response.json();
+            
+            allUsersData = result.items || [];
+            filteredUsersData = [...allUsersData];
             selectedUserIds = new Set();
             document.getElementById('selectAllUsers').checked = false;
             updateExportButton();
             updateDocZipButton();
-            renderUserData(usersData);
-            document.getElementById('userCountInfo').textContent = `Всего: ${usersData.length} пользователей`;
+            
+            renderUserData(allUsersData);
+            
+            document.getElementById('userCountInfo').textContent = `Всего: ${result.total} пользователей`;
+            
+            renderPagination(
+                'userdataPagination',
+                'userdataPaginationInfo',
+                'userdataPaginationControls',
+                page,
+                result.total,
+                PAGE_SIZE,
+                'loadUserData'
+            );
+            
         } catch (error) {
             console.error('Error loading user data:', error);
             tbody.innerHTML = `
@@ -2301,16 +2587,17 @@
 
         let html = '';
         users.forEach((user, index) => {
+            const globalIndex = (currentUserdataPage - 1) * PAGE_SIZE + index;
             const isSelected = selectedUserIds.has(user.id);
             const profileStatus = user.has_complete_profile ?
-                '<span class="badge-profile-complete">✅ Заполнен</span>' :
-                '<span class="badge-profile-incomplete">⚠️ Не заполнен</span>';
+                '<span class="badge-profile-complete">Заполнен</span>' :
+                '<span class="badge-profile-incomplete">Не заполнен</span>';
 
             const roleLabel = user.role === 'admin' ? 'Администратор' : 'Преподаватель';
             const roleBadge = user.role === 'admin' ? 'badge-danger' : 'badge-info';
 
             html += `
-                        <tr class="user-row" data-user-id="${user.id}" onclick="toggleUserDetails(${index})">
+                        <tr class="user-row" data-user-id="${user.id}" onclick="toggleUserDetails(${globalIndex})">
                             <td onclick="event.stopPropagation();">
                                 <input type="checkbox" class="user-select-checkbox user-checkbox" 
                                        data-user-id="${user.id}" ${isSelected ? 'checked' : ''} 
@@ -2319,7 +2606,7 @@
                             <td><span class="badge-gold">${user.id}</span></td>
                             <td>
                                 <strong>${escapeHtml(user.full_name)}</strong>
-                                <span class="expand-icon ${isSelected ? 'expanded' : ''}" id="expandIcon_${index}">
+                                <span class="expand-icon ${isSelected ? 'expanded' : ''}" id="expandIcon_${globalIndex}">
                                     <i class="bi bi-chevron-right"></i>
                                 </span>
                             </td>
@@ -2340,7 +2627,7 @@
                                 </button>
                             </td>
                         </tr>
-                        <tr class="user-details-row" id="detailsRow_${index}" style="display: none;">
+                        <tr class="user-details-row" id="detailsRow_${globalIndex}" style="display: none;">
                             <td colspan="8">
                                 <div class="details-grid">
                                     <div class="detail-item">
@@ -2849,5 +3136,9 @@
 
     // Инициализация
     loadStats();
+    loadCategories(1);
+    loadCourses(1);
+    loadUsers(1);
+    loadUserData(1);
 </script>
 {% endblock %}

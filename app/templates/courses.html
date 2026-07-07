@@ -918,7 +918,21 @@
                 throw new Error('Ошибка загрузки');
             }
             
-            allCourses = await response.json();
+            const result = await response.json();
+            
+            // Проверяем, вернулся ли объект с пагинацией или массив
+            if (result.items) {
+                // Новый формат с пагинацией
+                allCourses = result.items;
+            } else if (Array.isArray(result)) {
+                // Старый формат (массив)
+                allCourses = result;
+            } else {
+                // Неизвестный формат
+                allCourses = [];
+                console.error('Неизвестный формат ответа:', result);
+            }
+            
             filterCourses();
             
         } catch (error) {

@@ -1,13 +1,10 @@
+
 {% extends "base.html" %}
 
 {% block title %}Админ панель - ГБУ ДПО «ИРО ЧР»{% endblock %}
 
 {% block extra_css %}
 <style>
-/* ============================================================
-   СТИЛИ ДЛЯ АДМИН-ПАНЕЛИ (ВСТРОЕННЫЕ)
-   ============================================================ */
-
 :root {
     --primary: #1a4f7a;
     --primary-dark: #0d3b5e;
@@ -25,7 +22,6 @@
     --border: #e2e8f0;
 }
 
-/* ===== ШРИФТЫ ===== */
 .admin-page * {
     font-family: 'Inter', sans-serif;
 }
@@ -52,7 +48,6 @@
     font-size: 1rem !important;
 }
 
-/* ===== ПЕРЕОПРЕДЕЛЯЕМ НАВБАР ДЛЯ АДМИНКИ ===== */
 .navbar {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(16px) saturate(180%) !important;
@@ -177,7 +172,6 @@
     }
 }
 
-/* ===== САЙДБАР ===== */
 .admin-sidebar {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px) saturate(180%);
@@ -257,7 +251,6 @@
     color: var(--primary);
 }
 
-/* ===== СТАТИСТИКА ===== */
 .stat-card {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(8px);
@@ -317,7 +310,6 @@
     font-size: 0.875rem;
 }
 
-/* ===== ТАБЛИЦЫ ===== */
 .table-card {
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(8px);
@@ -358,7 +350,6 @@
     background: rgba(26, 79, 122, 0.04);
 }
 
-/* ===== БЭДЖИ ===== */
 .badge-gold {
     background: var(--primary-gradient);
     color: white;
@@ -432,7 +423,6 @@
     font-weight: 500;
 }
 
-/* ===== КНОПКИ ===== */
 .btn-primary {
     background: var(--primary-gradient);
     border: none;
@@ -698,7 +688,6 @@
     box-shadow: none;
 }
 
-/* ===== ПАГИНАЦИЯ ===== */
 .pagination-wrapper {
     display: flex;
     justify-content: space-between;
@@ -771,7 +760,6 @@
     border: none;
 }
 
-/* ===== МОДАЛЬНОЕ ОКНО ===== */
 .modal-content {
     border-radius: 20px;
     border: none;
@@ -798,7 +786,6 @@
     font-family: 'Playfair Display', 'Georgia', serif !important;
 }
 
-/* ===== ФОРМЫ ===== */
 .form-control,
 .form-select {
     border-radius: 10px;
@@ -922,7 +909,6 @@
     opacity: 0.4;
 }
 
-/* ===== ДОКУМЕНТЫ ===== */
 .doc-status-badge {
     display: inline-block;
     padding: 2px 8px;
@@ -998,7 +984,6 @@
     color: #ef4444;
 }
 
-/* ===== ПОИСК ===== */
 .search-wrapper {
     position: relative;
     max-width: 350px;
@@ -1081,7 +1066,6 @@
     to { transform: rotate(360deg); }
 }
 
-/* ===== АДАПТИВ ===== */
 @media (max-width: 768px) {
     .admin-sidebar {
         position: relative;
@@ -1124,7 +1108,6 @@
     }
 }
 
-/* ===== ДЕТАЛИ ПОЛЬЗОВАТЕЛЯ ===== */
 .user-data-table .user-row {
     cursor: pointer;
     transition: background 0.15s ease;
@@ -1194,7 +1177,6 @@
 {% block content %}
 <div class="container-fluid mt-3 admin-page">
     <div class="row">
-        <!-- Sidebar -->
         <div class="col-md-3 col-lg-2 mb-4">
             <div class="admin-sidebar">
                 <div class="sidebar-logo">
@@ -1223,9 +1205,7 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-9 col-lg-10">
-            <!-- Дашборд -->
             <div id="dashboardSection">
                 <div class="mb-4">
                     <h2 class="section-title">Панель управления</h2>
@@ -1263,7 +1243,6 @@
                 </div>
             </div>
 
-            <!-- Категории с пагинацией -->
             <div id="categoriesSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
@@ -1283,7 +1262,6 @@
                             <tbody id="categoriesList"></tbody>
                         </table>
                     </div>
-                    <!-- Пагинация категорий -->
                     <div class="pagination-wrapper" id="categoriesPagination">
                         <div class="pagination-info" id="categoriesPaginationInfo">Показано: 0 из 0</div>
                         <div class="pagination-controls" id="categoriesPaginationControls"></div>
@@ -1291,7 +1269,6 @@
                 </div>
             </div>
 
-            <!-- Курсы с пагинацией -->
             <div id="coursesSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
@@ -1314,7 +1291,6 @@
                             <tbody id="coursesList"></tbody>
                         </table>
                     </div>
-                    <!-- Пагинация курсов -->
                     <div class="pagination-wrapper" id="coursesPagination">
                         <div class="pagination-info" id="coursesPaginationInfo">Показано: 0 из 0</div>
                         <div class="pagination-controls" id="coursesPaginationControls"></div>
@@ -1322,7 +1298,6 @@
                 </div>
             </div>
 
-            <!-- Пользователи (управление) с пагинацией -->
             <div id="usersSection" style="display: none;">
                 <div class="mb-4">
                     <h2 class="section-title">Управление пользователями</h2>
@@ -1340,7 +1315,6 @@
                             <tbody id="usersList"></tbody>
                         </table>
                     </div>
-                    <!-- Пагинация пользователей -->
                     <div class="pagination-wrapper" id="usersPagination">
                         <div class="pagination-info" id="usersPaginationInfo">Показано: 0 из 0</div>
                         <div class="pagination-controls" id="usersPaginationControls"></div>
@@ -1348,7 +1322,6 @@
                 </div>
             </div>
 
-            <!-- Вкладка: ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ -->
             <div id="userdataSection" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
@@ -1357,7 +1330,6 @@
                     </div>
                 </div>
 
-                <!-- Поиск и кнопки экспорта -->
                 <div class="export-actions">
                     <div class="search-wrapper">
                         <input type="text" class="form-control" id="userSearchInput" 
@@ -1385,7 +1357,6 @@
                     </button>
                 </div>
 
-                <!-- Таблица пользователей с пагинацией -->
                 <div class="table-card">
                     <div class="table-responsive">
                         <table class="table mb-0 user-data-table" id="userDataTable">
@@ -1413,7 +1384,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <!-- Пагинация данных пользователей -->
                     <div class="pagination-wrapper" id="userdataPagination">
                         <div class="pagination-info" id="userdataPaginationInfo">Показано: 0 из 0</div>
                         <div class="pagination-controls" id="userdataPaginationControls"></div>
@@ -1425,7 +1395,6 @@
     </div>
 </div>
 
-<!-- Модальное окно создания категории -->
 <div class="modal fade" id="createCategoryModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -1450,7 +1419,6 @@
     </div>
 </div>
 
-<!-- Модальное окно создания курса -->
 <div class="modal fade" id="createCourseModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -1465,9 +1433,7 @@
                             <label class="form-label">Название <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="course_title" required>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <!-- Поле цены удалено -->
-                        </div>
+                        <div class="col-md-4 mb-3"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Краткое описание</label>
@@ -1478,7 +1444,6 @@
                         <textarea class="form-control" id="course_desc" rows="3"></textarea>
                     </div>
 
-                    <!-- Поле для MOODLE -->
                     <div class="formats-group" style="border-left: 4px solid var(--warning);">
                         <label><i class="bi bi-box-arrow-up-right me-2"></i>Интеграция с Moodle</label>
                         <div class="mb-3">
@@ -1500,7 +1465,6 @@
                         </div>
                     </div>
 
-                    <!-- Формат обучения -->
                     <div class="formats-group">
                         <label><i class="bi bi-calendar-event me-2"></i>Формат обучения</label>
                         <div class="row">
@@ -1522,7 +1486,6 @@
                         </div>
                     </div>
 
-                    <!-- Даты -->
                     <div class="formats-group">
                         <label><i class="bi bi-calendar-range me-2"></i>Даты проведения</label>
                         <div class="row">
@@ -1559,7 +1522,6 @@
                         </div>
                     </div>
 
-                    <!-- Загрузка изображения -->
                     <div class="mb-3">
                         <label class="form-label">Изображение курса</label>
                         <input type="file" class="form-control" id="course_image_file" accept="image/*">
@@ -1579,7 +1541,6 @@
                         </div>
                     </div>
 
-                    <!-- Спикеры -->
                     <div class="mb-3">
                         <label class="form-label">Спикеры</label>
                         <div id="speakersContainer"></div>
@@ -1595,7 +1556,6 @@
     </div>
 </div>
 
-<!-- Модальное окно просмотра регистраций -->
 <div class="modal fade" id="registrationsModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -1608,7 +1568,6 @@
     </div>
 </div>
 
-<!-- Модальное окно управления ролью -->
 <div class="modal fade" id="roleModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -1618,9 +1577,7 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="roleModalBody">
-                <!-- Контент заполняется динамически -->
-            </div>
+            <div class="modal-body" id="roleModalBody"></div>
             <div class="modal-footer" id="roleModalFooter">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 <button class="btn" id="roleConfirmBtn" disabled>
@@ -1632,13 +1589,12 @@
 </div>
 
 <script>
+(function() {
     const token = localStorage.getItem('token');
     if (!token) window.location.href = '/login';
 
     let currentSection = 'dashboard';
     let speakersList = [];
-    
-    // Данные для пагинации
     let allUsersData = [];
     let filteredUsersData = [];
     let allCoursesData = [];
@@ -1646,51 +1602,49 @@
     let allCategoriesData = [];
     let selectedUserIds = new Set();
     
-    // Параметры пагинации
     const PAGE_SIZE = 10;
     let currentCoursesPage = 1;
     let currentUsersPage = 1;
     let currentUserdataPage = 1;
     let currentCategoriesPage = 1;
 
-    function showToast(message, type = 'success') {
-        const toastContainer = document.querySelector('.toast-container') || (() => {
-            const container = document.createElement('div');
-            container.className = 'toast-container';
-            document.body.appendChild(container);
-            return container;
-        })();
-
-        const toast = document.createElement('div');
-        toast.className = `toast show bg-${type === 'success' ? 'success' : 'danger'} text-white`;
-        toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
+    function showToast(message, type) {
+        type = type || 'success';
+        var toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container';
+            document.body.appendChild(toastContainer);
+        }
+        var toast = document.createElement('div');
+        toast.className = 'toast show bg-' + (type === 'success' ? 'success' : 'danger') + ' text-white';
+        toast.innerHTML = '<div class="toast-body"><i class="bi bi-' + (type === 'success' ? 'check-circle' : 'exclamation-triangle') + ' me-2"></i>' + message + '</div>';
         toastContainer.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+        setTimeout(function() { toast.remove(); }, 3000);
     }
 
     function escapeHtml(text) {
         if (!text) return '';
-        const div = document.createElement('div');
+        var div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
 
-    // ========== ФУНКЦИИ ПАГИНАЦИИ ==========
     function renderPagination(containerId, infoId, controlsId, currentPage, totalItems, pageSize, onPageChange) {
-        const totalPages = Math.ceil(totalItems / pageSize);
-        const start = (currentPage - 1) * pageSize + 1;
-        const end = Math.min(currentPage * pageSize, totalItems);
+        var totalPages = Math.ceil(totalItems / pageSize);
+        var start = (currentPage - 1) * pageSize + 1;
+        var end = Math.min(currentPage * pageSize, totalItems);
 
-        const infoEl = document.getElementById(infoId);
+        var infoEl = document.getElementById(infoId);
         if (infoEl) {
             if (totalItems === 0) {
                 infoEl.textContent = 'Нет данных';
             } else {
-                infoEl.textContent = `Показано: ${start}–${end} из ${totalItems}`;
+                infoEl.textContent = 'Показано: ' + start + '–' + end + ' из ' + totalItems;
             }
         }
 
-        const controls = document.getElementById(controlsId);
+        var controls = document.getElementById(controlsId);
         if (!controls) return;
 
         if (totalPages <= 1) {
@@ -1698,72 +1652,64 @@
             return;
         }
 
-        let html = '';
-        
-        html += `<button class="page-btn" onclick="${onPageChange}(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>
-            <i class="bi bi-chevron-left"></i>
-        </button>`;
+        var html = '';
+        html += '<button class="page-btn" onclick="' + onPageChange + '(' + (currentPage - 1) + ')" ' + (currentPage <= 1 ? 'disabled' : '') + '><i class="bi bi-chevron-left"></i></button>';
 
-        let pages = [];
+        var pages = [];
         if (totalPages <= 7) {
-            for (let i = 1; i <= totalPages; i++) pages.push(i);
+            for (var i = 1; i <= totalPages; i++) pages.push(i);
         } else {
             pages.push(1);
             if (currentPage > 3) pages.push('gap');
-            for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-                pages.push(i);
+            for (var j = Math.max(2, currentPage - 1); j <= Math.min(totalPages - 1, currentPage + 1); j++) {
+                pages.push(j);
             }
             if (currentPage < totalPages - 2) pages.push('gap');
             pages.push(totalPages);
         }
 
-        pages.forEach(p => {
+        for (var k = 0; k < pages.length; k++) {
+            var p = pages[k];
             if (p === 'gap') {
-                html += `<span class="page-btn pagination-gap">…</span>`;
+                html += '<span class="page-btn pagination-gap">…</span>';
             } else {
-                html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="${onPageChange}(${p})">${p}</button>`;
+                html += '<button class="page-btn ' + (p === currentPage ? 'active' : '') + '" onclick="' + onPageChange + '(' + p + ')">' + p + '</button>';
             }
-        });
+        }
 
-        html += `<button class="page-btn" onclick="${onPageChange}(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>
-            <i class="bi bi-chevron-right"></i>
-        </button>`;
-
+        html += '<button class="page-btn" onclick="' + onPageChange + '(' + (currentPage + 1) + ')" ' + (currentPage >= totalPages ? 'disabled' : '') + '><i class="bi bi-chevron-right"></i></button>';
         controls.innerHTML = html;
     }
 
-    // ========== ФУНКЦИЯ ПОИСКА ==========
     function filterUserTable(query) {
         query = query.toLowerCase().trim();
-        const rows = document.querySelectorAll('#userDataList .user-row');
-        let visibleCount = 0;
+        var rows = document.querySelectorAll('#userDataList .user-row');
+        var visibleCount = 0;
 
-        rows.forEach(row => {
-            const fio = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
-            const email = row.querySelector('td:nth-child(4)')?.textContent?.toLowerCase() || '';
-            const id = row.querySelector('td:nth-child(2)')?.textContent || '';
-
-            const match = !query || fio.includes(query) || email.includes(query) || id.includes(query);
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            var fio = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
+            var email = row.querySelector('td:nth-child(4)')?.textContent?.toLowerCase() || '';
+            var id = row.querySelector('td:nth-child(2)')?.textContent || '';
+            var match = !query || fio.indexOf(query) !== -1 || email.indexOf(query) !== -1 || id.indexOf(query) !== -1;
             row.style.display = match ? '' : 'none';
-
             if (!match) {
-                const detailsRow = row.nextElementSibling;
+                var detailsRow = row.nextElementSibling;
                 if (detailsRow && detailsRow.classList.contains('user-details-row')) {
                     detailsRow.style.display = 'none';
                 }
             }
-
             if (match) visibleCount++;
-        });
+        }
 
-        document.getElementById('userCountInfo').textContent = `Показано: ${visibleCount} из ${allUsersData.length} пользователей`;
+        document.getElementById('userCountInfo').textContent = 'Показано: ' + visibleCount + ' из ' + allUsersData.length + ' пользователей';
         updateSelectAllState();
     }
 
     function updateSelectAllState() {
-        const visibleCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox');
-        const checkedCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox:checked');
-        const selectAll = document.getElementById('selectAllUsers');
+        var visibleCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox');
+        var checkedCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox:checked');
+        var selectAll = document.getElementById('selectAllUsers');
         if (visibleCheckboxes.length > 0) {
             selectAll.checked = visibleCheckboxes.length === checkedCheckboxes.length;
             selectAll.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < visibleCheckboxes.length;
@@ -1773,67 +1719,49 @@
         }
     }
 
-    // ========== ФУНКЦИЯ ПОЛУЧЕНИЯ СПИСКА КУРСОВ ИЗ MOODLE ==========
     async function fetchMoodleCourses() {
-        const container = document.getElementById('moodleCoursesList');
+        var container = document.getElementById('moodleCoursesList');
         container.style.display = 'block';
         container.innerHTML = '<div class="text-center py-2"><span class="loading-spinner"></span> Загрузка курсов из Moodle...</div>';
 
         try {
-            const response = await fetch('/api/admin/moodle-courses', {
+            var response = await fetch('/api/admin/moodle-courses', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки курсов из Moodle');
-            }
-
-            const courses = await response.json();
-
+            if (!response.ok) throw new Error('Ошибка загрузки курсов из Moodle');
+            var courses = await response.json();
             if (!courses || courses.length === 0) {
                 container.innerHTML = '<div class="text-center py-2 text-muted">Нет курсов в Moodle</div>';
                 return;
             }
-
-            let html = '<ul class="list-unstyled mb-0">';
-            courses.forEach(c => {
-                html += `
-                            <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
-                                <span><strong>${c.id}</strong> — ${c.fullname}</span>
-                                <button class="btn btn-sm btn-primary" onclick="document.getElementById('moodle_course_id').value = ${c.id}; document.getElementById('moodleCoursesList').style.display = 'none'; showToast('ID курса ${c.id} выбран', 'success');">
-                                    <i class="bi bi-check"></i> Выбрать
-                                </button>
-                            </li>
-                        `;
-            });
+            var html = '<ul class="list-unstyled mb-0">';
+            for (var i = 0; i < courses.length; i++) {
+                var c = courses[i];
+                html += '<li class="d-flex justify-content-between align-items-center py-1 border-bottom"><span><strong>' + c.id + '</strong> — ' + c.fullname + '</span><button class="btn btn-sm btn-primary" onclick="document.getElementById(\'moodle_course_id\').value = ' + c.id + '; document.getElementById(\'moodleCoursesList\').style.display = \'none\'; showToast(\'ID курса ' + c.id + ' выбран\', \'success\');"><i class="bi bi-check"></i> Выбрать</button></li>';
+            }
             html += '</ul>';
             container.innerHTML = html;
         } catch (error) {
-            container.innerHTML = `<div class="text-center py-2 text-danger">${error.message}</div>`;
+            container.innerHTML = '<div class="text-center py-2 text-danger">' + error.message + '</div>';
         }
     }
 
     async function exportRegistrations(courseId) {
         try {
-            const response = await fetch(`/api/admin/courses/${courseId}/export`, {
+            var response = await fetch('/api/admin/courses/' + courseId + '/export', {
                 method: 'GET',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка экспорта');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            if (!response.ok) throw new Error('Ошибка экспорта');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-            a.download = `registrations_course_${courseId}.xlsx`;
+            a.download = 'registrations_course_' + courseId + '.xlsx';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
             showToast('Экспорт успешно завершен', 'success');
         } catch (error) {
             console.error('Export error:', error);
@@ -1842,30 +1770,24 @@
     }
 
     async function uploadFile(file, endpoint) {
-        const formData = new FormData();
+        var formData = new FormData();
         formData.append('file', file);
-
-        const response = await fetch(endpoint, {
+        var response = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token },
             body: formData
         });
-
-        if (!response.ok) {
-            throw new Error('Upload failed');
-        }
+        if (!response.ok) throw new Error('Upload failed');
         return await response.json();
     }
 
-    document.getElementById('course_image_file')?.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
+    document.getElementById('course_image_file')?.addEventListener('change', async function(e) {
+        var file = e.target.files[0];
         if (!file) return;
-
         try {
-            const result = await uploadFile(file, '/api/admin/upload/course-image');
+            var result = await uploadFile(file, '/api/admin/upload/course-image');
             document.getElementById('course_image_url').value = result.url;
-            const preview = document.getElementById('course_image_preview');
-            preview.innerHTML = `<img src="${result.url}" class="image-preview" alt="Preview">`;
+            document.getElementById('course_image_preview').innerHTML = '<img src="' + result.url + '" class="image-preview" alt="Preview">';
             showToast('Изображение загружено', 'success');
         } catch (error) {
             showToast('Ошибка загрузки изображения', 'danger');
@@ -1874,11 +1796,11 @@
 
     async function uploadSpeakerPhoto(file, index) {
         try {
-            const result = await uploadFile(file, '/api/admin/upload/speaker-photo');
+            var result = await uploadFile(file, '/api/admin/upload/speaker-photo');
             speakersList[index].photo_url = result.url;
-            const previewDiv = document.getElementById(`speaker_photo_preview_${index}`);
+            var previewDiv = document.getElementById('speaker_photo_preview_' + index);
             if (previewDiv) {
-                previewDiv.innerHTML = `<img src="${result.url}" class="speaker-photo-preview" alt="Speaker photo">`;
+                previewDiv.innerHTML = '<img src="' + result.url + '" class="speaker-photo-preview" alt="Speaker photo">';
             }
             showToast('Фото спикера загружено', 'success');
         } catch (error) {
@@ -1887,40 +1809,13 @@
     }
 
     function addSpeaker() {
-        const index = speakersList.length;
+        var index = speakersList.length;
         speakersList.push({ full_name: '', position: '', bio: '', photo_url: null });
-
-        const container = document.getElementById('speakersContainer');
-        const speakerDiv = document.createElement('div');
+        var container = document.getElementById('speakersContainer');
+        var speakerDiv = document.createElement('div');
         speakerDiv.className = 'speaker-item';
-        speakerDiv.id = `speaker_${index}`;
-        speakerDiv.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label">ФИО <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
-                        </div>
-                        <div class="col-md-4 mb-2">
-                            <label class="form-label">Должность</label>
-                            <input type="text" class="form-control" onchange="updateSpeaker(${index}, 'position', this.value)" placeholder="Должность">
-                        </div>
-                        <div class="col-md-3 mb-2">
-                            <label class="form-label">Фото</label>
-                            <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${index}, this.files[0])">
-                            <div id="speaker_photo_preview_${index}" class="mt-2"></div>
-                        </div>
-                        <div class="col-md-1 remove-speaker">
-                            <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${index})">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Биография</label>
-                        <textarea class="form-control" rows="2" onchange="updateSpeaker(${index}, 'bio', this.value)" placeholder="Краткая биография спикера"></textarea>
-                    </div>
-                    <hr>
-                `;
+        speakerDiv.id = 'speaker_' + index;
+        speakerDiv.innerHTML = '<div class="row"><div class="col-md-4 mb-2"><label class="form-label">ФИО <span class="text-danger">*</span></label><input type="text" class="form-control" onchange="updateSpeaker(' + index + ', \'full_name\', this.value)" placeholder="Введите ФИО спикера"></div><div class="col-md-4 mb-2"><label class="form-label">Должность</label><input type="text" class="form-control" onchange="updateSpeaker(' + index + ', \'position\', this.value)" placeholder="Должность"></div><div class="col-md-3 mb-2"><label class="form-label">Фото</label><input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(' + index + ', this.files[0])"><div id="speaker_photo_preview_' + index + '" class="mt-2"></div></div><div class="col-md-1 remove-speaker"><button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(' + index + ')"><i class="bi bi-trash"></i></button></div></div><div class="mb-2"><label class="form-label">Биография</label><textarea class="form-control" rows="2" onchange="updateSpeaker(' + index + ', \'bio\', this.value)" placeholder="Краткая биография спикера"></textarea></div><hr>';
         container.appendChild(speakerDiv);
     }
 
@@ -1940,284 +1835,159 @@
     }
 
     function renderSpeakers() {
-        const container = document.getElementById('speakersContainer');
+        var container = document.getElementById('speakersContainer');
         container.innerHTML = '';
-        speakersList.forEach((speaker, idx) => {
-            const speakerDiv = document.createElement('div');
+        for (var i = 0; i < speakersList.length; i++) {
+            var speaker = speakersList[i];
+            var speakerDiv = document.createElement('div');
             speakerDiv.className = 'speaker-item';
-            speakerDiv.innerHTML = `
-                        <div class="row">
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">ФИО <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" value="${escapeHtml(speaker.full_name || '')}" onchange="updateSpeaker(${idx}, 'full_name', this.value)" placeholder="Введите ФИО спикера">
-                            </div>
-                            <div class="col-md-4 mb-2">
-                                <label class="form-label">Должность</label>
-                                <input type="text" class="form-control" value="${escapeHtml(speaker.position || '')}" onchange="updateSpeaker(${idx}, 'position', this.value)" placeholder="Должность">
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <label class="form-label">Фото</label>
-                                <input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(${idx}, this.files[0])">
-                                <div id="speaker_photo_preview_${idx}" class="mt-2">${speaker.photo_url ? `<img src="${speaker.photo_url}" class="speaker-photo-preview">` : ''}</div>
-                            </div>
-                            <div class="col-md-1 remove-speaker">
-                                <button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(${idx})">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Биография</label>
-                            <textarea class="form-control" rows="2" onchange="updateSpeaker(${idx}, 'bio', this.value)" placeholder="Краткая биография спикера">${escapeHtml(speaker.bio || '')}</textarea>
-                        </div>
-                        <hr>
-                    `;
+            speakerDiv.innerHTML = '<div class="row"><div class="col-md-4 mb-2"><label class="form-label">ФИО <span class="text-danger">*</span></label><input type="text" class="form-control" value="' + escapeHtml(speaker.full_name || '') + '" onchange="updateSpeaker(' + i + ', \'full_name\', this.value)" placeholder="Введите ФИО спикера"></div><div class="col-md-4 mb-2"><label class="form-label">Должность</label><input type="text" class="form-control" value="' + escapeHtml(speaker.position || '') + '" onchange="updateSpeaker(' + i + ', \'position\', this.value)" placeholder="Должность"></div><div class="col-md-3 mb-2"><label class="form-label">Фото</label><input type="file" class="form-control" accept="image/*" onchange="handleSpeakerPhoto(' + i + ', this.files[0])"><div id="speaker_photo_preview_' + i + '" class="mt-2">' + (speaker.photo_url ? '<img src="' + speaker.photo_url + '" class="speaker-photo-preview">' : '') + '</div></div><div class="col-md-1 remove-speaker"><button type="button" class="btn btn-sm btn-danger w-100" onclick="removeSpeaker(' + i + ')"><i class="bi bi-trash"></i></button></div></div><div class="mb-2"><label class="form-label">Биография</label><textarea class="form-control" rows="2" onchange="updateSpeaker(' + i + ', \'bio\', this.value)" placeholder="Краткая биография спикера">' + escapeHtml(speaker.bio || '') + '</textarea></div><hr>';
             container.appendChild(speakerDiv);
-        });
+        }
     }
 
     async function loadStats() {
-        const response = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
-        const stats = await response.json();
+        var response = await fetch('/api/admin/stats', { headers: { 'Authorization': 'Bearer ' + token } });
+        var stats = await response.json();
         document.getElementById('totalUsers').innerText = stats.total_users || 0;
         document.getElementById('totalCourses').innerText = stats.total_courses || 0;
         document.getElementById('totalRegistrations').innerText = stats.total_registrations || 0;
         document.getElementById('totalCategories').innerText = stats.total_categories || 0;
     }
 
-    // ========== ЗАГРУЗКА КАТЕГОРИЙ С ПАГИНАЦИЕЙ ==========
-    async function loadCategories(page = 1) {
+    async function loadCategories(page) {
+        page = page || 1;
         currentCategoriesPage = page;
         try {
-            const response = await fetch('/api/admin/categories', { 
-                headers: { 'Authorization': 'Bearer ' + token } 
-            });
-            
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки категорий');
-            }
-            
+            var response = await fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!response.ok) throw new Error('Ошибка загрузки категорий');
             allCategoriesData = await response.json();
             renderCategoriesPage(page);
         } catch (error) {
             console.error('Error loading categories:', error);
-            const tbody = document.getElementById('categoriesList');
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-danger">Ошибка загрузки: ${error.message}</td></tr>`;
+            document.getElementById('categoriesList').innerHTML = '<tr><td colspan="5" class="text-center py-4 text-danger">Ошибка загрузки: ' + error.message + '</td></tr>';
         }
     }
 
     function renderCategoriesPage(page) {
-        const start = (page - 1) * PAGE_SIZE;
-        const end = Math.min(start + PAGE_SIZE, allCategoriesData.length);
-        const pageData = allCategoriesData.slice(start, end);
-        const tbody = document.getElementById('categoriesList');
-
+        var start = (page - 1) * PAGE_SIZE;
+        var end = Math.min(start + PAGE_SIZE, allCategoriesData.length);
+        var pageData = allCategoriesData.slice(start, end);
+        var tbody = document.getElementById('categoriesList');
         if (!pageData || pageData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="bi bi-folder-x"></i><p>Нет категорий</p></td></tr>';
         } else {
-            tbody.innerHTML = pageData.map(c => `
-                        <tr>
-                            <td><span class="badge-gold">${c.id}</span></td>
-                            <td><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>${c.name}</td>
-                            <td>${c.description || '-'}</td>
-                            <td><span class="badge-info">${c.courses_count || 0}</span></td>
-                            <td><button class="btn btn-sm btn-danger" onclick="deleteCategoryItem(${c.id})"><i class="bi bi-trash"></i></button></td>
-                        </tr>
-                    `).join('');
+            var html = '';
+            for (var i = 0; i < pageData.length; i++) {
+                var c = pageData[i];
+                html += '<tr><td><span class="badge-gold">' + c.id + '</span></td><td><i class="bi bi-folder-fill me-2" style="color: var(--primary);"></i>' + c.name + '</td><td>' + (c.description || '-') + '</td><td><span class="badge-info">' + (c.courses_count || 0) + '</span></td><td><button class="btn btn-sm btn-danger" onclick="deleteCategoryItem(' + c.id + ')"><i class="bi bi-trash"></i></button></td></tr>';
+            }
+            tbody.innerHTML = html;
         }
-
-        const select = document.getElementById('course_category_id');
+        var select = document.getElementById('course_category_id');
         if (select && allCategoriesData.length > 0) {
-            select.innerHTML = '<option value="">-- Выберите категорию --</option>' + allCategoriesData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            var opts = '<option value="">-- Выберите категорию --</option>';
+            for (var j = 0; j < allCategoriesData.length; j++) {
+                opts += '<option value="' + allCategoriesData[j].id + '">' + allCategoriesData[j].name + '</option>';
+            }
+            select.innerHTML = opts;
         }
-
-        renderPagination(
-            'categoriesPagination',
-            'categoriesPaginationInfo',
-            'categoriesPaginationControls',
-            page,
-            allCategoriesData.length,
-            PAGE_SIZE,
-            'loadCategories'
-        );
+        renderPagination('categoriesPagination', 'categoriesPaginationInfo', 'categoriesPaginationControls', page, allCategoriesData.length, PAGE_SIZE, 'loadCategories');
     }
 
-    // ========== ЗАГРУЗКА КУРСОВ С ПАГИНАЦИЕЙ ==========
-    async function loadCourses(page = 1) {
+    async function loadCourses(page) {
+        page = page || 1;
         currentCoursesPage = page;
         try {
-            const response = await fetch('/api/admin/courses', { 
-                headers: { 'Authorization': 'Bearer ' + token } 
-            });
-            
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки курсов');
-            }
-            
-            const result = await response.json();
-            // Если сервер вернул объект с пагинацией
+            var response = await fetch('/api/admin/courses', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!response.ok) throw new Error('Ошибка загрузки курсов');
+            var result = await response.json();
             if (result.items) {
                 allCoursesData = result.items;
-                totalCourses = result.total || result.items.length;
             } else {
                 allCoursesData = result;
-                totalCourses = result.length;
             }
             filteredCoursesData = allCoursesData;
             renderCoursesPage(page);
         } catch (error) {
             console.error('Error loading courses:', error);
-            const tbody = document.getElementById('coursesList');
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-danger">Ошибка загрузки: ${error.message}</td></tr>`;
+            document.getElementById('coursesList').innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger">Ошибка загрузки: ' + error.message + '</td></tr>';
         }
     }
 
     function renderCoursesPage(page) {
-        const start = (page - 1) * PAGE_SIZE;
-        const end = Math.min(start + PAGE_SIZE, filteredCoursesData.length);
-        const pageData = filteredCoursesData.slice(start, end);
-        const tbody = document.getElementById('coursesList');
-
+        var start = (page - 1) * PAGE_SIZE;
+        var end = Math.min(start + PAGE_SIZE, filteredCoursesData.length);
+        var pageData = filteredCoursesData.slice(start, end);
+        var tbody = document.getElementById('coursesList');
         if (!pageData || pageData.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="bi bi-book-x"></i><p>Нет курсов</p></td></tr>';
         } else {
-            const formatMap = {
-                'full_time': 'Очный',
-                'part_time': 'Заочный',
-                'full_part_time': 'Очно-заочный',
-                'online': 'Онлайн'
-            };
-
-            tbody.innerHTML = pageData.map(c => `
-                        <tr>
-                            <td><span class="badge-gold">${c.id}</span></td>
-                            <td><i class="bi bi-book me-2" style="color: var(--primary);"></i>${c.title}</td>
-                            <td>${c.category_name || '-'}</td>
-                            <td><span class="badge-info">${formatMap[c.format_type] || 'Онлайн'}</span></td>
-                            <td>${c.current_participants}/${c.max_participants}</td>
-                            <td>
-                                ${c.moodle_course_id 
-                                    ? `<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ${c.moodle_course_id}</span>` 
-                                    : `<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>`}
-                            </td>
-                            <td><span class="${c.is_active ? 'badge-success' : 'badge-danger'}">${c.is_active ? 'Активен' : 'Неактивен'}</span></td>
-                            <td>
-                                <button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(${c.id})" title="Регистрации"><i class="bi bi-people"></i></button>
-                                <button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(${c.id}, ${!c.is_active})" title="Изменить статус"><i class="bi bi-power"></i></button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteCourseItem(${c.id})" title="Удалить"><i class="bi bi-trash"></i></button>
-                            </td>
-                        </tr>
-                    `).join('');
+            var formatMap = { 'full_time': 'Очный', 'part_time': 'Заочный', 'full_part_time': 'Очно-заочный', 'online': 'Онлайн' };
+            var html = '';
+            for (var i = 0; i < pageData.length; i++) {
+                var c = pageData[i];
+                html += '<tr><td><span class="badge-gold">' + c.id + '</span></td><td><i class="bi bi-book me-2" style="color: var(--primary);"></i>' + c.title + '</td><td>' + (c.category_name || '-') + '</td><td><span class="badge-info">' + (formatMap[c.format_type] || 'Онлайн') + '</span></td><td>' + c.current_participants + '/' + c.max_participants + '</td><td>' + (c.moodle_course_id ? '<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ' + c.moodle_course_id + '</span>' : '<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>') + '</td><td><span class="' + (c.is_active ? 'badge-success' : 'badge-danger') + '">' + (c.is_active ? 'Активен' : 'Неактивен') + '</span></td><td><button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(' + c.id + ')" title="Регистрации"><i class="bi bi-people"></i></button><button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(' + c.id + ', ' + (!c.is_active) + ')" title="Изменить статус"><i class="bi bi-power"></i></button><button class="btn btn-sm btn-danger" onclick="deleteCourseItem(' + c.id + ')" title="Удалить"><i class="bi bi-trash"></i></button></td></tr>';
+            }
+            tbody.innerHTML = html;
         }
-
-        renderPagination(
-            'coursesPagination',
-            'coursesPaginationInfo',
-            'coursesPaginationControls',
-            page,
-            filteredCoursesData.length,
-            PAGE_SIZE,
-            'loadCourses'
-        );
+        renderPagination('coursesPagination', 'coursesPaginationInfo', 'coursesPaginationControls', page, filteredCoursesData.length, PAGE_SIZE, 'loadCourses');
     }
 
-    // ========== ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ С ПАГИНАЦИЕЙ ==========
-    async function loadUsers(page = 1) {
+    async function loadUsers(page) {
+        page = page || 1;
         currentUsersPage = page;
         try {
-            const response = await fetch('/api/admin/users', { 
-                headers: { 'Authorization': 'Bearer ' + token } 
-            });
-            
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки пользователей');
-            }
-            
-            const users = await response.json();
-            const tbody = document.getElementById('usersList');
-
-            const start = (page - 1) * PAGE_SIZE;
-            const end = Math.min(start + PAGE_SIZE, users.length);
-            const pageData = users.slice(start, end);
-
+            var response = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
+            if (!response.ok) throw new Error('Ошибка загрузки пользователей');
+            var users = await response.json();
+            var tbody = document.getElementById('usersList');
+            var start = (page - 1) * PAGE_SIZE;
+            var end = Math.min(start + PAGE_SIZE, users.length);
+            var pageData = users.slice(start, end);
             if (!users || users.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p></td></tr>';
             } else {
-                tbody.innerHTML = pageData.map(u => `
-                            <tr>
-                                <td><span class="badge-gold">${u.id}</span></td>
-                                <td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>${u.full_name}</td>
-                                <td>${u.email}</td>
-                                <td><span class="${u.role === 'admin' ? 'badge-danger' : 'badge-info'}">${u.role === 'admin' ? 'Администратор' : 'Преподаватель'}</span></td>
-                                <td><span class="badge-info">${u.registrations_count || 0}</span></td>
-                                <td><span class="${!u.is_blocked ? 'badge-success' : 'badge-danger'}">${!u.is_blocked ? 'Активен' : 'Заблокирован'}</span></td>
-                                <td>
-                                    ${!u.is_blocked ? 
-                                        `<button class="btn btn-sm btn-warning" onclick="blockUserItem(${u.id})" title="Заблокировать"><i class="bi bi-lock"></i></button>` : 
-                                        `<button class="btn btn-sm btn-success" onclick="unblockUserItem(${u.id})" title="Разблокировать"><i class="bi bi-unlock"></i></button>`
-                                    }
-                                    <button class="btn btn-sm ${u.role === 'admin' ? 'btn-role btn-role-danger' : 'btn-role'}" 
-                                            onclick="openRoleModal(${u.id}, '${escapeHtml(u.full_name)}', '${u.role}')" 
-                                            title="${u.role === 'admin' ? 'Забрать права администратора' : 'Сделать администратором'}">
-                                        <i class="bi ${u.role === 'admin' ? 'bi-person-x' : 'bi-person-plus'}"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        `).join('');
+                var html = '';
+                for (var i = 0; i < pageData.length; i++) {
+                    var u = pageData[i];
+                    html += '<tr><td><span class="badge-gold">' + u.id + '</span></td><td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>' + u.full_name + '</td><td>' + u.email + '</td><td><span class="' + (u.role === 'admin' ? 'badge-danger' : 'badge-info') + '">' + (u.role === 'admin' ? 'Администратор' : 'Преподаватель') + '</span></td><td><span class="badge-info">' + (u.registrations_count || 0) + '</span></td><td><span class="' + (!u.is_blocked ? 'badge-success' : 'badge-danger') + '">' + (!u.is_blocked ? 'Активен' : 'Заблокирован') + '</span></td><td>' + (!u.is_blocked ? '<button class="btn btn-sm btn-warning" onclick="blockUserItem(' + u.id + ')" title="Заблокировать"><i class="bi bi-lock"></i></button>' : '<button class="btn btn-sm btn-success" onclick="unblockUserItem(' + u.id + ')" title="Разблокировать"><i class="bi bi-unlock"></i></button>') + '<button class="btn btn-sm ' + (u.role === 'admin' ? 'btn-role btn-role-danger' : 'btn-role') + '" onclick="openRoleModal(' + u.id + ', \'' + escapeHtml(u.full_name) + '\', \'' + u.role + '\')" title="' + (u.role === 'admin' ? 'Забрать права администратора' : 'Сделать администратором') + '"><i class="bi ' + (u.role === 'admin' ? 'bi-person-x' : 'bi-person-plus') + '"></i></button></td></tr>';
+                }
+                tbody.innerHTML = html;
             }
-
-            renderPagination(
-                'usersPagination',
-                'usersPaginationInfo',
-                'usersPaginationControls',
-                page,
-                users.length,
-                PAGE_SIZE,
-                'loadUsers'
-            );
+            renderPagination('usersPagination', 'usersPaginationInfo', 'usersPaginationControls', page, users.length, PAGE_SIZE, 'loadUsers');
         } catch (error) {
             console.error('Error loading users:', error);
-            const tbody = document.getElementById('usersList');
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки: ${error.message}</td></tr>`;
+            document.getElementById('usersList').innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки: ' + error.message + '</td></tr>';
         }
     }
 
     async function viewCourseRegistrations(courseId) {
-        const response = await fetch(`/api/admin/courses/${courseId}/registrations`, { headers: { 'Authorization': 'Bearer ' + token } });
-        const data = await response.json();
-
-        let html = `<div class="mb-4"><h5>${data.course.title}</h5>`;
+        var response = await fetch('/api/admin/courses/' + courseId + '/registrations', { headers: { 'Authorization': 'Bearer ' + token } });
+        var data = await response.json();
+        var html = '<div class="mb-4"><h5>' + data.course.title + '</h5>';
         if (data.course.moodle_course_id) {
-            html += `<p class="text-muted">Moodle ID: <strong>${data.course.moodle_course_id}</strong></p>`;
+            html += '<p class="text-muted">Moodle ID: <strong>' + data.course.moodle_course_id + '</strong></p>';
         }
-        html += `</div>`;
-
+        html += '</div>';
         if (!data.registrations || data.registrations.length === 0) {
             html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет регистраций</p></div>';
         } else {
-            html += `<div class="table-responsive"><table class="table table-striped"><thead class="table-light"><tr><th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Дата</th></tr></thead><tbody>`;
-            data.registrations.forEach((r, idx) => {
-                html += `<tr>
-                            <td>${idx + 1}</td>
-                            <td>${r.full_name}</td>
-                            <td>${r.email}</td>
-                            <td>${r.position || '-'}</td>
-                            <td>${r.phone || '-'}</td>
-                            <td>${r.organization || '-'}</td>
-                            <td>${new Date(r.registered_at).toLocaleDateString()}</td>
-                        </tr>`;
-            });
-            html += `</tbody></table></div>`;
-            html += `<div class="mt-3 text-center"><button class="btn btn-primary" onclick="exportRegistrations(${courseId})"><i class="bi bi-download me-2"></i>Экспорт в Excel</button></div>`;
+            html += '<div class="table-responsive"><table class="table table-striped"><thead class="table-light"><tr><th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Дата</th></tr></thead><tbody>';
+            for (var i = 0; i < data.registrations.length; i++) {
+                var r = data.registrations[i];
+                html += '<tr><td>' + (i + 1) + '</td><td>' + r.full_name + '</td><td>' + r.email + '</td><td>' + (r.position || '-') + '</td><td>' + (r.phone || '-') + '</td><td>' + (r.organization || '-') + '</td><td>' + new Date(r.registered_at).toLocaleDateString() + '</td></tr>';
+            }
+            html += '</tbody></table></div>';
+            html += '<div class="mt-3 text-center"><button class="btn btn-primary" onclick="exportRegistrations(' + courseId + ')"><i class="bi bi-download me-2"></i>Экспорт в Excel</button></div>';
         }
-
         document.getElementById('registrationsContent').innerHTML = html;
         new bootstrap.Modal(document.getElementById('registrationsModal')).show();
     }
 
     async function deleteCategoryItem(id) {
         if (!confirm('Вы уверены, что хотите удалить эту категорию?')) return;
-        const response = await fetch(`/api/admin/categories/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        var response = await fetch('/api/admin/categories/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Категория успешно удалена', 'success');
             await loadCategories(currentCategoriesPage);
@@ -2230,7 +2000,7 @@
 
     async function deleteCourseItem(id) {
         if (!confirm('Вы уверены, что хотите удалить этот курс? Действие необратимо.')) return;
-        const response = await fetch(`/api/admin/courses/${id}`, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+        var response = await fetch('/api/admin/courses/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Курс успешно удален', 'success');
             await loadCourses(currentCoursesPage);
@@ -2241,7 +2011,7 @@
     }
 
     async function toggleCourseStatusItem(id, isActive) {
-        const response = await fetch(`/api/courses/${id}`, {
+        var response = await fetch('/api/courses/' + id, {
             method: 'PUT',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify({ is_active: isActive })
@@ -2257,7 +2027,7 @@
 
     async function blockUserItem(id) {
         if (!confirm('Заблокировать этого пользователя?')) return;
-        const response = await fetch(`/api/admin/users/${id}/block`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        var response = await fetch('/api/admin/users/' + id + '/block', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Пользователь заблокирован', 'success');
             await loadUsers(currentUsersPage);
@@ -2268,7 +2038,7 @@
 
     async function unblockUserItem(id) {
         if (!confirm('Разблокировать этого пользователя?')) return;
-        const response = await fetch(`/api/admin/users/${id}/unblock`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+        var response = await fetch('/api/admin/users/' + id + '/unblock', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Пользователь разблокирован', 'success');
             await loadUsers(currentUsersPage);
@@ -2278,55 +2048,29 @@
     }
 
     function openRoleModal(userId, fullName, currentRole) {
-        const isAdmin = currentRole === 'admin';
-        const newRole = isAdmin ? 'teacher' : 'admin';
-        const icon = isAdmin ? 'bi-person-x' : 'bi-person-plus';
-        const color = isAdmin ? 'danger' : 'success';
-        const headerBg = isAdmin ? 'linear-gradient(135deg, #dc2626, #b91c1c)' : 'var(--primary-gradient)';
-        const roleNames = {
-            'admin': 'Администратор',
-            'teacher': 'Преподаватель'
-        };
-        const newRoleName = roleNames[newRole] || newRole;
+        var isAdmin = currentRole === 'admin';
+        var newRole = isAdmin ? 'teacher' : 'admin';
+        var icon = isAdmin ? 'bi-person-x' : 'bi-person-plus';
+        var color = isAdmin ? 'danger' : 'success';
+        var headerBg = isAdmin ? 'linear-gradient(135deg, #dc2626, #b91c1c)' : 'var(--primary-gradient)';
+        var roleNames = { 'admin': 'Администратор', 'teacher': 'Преподаватель' };
+        var newRoleName = roleNames[newRole] || newRole;
 
         document.getElementById('roleModalHeader').style.background = headerBg;
-        document.getElementById('roleModalTitle').innerHTML = `
-            <i class="bi ${icon} me-2"></i>
-            ${isAdmin ? 'Удаление прав администратора' : 'Назначение администратора'}
-        `;
+        document.getElementById('roleModalTitle').innerHTML = '<i class="bi ' + icon + ' me-2"></i>' + (isAdmin ? 'Удаление прав администратора' : 'Назначение администратора');
 
-        document.getElementById('roleModalBody').innerHTML = `
-            <p class="mb-0">
-                <strong>Пользователь:</strong> ${escapeHtml(fullName)}<br>
-                <strong>Текущая роль:</strong> ${roleNames[currentRole] || currentRole}
-            </p>
-            <div class="alert ${isAdmin ? 'alert-danger' : 'alert-warning'} mt-3">
-                <i class="bi bi-exclamation-triangle me-2"></i>
-                ${isAdmin 
-                    ? 'Вы действительно хотите <strong>забрать права администратора</strong> у этого пользователя?' 
-                    : 'Вы действительно хотите <strong>назначить этого пользователя администратором</strong>?'}
-                <br><span class="text-muted small">Новая роль: <strong>${newRoleName}</strong></span>
-            </div>
-            <div class="form-check mt-2">
-                <input class="form-check-input" type="checkbox" id="confirmRoleChange">
-                <label class="form-check-label" for="confirmRoleChange">
-                    Я подтверждаю это действие
-                </label>
-            </div>
-        `;
+        document.getElementById('roleModalBody').innerHTML = '<p class="mb-0"><strong>Пользователь:</strong> ' + escapeHtml(fullName) + '<br><strong>Текущая роль:</strong> ' + (roleNames[currentRole] || currentRole) + '</p><div class="alert ' + (isAdmin ? 'alert-danger' : 'alert-warning') + ' mt-3"><i class="bi bi-exclamation-triangle me-2"></i>' + (isAdmin ? 'Вы действительно хотите <strong>забрать права администратора</strong> у этого пользователя?' : 'Вы действительно хотите <strong>назначить этого пользователя администратором</strong>?') + '<br><span class="text-muted small">Новая роль: <strong>' + newRoleName + '</strong></span></div><div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="confirmRoleChange"><label class="form-check-label" for="confirmRoleChange">Я подтверждаю это действие</label></div>';
 
-        const modal = document.getElementById('roleModal');
+        var modal = document.getElementById('roleModal');
         modal.dataset.userId = userId;
         modal.dataset.newRole = newRole;
 
-        const confirmCheckbox = document.getElementById('confirmRoleChange');
-        const confirmBtn = document.getElementById('roleConfirmBtn');
-        
-        const newBtn = confirmBtn.cloneNode(true);
+        var confirmCheckbox = document.getElementById('confirmRoleChange');
+        var confirmBtn = document.getElementById('roleConfirmBtn');
+        var newBtn = confirmBtn.cloneNode(true);
         confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-        
-        const freshBtn = document.getElementById('roleConfirmBtn');
-        freshBtn.className = `btn btn-${color}`;
+        var freshBtn = document.getElementById('roleConfirmBtn');
+        freshBtn.className = 'btn btn-' + color;
         document.getElementById('roleConfirmText').textContent = isAdmin ? 'Забрать права' : 'Назначить админа';
         freshBtn.disabled = true;
 
@@ -2335,24 +2079,23 @@
         });
 
         freshBtn.addEventListener('click', function() {
-            const userId = parseInt(modal.dataset.userId);
-            const newRole = modal.dataset.newRole;
+            var userId = parseInt(modal.dataset.userId, 10);
+            var newRole = modal.dataset.newRole;
             changeUserRole(userId, newRole);
         });
 
-        const modalInstance = new bootstrap.Modal(document.getElementById('roleModal'));
+        var modalInstance = new bootstrap.Modal(document.getElementById('roleModal'));
         modalInstance.show();
     }
 
     async function changeUserRole(userId, newRole) {
-        const btn = document.getElementById('roleConfirmBtn');
-        const textSpan = document.getElementById('roleConfirmText');
-        
+        var btn = document.getElementById('roleConfirmBtn');
+        var textSpan = document.getElementById('roleConfirmText');
         btn.disabled = true;
         textSpan.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сохранение...';
 
         try {
-            const response = await fetch(`/api/admin/users/${userId}/role`, {
+            var response = await fetch('/api/admin/users/' + userId + '/role', {
                 method: 'PUT',
                 headers: {
                     'Authorization': 'Bearer ' + token,
@@ -2360,17 +2103,16 @@
                 },
                 body: JSON.stringify({ role: newRole })
             });
-
             if (response.ok) {
-                const result = await response.json();
+                var result = await response.json();
                 showToast(result.message || 'Роль успешно изменена', 'success');
-                const modal = bootstrap.Modal.getInstance(document.getElementById('roleModal'));
+                var modal = bootstrap.Modal.getInstance(document.getElementById('roleModal'));
                 if (modal) modal.hide();
                 await loadUsers(currentUsersPage);
                 await loadUserData(currentUserdataPage);
                 await loadStats();
             } else {
-                const error = await response.json();
+                var error = await response.json();
                 showToast(error.detail || 'Ошибка изменения роли', 'danger');
                 btn.disabled = false;
                 textSpan.textContent = 'Повторить';
@@ -2383,10 +2125,10 @@
         }
     }
 
-    document.getElementById('createCategoryForm').addEventListener('submit', async (e) => {
+    document.getElementById('createCategoryForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        const data = { name: document.getElementById('cat_name').value, description: document.getElementById('cat_desc').value };
-        const response = await fetch('/api/admin/categories', {
+        var data = { name: document.getElementById('cat_name').value, description: document.getElementById('cat_desc').value };
+        var response = await fetch('/api/admin/categories', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -2398,28 +2140,25 @@
             await loadCategories(currentCategoriesPage);
             await loadStats();
         } else {
-            const error = await response.json();
+            var error = await response.json();
             showToast(error.detail || 'Ошибка при создании категории', 'danger');
         }
     });
 
-    document.getElementById('createCourseForm').addEventListener('submit', async (e) => {
+    document.getElementById('createCourseForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-
-        const categoryId = document.getElementById('course_category_id').value;
+        var categoryId = document.getElementById('course_category_id').value;
         if (!categoryId) {
             showToast('Пожалуйста, выберите категорию', 'danger');
             return;
         }
-
-        const moodleCourseId = document.getElementById('moodle_course_id').value;
-
-        const data = {
+        var moodleCourseId = document.getElementById('moodle_course_id').value;
+        var data = {
             title: document.getElementById('course_title').value,
             short_description: document.getElementById('course_short_desc').value,
             description: document.getElementById('course_desc').value,
-            category_id: parseInt(categoryId),
-            max_participants: parseInt(document.getElementById('course_max').value) || 30,
+            category_id: parseInt(categoryId, 10),
+            max_participants: parseInt(document.getElementById('course_max').value, 10) || 30,
             image_url: document.getElementById('course_image_url').value || null,
             video_url: document.getElementById('course_video').value || null,
             video_platform: document.getElementById('video_platform').value,
@@ -2428,16 +2167,14 @@
             start_date: document.getElementById('start_date').value || null,
             end_date: document.getElementById('end_date').value || null,
             is_open_ended: document.getElementById('is_open_ended').checked,
-            moodle_course_id: moodleCourseId ? parseInt(moodleCourseId) : null,
-            speakers: speakersList.filter(s => s.full_name.trim())
+            moodle_course_id: moodleCourseId ? parseInt(moodleCourseId, 10) : null,
+            speakers: speakersList.filter(function(s) { return s.full_name.trim(); })
         };
-
-        const response = await fetch('/api/courses/', {
+        var response = await fetch('/api/courses/', {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-
         if (response.ok) {
             showToast('Курс успешно создан' + (data.moodle_course_id ? ' и привязан к Moodle!' : ''), 'success');
             bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
@@ -2447,7 +2184,7 @@
             await loadCourses(currentCoursesPage);
             await loadStats();
         } else {
-            const error = await response.json();
+            var error = await response.json();
             showToast(error.detail || 'Ошибка при создании курса', 'danger');
         }
     });
@@ -2460,11 +2197,11 @@
         document.getElementById('usersSection').style.display = 'none';
         document.getElementById('userdataSection').style.display = 'none';
 
-        document.querySelectorAll('.admin-sidebar .nav-link').forEach(el => el.classList.remove('active'));
-        const links = document.querySelectorAll('.admin-sidebar .nav-link');
-        const sectionMap = { 'dashboard': 0, 'categories': 1, 'courses': 2, 'users': 3, 'userdata': 4 };
-        if (sectionMap[section] !== undefined) {
-            links[sectionMap[section]]?.classList.add('active');
+        document.querySelectorAll('.admin-sidebar .nav-link').forEach(function(el) { el.classList.remove('active'); });
+        var links = document.querySelectorAll('.admin-sidebar .nav-link');
+        var sectionMap = { 'dashboard': 0, 'categories': 1, 'courses': 2, 'users': 3, 'userdata': 4 };
+        if (sectionMap[section] !== undefined && links[sectionMap[section]]) {
+            links[sectionMap[section]].classList.add('active');
         }
 
         if (section === 'dashboard') {
@@ -2500,204 +2237,83 @@
         document.getElementById('moodleCoursesList').style.display = 'none';
 
         fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } })
-            .then(res => res.json())
-            .then(categories => {
-                const select = document.getElementById('course_category_id');
+            .then(function(res) { return res.json(); })
+            .then(function(categories) {
+                var select = document.getElementById('course_category_id');
                 if (categories && categories.length > 0) {
-                    select.innerHTML = '<option value="">-- Выберите категорию --</option>' + categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+                    var opts = '<option value="">-- Выберите категорию --</option>';
+                    for (var i = 0; i < categories.length; i++) {
+                        opts += '<option value="' + categories[i].id + '">' + categories[i].name + '</option>';
+                    }
+                    select.innerHTML = opts;
                 }
             });
 
         new bootstrap.Modal(document.getElementById('createCourseModal')).show();
     }
 
-    // ========== ЗАГРУЗКА ДАННЫХ ПОЛЬЗОВАТЕЛЕЙ С ПАГИНАЦИЕЙ ==========
-    async function loadUserData(page = 1) {
+    async function loadUserData(page) {
+        page = page || 1;
         currentUserdataPage = page;
-        const tbody = document.getElementById('userDataList');
-        tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="text-center py-4">
-                            <div class="loading-spinner"></div>
-                            <p class="mt-2 text-muted">Загрузка данных...</p>
-                        </td>
-                    </tr>
-                `;
+        var tbody = document.getElementById('userDataList');
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4"><div class="loading-spinner"></div><p class="mt-2 text-muted">Загрузка данных...</p></td></tr>';
 
         try {
-            const offset = (page - 1) * PAGE_SIZE;
-            const response = await fetch(`/api/admin/users/list?limit=${PAGE_SIZE}&offset=${offset}`, {
+            var offset = (page - 1) * PAGE_SIZE;
+            var response = await fetch('/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки данных');
-            }
-
-            const result = await response.json();
-            
+            if (!response.ok) throw new Error('Ошибка загрузки данных');
+            var result = await response.json();
             allUsersData = result.items || [];
-            filteredUsersData = [...allUsersData];
+            filteredUsersData = allUsersData.slice();
             selectedUserIds = new Set();
             document.getElementById('selectAllUsers').checked = false;
             updateExportButton();
             updateDocZipButton();
-            
             renderUserData(allUsersData);
-            
-            document.getElementById('userCountInfo').textContent = `Всего: ${result.total} пользователей`;
-            
-            renderPagination(
-                'userdataPagination',
-                'userdataPaginationInfo',
-                'userdataPaginationControls',
-                page,
-                result.total,
-                PAGE_SIZE,
-                'loadUserData'
-            );
-            
+            document.getElementById('userCountInfo').textContent = 'Всего: ' + result.total + ' пользователей';
+            renderPagination('userdataPagination', 'userdataPaginationInfo', 'userdataPaginationControls', page, result.total, PAGE_SIZE, 'loadUserData');
         } catch (error) {
             console.error('Error loading user data:', error);
-            tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-danger">
-                                <i class="bi bi-exclamation-triangle fs-2"></i>
-                                <p class="mt-2">Ошибка загрузки данных: ${error.message}</p>
-                            </td>
-                        </tr>
-                    `;
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle fs-2"></i><p class="mt-2">Ошибка загрузки данных: ' + error.message + '</p></td></tr>';
         }
     }
 
     function renderUserData(users) {
-        const tbody = document.getElementById('userDataList');
-
+        var tbody = document.getElementById('userDataList');
         if (!users || users.length === 0) {
-            tbody.innerHTML = `
-                        <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">
-                                <i class="bi bi-people fs-2"></i>
-                                <p class="mt-2">Нет пользователей</p>
-                            </td>
-                        </tr>
-                    `;
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted"><i class="bi bi-people fs-2"></i><p class="mt-2">Нет пользователей</p></td></tr>';
             return;
         }
+        var html = '';
+        for (var i = 0; i < users.length; i++) {
+            var user = users[i];
+            var globalIndex = (currentUserdataPage - 1) * PAGE_SIZE + i;
+            var isSelected = selectedUserIds.has(user.id);
+            var profileStatus = user.has_complete_profile ? '<span class="badge-profile-complete">Заполнен</span>' : '<span class="badge-profile-incomplete">Не заполнен</span>';
+            var roleLabel = user.role === 'admin' ? 'Администратор' : 'Преподаватель';
+            var roleBadge = user.role === 'admin' ? 'badge-danger' : 'badge-info';
 
-        let html = '';
-        users.forEach((user, index) => {
-            const globalIndex = (currentUserdataPage - 1) * PAGE_SIZE + index;
-            const isSelected = selectedUserIds.has(user.id);
-            const profileStatus = user.has_complete_profile ?
-                '<span class="badge-profile-complete">Заполнен</span>' :
-                '<span class="badge-profile-incomplete">Не заполнен</span>';
-
-            const roleLabel = user.role === 'admin' ? 'Администратор' : 'Преподаватель';
-            const roleBadge = user.role === 'admin' ? 'badge-danger' : 'badge-info';
-
-            html += `
-                        <tr class="user-row" data-user-id="${user.id}" onclick="toggleUserDetails(${globalIndex})">
-                            <td onclick="event.stopPropagation();">
-                                <input type="checkbox" class="user-select-checkbox user-checkbox" 
-                                       data-user-id="${user.id}" ${isSelected ? 'checked' : ''} 
-                                       onchange="toggleUserSelection(${user.id}, this.checked)">
-                            </td>
-                            <td><span class="badge-gold">${user.id}</span></td>
-                            <td>
-                                <strong>${escapeHtml(user.full_name)}</strong>
-                                <span class="expand-icon ${isSelected ? 'expanded' : ''}" id="expandIcon_${globalIndex}">
-                                    <i class="bi bi-chevron-right"></i>
-                                </span>
-                            </td>
-                            <td>${escapeHtml(user.email)}</td>
-                            <td><span class="${roleBadge}">${roleLabel}</span></td>
-                            <td>${profileStatus}</td>
-                            <td>
-                                <div id="documents_${user.id}">
-                                    <span class="text-muted" style="font-size:0.7rem;">Загрузка...</span>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="btn-export-single" onclick="event.stopPropagation(); exportSingleUser(${user.id})" title="Экспортировать данные пользователя">
-                                    <i class="bi bi-download"></i> Экспорт
-                                </button>
-                                <button class="btn-doc-zip" onclick="event.stopPropagation(); downloadUserDocuments(${user.id})" title="Скачать документы пользователя">
-                                    <i class="bi bi-file-zip"></i> Доки
-                                </button>
-                            </td>
-                        </tr>
-                        <tr class="user-details-row" id="detailsRow_${globalIndex}" style="display: none;">
-                            <td colspan="8">
-                                <div class="details-grid">
-                                    <div class="detail-item">
-                                        <span class="label">Муниципалитет</span>
-                                        <span class="value ${!user.data.municipality ? 'empty' : ''}">${escapeHtml(user.data.municipality) || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Место работы</span>
-                                        <span class="value ${!user.data.organization ? 'empty' : ''}">${escapeHtml(user.data.organization) || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Должность</span>
-                                        <span class="value ${!user.data.position ? 'empty' : ''}">${escapeHtml(user.data.position) || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">СНИЛС</span>
-                                        <span class="value ${!user.data.snils ? 'empty' : ''}">${escapeHtml(user.data.snils) || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Образование</span>
-                                        <span class="value ${!user.data.education ? 'empty' : ''}">${escapeHtml(user.data.education) || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Предметы</span>
-                                        <span class="value ${!user.data.subjects ? 'empty' : ''}">${escapeHtml(user.data.subjects) || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Педагогический стаж</span>
-                                        <span class="value ${!user.data.teaching_experience ? 'empty' : ''}">${user.data.teaching_experience || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Стаж в должности</span>
-                                        <span class="value ${!user.data.work_experience ? 'empty' : ''}">${user.data.work_experience || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Телефон</span>
-                                        <span class="value ${!user.data.phone ? 'empty' : ''}">${escapeHtml(user.data.phone) || '—'}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <span class="label">Дата регистрации</span>
-                                        <span class="value">${user.created_at || '—'}</span>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-        });
-
+            html += '<tr class="user-row" data-user-id="' + user.id + '" onclick="toggleUserDetails(' + globalIndex + ')"><td onclick="event.stopPropagation();"><input type="checkbox" class="user-select-checkbox user-checkbox" data-user-id="' + user.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="toggleUserSelection(' + user.id + ', this.checked)"></td><td><span class="badge-gold">' + user.id + '</span></td><td><strong>' + escapeHtml(user.full_name) + '</strong><span class="expand-icon ' + (isSelected ? 'expanded' : '') + '" id="expandIcon_' + globalIndex + '"><i class="bi bi-chevron-right"></i></span></td><td>' + escapeHtml(user.email) + '</td><td><span class="' + roleBadge + '">' + roleLabel + '</span></td><td>' + profileStatus + '</td><td><div id="documents_' + user.id + '"><span class="text-muted" style="font-size:0.7rem;">Загрузка...</span></div></td><td><button class="btn-export-single" onclick="event.stopPropagation(); exportSingleUser(' + user.id + ')" title="Экспортировать данные пользователя"><i class="bi bi-download"></i> Экспорт</button><button class="btn-doc-zip" onclick="event.stopPropagation(); downloadUserDocuments(' + user.id + ')" title="Скачать документы пользователя"><i class="bi bi-file-zip"></i> Доки</button></td></tr><tr class="user-details-row" id="detailsRow_' + globalIndex + '" style="display: none;"><td colspan="8"><div class="details-grid"><div class="detail-item"><span class="label">Муниципалитет</span><span class="value ' + (!user.data.municipality ? 'empty' : '') + '">' + escapeHtml(user.data.municipality || '—') + '</span></div><div class="detail-item"><span class="label">Место работы</span><span class="value ' + (!user.data.organization ? 'empty' : '') + '">' + escapeHtml(user.data.organization || '—') + '</span></div><div class="detail-item"><span class="label">Должность</span><span class="value ' + (!user.data.position ? 'empty' : '') + '">' + escapeHtml(user.data.position || '—') + '</span></div><div class="detail-item"><span class="label">СНИЛС</span><span class="value ' + (!user.data.snils ? 'empty' : '') + '">' + escapeHtml(user.data.snils || '—') + '</span></div><div class="detail-item"><span class="label">Образование</span><span class="value ' + (!user.data.education ? 'empty' : '') + '">' + escapeHtml(user.data.education || '—') + '</span></div><div class="detail-item"><span class="label">Предметы</span><span class="value ' + (!user.data.subjects ? 'empty' : '') + '">' + escapeHtml(user.data.subjects || '—') + '</span></div><div class="detail-item"><span class="label">Педагогический стаж</span><span class="value ' + (!user.data.teaching_experience ? 'empty' : '') + '">' + (user.data.teaching_experience || '—') + '</span></div><div class="detail-item"><span class="label">Стаж в должности</span><span class="value ' + (!user.data.work_experience ? 'empty' : '') + '">' + (user.data.work_experience || '—') + '</span></div><div class="detail-item"><span class="label">Телефон</span><span class="value ' + (!user.data.phone ? 'empty' : '') + '">' + escapeHtml(user.data.phone || '—') + '</span></div><div class="detail-item"><span class="label">Дата регистрации</span><span class="value">' + (user.created_at || '—') + '</span></div></div></td></tr>';
+        }
         tbody.innerHTML = html;
-
-        users.forEach(user => {
-            loadUserDocuments(user.id);
-        });
+        for (var j = 0; j < users.length; j++) {
+            loadUserDocuments(users[j].id);
+        }
     }
 
     async function loadUserDocuments(userId) {
         try {
-            const response = await fetch(`/api/admin/users/${userId}/documents`, {
+            var response = await fetch('/api/admin/users/' + userId + '/documents', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки документов');
-            }
-
-            const data = await response.json();
+            if (!response.ok) throw new Error('Ошибка загрузки документов');
+            var data = await response.json();
             renderUserDocuments(userId, data);
         } catch (error) {
             console.error('Error loading documents:', error);
-            const container = document.getElementById(`documents_${userId}`);
+            var container = document.getElementById('documents_' + userId);
             if (container) {
                 container.innerHTML = '<span class="text-danger" style="font-size:0.7rem;">Ошибка</span>';
             }
@@ -2705,38 +2321,18 @@
     }
 
     function renderUserDocuments(userId, data) {
-        const container = document.getElementById(`documents_${userId}`);
+        var container = document.getElementById('documents_' + userId);
         if (!container) return;
-
         if (!data.has_any_document) {
             container.innerHTML = '<span class="text-muted" style="font-size:0.7rem;">Нет документов</span>';
             return;
         }
-
-        let html = '<div class="documents-container">';
-        const docLabels = {
-            'snils': 'СНИЛС',
-            'diploma': 'Диплом',
-            'passport': 'Паспорт',
-            'inn': 'ИНН',
-            'marriage': 'Св-во о браке'
-        };
-
-        for (const [docType, docInfo] of Object.entries(data.documents)) {
-            if (docInfo.exists) {
-                const label = docLabels[docType] || docType;
-                html += `
-                            <div class="document-item">
-                                <span class="doc-label" onclick="event.stopPropagation(); downloadSingleDocument(${userId}, '${docType}')" title="Скачать ${label}">
-                                    ${label}
-                                </span>
-                                <span class="doc-actions-inline">
-                                    <button class="doc-delete-btn" onclick="event.stopPropagation(); deleteUserDocument(${userId}, '${docType}')" title="Удалить документ">
-                                        <i class="bi bi-x"></i>
-                                    </button>
-                                </span>
-                            </div>
-                        `;
+        var html = '<div class="documents-container">';
+        var docLabels = { 'snils': 'СНИЛС', 'diploma': 'Диплом', 'passport': 'Паспорт', 'inn': 'ИНН', 'marriage': 'Св-во о браке' };
+        for (var docType in data.documents) {
+            if (data.documents[docType].exists) {
+                var label = docLabels[docType] || docType;
+                html += '<div class="document-item"><span class="doc-label" onclick="event.stopPropagation(); downloadSingleDocument(' + userId + ', \'' + docType + '\')" title="Скачать ' + label + '">' + label + '</span><span class="doc-actions-inline"><button class="doc-delete-btn" onclick="event.stopPropagation(); deleteUserDocument(' + userId + ', \'' + docType + '\')" title="Удалить документ"><i class="bi bi-x"></i></button></span></div>';
             }
         }
         html += '</div>';
@@ -2744,10 +2340,10 @@
     }
 
     function toggleUserDetails(index) {
-        const row = document.getElementById(`detailsRow_${index}`);
-        const icon = document.getElementById(`expandIcon_${index}`);
+        var row = document.getElementById('detailsRow_' + index);
+        var icon = document.getElementById('expandIcon_' + index);
         if (row) {
-            const isVisible = row.style.display !== 'none';
+            var isVisible = row.style.display !== 'none';
             row.style.display = isVisible ? 'none' : 'table-row';
             if (icon) {
                 icon.classList.toggle('expanded');
@@ -2767,77 +2363,58 @@
     }
 
     function toggleSelectAll() {
-        const checked = document.getElementById('selectAllUsers').checked;
-        const visibleRows = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"])');
-
-        visibleRows.forEach(row => {
-            const cb = row.querySelector('.user-checkbox');
+        var checked = document.getElementById('selectAllUsers').checked;
+        var visibleRows = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"])');
+        for (var i = 0; i < visibleRows.length; i++) {
+            var cb = visibleRows[i].querySelector('.user-checkbox');
             if (cb) {
                 cb.checked = checked;
-                const userId = parseInt(cb.dataset.userId);
+                var userId = parseInt(cb.dataset.userId, 10);
                 if (checked) {
                     selectedUserIds.add(userId);
                 } else {
                     selectedUserIds.delete(userId);
                 }
             }
-        });
-
+        }
         updateExportButton();
         updateDocZipButton();
     }
 
     function updateExportButton() {
-        const btn = document.getElementById('exportSelectedBtn');
+        var btn = document.getElementById('exportSelectedBtn');
         btn.disabled = selectedUserIds.size === 0;
-        if (selectedUserIds.size > 0) {
-            btn.innerHTML = `<i class="bi bi-download me-2"></i>Экспорт выбранных (${selectedUserIds.size})`;
-        } else {
-            btn.innerHTML = `<i class="bi bi-download me-2"></i>Экспорт выбранных`;
-        }
+        btn.innerHTML = selectedUserIds.size > 0 ? '<i class="bi bi-download me-2"></i>Экспорт выбранных (' + selectedUserIds.size + ')' : '<i class="bi bi-download me-2"></i>Экспорт выбранных';
     }
 
     function updateDocZipButton() {
-        const btn = document.getElementById('docZipSelectedBtn');
+        var btn = document.getElementById('docZipSelectedBtn');
         btn.disabled = selectedUserIds.size === 0;
-        if (selectedUserIds.size > 0) {
-            btn.innerHTML = `<i class="bi bi-file-zip me-2"></i>Доки выбранных (${selectedUserIds.size})`;
-        } else {
-            btn.innerHTML = `<i class="bi bi-file-zip me-2"></i>Доки выбранных`;
-        }
+        btn.innerHTML = selectedUserIds.size > 0 ? '<i class="bi bi-file-zip me-2"></i>Доки выбранных (' + selectedUserIds.size + ')' : '<i class="bi bi-file-zip me-2"></i>Доки выбранных';
     }
 
     async function exportAllUsers() {
         if (!confirm('Экспортировать данные ВСЕХ пользователей?')) return;
-
         try {
-            const response = await fetch('/api/admin/users/export-all', {
+            var response = await fetch('/api/admin/users/export-all', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка экспорта');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            if (!response.ok) throw new Error('Ошибка экспорта');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = 'all_users_data.xlsx';
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'all_users_data.xlsx';
             if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-                if (match) {
-                    filename = decodeURIComponent(match[1]);
-                }
+                var match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) filename = decodeURIComponent(match[1]);
             }
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
             showToast('Экспорт всех пользователей успешно завершен', 'success');
         } catch (error) {
             console.error('Export error:', error);
@@ -2850,38 +2427,28 @@
             showToast('Выберите хотя бы одного пользователя', 'warning');
             return;
         }
-
-        const ids = Array.from(selectedUserIds).join(',');
-
+        var ids = Array.from(selectedUserIds).join(',');
         try {
-            const response = await fetch(`/api/admin/users/export-selected?user_ids=${ids}`, {
+            var response = await fetch('/api/admin/users/export-selected?user_ids=' + ids, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка экспорта');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            if (!response.ok) throw new Error('Ошибка экспорта');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = `selected_users_${selectedUserIds.size}.xlsx`;
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'selected_users_' + selectedUserIds.size + '.xlsx';
             if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-                if (match) {
-                    filename = decodeURIComponent(match[1]);
-                }
+                var match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) filename = decodeURIComponent(match[1]);
             }
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
-            showToast(`Экспорт ${selectedUserIds.size} пользователей успешно завершен`, 'success');
+            showToast('Экспорт ' + selectedUserIds.size + ' пользователей успешно завершен', 'success');
         } catch (error) {
             console.error('Export error:', error);
             showToast('Ошибка при экспорте', 'danger');
@@ -2890,33 +2457,25 @@
 
     async function exportSingleUser(userId) {
         try {
-            const response = await fetch(`/api/admin/users/${userId}/export`, {
+            var response = await fetch('/api/admin/users/' + userId + '/export', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
-            if (!response.ok) {
-                throw new Error('Ошибка экспорта');
-            }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            if (!response.ok) throw new Error('Ошибка экспорта');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = `user_${userId}_data.xlsx`;
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'user_' + userId + '_data.xlsx';
             if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-                if (match) {
-                    filename = decodeURIComponent(match[1]);
-                }
+                var match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) filename = decodeURIComponent(match[1]);
             }
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
             showToast('Экспорт пользователя успешно завершен', 'success');
         } catch (error) {
             console.error('Export error:', error);
@@ -2926,34 +2485,28 @@
 
     async function downloadUserDocuments(userId) {
         try {
-            const response = await fetch(`/api/admin/users/${userId}/documents/download`, {
+            var response = await fetch('/api/admin/users/' + userId + '/documents/download', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
             if (!response.ok) {
-                const error = await response.json();
+                var error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документов');
             }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = `user_${userId}_documents.zip`;
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'user_' + userId + '_documents.zip';
             if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-                if (match) {
-                    filename = decodeURIComponent(match[1]);
-                }
+                var match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) filename = decodeURIComponent(match[1]);
             }
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
             showToast('Документы скачаны успешно', 'success');
         } catch (error) {
             console.error('Download documents error:', error);
@@ -2963,36 +2516,29 @@
 
     async function downloadAllDocuments() {
         if (!confirm('Скачать документы ВСЕХ пользователей?')) return;
-
         try {
-            const response = await fetch('/api/admin/users/documents/download-all', {
+            var response = await fetch('/api/admin/users/documents/download-all', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
             if (!response.ok) {
-                const error = await response.json();
+                var error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документов');
             }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = 'all_users_documents.zip';
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'all_users_documents.zip';
             if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-                if (match) {
-                    filename = decodeURIComponent(match[1]);
-                }
+                var match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) filename = decodeURIComponent(match[1]);
             }
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
             showToast('Документы всех пользователей скачаны успешно', 'success');
         } catch (error) {
             console.error('Download all documents error:', error);
@@ -3005,39 +2551,31 @@
             showToast('Выберите хотя бы одного пользователя', 'warning');
             return;
         }
-
-        const ids = Array.from(selectedUserIds).join(',');
-
+        var ids = Array.from(selectedUserIds).join(',');
         try {
-            const response = await fetch(`/api/admin/users/documents/download-selected?user_ids=${ids}`, {
+            var response = await fetch('/api/admin/users/documents/download-selected?user_ids=' + ids, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
             if (!response.ok) {
-                const error = await response.json();
+                var error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документов');
             }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = `selected_users_documents_${selectedUserIds.size}.zip`;
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'selected_users_documents_' + selectedUserIds.size + '.zip';
             if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-                if (match) {
-                    filename = decodeURIComponent(match[1]);
-                }
+                var match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) filename = decodeURIComponent(match[1]);
             }
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
-            showToast(`Документы ${selectedUserIds.size} пользователей скачаны успешно`, 'success');
+            showToast('Документы ' + selectedUserIds.size + ' пользователей скачаны успешно', 'success');
         } catch (error) {
             console.error('Download selected documents error:', error);
             showToast(error.message || 'Ошибка при скачивании документов', 'danger');
@@ -3046,56 +2584,39 @@
 
     async function downloadSingleDocument(userId, docType) {
         try {
-            const response = await fetch(`/api/admin/users/${userId}/documents/${docType}/download`, {
+            var response = await fetch('/api/admin/users/' + userId + '/documents/' + docType + '/download', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
             if (!response.ok) {
-                const error = await response.json();
+                var error = await response.json();
                 throw new Error(error.detail || 'Ошибка скачивания документа');
             }
-
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
+            var blob = await response.blob();
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
             a.href = url;
-
-            const contentType = response.headers.get('Content-Type') || '';
-            let extension = 'pdf';
-
-            if (contentType.includes('image/jpeg') || contentType.includes('image/jpg')) {
-                extension = 'jpg';
-            } else if (contentType.includes('image/png')) {
-                extension = 'png';
-            } else if (contentType.includes('image/gif')) {
-                extension = 'gif';
-            } else if (contentType.includes('application/pdf')) {
-                extension = 'pdf';
-            } else if (contentType.includes('image/webp')) {
-                extension = 'webp';
-            }
-
-            const contentDisposition = response.headers.get('Content-Disposition');
-            let filename = `document_${docType}.${extension}`;
-
+            var contentType = response.headers.get('Content-Type') || '';
+            var extension = 'pdf';
+            if (contentType.indexOf('image/jpeg') !== -1 || contentType.indexOf('image/jpg') !== -1) extension = 'jpg';
+            else if (contentType.indexOf('image/png') !== -1) extension = 'png';
+            else if (contentType.indexOf('image/gif') !== -1) extension = 'gif';
+            else if (contentType.indexOf('application/pdf') !== -1) extension = 'pdf';
+            else if (contentType.indexOf('image/webp') !== -1) extension = 'webp';
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'document_' + docType + '.' + extension;
             if (contentDisposition) {
-                const match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
-                if (match) {
-                    filename = decodeURIComponent(match[1]);
-                } else {
-                    const simpleMatch = contentDisposition.match(/filename=([^;]+)/);
-                    if (simpleMatch) {
-                        filename = simpleMatch[1].trim();
-                    }
+                var match = contentDisposition.match(/filename\*=UTF-8''(.+)/);
+                if (match) filename = decodeURIComponent(match[1]);
+                else {
+                    var simpleMatch = contentDisposition.match(/filename=([^;]+)/);
+                    if (simpleMatch) filename = simpleMatch[1].trim();
                 }
             }
-
             a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-
             showToast('Документ скачан успешно', 'success');
         } catch (error) {
             console.error('Download single document error:', error);
@@ -3104,29 +2625,19 @@
     }
 
     async function deleteUserDocument(userId, docType) {
-        const docLabels = {
-            'snils': 'СНИЛС',
-            'diploma': 'Диплом',
-            'passport': 'Паспорт',
-            'inn': 'ИНН',
-            'marriage': 'Свидетельство о браке'
-        };
-        const label = docLabels[docType] || docType;
-
-        if (!confirm(`Удалить документ "${label}" у пользователя?`)) return;
-
+        var docLabels = { 'snils': 'СНИЛС', 'diploma': 'Диплом', 'passport': 'Паспорт', 'inn': 'ИНН', 'marriage': 'Свидетельство о браке' };
+        var label = docLabels[docType] || docType;
+        if (!confirm('Удалить документ "' + label + '" у пользователя?')) return;
         try {
-            const response = await fetch(`/api/admin/users/${userId}/documents/${docType}`, {
+            var response = await fetch('/api/admin/users/' + userId + '/documents/' + docType, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-
             if (!response.ok) {
-                const error = await response.json();
+                var error = await response.json();
                 throw new Error(error.detail || 'Ошибка удаления документа');
             }
-
-            showToast(`Документ "${label}" удален успешно`, 'success');
+            showToast('Документ "' + label + '" удален успешно', 'success');
             loadUserDocuments(userId);
         } catch (error) {
             console.error('Delete document error:', error);
@@ -3134,11 +2645,60 @@
         }
     }
 
-    // Инициализация
     loadStats();
     loadCategories(1);
     loadCourses(1);
     loadUsers(1);
     loadUserData(1);
+
+    window.showToast = showToast;
+    window.escapeHtml = escapeHtml;
+    window.renderPagination = renderPagination;
+    window.filterUserTable = filterUserTable;
+    window.updateSelectAllState = updateSelectAllState;
+    window.fetchMoodleCourses = fetchMoodleCourses;
+    window.exportRegistrations = exportRegistrations;
+    window.uploadFile = uploadFile;
+    window.uploadSpeakerPhoto = uploadSpeakerPhoto;
+    window.addSpeaker = addSpeaker;
+    window.updateSpeaker = updateSpeaker;
+    window.removeSpeaker = removeSpeaker;
+    window.handleSpeakerPhoto = handleSpeakerPhoto;
+    window.renderSpeakers = renderSpeakers;
+    window.loadStats = loadStats;
+    window.loadCategories = loadCategories;
+    window.renderCategoriesPage = renderCategoriesPage;
+    window.loadCourses = loadCourses;
+    window.renderCoursesPage = renderCoursesPage;
+    window.loadUsers = loadUsers;
+    window.viewCourseRegistrations = viewCourseRegistrations;
+    window.deleteCategoryItem = deleteCategoryItem;
+    window.deleteCourseItem = deleteCourseItem;
+    window.toggleCourseStatusItem = toggleCourseStatusItem;
+    window.blockUserItem = blockUserItem;
+    window.unblockUserItem = unblockUserItem;
+    window.openRoleModal = openRoleModal;
+    window.changeUserRole = changeUserRole;
+    window.showSection = showSection;
+    window.showCreateCategoryModal = showCreateCategoryModal;
+    window.showCreateCourseModal = showCreateCourseModal;
+    window.loadUserData = loadUserData;
+    window.renderUserData = renderUserData;
+    window.loadUserDocuments = loadUserDocuments;
+    window.renderUserDocuments = renderUserDocuments;
+    window.toggleUserDetails = toggleUserDetails;
+    window.toggleUserSelection = toggleUserSelection;
+    window.toggleSelectAll = toggleSelectAll;
+    window.updateExportButton = updateExportButton;
+    window.updateDocZipButton = updateDocZipButton;
+    window.exportAllUsers = exportAllUsers;
+    window.exportSelectedUsers = exportSelectedUsers;
+    window.exportSingleUser = exportSingleUser;
+    window.downloadUserDocuments = downloadUserDocuments;
+    window.downloadAllDocuments = downloadAllDocuments;
+    window.downloadSelectedDocuments = downloadSelectedDocuments;
+    window.downloadSingleDocument = downloadSingleDocument;
+    window.deleteUserDocument = deleteUserDocument;
+})();
 </script>
 {% endblock %}

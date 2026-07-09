@@ -4,7 +4,6 @@
 
 {% block extra_css %}
 <style>
-/* ===== ПЕРЕОПРЕДЕЛЕНИЕ ВСЕХ ЦВЕТОВ ===== */
 :root {
     --primary: #1a4f7a !important;
     --primary-dark: #0d3b5e !important;
@@ -23,7 +22,6 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== ПЕРЕОПРЕДЕЛЕНИЕ BOOTSTRAP ===== */
 .btn-primary,
 .btn-primary:hover,
 .btn-primary:focus,
@@ -44,19 +42,10 @@
     color: white !important;
 }
 
-.bg-primary {
-    background: #1a4f7a !important;
-}
+.bg-primary { background: #1a4f7a !important; }
+.text-primary { color: #1a4f7a !important; }
+.badge.bg-primary { background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important; }
 
-.text-primary {
-    color: #1a4f7a !important;
-}
-
-.badge.bg-primary {
-    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
-}
-
-/* ===== ГЕРОЙ-СЕКЦИЯ ===== */
 .courses-hero {
     background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%) !important;
     padding: clamp(30px, 6vw, 60px) 0 clamp(20px, 4vw, 50px) !important;
@@ -95,10 +84,7 @@
     50% { transform: translate(20px, -20px) scale(1.05); }
 }
 
-.courses-hero .container {
-    position: relative !important;
-    z-index: 2 !important;
-}
+.courses-hero .container { position: relative !important; z-index: 2 !important; }
 
 .courses-hero .hero-badge {
     display: inline-block !important;
@@ -156,7 +142,6 @@
     z-index: 1 !important;
 }
 
-/* ===== ФИЛЬТРЫ ===== */
 .filter-sidebar {
     background: rgba(255, 255, 255, 0.7) !important;
     backdrop-filter: blur(16px) saturate(180%) !important;
@@ -187,9 +172,7 @@
     color: #0d1b2a !important;
 }
 
-.filter-title i {
-    color: #1a4f7a !important;
-}
+.filter-title i { color: #1a4f7a !important; }
 
 .filter-group {
     margin-bottom: clamp(16px, 2.5vw, 24px) !important;
@@ -205,9 +188,7 @@
     color: #0d1b2a !important;
 }
 
-.filter-group label i {
-    color: #1a4f7a !important;
-}
+.filter-group label i { color: #1a4f7a !important; }
 
 .category-check {
     margin-bottom: 6px !important;
@@ -221,10 +202,7 @@
     touch-action: manipulation;
 }
 
-.category-check:hover {
-    background: rgba(26, 79, 122, 0.06) !important;
-}
-
+.category-check:hover { background: rgba(26, 79, 122, 0.06) !important; }
 .category-check:active {
     background: rgba(26, 79, 122, 0.08) !important;
     transform: scale(0.98);
@@ -249,9 +227,7 @@
     transition: color 0.2s ease !important;
 }
 
-.category-check:hover label {
-    color: #1a4f7a !important;
-}
+.category-check:hover label { color: #1a4f7a !important; }
 
 .category-check .count-badge {
     background: rgba(26, 79, 122, 0.06) !important;
@@ -270,9 +246,7 @@
     color: #1a4f7a !important;
 }
 
-.search-input {
-    position: relative !important;
-}
+.search-input { position: relative !important; }
 
 .search-input i {
     position: absolute !important;
@@ -314,10 +288,7 @@
     touch-action: manipulation;
 }
 
-.filter-check:hover {
-    background: rgba(26, 79, 122, 0.06) !important;
-}
-
+.filter-check:hover { background: rgba(26, 79, 122, 0.06) !important; }
 .filter-check:active {
     background: rgba(26, 79, 122, 0.08) !important;
     transform: scale(0.98);
@@ -342,9 +313,7 @@
     transition: color 0.2s ease !important;
 }
 
-.filter-check:hover label {
-    color: #1a4f7a !important;
-}
+.filter-check:hover label { color: #1a4f7a !important; }
 
 .clear-filters {
     margin-top: 12px !important;
@@ -371,11 +340,8 @@
     transform: translateY(-2px);
 }
 
-.clear-filters:active {
-    transform: scale(0.97) !important;
-}
+.clear-filters:active { transform: scale(0.97) !important; }
 
-/* ===== КАРТОЧКИ КУРСОВ ===== */
 .course-card {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
     height: 100% !important;
@@ -394,9 +360,7 @@
     border-color: rgba(26, 79, 122, 0.1) !important;
 }
 
-.course-card:active {
-    transform: scale(0.98) !important;
-}
+.course-card:active { transform: scale(0.98) !important; }
 
 .course-card::before {
     content: '' !important;
@@ -411,9 +375,7 @@
     z-index: 2 !important;
 }
 
-.course-card:hover::before {
-    opacity: 1 !important;
-}
+.course-card:hover::before { opacity: 1 !important; }
 
 .course-card-img {
     height: clamp(140px, 25vw, 180px) !important;
@@ -422,9 +384,7 @@
     transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-.course-card:hover .course-card-img {
-    transform: scale(1.04);
-}
+.course-card:hover .course-card-img { transform: scale(1.04); }
 
 .course-badge {
     position: absolute !important;
@@ -494,9 +454,7 @@
     color: #b71c1c !important;
 }
 
-.course-card .card-body {
-    padding: clamp(14px, 2.5vw, 20px) !important;
-}
+.course-card .card-body { padding: clamp(14px, 2.5vw, 20px) !important; }
 
 .course-card .card-title {
     font-family: 'Playfair Display', 'Georgia', serif !important;
@@ -513,9 +471,7 @@
     transition: color 0.3s ease !important;
 }
 
-.course-card:hover .card-title {
-    color: #1a4f7a !important;
-}
+.course-card:hover .card-title { color: #1a4f7a !important; }
 
 .course-card .card-text {
     font-family: 'Cormorant Garamond', 'Georgia', serif !important;
@@ -548,15 +504,9 @@
     transition: color 0.3s ease !important;
 }
 
-.course-card:hover .course-meta .participants {
-    color: #1a4f7a !important;
-}
+.course-card:hover .course-meta .participants { color: #1a4f7a !important; }
+.course-card .course-meta .participants i { color: #1a4f7a !important; }
 
-.course-card .course-meta .participants i {
-    color: #1a4f7a !important;
-}
-
-/* ===== КНОПКА КУРСА ===== */
 .btn-course {
     background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
     color: white !important;
@@ -598,11 +548,8 @@
     height: 200px !important;
 }
 
-.btn-course:active {
-    transform: scale(0.96) !important;
-}
+.btn-course:active { transform: scale(0.96) !important; }
 
-/* ===== РЕЗУЛЬТАТ ПОИСКА ===== */
 .result-count {
     font-family: 'Cormorant Garamond', 'Georgia', serif !important;
     font-size: clamp(0.85rem, 1.5vw, 0.95rem) !important;
@@ -629,7 +576,6 @@
     font-weight: 700 !important;
 }
 
-/* ===== НЕТ РЕЗУЛЬТАТОВ ===== */
 .no-results {
     text-align: center !important;
     padding: clamp(30px, 5vw, 60px) clamp(16px, 3vw, 20px) !important;
@@ -694,11 +640,8 @@
     box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25) !important;
 }
 
-.no-results .btn-primary:active {
-    transform: scale(0.97) !important;
-}
+.no-results .btn-primary:active { transform: scale(0.97) !important; }
 
-/* ===== ЛОАДЕР ===== */
 .loading-spinner {
     display: inline-block !important;
     width: clamp(32px, 5vw, 40px) !important;
@@ -709,9 +652,7 @@
     animation: spin 0.6s linear infinite !important;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .loading-text {
     font-family: 'Cormorant Garamond', 'Georgia', serif !important;
@@ -721,7 +662,6 @@
     margin-top: 16px !important;
 }
 
-/* ===== АДАПТИВ ===== */
 @media (max-width: 991.98px) {
     .filter-sidebar {
         position: relative !important;
@@ -729,182 +669,94 @@
         margin-bottom: 20px !important;
         padding: 16px !important;
     }
-    
-    .filter-group {
-        margin-bottom: 14px !important;
-    }
+    .filter-group { margin-bottom: 14px !important; }
 }
 
 @media (max-width: 767.98px) {
-    .courses-hero {
-        padding: 25px 0 15px !important;
-    }
-    
-    .courses-hero h1 {
-        font-size: 2rem !important;
-    }
-    
-    .courses-hero p {
-        font-size: 1rem !important;
-    }
-    
-    .filter-sidebar {
-        padding: 14px !important;
-    }
-    
-    .course-card-img {
-        height: 140px !important;
-    }
-    
-    .course-card .card-body {
-        padding: 14px !important;
-    }
-    
-    .course-card .card-title {
-        font-size: 0.95rem !important;
-    }
-    
-    .course-card .card-text {
-        font-size: 0.85rem !important;
-    }
-    
-    .row.g-4 {
-        --bs-gutter-y: 1rem !important;
-        --bs-gutter-x: 1rem !important;
-    }
-    
-    .result-count {
-        width: 100% !important;
-        text-align: center !important;
-    }
-    
-    .filter-check, .category-check {
-        padding: 6px 8px !important;
-    }
+    .courses-hero { padding: 25px 0 15px !important; }
+    .courses-hero h1 { font-size: 2rem !important; }
+    .courses-hero p { font-size: 1rem !important; }
+    .filter-sidebar { padding: 14px !important; }
+    .course-card-img { height: 140px !important; }
+    .course-card .card-body { padding: 14px !important; }
+    .course-card .card-title { font-size: 0.95rem !important; }
+    .course-card .card-text { font-size: 0.85rem !important; }
+    .row.g-4 { --bs-gutter-y: 1rem !important; --bs-gutter-x: 1rem !important; }
+    .result-count { width: 100% !important; text-align: center !important; }
+    .filter-check, .category-check { padding: 6px 8px !important; }
 }
 
 @media (max-width: 575.98px) {
-    .courses-hero {
-        padding: 20px 0 10px !important;
-    }
-    
-    .courses-hero h1 {
-        font-size: 1.6rem !important;
-    }
-    
-    .courses-hero p {
-        font-size: 0.9rem !important;
-    }
-    
+    .courses-hero { padding: 20px 0 10px !important; }
+    .courses-hero h1 { font-size: 1.6rem !important; }
+    .courses-hero p { font-size: 0.9rem !important; }
     .courses-hero .hero-badge {
         font-size: 0.55rem !important;
         padding: 4px 14px !important;
         letter-spacing: 0.1em !important;
     }
-    
-    .filter-sidebar {
-        padding: 12px !important;
-        border-radius: var(--radius-sm) !important;
-    }
-    
-    .filter-title {
-        font-size: 0.95rem !important;
-        margin-bottom: 12px !important;
-    }
-    
-    .course-card-img {
-        height: 120px !important;
-    }
-    
-    .course-card .card-body {
-        padding: 12px !important;
-    }
-    
-    .course-card .card-title {
-        font-size: 0.85rem !important;
-    }
-    
+    .filter-sidebar { padding: 12px !important; border-radius: var(--radius-sm) !important; }
+    .filter-title { font-size: 0.95rem !important; margin-bottom: 12px !important; }
+    .course-card-img { height: 120px !important; }
+    .course-card .card-body { padding: 12px !important; }
+    .course-card .card-title { font-size: 0.85rem !important; }
     .course-card .card-text {
         font-size: 0.8rem !important;
         -webkit-line-clamp: 1 !important;
     }
-    
     .course-card .course-meta {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 8px !important;
     }
-    
     .course-card .course-meta .participants {
         font-size: 0.7rem !important;
         text-align: center !important;
     }
-    
     .btn-course {
         text-align: center !important;
         width: 100% !important;
         padding: 8px 12px !important;
         font-size: 0.8rem !important;
     }
-    
-    .filter-check label, .category-check label {
-        font-size: 0.8rem !important;
-    }
-    
+    .filter-check label, .category-check label { font-size: 0.8rem !important; }
     .filter-check input[type="checkbox"], 
     .category-check input[type="checkbox"] {
         width: 18px !important;
         height: 18px !important;
     }
-    
     .category-check .count-badge {
         font-size: 0.6rem !important;
         padding: 1px 6px !important;
     }
-    
     .search-input input {
         font-size: 0.8rem !important;
         padding: 8px 12px !important;
         padding-left: 32px !important;
     }
-    
     .search-input i {
         left: 10px !important;
         font-size: 0.8rem !important;
     }
-    
     .clear-filters {
         font-size: 0.8rem !important;
         padding: 8px !important;
     }
-    
-    .no-results {
-        padding: 24px 12px !important;
-    }
-    
-    .no-results h5 {
-        font-size: 0.95rem !important;
-    }
-    
-    .no-results p {
-        font-size: 0.85rem !important;
-    }
-    
+    .no-results { padding: 24px 12px !important; }
+    .no-results h5 { font-size: 0.95rem !important; }
+    .no-results p { font-size: 0.85rem !important; }
     .no-results .btn-primary {
         font-size: 0.85rem !important;
         padding: 8px 20px !important;
     }
-    
     .result-count {
         font-size: 0.8rem !important;
         padding: 6px 12px !important;
     }
-    
     .container {
         padding-left: 12px !important;
         padding-right: 12px !important;
     }
-    
     .row.g-4 {
         --bs-gutter-x: 0.75rem !important;
         --bs-gutter-y: 0.75rem !important;
@@ -912,136 +764,83 @@
 }
 
 @media (max-width: 380px) {
-    .courses-hero h1 {
-        font-size: 1.4rem !important;
-    }
-    
-    .courses-hero p {
-        font-size: 0.8rem !important;
-    }
-    
-    .course-card-img {
-        height: 100px !important;
-    }
-    
-    .filter-sidebar {
-        padding: 10px !important;
-    }
-    
-    .filter-group {
-        margin-bottom: 10px !important;
-    }
-    
-    .filter-title {
-        font-size: 0.85rem !important;
-        margin-bottom: 10px !important;
-    }
-    
-    .filter-check, .category-check {
-        padding: 4px 6px !important;
-    }
+    .courses-hero h1 { font-size: 1.4rem !important; }
+    .courses-hero p { font-size: 0.8rem !important; }
+    .course-card-img { height: 100px !important; }
+    .filter-sidebar { padding: 10px !important; }
+    .filter-group { margin-bottom: 10px !important; }
+    .filter-title { font-size: 0.85rem !important; margin-bottom: 10px !important; }
+    .filter-check, .category-check { padding: 4px 6px !important; }
 }
 
-/* ===== УЛУЧШЕНИЯ ДЛЯ ТАЧ-УСТРОЙСТВ ===== */
 @media (hover: none) {
     .course-card:hover {
         transform: none !important;
         box-shadow: var(--shadow-sm) !important;
         border-color: #e2e8f0 !important;
     }
-    
-    .course-card:hover::before {
-        opacity: 0 !important;
-    }
-    
-    .course-card:hover .course-card-img {
-        transform: none !important;
-    }
-    
-    .course-card:hover .card-title {
-        color: #0d1b2a !important;
-    }
-    
+    .course-card:hover::before { opacity: 0 !important; }
+    .course-card:hover .course-card-img { transform: none !important; }
+    .course-card:hover .card-title { color: #0d1b2a !important; }
     .filter-sidebar:hover {
         box-shadow: var(--shadow-sm) !important;
         border-color: rgba(255, 255, 255, 0.3) !important;
     }
-    
     .category-check:hover,
-    .filter-check:hover {
-        background: transparent !important;
-    }
-    
+    .filter-check:hover { background: transparent !important; }
     .category-check:hover label,
-    .filter-check:hover label {
-        color: #3a4a5a !important;
-    }
-    
+    .filter-check:hover label { color: #3a4a5a !important; }
     .category-check:hover .count-badge {
         background: rgba(26, 79, 122, 0.06) !important;
         color: #718096 !important;
     }
-    
     .category-check:active,
     .filter-check:active {
         background: rgba(26, 79, 122, 0.08) !important;
         transform: scale(0.98);
     }
-    
     .btn-course:hover {
         transform: none !important;
         box-shadow: none !important;
     }
-    
     .btn-course:hover::after {
         width: 0 !important;
         height: 0 !important;
     }
-    
     .btn-course:active {
         transform: scale(0.96) !important;
         box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25) !important;
     }
-    
     .clear-filters:hover {
         background: transparent !important;
         color: #1a4f7a !important;
         transform: none !important;
         box-shadow: none !important;
     }
-    
     .clear-filters:active {
         background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
         color: white !important;
         transform: scale(0.97) !important;
     }
-    
     .no-results .btn-primary:hover {
         transform: none !important;
         box-shadow: none !important;
     }
-    
-    .no-results .btn-primary:active {
-        transform: scale(0.97) !important;
-    }
-    
+    .no-results .btn-primary:active { transform: scale(0.97) !important; }
     .no-results:hover {
         border-color: #e2e8f0 !important;
         box-shadow: none !important;
     }
-    
     .no-results:hover i {
         opacity: 0.4 !important;
         transform: none !important;
     }
-    
     .result-count:hover {
         border-color: #e2e8f0 !important;
         background: rgba(255, 255, 255, 0.6) !important;
     }
 }
 
-/* ===== АНИМАЦИИ ДЛЯ AOS ===== */
 @media (max-width: 767.98px) {
     [data-aos] {
         opacity: 1 !important;
@@ -1049,41 +848,16 @@
     }
 }
 
-/* Убираем все следы золотого и черного */
-.gold {
-    color: #1a4f7a !important;
-}
+.gold { color: #1a4f7a !important; }
+.text-dark { color: #0d1b2a !important; }
+.bg-dark { background: #0d1b2a !important; }
+.border-dark { border-color: #0d1b2a !important; }
+.text-black { color: #0d1b2a !important; }
+.bg-black { background: #0d1b2a !important; }
 
-.text-dark {
-    color: #0d1b2a !important;
-}
-
-.bg-dark {
-    background: #0d1b2a !important;
-}
-
-.border-dark {
-    border-color: #0d1b2a !important;
-}
-
-.text-black {
-    color: #0d1b2a !important;
-}
-
-.bg-black {
-    background: #0d1b2a !important;
-}
-
-/* Дополнительные анимации для карточек при появлении */
 @keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .course-card {
@@ -1106,7 +880,6 @@
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция -->
 <div class="courses-hero">
     <div class="hero-waves"></div>
     <div class="container text-center">
@@ -1120,12 +893,10 @@
 
 <div class="container mt-3 mt-md-4 mb-4 mb-md-5">
     <div class="row g-3 g-md-4">
-        <!-- Фильтры - боковая панель -->
         <div class="col-lg-3">
             <div class="filter-sidebar">
                 <h5 class="filter-title"><i class="bi bi-funnel me-2"></i>Фильтры</h5>
                 
-                <!-- Поиск -->
                 <div class="filter-group">
                     <label><i class="bi bi-search me-1"></i>Поиск</label>
                     <div class="search-input">
@@ -1134,13 +905,11 @@
                     </div>
                 </div>
                 
-                <!-- Категории -->
                 <div class="filter-group">
                     <label><i class="bi bi-folder me-1"></i>Категории</label>
                     <div id="categoriesList"></div>
                 </div>
                 
-                <!-- Формат обучения -->
                 <div class="filter-group">
                     <label><i class="bi bi-calendar-event me-1"></i>Формат обучения</label>
                     <div class="filter-check">
@@ -1161,14 +930,12 @@
                     </div>
                 </div>
                 
-                <!-- Кнопка сброса фильтров -->
                 <button class="clear-filters" onclick="resetFilters()">
                     <i class="bi bi-arrow-clockwise me-2"></i>Сбросить фильтры
                 </button>
             </div>
         </div>
         
-        <!-- Список курсов -->
         <div class="col-lg-9">
             <div id="resultCount" class="result-count">
                 <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #1a4f7a;"></i>
@@ -1185,37 +952,38 @@
 </div>
 
 <script>
+(function() {
     const token = localStorage.getItem('token');
     let allCourses = [];
     let allCategories = [];
     let filteredCount = 0;
-    
+    let filterTimeout = null;
+
     function escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
+
     const formatMap = {
         'full_time': 'Очный',
         'part_time': 'Заочный',
         'full_part_time': 'Очно-заочный',
         'online': 'Онлайн'
     };
-    
+
     const formatBadgeClass = {
         'online': 'badge-format-online',
         'full_time': 'badge-format-full_time',
         'part_time': 'badge-format-part_time',
         'full_part_time': 'badge-format-full_part_time'
     };
-    
+
     async function loadCategories() {
         try {
-            const response = await fetch('/api/admin/categories', {
-                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
-            });
+            const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+            const response = await fetch('/api/admin/categories', { headers });
             if (response.ok) {
                 allCategories = await response.json();
                 renderCategoriesFilter();
@@ -1224,18 +992,18 @@
             console.error('Error loading categories:', error);
         }
     }
-    
+
     function renderCategoriesFilter() {
         const container = document.getElementById('categoriesList');
         if (!container) return;
-        
+
         if (allCategories.length === 0) {
             container.innerHTML = '<p style="font-family: \'Cormorant Garamond\', serif; font-size: clamp(0.85rem, 1.3vw, 0.9rem); color: #4a5a6a;">Нет категорий</p>';
             return;
         }
-        
+
         let html = '';
-        allCategories.forEach(cat => {
+        for (const cat of allCategories) {
             const count = cat.courses_count || 0;
             html += `
                 <div class="category-check">
@@ -1244,22 +1012,22 @@
                     <span class="count-badge">${count}</span>
                 </div>
             `;
-        });
+        }
         container.innerHTML = html;
-        
-        document.querySelectorAll('.category-checkbox').forEach(cb => {
+
+        document.querySelectorAll('.category-checkbox').forEach(function(cb) {
             cb.addEventListener('change', filterCourses);
         });
     }
-    
+
     function getSelectedCategories() {
         const selected = [];
-        document.querySelectorAll('.category-checkbox:checked').forEach(cb => {
-            selected.push(parseInt(cb.value));
+        document.querySelectorAll('.category-checkbox:checked').forEach(function(cb) {
+            selected.push(parseInt(cb.value, 10));
         });
         return selected;
     }
-    
+
     function getSelectedFormats() {
         const formats = [];
         if (document.getElementById('formatOnline')?.checked) formats.push('online');
@@ -1268,58 +1036,59 @@
         if (document.getElementById('formatFullPartTime')?.checked) formats.push('full_part_time');
         return formats;
     }
-    
+
     function filterCourses() {
         const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
         const selectedCategories = getSelectedCategories();
         const selectedFormats = getSelectedFormats();
-        
-        let filtered = [...allCourses];
-        
+
+        let filtered = allCourses.slice();
+
         if (searchTerm) {
-            filtered = filtered.filter(course => 
-                course.title.toLowerCase().includes(searchTerm) || 
-                (course.description && course.description.toLowerCase().includes(searchTerm)) ||
-                (course.short_description && course.short_description.toLowerCase().includes(searchTerm))
-            );
+            filtered = filtered.filter(function(course) {
+                return course.title.toLowerCase().includes(searchTerm) ||
+                    (course.description && course.description.toLowerCase().includes(searchTerm)) ||
+                    (course.short_description && course.short_description.toLowerCase().includes(searchTerm));
+            });
         }
-        
+
         if (selectedCategories.length > 0) {
-            filtered = filtered.filter(course => 
-                course.category_id && selectedCategories.includes(course.category_id)
-            );
+            filtered = filtered.filter(function(course) {
+                return course.category_id && selectedCategories.indexOf(course.category_id) !== -1;
+            });
         }
-        
+
         if (selectedFormats.length > 0) {
-            filtered = filtered.filter(course => 
-                course.format_type && selectedFormats.includes(course.format_type)
-            );
+            filtered = filtered.filter(function(course) {
+                return course.format_type && selectedFormats.indexOf(course.format_type) !== -1;
+            });
         }
-        
+
         filteredCount = filtered.length;
         renderCourses(filtered);
         updateResultCount();
     }
-    
+
     function updateResultCount() {
         const countEl = document.getElementById('coursesCount');
         if (countEl) {
-            countEl.innerHTML = `<strong>${filteredCount}</strong> ${filteredCount === 1 ? 'курс' : (filteredCount < 5 ? 'курса' : 'курсов')}`;
+            countEl.innerHTML = '<strong>' + filteredCount + '</strong> ' +
+                (filteredCount === 1 ? 'курс' : (filteredCount < 5 ? 'курса' : 'курсов'));
         }
     }
-    
+
     async function loadCourses() {
         const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
-        
+
         try {
             const response = await fetch('/api/courses/', { headers });
-            
+
             if (!response.ok) {
                 throw new Error('Ошибка загрузки');
             }
-            
+
             const result = await response.json();
-            
+
             if (result.items) {
                 allCourses = result.items;
             } else if (Array.isArray(result)) {
@@ -1328,9 +1097,9 @@
                 allCourses = [];
                 console.error('Неизвестный формат ответа:', result);
             }
-            
+
             filterCourses();
-            
+
         } catch (error) {
             console.error('Error loading courses:', error);
             document.getElementById('coursesList').innerHTML = `
@@ -1346,10 +1115,10 @@
             document.getElementById('coursesCount').textContent = 'Ошибка';
         }
     }
-    
+
     function renderCourses(courses) {
         const container = document.getElementById('coursesList');
-        
+
         if (!courses || courses.length === 0) {
             container.innerHTML = `
                 <div class="no-results">
@@ -1361,16 +1130,17 @@
             `;
             return;
         }
-        
+
         let html = '';
-        courses.forEach((course, index) => {
+        for (let i = 0; i < courses.length; i++) {
+            const course = courses[i];
             const formatText = formatMap[course.format_type] || 'Онлайн';
             const badgeClass = formatBadgeClass[course.format_type] || 'badge-format-online';
             const categoryName = course.category_name || 'Обучение';
-            
+
             html += `
                 <div class="col-6 col-md-6 col-lg-4">
-                    <div class="course-card" style="animation-delay: ${index * 0.05}s;">
+                    <div class="course-card" style="animation-delay: ${i * 0.05}s;">
                         <div class="format-badge">
                             <span class="badge ${badgeClass}">${formatText}</span>
                         </div>
@@ -1378,7 +1148,7 @@
                             <span class="badge">${escapeHtml(categoryName)}</span>
                         </div>
                         ${course.image_url ? 
-                            `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}" loading="lazy">` :
+                            `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}" loading="lazy" decoding="async">` :
                             `<div class="course-card-img d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);">
                                 <i class="bi bi-book" style="font-size: clamp(2rem, 5vw, 3rem); color: #1a4f7a; opacity: 0.4;"></i>
                             </div>`
@@ -1398,41 +1168,49 @@
                     </div>
                 </div>
             `;
-        });
-        
+        }
+
         container.innerHTML = html;
     }
-    
+
     function resetFilters() {
         const searchInput = document.getElementById('searchInput');
         if (searchInput) searchInput.value = '';
-        
-        document.querySelectorAll('.category-checkbox').forEach(cb => {
+
+        document.querySelectorAll('.category-checkbox').forEach(function(cb) {
             cb.checked = false;
         });
-        
-        document.getElementById('formatOnline') && (document.getElementById('formatOnline').checked = false);
-        document.getElementById('formatFullTime') && (document.getElementById('formatFullTime').checked = false);
-        document.getElementById('formatPartTime') && (document.getElementById('formatPartTime').checked = false);
-        document.getElementById('formatFullPartTime') && (document.getElementById('formatFullPartTime').checked = false);
-        
+
+        const formatIds = ['formatOnline', 'formatFullTime', 'formatPartTime', 'formatFullPartTime'];
+        for (const id of formatIds) {
+            const el = document.getElementById(id);
+            if (el) el.checked = false;
+        }
+
         filterCourses();
     }
-    
+
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
-            searchInput.addEventListener('input', filterCourses);
+            searchInput.addEventListener('input', function() {
+                if (filterTimeout) clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(filterCourses, 300);
+            });
         }
-        
+
         const formats = ['formatOnline', 'formatFullTime', 'formatPartTime', 'formatFullPartTime'];
-        formats.forEach(id => {
+        for (const id of formats) {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', filterCourses);
-        });
+        }
     });
-    
+
     loadCategories();
     loadCourses();
+
+    window.resetFilters = resetFilters;
+    window.loadCourses = loadCourses;
+})();
 </script>
 {% endblock %}

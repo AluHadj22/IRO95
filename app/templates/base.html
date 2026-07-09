@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>{% block title %}ГБУ ДПО «ИРО ЧР» - Повышение квалификации{% endblock %}</title>
     
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,7 +19,6 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
     <style>
-        /* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===== */
         :root {
             --primary: #1a4f7a;
             --primary-light: #2a6fa8;
@@ -30,10 +33,7 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* ===== БАЗОВЫЕ СТИЛИ ===== */
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -45,7 +45,6 @@
             overflow-x: hidden;
         }
 
-        /* ===== НАВИГАЦИЯ ===== */
         #mainNav {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(20px);
@@ -82,9 +81,7 @@
             line-height: 1.2;
         }
 
-        .navbar-brand .title .accent {
-            color: var(--primary);
-        }
+        .navbar-brand .title .accent { color: var(--primary); }
 
         .navbar-brand .subtitle {
             display: block;
@@ -121,7 +118,6 @@
             background: var(--secondary);
         }
 
-        /* ===== ГЕРОЙ-СЕКЦИЯ ===== */
         .hero-section {
             position: relative;
             padding: 40px 0 30px;
@@ -140,10 +136,7 @@
             pointer-events: none;
         }
 
-        .hero-content {
-            position: relative;
-            z-index: 2;
-        }
+        .hero-content { position: relative; z-index: 2; }
 
         .hero-section .accent-badge {
             display: inline-block;
@@ -162,9 +155,7 @@
             font-weight: 800;
         }
 
-        .hero-section h1 .accent {
-            color: var(--primary);
-        }
+        .hero-section h1 .accent { color: var(--primary); }
 
         .hero-section .lead {
             font-size: clamp(1rem, 1.8vw, 1.25rem);
@@ -202,7 +193,6 @@
             transform: translateY(-2px);
         }
 
-        /* ===== ИНФО-КАРТОЧКА ===== */
         .info-card {
             background: #ffffff;
             border-radius: var(--radius);
@@ -236,7 +226,6 @@
             font-weight: 500;
         }
 
-        /* ===== КАРТОЧКИ ФИЧ ===== */
         .feature-card {
             background: #ffffff;
             border: 1px solid var(--border);
@@ -271,7 +260,6 @@
             font-size: 0.75rem;
         }
 
-        /* ===== ФУТЕР ===== */
         .footer-light {
             background: var(--light-gray);
             border-top: 1px solid var(--border);
@@ -311,11 +299,8 @@
             border: 1px solid var(--border);
         }
 
-        .footer-light .map-card-link {
-            text-decoration: none;
-        }
+        .footer-light .map-card-link { text-decoration: none; }
 
-        /* ===== ЧАТ-БОТ ===== */
         .chatbot-container {
             position: fixed;
             bottom: 24px;
@@ -350,9 +335,7 @@
             box-shadow: 0 8px 40px rgba(26,79,122,0.5);
         }
 
-        .chatbot-toggle:active {
-            transform: scale(0.92);
-        }
+        .chatbot-toggle:active { transform: scale(0.92); }
 
         .chatbot-toggle .chatbot-badge {
             position: absolute;
@@ -393,9 +376,7 @@
             animation: chatbot-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .chatbot-window.open {
-            display: flex;
-        }
+        .chatbot-window.open { display: flex; }
 
         @keyframes chatbot-slide-up {
             from {
@@ -514,9 +495,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .chatbot-question:active {
-            transform: scale(0.98);
-        }
+        .chatbot-question:active { transform: scale(0.98); }
 
         .chatbot-question .q-icon {
             color: var(--primary);
@@ -548,9 +527,7 @@
             line-height: 1.6;
         }
 
-        .chatbot-question .q-content.show {
-            display: block;
-        }
+        .chatbot-question .q-content.show { display: block; }
 
         .chatbot-question .q-content .step {
             display: block;
@@ -567,9 +544,7 @@
             font-weight: 700;
         }
 
-        .chatbot-question .q-content .highlight {
-            color: var(--primary);
-        }
+        .chatbot-question .q-content .highlight { color: var(--primary); }
 
         .chatbot-footer {
             padding: 12px 20px;
@@ -586,11 +561,8 @@
             font-weight: 500;
         }
 
-        .chatbot-footer a:hover {
-            text-decoration: underline;
-        }
+        .chatbot-footer a:hover { text-decoration: underline; }
 
-        /* ===== ТОСТЫ ===== */
         .toast-container {
             position: fixed;
             top: 90px;
@@ -630,24 +602,11 @@
             padding: 0;
         }
 
-        /* ===== МЕДИА-ЗАПРОСЫ ДЛЯ МОБИЛЬНЫХ ===== */
         @media (max-width: 767.98px) {
-            body {
-                padding-top: 70px;
-            }
-
-            #mainNav {
-                padding: 8px 0;
-            }
-
-            .navbar-brand img {
-                height: 38px;
-            }
-
-            .navbar-brand .title {
-                font-size: 0.95rem;
-            }
-
+            body { padding-top: 70px; }
+            #mainNav { padding: 8px 0; }
+            .navbar-brand img { height: 38px; }
+            .navbar-brand .title { font-size: 0.95rem; }
             .navbar-brand .subtitle {
                 font-size: 0.6rem;
                 max-width: 160px;
@@ -655,7 +614,6 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-
             .navbar-collapse {
                 background: #ffffff;
                 padding: 16px 12px 20px;
@@ -664,196 +622,115 @@
                 box-shadow: 0 10px 40px rgba(0,0,0,0.08);
                 border: 1px solid var(--border);
             }
-
             .navbar-nav .nav-link {
                 padding: 12px 16px;
                 font-size: 1rem;
                 border-radius: 10px;
             }
-
-            .navbar-nav .nav-link:active {
-                background: var(--secondary);
-            }
-
-            .hero-section {
-                padding: 20px 0 10px;
-            }
-
+            .navbar-nav .nav-link:active { background: var(--secondary); }
+            .hero-section { padding: 20px 0 10px; }
             .hero-section .accent-badge {
                 font-size: 0.7rem;
                 padding: 4px 14px;
             }
-
             .hero-section .btn {
                 padding: 14px 24px;
                 font-size: 1rem;
                 width: 100%;
                 justify-content: center;
             }
-
             .hero-section .d-flex.flex-wrap {
                 flex-direction: column;
                 gap: 10px !important;
             }
-
             .info-card {
                 padding: 18px 20px;
                 margin-top: 20px;
             }
-
             .info-item {
                 font-size: 0.85rem;
                 padding: 6px 0;
             }
-
-            .feature-card {
-                padding: 20px !important;
-            }
-
+            .feature-card { padding: 20px !important; }
             .feature-card .feature-icon {
                 width: 56px;
                 height: 56px;
                 font-size: 1.5rem;
             }
-
-            .feature-card h5 {
-                font-size: 1rem;
-            }
-
-            .feature-card .text-muted {
-                font-size: 0.85rem !important;
-            }
-
-            .footer-light {
-                margin-top: 20px;
-            }
-
+            .feature-card h5 { font-size: 1rem; }
+            .feature-card .text-muted { font-size: 0.85rem !important; }
+            .footer-light { margin-top: 20px; }
             .footer-light .container {
                 padding-left: 16px;
                 padding-right: 16px;
             }
-
             .footer-light h5 {
                 font-size: 0.95rem;
                 margin-top: 8px;
             }
-
-            .footer-light .map-container {
-                height: 180px !important;
-            }
-
+            .footer-light .map-container { height: 180px !important; }
             .footer-light .social-icons a {
                 width: 44px;
                 height: 44px;
             }
-
             .chatbot-container {
                 bottom: 16px;
                 right: 16px;
             }
-
             .chatbot-toggle {
                 width: 56px;
                 height: 56px;
                 font-size: 1.4rem;
             }
-
             .chatbot-toggle .chatbot-badge {
                 width: 20px;
                 height: 20px;
                 font-size: 0.6rem;
             }
-
             .chatbot-window {
                 bottom: 70px;
                 max-width: calc(100vw - 32px);
                 max-height: calc(100vh - 160px);
                 border-radius: 14px;
             }
-
-            .chatbot-header {
-                padding: 14px 16px;
-            }
-
-            .chatbot-header-title {
-                font-size: 0.9rem;
-            }
-
-            .chatbot-body {
-                padding: 12px 14px;
-            }
-
-            .chatbot-question {
-                padding: 12px 14px;
-            }
-
-            .chatbot-question .q-text {
-                font-size: 0.85rem;
-            }
-
+            .chatbot-header { padding: 14px 16px; }
+            .chatbot-header-title { font-size: 0.9rem; }
+            .chatbot-body { padding: 12px 14px; }
+            .chatbot-question { padding: 12px 14px; }
+            .chatbot-question .q-text { font-size: 0.85rem; }
             .chatbot-footer {
                 font-size: 0.75rem;
                 padding: 10px 14px;
             }
-
             .toast-container {
                 top: 76px;
                 right: 12px;
                 max-width: calc(100% - 24px);
             }
-
             .toast-container .toast {
                 padding: 10px 16px;
                 font-size: 0.85rem;
             }
         }
 
-        /* ===== ПЛАНШЕТЫ ===== */
         @media (min-width: 768px) and (max-width: 991.98px) {
-            .hero-section h1 {
-                font-size: 2.4rem;
-            }
-
-            .info-card {
-                margin-top: 16px;
-            }
-
-            .navbar-brand .subtitle {
-                font-size: 0.65rem;
-            }
+            .hero-section h1 { font-size: 2.4rem; }
+            .info-card { margin-top: 16px; }
+            .navbar-brand .subtitle { font-size: 0.65rem; }
         }
 
-        /* ===== КРУПНЫЕ ДЕСКТОПЫ ===== */
         @media (min-width: 1400px) {
-            .container {
-                max-width: 1320px;
-            }
+            .container { max-width: 1320px; }
         }
 
-        /* ===== УЛУЧШЕНИЯ ДЛЯ ТАЧ-УСТРОЙСТВ ===== */
         @media (hover: none) {
-            .feature-card:hover {
-                transform: none;
-            }
-
-            .hero-section .btn:hover {
-                transform: none;
-            }
-
-            .chatbot-question:active {
-                transform: scale(0.98);
-            }
-
-            .navbar-nav .nav-link:hover {
-                background: none;
-            }
-
-            .navbar-nav .nav-link:active {
-                background: var(--secondary);
-            }
+            .feature-card:hover { transform: none; }
+            .hero-section .btn:hover { transform: none; }
+            .chatbot-question:active { transform: scale(0.98); }
+            .navbar-nav .nav-link:hover { background: none; }
+            .navbar-nav .nav-link:active { background: var(--secondary); }
         }
 
-        /* ===== АНИМАЦИИ ДЛЯ AOS НА МОБИЛЬНЫХ ===== */
         @media (max-width: 767.98px) {
             [data-aos] {
                 opacity: 1 !important;
@@ -872,7 +749,7 @@
 <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" loading="lazy">
+            <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" loading="lazy" width="45" height="45">
             <span>
                 <span class="title fw-bold">ГБУ ДПО <span class="accent">«ИРО ЧР»</span></span>
                 <span class="subtitle">Институт развития образования Чеченской Республики</span>
@@ -895,107 +772,14 @@
 </nav>
 
 <main>
-    {% block content %}
-    <section class="hero-section">
-        <div class="hero-waves"></div>
-        <div class="container hero-content">
-            <div class="row align-items-center">
-                <div class="col-lg-8" data-aos="fade-right">
-                    <div class="hero-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#1a4f7a"/>
-                        </svg>
-                    </div>
-                    <div class="accent-badge mb-3">Система дистанционного обучения</div>
-                    <h1 class="fw-bold mb-3">
-                        ГБУ ДПО <span class="accent">«Институт развития образования</span><br>
-                        <span class="accent">Чеченской Республики»</span>
-                    </h1>
-                    <p class="lead mb-4" style="opacity: 0.7; font-weight: 300; color: var(--dark);">
-                        Повышение квалификации и профессиональная переподготовка<br class="d-none d-md-block">
-                        педагогических работников
-                    </p>
-                    <div class="d-flex flex-wrap gap-3">
-                        <a href="/courses" class="btn btn-primary btn-lg px-5">
-                            <i class="bi bi-book me-2"></i>Каталог курсов
-                        </a>
-                        <a href="/map" class="btn btn-outline-primary btn-lg px-4">
-                            <i class="bi bi-geo-alt me-2"></i>Как нас найти
-                        </a>
-                    </div>
-                </div>
-                <div class="col-lg-4 d-none d-lg-block" data-aos="fade-left">
-                    <div class="info-card">
-                        <div class="info-item">
-                            <span class="info-icon">📍</span>
-                            <span>г. Грозный, ул. Лермонтова, 2</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-icon">📞</span>
-                            <span>+7 (8712) 21-22-24</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-icon">✉</span>
-                            <span>ipkro-chr@mail.ru</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-icon">🕐</span>
-                            <span>Пн–пт 9:00–18:00</span>
-                        </div>
-                        <hr style="border-color: rgba(26,79,122,0.06); margin: 8px 0;">
-                        <div class="d-flex gap-2 flex-wrap">
-                            <span class="badge-tag">Повышение квалификации</span>
-                            <span class="badge-tag">Профпереподготовка</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="container py-4 py-md-5">
-        <div class="row g-4">
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="card feature-card h-100 p-4 text-center">
-                    <div class="feature-icon">
-                        <i class="bi bi-mortarboard-fill"></i>
-                    </div>
-                    <h5 class="fw-bold">Образовательная деятельность</h5>
-                    <p class="text-muted small">Реализуем программы повышения квалификации и профессиональной переподготовки</p>
-                    <span class="badge badge-primary mt-2">Подробнее →</span>
-                </div>
-            </div>
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="card feature-card h-100 p-4 text-center">
-                    <div class="feature-icon">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                    <h5 class="fw-bold">Квалифицированные кадры</h5>
-                    <p class="text-muted small">Опытные преподаватели и эксперты в области образования</p>
-                    <span class="badge badge-primary mt-2">Подробнее →</span>
-                </div>
-            </div>
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="card feature-card h-100 p-4 text-center">
-                    <div class="feature-icon">
-                        <i class="bi bi-laptop-fill"></i>
-                    </div>
-                    <h5 class="fw-bold">Дистанционное обучение</h5>
-                    <p class="text-muted small">Современные технологии для эффективного обучения в любой точке</p>
-                    <span class="badge badge-primary mt-2">Подробнее →</span>
-                </div>
-            </div>
-        </div>
-    </section>
-    {% endblock %}
+    {% block content %}{% endblock %}
 </main>
 
-<!-- ===== ФУТЕР ===== -->
 <footer class="footer-light">
     <div class="container py-4 py-md-5">
         <div class="row">
             <div class="col-md-4 mb-4">
-                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 50px; margin-bottom: 12px; border-radius: 8px;" loading="lazy">
+                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 50px; margin-bottom: 12px; border-radius: 8px;" loading="lazy" width="50" height="50">
                 <h5 style="color: var(--dark); font-size: clamp(0.95rem, 1.2vw, 1.1rem);">ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
                 <p class="small" style="color: var(--gray); opacity: 0.7;">Повышение квалификации педагогических работников</p>
                 <div class="social-icons mt-3">
@@ -1030,7 +814,6 @@
     </div>
 </footer>
 
-<!-- ===== ЧАТ-БОТ ===== -->
 <div class="chatbot-container" id="chatbotContainer">
     <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Помощь">
         <i class="bi bi-chat-dots-fill"></i>
@@ -1135,7 +918,6 @@
 </div>
 
 <script>
-// ===== ИНИЦИАЛИЗАЦИЯ AOS =====
 try {
     if (typeof AOS !== 'undefined') {
         AOS.init({
@@ -1146,7 +928,6 @@ try {
     }
 } catch(e) {}
 
-// ===== НАВИГАЦИЯ ПРИ СКРОЛЛЕ =====
 try {
     window.addEventListener('scroll', function() {
         try {
@@ -1158,14 +939,12 @@ try {
     }, { passive: true });
 } catch(e) {}
 
-// ===== ДАННЫЕ ДЛЯ КАРТЫ =====
 const instituteCoords = [43.3181, 45.6941];
 const instituteAddress = "г. Грозный, ул. Лермонтова, 2";
 const institutePhone = "+7 (8712) 21-22-24";
 const instituteEmail = "ipkro-chr@mail.ru";
 const instituteHours = "Пн-Пт: 9:00 - 18:00";
 
-// ===== КАРТА В ФУТЕРЕ =====
 function initFooterMap() {
     try {
         const mapElement = document.getElementById('footer-map');
@@ -1214,7 +993,6 @@ function initFooterMap() {
     } catch(e) {}
 }
 
-// ===== КАРТА НА СТРАНИЦЕ /MAP =====
 function initFullMap() {
     try {
         const mapElement = document.getElementById('full-map');
@@ -1293,7 +1071,6 @@ function initFullMap() {
     } catch(e) {}
 }
 
-// ===== ЗАГРУЗКА ЯНДЕКС КАРТ =====
 try {
     let ymapsLoaded = false;
     const checkYmaps = setInterval(function() {
@@ -1316,7 +1093,6 @@ try {
     }, 10000);
 } catch(e) {}
 
-// ===== АВТОРИЗАЦИЯ =====
 try {
     const token = localStorage.getItem('token');
     
@@ -1390,7 +1166,6 @@ try {
     }
 } catch(e) {}
 
-// ===== ЧАТ-БОТ =====
 function toggleChatbot() {
     const window = document.getElementById('chatbotWindow');
     const toggle = document.getElementById('chatbotToggle');
@@ -1438,7 +1213,6 @@ function toggleQuestion(element) {
     }
 }
 
-// ===== ЗАКРЫТИЕ ЧАТА ПРИ КЛИКЕ ВНЕ =====
 document.addEventListener('click', function(event) {
     const container = document.getElementById('chatbotContainer');
     const window = document.getElementById('chatbotWindow');
@@ -1451,7 +1225,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// ===== ЗАКРЫТИЕ ПО ESC =====
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
         const window = document.getElementById('chatbotWindow');
@@ -1461,7 +1234,6 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// ===== АВТО-ПОКАЗ ПОДСКАЗКИ =====
 let chatbotTimeout = setTimeout(() => {
     const window = document.getElementById('chatbotWindow');
     if (!window.classList.contains('open')) {

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import desc, func
 from app import models, schemas, auth
 from app.database import get_db
@@ -282,9 +282,11 @@ def get_course_registrations(
             detail="Course not found"
         )
     
-    registrations = db.query(models.CourseRegistration, models.User).join(
-        models.User
-    ).filter(models.CourseRegistration.course_id == course_id).order_by(
+    registrations = db.query(models.CourseRegistration).options(
+        selectinload(models.CourseRegistration.user)
+    ).filter(
+        models.CourseRegistration.course_id == course_id
+    ).order_by(
         models.CourseRegistration.registered_at.desc()
     ).all()
     
@@ -295,14 +297,14 @@ def get_course_registrations(
             "moodle_course_id": course.moodle_course_id
         },
         "registrations": [{
-            "id": r.CourseRegistration.id,
-            "user_id": r.User.id,
-            "full_name": r.User.full_name,
-            "email": r.User.email,
-            "position": r.User.position,
-            "phone": r.User.phone,
-            "organization": r.User.organization,
-            "registered_at": r.CourseRegistration.registered_at
+            "id": r.id,
+            "user_id": r.user.id,
+            "full_name": r.user.full_name,
+            "email": r.user.email,
+            "position": r.user.position,
+            "phone": r.user.phone,
+            "organization": r.user.organization,
+            "registered_at": r.registered_at
         } for r in registrations]
     }
 
@@ -342,21 +344,11 @@ def get_users(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    registrations_subquery = db.query(
-        models.CourseRegistration.user_id,
-        func.count(models.CourseRegistration.id).label('registrations_count')
-    ).group_by(models.CourseRegistration.user_id).subquery()
+    users = db.query(models.User).options(
+        selectinload(models.User.registrations)
+    ).order_by(models.User.id).offset(offset).limit(limit).all()
     
-    query = db.query(
-        models.User,
-        func.coalesce(registrations_subquery.c.registrations_count, 0).label('registrations_count')
-    ).outerjoin(
-        registrations_subquery,
-        models.User.id == registrations_subquery.c.user_id
-    )
-    
-    total = query.count()
-    results = query.order_by(models.User.id).offset(offset).limit(limit).all()
+    total = db.query(models.User).count()
     
     return [{
         "id": u.id,
@@ -364,8 +356,8 @@ def get_users(
         "full_name": u.full_name,
         "role": u.role.value,
         "is_blocked": u.is_blocked,
-        "registrations_count": registrations_count
-    } for u, registrations_count in results]
+        "registrations_count": len(u.registrations)
+    } for u in users]
 
 
 @router.post("/users/{user_id}/block")

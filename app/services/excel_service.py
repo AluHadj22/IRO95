@@ -3,7 +3,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from io import BytesIO
 from typing import List, Dict
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from app import models
 from app.services.encryption_service import EncryptionService
 import json
@@ -129,19 +129,15 @@ def generate_registrations_excel(data: List[Dict], course_title: str = "") -> By
 
 
 def _get_users_export_data_batch(db: Session, users: List[models.User]) -> Dict[int, Dict[str, str]]:
-    """
-    Собирает данные для списка пользователей за один запрос с joinedload.
-    Исправляет N+1 проблему.
-    """
     if not users:
         return {}
     
     user_ids = [u.id for u in users]
     
     users_with_data = db.query(models.User).options(
-        joinedload(models.User.work),
-        joinedload(models.User.education),
-        joinedload(models.User.additional_info)
+        selectinload(models.User.work),
+        selectinload(models.User.education),
+        selectinload(models.User.additional_info)
     ).filter(models.User.id.in_(user_ids)).all()
     
     users_map = {u.id: u for u in users_with_data}

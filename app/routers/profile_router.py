@@ -1,7 +1,7 @@
 # app/routers/profile_router.py
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import and_
 from app import models, schemas, auth
 from app.database import get_db
@@ -1037,16 +1037,11 @@ def get_full_profile(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """
-    Получить полный профиль пользователя.
-    Оптимизировано: все связанные данные загружаются одним запросом с joinedload.
-    """
-    # Загружаем пользователя со всеми связанными данными одним запросом
     user = db.query(models.User).options(
-        joinedload(models.User.education),
-        joinedload(models.User.work),
         joinedload(models.User.address),
-        joinedload(models.User.additional_info)
+        selectinload(models.User.education),
+        selectinload(models.User.work),
+        selectinload(models.User.additional_info)
     ).filter(models.User.id == current_user.id).first()
     
     if not user:

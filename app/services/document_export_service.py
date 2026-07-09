@@ -9,17 +9,13 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app import models
 
-# Настройка логирования
 logger = logging.getLogger(__name__)
 
 
 class DocumentExportService:
-    """Сервис для экспорта документов пользователей в ZIP-архивы"""
     
-    # Базовый путь для загрузок
     UPLOAD_BASE = "app/static/uploads/profile/documents"
     
-    # Маппинг типов документов
     DOCUMENT_TYPES = {
         "snils": {
             "field_url": "snils_file_url",
@@ -53,60 +49,34 @@ class DocumentExportService:
         }
     }
     
-    # ✅ Только безопасные символы (латиница, цифры, подчёркивание, дефис)
-    SAFE_FILENAME_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
-    
     def __init__(self, db: Session):
         self.db = db
     
-    def _sanitize_filename(self, filename: str) -> str:
-        """
-        Санитизация имени файла для безопасного использования в ZIP.
-        ✅ Только латиница, цифры, подчёркивание, дефис
-        ✅ Защита от path traversal
-        """
-        if not filename:
-            return "unknown"
-        
-        # Удаляем path traversal
-        filename = os.path.basename(filename)
-        
-        # Оставляем только безопасные символы (латиница, цифры, _, -, .)
-        safe_name = ''.join(c for c in filename if c in self.SAFE_FILENAME_CHARS or c == '.')
-        
-        # Если имя пустое - генерируем
-        if not safe_name:
-            safe_name = f"file_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        
-        # Убираем лишние точки в начале и конце
-        safe_name = safe_name.strip('.')
-        
-        return safe_name
-    
     def _sanitize_folder_name(self, name: str) -> str:
-        """
-        Санитизация имени папки для ZIP.
-        ✅ Только латиница, цифры, подчёркивание, дефис
-        """
         if not name:
             return "user"
         
-        # Удаляем path traversal
-        name = os.path.basename(name)
-        
-        # Оставляем только безопасные символы
-        safe_name = ''.join(c for c in name if c in self.SAFE_FILENAME_CHARS)
-        
+        forbidden = r'[<>:"/\\|?*]'
+        import re
+        safe_name = re.sub(forbidden, '_', name)
+        safe_name = safe_name.strip('. ')
         if not safe_name:
-            safe_name = f"user_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            safe_name = "user"
+        return safe_name
+    
+    def _sanitize_filename(self, filename: str) -> str:
+        if not filename:
+            return "unknown"
         
+        forbidden = r'[<>:"/\\|?*]'
+        import re
+        safe_name = re.sub(forbidden, '_', filename)
+        safe_name = safe_name.strip('. ')
+        if not safe_name:
+            safe_name = f"file_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         return safe_name
     
     def _generate_unique_name(self, base_name: str, used_names: set, extension: str = "") -> str:
-        """
-        Генерирует уникальное имя файла.
-        ✅ Добавляет счётчик если имя уже существует
-        """
         final_name = f"{base_name}{extension}"
         counter = 1
         
@@ -117,10 +87,36 @@ class DocumentExportService:
         used_names.add(final_name)
         return final_name
     
+    def _get_user_display_name(self, user: models.User) -> str:
+        parts = []
+        if user.last_name:
+            parts.append(user.last_name)
+        if user.first_name:
+            parts.append(user.first_name)
+        if user.middle_name:
+            parts.append(user.middle_name)
+        
+        if parts:
+            return " ".join(parts)
+        return user.full_name or f"user_{user.id}"
+    
+    def _get_user_folder_name(self, user: models.User) -> str:
+        parts = []
+        if user.last_name:
+            parts.append(user.last_name)
+        if user.first_name:
+            parts.append(user.first_name)
+        if user.middle_name:
+            parts.append(user.middle_name)
+        
+        if parts:
+            folder_name = "_".join(parts)
+        else:
+            folder_name = user.full_name.replace(" ", "_") if user.full_name else f"user_{user.id}"
+        
+        return self._sanitize_folder_name(folder_name)
+    
     def _get_user_documents(self, user: models.User) -> Dict[str, Dict[str, Any]]:
-        """
-        Получает все документы пользователя.
-        """
         additional_info = self.db.query(models.UserAdditionalInfo).filter(
             models.UserAdditionalInfo.user_id == user.id
         ).first()
@@ -178,9 +174,6 @@ class DocumentExportService:
         return documents
     
     def get_user_documents_list(self, user_id: int) -> Dict[str, Any]:
-        """
-        Получить список документов пользователя с их статусами.
-        """
         user = self.db.query(models.User).filter(models.User.id == user_id).first()
         if not user:
             raise HTTPException(
@@ -189,27 +182,18 @@ class DocumentExportService:
             )
         
         documents = self._get_user_documents(user)
-        
-        full_name = f"{user.last_name or ''}_{user.first_name or ''}_{user.middle_name or ''}".strip("_")
-        if not full_name:
-            full_name = self._sanitize_filename(user.full_name.replace(" ", "_")) or f"user_{user.id}"
-        else:
-            full_name = self._sanitize_filename(full_name)
+        display_name = self._get_user_display_name(user)
+        folder_name = self._get_user_folder_name(user)
         
         return {
             "user_id": user.id,
-            "full_name": full_name,
+            "full_name": folder_name,
+            "display_name": display_name,
             "documents": documents,
             "has_any_document": any(doc["exists"] for doc in documents.values())
         }
     
     def create_user_zip(self, user_id: int) -> Tuple[bytes, str]:
-        """
-        Создает ZIP-архив со всеми документами пользователя.
-        ✅ Уникальные имена файлов внутри архива
-        ✅ Только латиница, цифры, подчёркивание
-        ✅ Добавлен timestamp для уникальности имени архива
-        """
         user = self.db.query(models.User).filter(models.User.id == user_id).first()
         if not user:
             raise HTTPException(
@@ -230,29 +214,25 @@ class DocumentExportService:
         added_files = 0
         used_names = set()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        folder_name = self._get_user_folder_name(user)
         
         try:
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
                 for doc_type, doc_info in documents.items():
                     if doc_info["exists"] and doc_info["path"]:
                         try:
-                            # ✅ Получаем расширение файла
                             file_ext = os.path.splitext(doc_info["filename"])[1]
                             if not file_ext:
-                                file_ext = ".pdf"  # fallback
+                                file_ext = ".pdf"
                             
-                            # ✅ Создаём безопасное имя (только латиница)
                             safe_prefix = self._sanitize_filename(doc_info['prefix'])
                             if not safe_prefix:
                                 safe_prefix = f"doc_{doc_type}"
                             
-                            # ✅ Добавляем ID пользователя для уникальности
-                            base_name = f"{safe_prefix}_{user_id}_{timestamp}"
-                            
-                            # ✅ Генерируем уникальное имя
+                            base_name = f"{safe_prefix}_{timestamp}"
                             archive_filename = self._generate_unique_name(base_name, used_names, file_ext)
+                            archive_filename = f"{folder_name}/{archive_filename}"
                             
-                            # ✅ Проверяем, что файл существует и доступен
                             if os.path.exists(doc_info["path"]) and os.access(doc_info["path"], os.R_OK):
                                 zip_file.write(doc_info["path"], archive_filename)
                                 added_files += 1
@@ -278,23 +258,11 @@ class DocumentExportService:
                 detail=f"Error creating ZIP archive: {str(e)}"
             )
         
-        # ✅ Имя ZIP-архива — только латиница, цифры, подчёркивание
-        full_name = f"{user.last_name or ''}_{user.first_name or ''}_{user.middle_name or ''}".strip("_")
-        if not full_name:
-            full_name = self._sanitize_filename(user.full_name.replace(" ", "_")) or f"user_{user.id}"
-        else:
-            full_name = self._sanitize_filename(full_name)
-        
-        filename = f"{full_name}_documents_{timestamp}.zip"
+        filename = f"{folder_name}_documents_{timestamp}.zip"
         
         return zip_buffer.getvalue(), filename
     
     def create_multiple_users_zip(self, user_ids: List[int]) -> Tuple[bytes, str]:
-        """
-        Создает ZIP-архив с документами нескольких пользователей.
-        ✅ Уникальные имена файлов
-        ✅ Только латиница, цифры, подчёркивание
-        """
         if not user_ids:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -317,13 +285,7 @@ class DocumentExportService:
         try:
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
                 for user in users:
-                    # ✅ Безопасное имя папки (только латиница)
-                    folder_name = f"{user.last_name or ''}_{user.first_name or ''}_{user.middle_name or ''}".strip("_")
-                    if not folder_name:
-                        folder_name = self._sanitize_filename(user.full_name.replace(" ", "_")) or f"user_{user.id}"
-                    else:
-                        folder_name = self._sanitize_filename(folder_name)
-                    folder_name = f"{folder_name}_{user.id}"
+                    folder_name = self._get_user_folder_name(user)
                     
                     documents = self._get_user_documents(user)
                     
@@ -339,10 +301,9 @@ class DocumentExportService:
                                     if not safe_prefix:
                                         safe_prefix = f"doc_{doc_type}"
                                     
-                                    base_name = f"{safe_prefix}_{user.id}_{timestamp}"
+                                    base_name = f"{safe_prefix}_{timestamp}"
                                     archive_filename = f"{folder_name}/{base_name}{file_ext}"
                                     
-                                    # ✅ Проверяем уникальность полного пути
                                     if archive_filename in used_names:
                                         counter = 1
                                         while f"{folder_name}/{base_name}_{counter}{file_ext}" in used_names:
@@ -378,9 +339,6 @@ class DocumentExportService:
         return zip_buffer.getvalue(), filename
     
     def get_document_file(self, user_id: int, doc_type: str) -> Tuple[bytes, str, str]:
-        """
-        Получает содержимое конкретного документа пользователя.
-        """
         if doc_type not in self.DOCUMENT_TYPES:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -473,9 +431,6 @@ class DocumentExportService:
         return content, filename, mime_type
     
     def delete_document(self, user_id: int, doc_type: str) -> Dict[str, str]:
-        """
-        Удаляет документ пользователя (админское удаление).
-        """
         if doc_type not in self.DOCUMENT_TYPES:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

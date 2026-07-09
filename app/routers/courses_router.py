@@ -1,6 +1,6 @@
 # app/routers/courses_router.py
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 from sqlalchemy import or_, and_
 from app import models, schemas, auth
 from app.database import get_db
@@ -38,8 +38,6 @@ def convert_video_url(url: str, platform: str = "youtube") -> str:
     return url
 
 
-# ========== ПОЛУЧЕНИЕ СПИСКА КУРСОВ (С ИСПРАВЛЕНИЕМ N+1) ==========
-
 @router.get("/")
 def get_courses(
     category_id: Optional[int] = Query(None),
@@ -51,7 +49,8 @@ def get_courses(
 ):
     """
     Получение списка курсов с пагинацией и оптимизированными запросами.
-    Использует joinedload для предотвращения N+1 запросов.
+    Использует joinedload для связи многие-к-одному (category) 
+    и selectinload для связи один-ко-многим (speakers).
     """
     query = db.query(models.Course).filter(models.Course.is_active == True)
     
@@ -67,10 +66,9 @@ def get_courses(
             )
         )
     
-    # Оптимизация: загружаем связанные данные одним запросом
     query = query.options(
         joinedload(models.Course.category),
-        joinedload(models.Course.speakers)
+        selectinload(models.Course.speakers)
     )
     
     total = query.count()
@@ -192,7 +190,7 @@ def get_course(
     """Получение одного курса с оптимизированной загрузкой связей"""
     course = db.query(models.Course).options(
         joinedload(models.Course.category),
-        joinedload(models.Course.speakers)
+        selectinload(models.Course.speakers)
     ).filter(models.Course.id == course_id).first()
     
     if not course:
@@ -384,8 +382,6 @@ def remove_from_watch_later(
     db.commit()
     return {"message": "Removed from watch later"}
 
-
-# ========== РЕГИСТРАЦИЯ НА КУРС ==========
 
 @router.post("/{course_id}/register")
 def register_for_course(
@@ -726,8 +722,6 @@ def get_all_moodle_progress(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get Moodle progress: {str(e)}")
 
-
-# ========== ПРОГРЕСС И СТАТИСТИКА ==========
 
 @router.post("/{course_id}/progress")
 def update_course_progress(

@@ -1,461 +1,123 @@
-/* ============================================================
-   СТИЛИ ДЛЯ СТРАНИЦЫ ДЕТАЛЕЙ КУРСА
-   ============================================================ */
-
+/* ===== ПЕРЕОПРЕДЕЛЕНИЕ ВСЕХ ЦВЕТОВ ===== */
 :root {
-    --primary: #c9a13b;
-    --primary-dark: #b8860b;
-    --primary-light: #f9d976;
-    --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
-    --dark: #1a1a2e;
-    --light: #f8fafc;
-    --gray: #64748b;
-    --white: #ffffff;
-    --border: #e2e8f0;
+    --primary: #1a4f7a !important;
+    --primary-dark: #0d3b5e !important;
+    --primary-light: #3a7ca5 !important;
+    --primary-gradient: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
+    --dark: #0d1b2a !important;
+    --light: #f7fafc !important;
+    --gray: #718096 !important;
+    --white: #ffffff !important;
+    --border: #e2e8f0 !important;
 }
 
-.moodle-badge {
-    background: #fef9e7;
-    border: 1px solid var(--primary);
-    border-radius: 8px;
-    padding: 8px 14px;
-    font-size: 0.85rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--primary-dark);
-    margin-bottom: 12px;
-    font-weight: 500;
-}
-.moodle-badge i {
-    font-size: 1.1rem;
-    color: var(--primary);
+/* ===== ШРИФТЫ ===== */
+.course-page * {
+    font-family: 'Inter', sans-serif;
 }
 
+.course-page h1, 
+.course-page h2, 
+.course-page h3, 
+.course-page h4, 
+.course-page h5,
+.course-page .section-title,
+.course-page .modal-title {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.course-page .lead,
+.course-page .speaker-position,
+.course-page .course-description,
+.course-page .info-box p {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-size: clamp(0.95rem, 2vw, 1.05rem) !important;
+    line-height: 1.7 !important;
+}
+
+/* ===== ГЕРОЙ ===== */
 .course-hero-image {
-    max-height: 400px;
-    object-fit: cover;
     width: 100%;
-    border-radius: 16px 16px 0 0;
+    height: clamp(180px, 35vw, 300px);
+    object-fit: cover;
+    border-bottom: 3px solid rgba(26, 79, 122, 0.08);
 }
 
 .course-placeholder {
-    background: linear-gradient(135deg, #fef9e7 0%, #fdf2d0 100%);
-    padding: 80px 20px;
-    text-align: center;
-    border-radius: 16px 16px 0 0;
+    height: clamp(180px, 35vw, 300px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
+    border-bottom: 3px solid rgba(26, 79, 122, 0.08);
 }
 
 .course-placeholder i {
-    font-size: 4rem;
-    color: var(--primary);
-    opacity: 0.5;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    color: #1a4f7a;
+    opacity: 0.3;
 }
 
-.speaker-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--border);
-    transition: all 0.3s ease;
-    height: 100%;
-    text-align: center;
+/* ===== КАРТОЧКА КУРСА ===== */
+.course-page .card {
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.3s ease !important;
+    background: var(--white) !important;
 }
 
-.speaker-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--primary);
-    box-shadow: 0 12px 24px -12px rgba(201,161,59,0.15);
+.course-page .card:hover {
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.06) !important;
 }
 
-.speaker-img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--primary);
-    padding: 3px;
-    transition: all 0.3s ease;
+.course-page .card-body {
+    padding: clamp(16px, 3vw, 28px) !important;
 }
 
-.speaker-card:hover .speaker-img {
-    border-color: var(--primary-light);
-    box-shadow: 0 0 0 6px rgba(201,161,59,0.08);
-}
-
-.speaker-card .speaker-name {
-    font-weight: 700;
-    color: var(--dark);
-    margin-bottom: 2px;
-}
-
-.speaker-card .speaker-position {
-    font-size: 0.85rem;
-    color: var(--gray);
-}
-
-.speaker-card .speaker-bio {
-    font-size: 0.8rem;
-    color: var(--gray);
-    margin-top: 8px;
-    line-height: 1.5;
-}
-
-.sticky-sidebar {
-    position: sticky;
-    top: 90px;
-}
-
-.course-info-card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    padding: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    transition: all 0.3s ease;
-}
-
-.course-info-card:hover {
-    box-shadow: 0 4px 16px rgba(201,161,59,0.06);
-}
-
-.course-info-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-}
-
-.course-info-item:last-child {
-    border-bottom: none;
-}
-
-.course-info-item .label {
-    color: var(--gray);
-    font-size: 0.9rem;
-}
-
-.course-info-item .value {
-    font-weight: 500;
-    color: var(--dark);
-}
-
-.course-info-item .value i {
-    color: var(--primary);
-    margin-right: 6px;
-}
-
-.btn-register {
-    background: var(--primary-gradient);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 14px;
+/* ===== MOODLE БЭДЖ ===== */
+.moodle-badge {
+    display: inline-block;
+    background: rgba(26, 79, 122, 0.08);
+    color: #1a4f7a;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    width: 100%;
+    margin-bottom: 16px;
+    border: 1px solid rgba(26, 79, 122, 0.06);
 }
 
-.btn-register:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(201,161,59,0.3);
-    color: white;
+.moodle-badge i {
+    margin-right: 8px;
 }
 
-.btn-register:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none !important;
-}
-
-.btn-register.registered {
-    background: #10b981;
-}
-
-.btn-register.registered:hover {
-    background: #059669;
-    box-shadow: 0 8px 24px rgba(16,185,129,0.3);
-}
-
-.btn-outline-favorite {
-    border: 1.5px solid var(--border);
-    color: var(--gray);
-    background: transparent;
-    border-radius: 10px;
-    padding: 8px 18px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-outline-favorite:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: #fef9e7;
-}
-
-.btn-outline-favorite.active {
-    border-color: #ef4444;
-    color: #dc2626;
-    background: #fee2e2;
-}
-
-.btn-outline-favorite.active:hover {
-    background: #fecaca;
-}
-
-.btn-outline-watch {
-    border: 1.5px solid var(--border);
-    color: var(--gray);
-    background: transparent;
-    border-radius: 10px;
-    padding: 8px 18px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-outline-watch:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-    background: #fef9e7;
-}
-
-.btn-outline-watch.active {
-    border-color: #f59e0b;
-    color: #d97706;
-    background: #fef3c7;
-}
-
-.btn-outline-watch.active:hover {
-    background: #fde68a;
-}
-
+/* ===== ТЕГИ ===== */
 .badge-category {
-    background: var(--primary-gradient);
+    display: inline-block;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
     color: white;
     padding: 4px 16px;
     border-radius: 20px;
-    font-weight: 500;
-    font-size: 0.75rem;
-}
-
-.badge-hashtag {
-    background: #f1f5f9;
-    color: var(--gray);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    margin-right: 4px;
-    transition: all 0.2s ease;
-}
-
-.badge-hashtag:hover {
-    background: #fef9e7;
-    color: var(--primary-dark);
-}
-
-.info-box {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    margin-top: 16px;
-}
-
-.info-box p {
-    margin-bottom: 4px;
-    font-size: 0.85rem;
-    color: var(--gray);
-}
-
-.info-box p:last-child {
-    margin-bottom: 0;
-}
-
-.info-box .info-icon {
-    color: var(--primary);
-}
-
-.section-title {
-    color: var(--dark);
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.section-title i {
-    color: var(--primary);
-    margin-right: 10px;
-}
-
-.course-description {
-    color: var(--gray);
-    line-height: 1.8;
-    font-size: 1rem;
-}
-
-.video-wrapper {
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-    border: 1px solid var(--border);
-}
-
-.video-wrapper iframe {
-    width: 100%;
-    aspect-ratio: 16/9;
-    border: none;
-}
-
-/* ===== МОДАЛЬНОЕ ОКНО ПРОФИЛЯ ===== */
-.profile-incomplete-modal .modal-content {
-    border-radius: 20px;
-    border: none;
-    overflow: hidden;
-}
-
-.profile-incomplete-modal .modal-header {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    color: white;
-    border: none;
-    padding: 18px 24px;
-}
-
-.profile-incomplete-modal .modal-header .btn-close {
-    filter: brightness(0) invert(1);
-    opacity: 0.8;
-}
-
-.profile-incomplete-modal .modal-body {
-    padding: 24px;
-}
-
-.profile-incomplete-modal .missing-sections-list {
-    list-style: none;
-    padding: 0;
-    margin: 12px 0 20px 0;
-}
-
-.profile-incomplete-modal .missing-sections-list li {
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    background: #fef2f2;
-    border-radius: 10px;
-    border-left: 4px solid #dc2626;
-}
-
-.profile-incomplete-modal .missing-sections-list li .section-label {
+    font-size: clamp(0.6rem, 1.2vw, 0.7rem);
     font-weight: 600;
-    color: #dc2626;
-    display: block;
-    margin-bottom: 4px;
-    font-size: 0.95rem;
-}
-
-.profile-incomplete-modal .missing-sections-list li .section-fields {
-    font-size: 0.85rem;
-    color: #6b7280;
-    display: block;
-}
-
-.profile-incomplete-modal .missing-sections-list li .section-fields .field-item {
-    display: inline-block;
-    background: white;
-    padding: 1px 10px;
-    border-radius: 12px;
-    margin: 2px 4px 2px 0;
-    font-size: 0.75rem;
-    color: #dc2626;
-    border: 1px solid #fecaca;
-}
-
-.profile-incomplete-modal .alert-info-custom {
-    background: #fef9e7;
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    padding: 12px 16px;
-    color: var(--primary-dark);
-    font-size: 0.9rem;
-}
-
-.profile-incomplete-modal .alert-info-custom i {
-    margin-right: 8px;
-    color: var(--primary);
-}
-
-.profile-incomplete-modal .btn-go-profile {
-    background: var(--primary-gradient);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 24px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.profile-incomplete-modal .btn-go-profile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(201,161,59,0.3);
-    color: white;
-}
-
-.profile-incomplete-modal .btn-close-modal {
-    border: 1px solid var(--border);
-    background: transparent;
-    border-radius: 10px;
-    padding: 10px 24px;
-    font-weight: 500;
-    color: var(--gray);
-    transition: all 0.2s ease;
-}
-
-.profile-incomplete-modal .btn-close-modal:hover {
-    background: #f3f4f6;
-}
-
-.profile-incomplete-modal .progress-status {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background: #f8fafc;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-}
-
-.profile-incomplete-modal .progress-status .progress-bar-mini {
-    flex: 1;
-    height: 8px;
-    background: var(--border);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.profile-incomplete-modal .progress-status .progress-bar-mini .fill {
-    height: 100%;
-    background: var(--primary-gradient);
-    border-radius: 10px;
-    transition: width 0.5s ease;
-}
-
-.profile-incomplete-modal .progress-status .progress-text {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--dark);
-    white-space: nowrap;
-}
-
-.profile-incomplete-modal .modal-footer {
-    border-top: 1px solid var(--border);
-    padding: 16px 24px;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.04em;
 }
 
 .badge-format {
-    padding: 4px 14px;
+    display: inline-block;
+    padding: 4px 16px;
     border-radius: 20px;
-    font-weight: 500;
-    font-size: 0.7rem;
+    font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+    font-weight: 600;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.04em;
 }
 
 .badge-format-online {
@@ -478,53 +140,792 @@
     color: #b71c1c;
 }
 
-@media (max-width: 768px) {
+.badge-hashtag {
+    display: inline-block;
+    background: rgba(26, 79, 122, 0.06);
+    color: #1a4f7a;
+    padding: 2px 12px;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 500;
+    margin: 2px 3px;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== ЗАГОЛОВКИ СЕКЦИЙ ===== */
+.section-title {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(1rem, 2vw, 1.15rem) !important;
+    color: #0d1b2a !important;
+    margin-bottom: 12px !important;
+    letter-spacing: 0.02em !important;
+}
+
+.section-title i {
+    color: #1a4f7a;
+    margin-right: 10px;
+}
+
+/* ===== ОПИСАНИЕ ===== */
+.course-description {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: clamp(0.95rem, 2vw, 1.05rem) !important;
+    line-height: 1.8 !important;
+    color: #3a4a5a !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    white-space: pre-line;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* ===== ВИДЕО ===== */
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #0d1b2a;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ===== КНОПКИ ИЗБРАННОГО ===== */
+.btn-outline-favorite {
+    background: transparent;
+    border: 1.5px solid #e2e8f0;
+    color: #4a5a6a;
+    padding: clamp(6px, 1.2vw, 8px) clamp(14px, 2vw, 18px);
+    border-radius: 8px;
+    font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.03em;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-outline-favorite:hover {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.04);
+}
+
+.btn-outline-favorite.active {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.08);
+}
+
+.btn-outline-favorite:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-outline-favorite:active {
+    transform: scale(0.96);
+}
+
+.btn-outline-watch {
+    background: transparent;
+    border: 1.5px solid #e2e8f0;
+    color: #4a5a6a;
+    padding: clamp(6px, 1.2vw, 8px) clamp(14px, 2vw, 18px);
+    border-radius: 8px;
+    font-size: clamp(0.75rem, 1.5vw, 0.85rem);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    letter-spacing: 0.03em;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-outline-watch:hover {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.04);
+}
+
+.btn-outline-watch.active {
+    border-color: #1a4f7a;
+    color: #1a4f7a;
+    background: rgba(26, 79, 122, 0.08);
+}
+
+.btn-outline-watch:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-outline-watch:active {
+    transform: scale(0.96);
+}
+
+/* ===== КНОПКИ В ГРУППЕ ===== */
+.btn-group-responsive {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-group-responsive .btn-outline-favorite,
+.btn-group-responsive .btn-outline-watch {
+    flex: 1 1 auto;
+    min-width: fit-content;
+    justify-content: center;
+    text-align: center;
+}
+
+/* ===== СПИКЕРЫ ===== */
+.speaker-card {
+    text-align: center;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    touch-action: manipulation;
+}
+
+.speaker-card:active {
+    transform: scale(0.98);
+}
+
+.speaker-card:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: #1a4f7a;
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.06);
+}
+
+.speaker-img {
+    width: clamp(64px, 12vw, 80px);
+    height: clamp(64px, 12vw, 80px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #1a4f7a;
+    margin-bottom: 10px;
+}
+
+.speaker-name {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(0.9rem, 1.8vw, 1rem) !important;
+    color: #0d1b2a !important;
+    letter-spacing: 0.02em !important;
+}
+
+.speaker-position {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem) !important;
+    color: #4a5a6a !important;
+    font-weight: 500 !important;
+    font-style: italic !important;
+    letter-spacing: 0.03em !important;
+}
+
+.speaker-bio {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: clamp(0.8rem, 1.3vw, 0.85rem) !important;
+    color: #5a6a7a !important;
+    margin-top: 6px;
+    font-weight: 400 !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* ===== БОКОВАЯ ПАНЕЛЬ ===== */
+.sticky-sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.course-info-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: clamp(16px, 3vw, 24px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.course-info-card hr {
+    border-color: var(--border);
+    margin: 16px 0;
+}
+
+.course-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.course-info-item .label {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 600 !important;
+    color: #4a5a6a !important;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem) !important;
+    letter-spacing: 0.03em !important;
+}
+
+.course-info-item .label i {
+    color: #1a4f7a;
+}
+
+.course-info-item .value {
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    color: #0d1b2a !important;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem) !important;
+    text-align: right;
+}
+
+/* ===== КНОПКА ЗАПИСИ ===== */
+.btn-register {
+    width: 100%;
+    padding: clamp(12px, 2vw, 16px) 20px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(0.9rem, 1.5vw, 1rem) !important;
+    letter-spacing: 0.03em !important;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
+    color: white !important;
+    transition: all 0.3s ease !important;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25) !important;
+}
+
+.btn-register:active {
+    transform: scale(0.97) !important;
+}
+
+.btn-register:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-register.registered {
+    background: #10b981 !important;
+}
+
+.btn-register.registered:hover {
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25) !important;
+}
+
+/* ===== ИНФО БОКС ===== */
+.info-box {
+    margin-top: 16px;
+    padding: clamp(12px, 2vw, 16px);
+    background: rgba(26, 79, 122, 0.04);
+    border-radius: 8px;
+    border-left: 3px solid #1a4f7a;
+}
+
+.info-box p {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: clamp(0.8rem, 1.3vw, 0.85rem) !important;
+    color: #4a5a6a !important;
+    margin-bottom: 6px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    word-wrap: break-word;
+}
+
+.info-box p:last-child {
+    margin-bottom: 0 !important;
+}
+
+.info-box .info-icon {
+    color: #1a4f7a;
+}
+
+/* ===== МОДАЛЬНОЕ ОКНО ===== */
+.profile-incomplete-modal .modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.profile-incomplete-modal .modal-header {
+    border-bottom: 2px solid #1a4f7a;
+    padding: clamp(16px, 2vw, 20px) clamp(16px, 3vw, 24px);
+}
+
+.profile-incomplete-modal .modal-title {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    color: #0d1b2a !important;
+    font-size: clamp(1rem, 2vw, 1.2rem) !important;
+}
+
+.profile-incomplete-modal .modal-title i {
+    color: #dc2626;
+}
+
+.profile-incomplete-modal .modal-body {
+    padding: clamp(16px, 2vw, 24px);
+}
+
+.profile-incomplete-modal .modal-footer {
+    border-top: 1px solid var(--border);
+    padding: clamp(12px, 1.5vw, 16px) clamp(16px, 3vw, 24px);
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.progress-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.progress-text {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem) !important;
+    color: #0d1b2a !important;
+    min-width: 40px;
+}
+
+.progress-bar-mini {
+    flex: 1;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar-mini .fill {
+    height: 100%;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.missing-sections-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0;
+}
+
+.missing-sections-list li {
+    padding: clamp(8px, 1.2vw, 10px) clamp(10px, 1.5vw, 14px);
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    border-left: 3px solid #dc2626;
+}
+
+.section-label {
+    display: block;
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem) !important;
+    color: #0d1b2a !important;
+    margin-bottom: 4px;
+}
+
+.section-fields {
+    display: inline-block;
+    font-family: 'Inter', sans-serif !important;
+    font-size: clamp(0.65rem, 1.2vw, 0.75rem) !important;
+    color: #4a5a6a !important;
+    background: rgba(26, 79, 122, 0.06);
+    padding: 2px 10px;
+    border-radius: 4px;
+}
+
+.field-item {
+    display: inline-block;
+    background: rgba(26, 79, 122, 0.04);
+    padding: 0 8px;
+    margin: 1px 2px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    color: #1a4f7a;
+}
+
+.alert-info-custom {
+    padding: clamp(10px, 1.5vw, 12px) clamp(12px, 2vw, 16px);
+    background: rgba(26, 79, 122, 0.06);
+    border-radius: 8px;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: clamp(0.8rem, 1.3vw, 0.9rem) !important;
+    color: #4a5a6a !important;
+    margin-top: 12px;
+    font-weight: 500 !important;
+    border: 1px solid rgba(26, 79, 122, 0.06);
+}
+
+.alert-info-custom i {
+    color: #1a4f7a;
+    margin-right: 8px;
+}
+
+.btn-close-modal {
+    padding: clamp(6px, 1vw, 8px) clamp(16px, 2vw, 20px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 600 !important;
+    font-size: clamp(0.8rem, 1.3vw, 0.9rem) !important;
+    color: #4a5a6a !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.btn-close-modal:hover {
+    background: rgba(26, 79, 122, 0.04);
+    border-color: #1a4f7a;
+}
+
+.btn-close-modal:active {
+    transform: scale(0.97);
+}
+
+.btn-go-profile {
+    padding: clamp(6px, 1vw, 8px) clamp(16px, 2vw, 24px);
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
+    color: white !important;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(0.8rem, 1.3vw, 0.9rem) !important;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.btn-go-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
+}
+
+.btn-go-profile:active {
+    transform: scale(0.97);
+}
+
+/* ===== ЗАГРУЗКА ===== */
+.loading-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading-container .spinner-border {
+    color: var(--primary);
+    width: clamp(2.5rem, 5vw, 3rem);
+    height: clamp(2.5rem, 5vw, 3rem);
+}
+
+.loading-container p {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: clamp(1rem, 1.8vw, 1.1rem) !important;
+    font-weight: 500 !important;
+    color: #6c757d !important;
+    margin-top: 16px !important;
+}
+
+/* ===== ОШИБКА ===== */
+.error-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-container .bg-light {
+    background: #f8f9fa !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    padding: clamp(16px, 3vw, 24px) !important;
+    margin-bottom: 24px !important;
+}
+
+.error-container .bg-light i {
+    font-size: clamp(2rem, 5vw, 3rem) !important;
+    color: #dc2626 !important;
+}
+
+.error-container h3 {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    color: #0d1b2a !important;
+    font-size: clamp(1.3rem, 3vw, 1.8rem) !important;
+    margin-bottom: 12px !important;
+}
+
+.error-container .text-muted {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-size: clamp(0.95rem, 2vw, 1.1rem) !important;
+    margin-bottom: 20px !important;
+}
+
+.error-container .btn {
+    background: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: clamp(8px, 1.5vw, 10px) clamp(20px, 3vw, 28px) !important;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: clamp(0.9rem, 1.5vw, 1rem) !important;
+    letter-spacing: 0.03em !important;
+}
+
+/* ===== ТЕГИ НА МОБИЛЬНЫХ ===== */
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 991.98px) {
     .sticky-sidebar {
         position: relative;
         top: 0;
     }
-    .course-hero-image {
-        max-height: 250px;
-    }
-    .course-placeholder {
-        padding: 40px 20px;
-    }
-    .course-placeholder i {
-        font-size: 3rem;
-    }
-    .course-info-card {
-        padding: 16px;
-    }
-    .speaker-img {
-        width: 80px;
-        height: 80px;
-    }
-    .btn-register {
-        padding: 12px;
-        font-size: 0.95rem;
+    
+    .course-page .card-body {
+        padding: 20px !important;
     }
 }
 
-@media (max-width: 480px) {
-    .course-hero-image {
-        max-height: 180px;
-    }
+@media (max-width: 767.98px) {
+    .course-hero-image,
     .course-placeholder {
-        padding: 30px 16px;
+        height: 200px;
     }
-    .course-placeholder i {
-        font-size: 2.5rem;
+    
+    .course-page .card-body {
+        padding: 16px !important;
     }
+    
+    .course-page .card {
+        border-radius: 12px !important;
+    }
+    
+    .btn-outline-favorite,
+    .btn-outline-watch {
+        flex: 1 1 45%;
+        justify-content: center;
+        text-align: center;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-group-responsive {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .course-info-card {
+        padding: 16px;
+    }
+    
     .course-info-item {
-        flex-direction: column;
-        gap: 2px;
         padding: 6px 0;
     }
-    .course-info-item .value {
-        font-size: 0.9rem;
+    
+    .section-title {
+        font-size: 1rem !important;
     }
-    .btn-outline-favorite, .btn-outline-watch {
-        padding: 6px 12px;
+    
+    .speaker-img {
+        width: 64px;
+        height: 64px;
+    }
+    
+    .speaker-card {
+        padding: 12px;
+    }
+    
+    .missing-sections-list li {
+        padding: 8px 12px;
+    }
+    
+    .profile-incomplete-modal .modal-footer {
+        flex-direction: column;
+    }
+    
+    .profile-incomplete-modal .modal-footer .btn-close-modal,
+    .profile-incomplete-modal .modal-footer .btn-go-profile {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .course-hero-image,
+    .course-placeholder {
+        height: 160px;
+    }
+    
+    .course-page .card-body {
+        padding: 14px !important;
+    }
+    
+    .course-page h1 {
+        font-size: clamp(1.3rem, 5vw, 1.6rem) !important;
+    }
+    
+    .btn-outline-favorite,
+    .btn-outline-watch {
+        flex: 1 1 100%;
+        justify-content: center;
+        padding: 10px 12px;
         font-size: 0.85rem;
+    }
+    
+    .btn-group-responsive {
+        flex-direction: column;
+    }
+    
+    .course-info-card {
+        padding: 14px;
+    }
+    
+    .course-info-item {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    
+    .course-info-item .value {
+        text-align: right;
+        font-size: 0.8rem;
+    }
+    
+    .course-info-item .label {
+        font-size: 0.8rem;
+    }
+    
+    .speaker-card {
+        padding: 10px;
+    }
+    
+    .speaker-img {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .speaker-name {
+        font-size: 0.85rem !important;
+    }
+    
+    .speaker-position {
+        font-size: 0.75rem !important;
+    }
+    
+    .badge-category,
+    .badge-format {
+        font-size: 0.6rem;
+        padding: 3px 12px;
+    }
+    
+    .badge-hashtag {
+        font-size: 0.6rem;
+        padding: 2px 10px;
+    }
+}
+
+@media (max-width: 400px) {
+    .course-hero-image,
+    .course-placeholder {
+        height: 140px;
+    }
+    
+    .course-page .card-body {
+        padding: 12px !important;
+    }
+    
+    .course-info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+    
+    .course-info-item .value {
+        text-align: left;
+    }
+    
+    .btn-register {
+        font-size: 0.85rem !important;
+        padding: 12px 16px;
+    }
+    
+    .info-box p {
+        font-size: 0.8rem !important;
+    }
+}
+
+/* ===== УЛУЧШЕНИЯ ДЛЯ ТАЧ-УСТРОЙСТВ ===== */
+@media (hover: none) {
+    .speaker-card:hover {
+        background: rgba(255, 255, 255, 0.5);
+        border-color: var(--border);
+        box-shadow: none;
+    }
+    
+    .course-page .card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .btn-outline-favorite:hover,
+    .btn-outline-watch:hover {
+        border-color: #e2e8f0;
+        color: #4a5a6a;
+        background: transparent;
+    }
+    
+    .btn-outline-favorite.active:hover,
+    .btn-outline-watch.active:hover {
+        border-color: #1a4f7a;
+        color: #1a4f7a;
+        background: rgba(26, 79, 122, 0.08);
+    }
+    
+    .btn-register:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .btn-register:active {
+        transform: scale(0.97) !important;
+    }
+    
+    .btn-go-profile:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .btn-go-profile:active {
+        transform: scale(0.97);
     }
 }

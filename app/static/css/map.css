@@ -1,26 +1,53 @@
 /* ============================================================
-   СТИЛИ ДЛЯ СТРАНИЦЫ КАРТЫ
+   СТИЛИ ДЛЯ СТРАНИЦЫ КАРТЫ (ВСТРОЕННЫЕ)
    ============================================================ */
 
 :root {
-    --primary: #c9a13b;
-    --primary-dark: #b8860b;
-    --primary-light: #f9d976;
-    --primary-gradient: linear-gradient(135deg, #c9a13b 0%, #b8860b 50%, #8b6914 100%);
-    --dark: #1a1a2e;
-    --light: #f8fafc;
-    --gray: #64748b;
+    --primary: #1a4f7a;
+    --primary-dark: #0d3b5e;
+    --primary-light: #3a7ca5;
+    --primary-gradient: linear-gradient(135deg, #1a4f7a 0%, #0d3b5e 100%);
+    --dark: #0d1b2a;
+    --light: #f7fafc;
+    --gray: #718096;
     --white: #ffffff;
     --border: #e2e8f0;
 }
 
+/* ===== ШРИФТЫ ===== */
+.map-page * {
+    font-family: 'Inter', sans-serif;
+}
+
+.map-page h1,
+.map-page h2,
+.map-page h3,
+.map-page h4,
+.map-page h5,
+.map-page .hero-badge {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+}
+
+.map-page .lead,
+.map-page .info-badge,
+.map-page .small,
+.map-page .info-alert strong {
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    font-size: 1.05rem !important;
+}
+
+/* ===== ГЕРОЙ-СЕКЦИЯ (СВЕТЛАЯ) ===== */
 .map-hero {
-    background: linear-gradient(135deg, #0a0a18 0%, #1a1a2e 60%, #0f0f1a 100%);
-    padding: 50px 0 40px;
+    background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
+    padding: 60px 0 50px;
     margin-bottom: 30px;
-    border-bottom: 3px solid rgba(201, 161, 59, 0.3);
     position: relative;
     overflow: hidden;
+    border-bottom: 2px solid rgba(26, 79, 122, 0.08);
 }
 
 .map-hero::before {
@@ -30,9 +57,9 @@
     right: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(201, 161, 59, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.04) 0%, transparent 70%);
     border-radius: 50%;
-    animation: float 20s ease-in-out infinite;
+    animation: floatHero 20s ease-in-out infinite;
 }
 
 .map-hero::after {
@@ -42,211 +69,250 @@
     left: -5%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(201, 161, 59, 0.04) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(26, 79, 122, 0.03) 0%, transparent 70%);
     border-radius: 50%;
-    animation: float 15s ease-in-out infinite reverse;
+    animation: floatHero 15s ease-in-out infinite reverse;
 }
 
-@keyframes float {
+@keyframes floatHero {
     0%, 100% { transform: translate(0, 0) scale(1); }
     50% { transform: translate(20px, -20px) scale(1.05); }
 }
 
-.map-hero h1 {
-    color: white;
+.map-hero .container {
     position: relative;
-    z-index: 1;
+    z-index: 2;
+}
+
+.hero-icon {
+    display: inline-block;
+    margin-bottom: 16px;
+}
+
+.hero-icon svg path {
+    fill: var(--primary);
+}
+
+.hero-badge {
+    display: inline-block;
+    font-family: 'Cormorant Garamond', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
+    padding: 8px 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(26, 79, 122, 0.08);
+    margin-bottom: 16px;
+}
+
+.map-hero h1 {
+    color: #0d1b2a;
+    font-size: 3rem;
 }
 
 .map-hero h1 .gold {
-    color: var(--primary-light);
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 700 !important;
+    font-style: italic !important;
+    color: var(--primary);
+    letter-spacing: 0.03em !important;
 }
 
-.map-hero p {
-    color: rgba(255,255,255,0.7);
-    position: relative;
-    z-index: 1;
+.map-hero .lead {
+    color: #1a2a3a;
+    opacity: 0.7;
+    font-size: 1.3rem;
+    font-style: italic;
 }
 
-.map-hero .hero-badge {
-    display: inline-block;
-    background: rgba(201, 161, 59, 0.15);
-    color: var(--primary-light);
-    padding: 6px 20px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    border: 1px solid rgba(201, 161, 59, 0.15);
-    margin-bottom: 12px;
-}
-
-.map-hero .hero-icon {
-    display: inline-block;
-    margin-bottom: 16px;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+/* ===== ИНФО БЭДЖИ ===== */
+.info-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 24px;
+    margin-top: 16px;
 }
 
 .info-badge {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.8);
-    padding: 8px 18px;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    font-weight: 500;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    color: #3a4a5a;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 6px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(26, 79, 122, 0.06);
     backdrop-filter: blur(4px);
-    position: relative;
-    z-index: 1;
-}
-
-.info-badge:hover {
-    background: rgba(201, 161, 59, 0.12);
-    border-color: rgba(201, 161, 59, 0.3);
-    transform: translateY(-2px);
+    font-family: 'Inter', sans-serif !important;
 }
 
 .info-badge i {
-    color: var(--primary-light);
-    font-size: 1rem;
+    color: var(--primary);
+    font-size: 0.9rem;
 }
 
+/* ===== КАРТА ===== */
 .map-card {
-    border-radius: 20px !important;
-    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
-    transition: all 0.3s ease;
+    border: 1px solid rgba(26, 79, 122, 0.08) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.3s ease !important;
 }
 
 .map-card:hover {
-    box-shadow: 0 8px 32px rgba(201, 161, 59, 0.08) !important;
-    border-color: var(--primary) !important;
+    border-color: rgba(26, 79, 122, 0.15) !important;
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.06) !important;
 }
 
 .map-container {
     width: 100%;
     height: 500px;
     border-radius: 16px;
-    overflow: hidden;
 }
 
-.map-container [class*="ymaps"] {
-    border-radius: 16px;
-}
-
+/* ===== ИНФО-АЛЕРТ ===== */
 .info-alert {
-    background: #fef9e7 !important;
-    border: 1px solid var(--primary) !important;
-    border-radius: 16px !important;
-    padding: 20px 24px !important;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 16px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     transition: all 0.3s ease;
 }
 
 .info-alert:hover {
-    box-shadow: 0 4px 16px rgba(201, 161, 59, 0.08);
+    border-color: rgba(26, 79, 122, 0.1);
+    box-shadow: 0 8px 32px rgba(26, 79, 122, 0.04);
 }
 
 .info-alert .icon-wrapper {
-    width: 48px;
-    height: 48px;
-    background: var(--primary-gradient);
-    border-radius: 12px;
-    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(26, 79, 122, 0.08);
+    border-radius: 50%;
     flex-shrink: 0;
-    color: white;
+}
+
+.info-alert .icon-wrapper i {
+    color: var(--primary);
     font-size: 1.4rem;
 }
 
+.info-alert strong {
+    color: var(--dark);
+    font-size: 0.95rem;
+}
+
+.info-alert .small {
+    color: var(--gray);
+    font-size: 0.85rem !important;
+}
+
+/* ===== КНОПКА МАРШРУТА ===== */
 .btn-route {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
     background: var(--primary-gradient);
     color: white;
     border: none;
-    border-radius: 10px;
-    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
     font-weight: 600;
+    font-size: 0.9rem;
     transition: all 0.3s ease;
+    text-decoration: none;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .btn-route:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(201, 161, 59, 0.3);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
     color: white;
 }
 
 .btn-route i {
-    margin-right: 8px;
+    font-size: 1.1rem;
 }
 
-.info-badges {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-}
-
+/* ===== АДАПТИВ ===== */
 @media (max-width: 768px) {
     .map-hero {
-        padding: 30px 0 25px;
+        padding: 40px 0 30px;
     }
     .map-hero h1 {
-        font-size: 1.8rem;
+        font-size: 2.2rem;
+    }
+    .map-hero .lead {
+        font-size: 1.1rem;
     }
     .map-container {
         height: 350px;
     }
-    .info-alert {
-        padding: 16px !important;
+    .info-badges {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    .info-badge {
+        width: 100%;
+        justify-content: center;
+        font-size: 0.8rem;
+        padding: 5px 14px;
     }
     .info-alert .d-flex {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
+        flex-direction: column;
+        text-align: center;
+    }
+    .info-alert .icon-wrapper {
+        margin: 0 auto;
     }
     .btn-route {
         width: 100%;
-        text-align: center;
         justify-content: center;
-    }
-    .info-badge {
-        font-size: 0.8rem;
-        padding: 6px 14px;
-    }
-    .info-badges {
-        gap: 8px;
+        margin-top: 8px;
     }
 }
 
 @media (max-width: 480px) {
+    .map-hero {
+        padding: 30px 0 20px;
+    }
     .map-hero h1 {
-        font-size: 1.4rem;
+        font-size: 1.8rem;
+    }
+    .map-hero .lead {
+        font-size: 0.95rem;
+    }
+    .hero-badge {
+        font-size: 0.65rem !important;
+        padding: 6px 18px;
+    }
+    .hero-icon svg {
+        width: 48px;
+        height: 48px;
     }
     .map-container {
         height: 280px;
     }
-    .info-badge {
-        font-size: 0.7rem;
-        padding: 4px 12px;
+    .info-alert {
+        padding: 12px 16px;
     }
-    .info-badge i {
+    .btn-route {
         font-size: 0.8rem;
-    }
-    .info-alert .icon-wrapper {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
+        padding: 8px 16px;
     }
 }

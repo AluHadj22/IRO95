@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,19 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>{% block title %}ГБУ ДПО «ИРО ЧР» - Повышение квалификации{% endblock %}</title>
     
+    <!-- ===== PRECONNECT ДЛЯ БЫСТРЫХ СОЕДИНЕНИЙ ===== -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://unpkg.com">
+    
+    <!-- ===== DNS PREFETCH ===== -->
+    <link rel="dns-prefetch" href="https://api-maps.yandex.ru">
+    <link rel="dns-prefetch" href="https://yastatic.net">
+    <link rel="dns-prefetch" href="https://govzalla.ru">
+    
+    <!-- ===== ШРИФТЫ (НОРМАЛЬНАЯ ЗАГРУЗКА, БЕЗ PRELOAD) ===== -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <script async defer src="https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU" type="text/javascript"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- ===== КРИТИЧЕСКИЙ CSS (ИНЛАЙН) ===== -->
+    <style>
+        /* Минимальный критический CSS для быстрого рендеринга */
+        :root {
+            --primary: #1a4f7a;
+            --primary-light: #2a6fa8;
+            --primary-dark: #0f3555;
+            --secondary: #e8f0fe;
+            --dark: #1a1a2e;
+            --gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --border: #e9ecef;
+            --shadow: 0 10px 40px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * { box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding-top: 80px;
+            background: #ffffff;
+            color: var(--dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            margin: 0;
+        }
+        
+        #mainNav {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding: 12px 0;
+            transition: var(--transition);
+        }
+        
+        #mainNav.scrolled {
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.98);
+        }
+        
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            padding: 0;
+        }
+        
+        .navbar-brand img {
+            height: 45px;
+            width: auto;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+        
+        .navbar-brand .title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+        
+        .navbar-brand .title .accent { color: var(--primary); }
+        
+        .navbar-brand .subtitle {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--gray);
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+        }
+        
+        .navbar-toggler {
+            border: none;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: var(--light-gray);
+        }
+        
+        .hero-section {
+            padding: 40px 0 30px;
+            background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+            overflow: hidden;
+        }
+        
+        .hero-section h1 {
+            font-size: clamp(1.8rem, 5vw, 3.2rem);
+            line-height: 1.2;
+            font-weight: 800;
+        }
+        
+        .hero-section h1 .accent { color: var(--primary); }
+        
+        .info-card {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        @media (max-width: 767.98px) {
+            body { padding-top: 70px; }
+            #mainNav { padding: 8px 0; }
+            .navbar-brand img { height: 38px; }
+            .navbar-brand .title { font-size: 0.95rem; }
+            .navbar-brand .subtitle {
+                font-size: 0.6rem;
+                max-width: 160px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .hero-section { padding: 20px 0 10px; }
+        }
+    </style>
     
-    <link rel="stylesheet" href="/static/css/main.css">
+    <!-- ===== АСИНХРОННАЯ ЗАГРУЗКА CSS ===== -->
+    <link rel="stylesheet" href="/static/css/main.css" media="print" onload="this.media='all';this.onload=null">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" media="print" onload="this.media='all';this.onload=null">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" media="print" onload="this.media='all';this.onload=null">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <noscript>
+        <link rel="stylesheet" href="/static/css/main.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+    </noscript>
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -28,7 +162,15 @@
 <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
     <div class="container">
         <a class="navbar-brand" href="/">
-            <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" loading="lazy" width="45" height="45">
+            <img 
+                src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" 
+                alt="ИРО ЧР" 
+                loading="lazy" 
+                width="45" 
+                height="45"
+                decoding="async"
+                fetchpriority="high"
+            >
             <span>
                 <span class="title fw-bold">ГБУ ДПО <span class="accent">«ИРО ЧР»</span></span>
                 <span class="subtitle">Институт развития образования Чеченской Республики</span>
@@ -58,7 +200,15 @@
     <div class="container py-4 py-md-5">
         <div class="row">
             <div class="col-md-4 mb-4">
-                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 50px; margin-bottom: 12px; border-radius: 8px;" loading="lazy" width="50" height="50">
+                <img 
+                    src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" 
+                    alt="ИРО ЧР" 
+                    style="height: 50px; margin-bottom: 12px; border-radius: 8px;" 
+                    loading="lazy" 
+                    width="50" 
+                    height="50"
+                    decoding="async"
+                >
                 <h5 style="color: var(--dark); font-size: clamp(0.95rem, 1.2vw, 1.1rem);">ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
                 <p class="small" style="color: var(--gray); opacity: 0.7;">Повышение квалификации педагогических работников</p>
                 <div class="social-icons mt-3">
@@ -93,6 +243,7 @@
     </div>
 </footer>
 
+<!-- ===== ЧАТ-БОТ ===== -->
 <div class="chatbot-container" id="chatbotContainer">
     <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Помощь">
         <i class="bi bi-chat-dots-fill"></i>
@@ -196,198 +347,122 @@
     </div>
 </div>
 
+<!-- ===== СКРИПТЫ (все с defer) ===== -->
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script defer src="/static/js/profile_check.js"></script>
+
 <script>
-try {
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 80
-        });
-    }
-} catch(e) {}
-
-try {
-    window.addEventListener('scroll', function() {
-        try {
-            const navbar = document.getElementById('mainNav');
-            if (navbar) {
-                navbar.classList.toggle('scrolled', window.scrollY > 30);
-            }
-        } catch(e) {}
-    }, { passive: true });
-} catch(e) {}
-
-const instituteCoords = [43.3181, 45.6941];
-const instituteAddress = "г. Грозный, ул. Лермонтова, 2";
-const institutePhone = "+7 (8712) 21-22-24";
-const instituteEmail = "ipkro-chr@mail.ru";
-const instituteHours = "Пн-Пт: 9:00 - 18:00";
-
-function initFooterMap() {
-    try {
-        const mapElement = document.getElementById('footer-map');
-        if (!mapElement || typeof ymaps === 'undefined') return;
-        
-        const map = new ymaps.Map('footer-map', {
-            center: instituteCoords,
-            zoom: 16,
-            controls: ['zoomControl']
-        });
-        
-        const placemark = new ymaps.Placemark(instituteCoords, {
-            hintContent: 'ГБУ ДПО «ИРО ЧР»',
-            balloonContent: `
-                <div style="font-family: 'Inter', sans-serif; min-width: 200px;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #1a4f7a; padding-bottom: 8px;">
-                        <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 40px;" alt="logo">
-                        <strong style="color: #1a4f7a; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
-                    </div>
-                    <p style="margin: 0 0 5px 0; font-size: 12px;">
-                        <strong>Институт развития образования<br>Чеченской Республики</strong>
-                    </p>
-                    <hr style="margin: 8px 0;">
-                    <p style="margin: 5px 0; font-size: 12px;">
-                        <i class="bi bi-geo-alt" style="color: #1a4f7a;"></i> ${instituteAddress}<br>
-                        <i class="bi bi-telephone" style="color: #1a4f7a;"></i> ${institutePhone}<br>
-                        <i class="bi bi-envelope" style="color: #1a4f7a;"></i> ${instituteEmail}<br>
-                        <i class="bi bi-clock" style="color: #1a4f7a;"></i> ${instituteHours}
-                    </p>
-                    <hr style="margin: 8px 0;">
-                    <a href="/map" style="color: #1a4f7a; text-decoration: none; font-size: 12px; font-weight: 500;">
-                        Подробная карта →
-                    </a>
-                </div>
-            `
-        }, {
-            preset: 'islands#circleIcon',
-            iconColor: '#1a4f7a'
-        });
-        
-        map.geoObjects.add(placemark);
-        
-        window.addEventListener('resize', function() {
-            try { map.container.fitToViewport(); } catch(e) {}
-        });
-    } catch(e) {}
-}
-
-function initFullMap() {
-    try {
-        const mapElement = document.getElementById('full-map');
-        if (!mapElement || typeof ymaps === 'undefined') return;
-        
-        const map = new ymaps.Map('full-map', {
-            center: instituteCoords,
-            zoom: 17,
-            controls: ['zoomControl', 'fullscreenControl', 'geolocationControl', 'rulerControl']
-        });
-        
-        const placemark = new ymaps.Placemark(instituteCoords, {
-            hintContent: 'ГБУ ДПО «ИРО ЧР»',
-            balloonContentHeader: `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 35px;" alt="logo">
-                    <strong style="color: #1a4f7a; font-size: 16px;">ГБУ ДПО «ИРО ЧР»</strong>
-                </div>
-            `,
-            balloonContentBody: `
-                <div style="margin-top: 10px;">
-                    <p><strong>Институт развития образования<br>Чеченской Республики</strong></p>
-                    <table style="width: 100%; font-size: 13px;">
-                        <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-geo-alt" style="color: #1a4f7a;"></i> Адрес:</td>
-                            <td style="padding: 4px 0;">${instituteAddress}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-telephone" style="color: #1a4f7a;"></i> Телефон:</td>
-                            <td style="padding: 4px 0;">${institutePhone}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-envelope" style="color: #1a4f7a;"></i> Email:</td>
-                            <td style="padding: 4px 0;">${instituteEmail}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 4px 0;"><i class="bi bi-clock" style="color: #1a4f7a;"></i> Часы работы:</td>
-                            <td style="padding: 4px 0;">${instituteHours}</td>
-                        </tr>
-                    </table>
-                    <hr style="margin: 8px 0;">
-                    <p style="font-size: 12px; margin: 0;">
-                        <i class="bi bi-bus-front"></i> Ближайшая остановка: "Институт развития образования" (2 мин пешком)<br>
-                        <i class="bi bi-car-front"></i> Имеется бесплатная парковка для слушателей курсов
-                    </p>
-                </div>
-            `,
-            balloonContentFooter: `
-                <div style="margin-top: 10px; text-align: center;">
-                    <a href="https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}" target="_blank" style="color: #1a4f7a; text-decoration: none;">
-                        🚗 Построить маршрут →
-                    </a>
-                </div>
-            `
-        }, {
-            preset: 'islands#circleIcon',
-            iconColor: '#1a4f7a'
-        });
-        
-        map.geoObjects.add(placemark);
-        
-        setTimeout(() => {
-            try { placemark.balloon.open(); } catch(e) {}
-        }, 500);
-        
-        const routeButton = new ymaps.control.Button({
-            data: { content: "📍 Схема проезда", title: "Проложить маршрут" },
-            options: { maxWidth: 140, selectOnClick: false }
-        });
-        
-        routeButton.events.add('click', function() {
-            window.open(`https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}`, '_blank');
-        });
-        
-        map.controls.add(routeButton, { float: 'right' });
-    } catch(e) {}
-}
-
-try {
-    let ymapsLoaded = false;
-    const checkYmaps = setInterval(function() {
-        if (typeof ymaps !== 'undefined' && ymaps.ready) {
-            if (!ymapsLoaded) {
-                ymapsLoaded = true;
-                clearInterval(checkYmaps);
-                ymaps.ready(function() {
-                    initFooterMap();
-                    if (document.getElementById('full-map')) {
-                        initFullMap();
-                    }
+    // ============================================================
+    // 1. ИНИЦИАЛИЗАЦИЯ AOS
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof AOS !== 'undefined') {
+            try {
+                AOS.init({
+                    duration: 800,
+                    once: true,
+                    offset: 80,
+                    disable: window.innerWidth < 768
                 });
-            }
+            } catch(e) {}
         }
-    }, 200);
-    
-    setTimeout(function() {
-        clearInterval(checkYmaps);
-    }, 10000);
-} catch(e) {}
+    });
 
-try {
-    const token = localStorage.getItem('token');
-    
+    // ============================================================
+    // 2. НАВИГАЦИЯ
+    // ============================================================
+    (function initNavbar() {
+        let ticking = false;
+        const navbar = document.getElementById('mainNav');
+        if (!navbar) return;
+        
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    navbar.classList.toggle('scrolled', window.scrollY > 30);
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    })();
+
+    // ============================================================
+    // 3. ЧАТ-БОТ
+    // ============================================================
+    window.toggleChatbot = function() {
+        const windowEl = document.getElementById('chatbotWindow');
+        const toggle = document.getElementById('chatbotToggle');
+        
+        if (windowEl.classList.contains('open')) {
+            windowEl.classList.remove('open');
+            toggle.classList.remove('active');
+        } else {
+            windowEl.classList.add('open');
+            toggle.classList.add('active');
+            document.getElementById('chatbotBody').scrollTop = 0;
+        }
+    };
+
+    window.toggleQuestion = function(element) {
+        const content = element.querySelector('.q-content');
+        const arrow = element.querySelector('.q-arrow i');
+        
+        if (content.classList.contains('show')) {
+            content.classList.remove('show');
+            if (arrow) arrow.className = 'bi bi-chevron-down';
+        } else {
+            document.querySelectorAll('.chatbot-question .q-content').forEach(c => c.classList.remove('show'));
+            document.querySelectorAll('.chatbot-question .q-arrow i').forEach(a => {
+                a.className = 'bi bi-chevron-down';
+            });
+            
+            content.classList.add('show');
+            if (arrow) arrow.className = 'bi bi-chevron-up';
+            
+            setTimeout(() => {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+    };
+
+    // Клик вне чата - закрытие
+    document.addEventListener('click', function(event) {
+        const container = document.getElementById('chatbotContainer');
+        const windowEl = document.getElementById('chatbotWindow');
+        if (windowEl && windowEl.classList.contains('open') && container && !container.contains(event.target)) {
+            window.toggleChatbot();
+        }
+    });
+
+    // Escape - закрытие
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const windowEl = document.getElementById('chatbotWindow');
+            if (windowEl && windowEl.classList.contains('open')) window.toggleChatbot();
+        }
+    });
+
+    // ============================================================
+    // 4. ТОСТ-УВЕДОМЛЕНИЯ
+    // ============================================================
     window.showToast = function(message, type = 'success') {
         try {
-            const toastContainer = document.querySelector('.toast-container');
-            if (!toastContainer) return;
+            const container = document.querySelector('.toast-container');
+            if (!container) return;
             const toast = document.createElement('div');
             toast.className = `toast show bg-${type === 'success' ? 'success' : 'danger'} text-white`;
             toast.setAttribute('role', 'alert');
             toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
-            toastContainer.appendChild(toast);
+            container.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         } catch(e) {}
     };
-    
+
+    // ============================================================
+    // 5. АУТЕНТИФИКАЦИЯ
+    // ============================================================
     window.logout = function() {
         try {
             localStorage.removeItem('token');
@@ -398,158 +473,144 @@ try {
             window.location.href = '/';
         }
     };
-    
-    if (token) {
-        fetch('/api/auth/me', {
-            headers: { 'Authorization': 'Bearer ' + token }
-        })
-        .then(function(res) {
-            if (!res.ok) throw new Error('Token invalid');
-            return res.json();
-        })
-        .then(function(user) {
-            try {
+
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            
+            fetch('/api/auth/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function(res) {
+                if (!res.ok) throw new Error('Token invalid');
+                return res.json();
+            })
+            .then(function(user) {
                 const navLinks = document.getElementById('navLinks');
                 if (!navLinks) return;
                 
-                if (user.role === 'admin') {
-                    navLinks.innerHTML = `
-                        <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/api/ai/chat">ИИ-помощник</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-badge me-1"></i>Мои данные</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin">Админ панель</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#" onclick="window.logout()">Выйти</a></li>
-                    `;
-                } else {
-                    navLinks.innerHTML = `
-                        <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/api/ai/chat">ИИ-помощник</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/profile"><i class="bi bi-person-badge me-1"></i>Мои данные</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/dashboard">Кабинет</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#" onclick="window.logout()">Выйти</a></li>
-                    `;
-                }
-            } catch(e) {}
-        })
-        .catch(function() {
-            try {
+                const isAdmin = user.role === 'admin';
+                const links = isAdmin ? [
+                    ['/', 'Главная'],
+                    ['/courses', 'Курсы'],
+                    ['/map', 'Карта'],
+                    ['/api/ai/chat', 'ИИ-помощник'],
+                    ['/profile', '<i class="bi bi-person-badge me-1"></i>Мои данные'],
+                    ['/admin', 'Админ панель'],
+                    ['/dashboard', 'Кабинет'],
+                    ['#', 'Выйти', 'window.logout()']
+                ] : [
+                    ['/', 'Главная'],
+                    ['/courses', 'Курсы'],
+                    ['/map', 'Карта'],
+                    ['/api/ai/chat', 'ИИ-помощник'],
+                    ['/profile', '<i class="bi bi-person-badge me-1"></i>Мои данные'],
+                    ['/dashboard', 'Кабинет'],
+                    ['#', 'Выйти', 'window.logout()']
+                ];
+                
+                navLinks.innerHTML = links.map(([href, text, onclick]) => 
+                    `<li class="nav-item"><a class="nav-link" href="${href}"${onclick ? ` onclick="${onclick}"` : ''}>${text}</a></li>`
+                ).join('');
+            })
+            .catch(function() {
                 localStorage.removeItem('token');
                 localStorage.removeItem('role');
-            } catch(e) {}
-        });
-    }
-} catch(e) {}
+            });
+        } catch(e) {}
+    });
 
-function toggleChatbot() {
-    const window = document.getElementById('chatbotWindow');
-    const toggle = document.getElementById('chatbotToggle');
-    
-    if (window.classList.contains('open')) {
-        window.classList.remove('open');
-        toggle.classList.remove('active');
-        toggle.style.animation = 'none';
-        setTimeout(() => {
-            toggle.style.animation = '';
-        }, 10);
-    } else {
-        window.classList.add('open');
-        toggle.classList.add('active');
-        toggle.style.animation = 'none';
-        document.getElementById('chatbotBody').scrollTop = 0;
-    }
-}
-
-function toggleQuestion(element) {
-    const content = element.querySelector('.q-content');
-    const arrow = element.querySelector('.q-arrow i');
-    
-    if (content.classList.contains('show')) {
-        content.classList.remove('show');
-        if (arrow) {
-            arrow.className = 'bi bi-chevron-down';
-        }
-    } else {
-        document.querySelectorAll('.chatbot-question .q-content').forEach(c => {
-            c.classList.remove('show');
-        });
-        document.querySelectorAll('.chatbot-question .q-arrow i').forEach(a => {
-            a.className = 'bi bi-chevron-down';
-        });
+    // ============================================================
+    // 6. ЯНДЕКС КАРТЫ (ЛЕНИВАЯ ЗАГРУЗКА)
+    // ============================================================
+    (function lazyLoadMaps() {
+        const mapElement = document.getElementById('footer-map');
+        if (!mapElement) return;
         
-        content.classList.add('show');
-        if (arrow) {
-            arrow.className = 'bi bi-chevron-up';
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        loadMapsScript();
+                        observer.disconnect();
+                    }
+                });
+            }, { rootMargin: '200px' });
+            observer.observe(mapElement);
+        } else {
+            setTimeout(loadMapsScript, 3000);
         }
         
-        setTimeout(() => {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
-    }
-}
-
-document.addEventListener('click', function(event) {
-    const container = document.getElementById('chatbotContainer');
-    const window = document.getElementById('chatbotWindow');
-    
-    if (window.classList.contains('open')) {
-        const isClickInside = container.contains(event.target);
-        if (!isClickInside) {
-            toggleChatbot();
+        function loadMapsScript() {
+            if (typeof ymaps !== 'undefined') {
+                initMaps();
+                return;
+            }
+            
+            const script = document.createElement('script');
+            script.src = 'https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU&load=Map,Placemark,control.ZoomControl';
+            script.async = true;
+            script.defer = true;
+            script.onload = function() {
+                if (typeof ymaps !== 'undefined') {
+                    ymaps.ready(initMaps);
+                }
+            };
+            document.head.appendChild(script);
         }
-    }
-});
-
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        const window = document.getElementById('chatbotWindow');
-        if (window.classList.contains('open')) {
-            toggleChatbot();
-        }
-    }
-});
-
-let chatbotTimeout = setTimeout(() => {
-    const window = document.getElementById('chatbotWindow');
-    if (!window.classList.contains('open')) {
-        const toggle = document.getElementById('chatbotToggle');
-        toggle.style.animation = 'none';
-        setTimeout(() => {
-            toggle.style.animation = 'chatbot-pulse 1.5s ease-in-out 2';
-        }, 10);
         
-        toggle.style.transform = 'scale(1.1) rotate(-10deg)';
-        setTimeout(() => {
-            toggle.style.transform = '';
-        }, 300);
-    }
-}, 3000);
-
-document.getElementById('chatbotToggle').addEventListener('click', function() {
-    clearTimeout(chatbotTimeout);
-});
-
-let scrollTriggered = false;
-window.addEventListener('scroll', function() {
-    if (!scrollTriggered && window.scrollY > window.innerHeight * 0.5) {
-        scrollTriggered = true;
-        const window = document.getElementById('chatbotWindow');
-        if (!window.classList.contains('open')) {
-            const toggle = document.getElementById('chatbotToggle');
-            toggle.style.animation = 'none';
-            setTimeout(() => {
-                toggle.style.animation = 'chatbot-pulse 1s ease-in-out 3';
-            }, 10);
+        function initMaps() {
+            try {
+                const coords = [43.3181, 45.6941];
+                const address = "г. Грозный, ул. Лермонтова, 2";
+                const phone = "+7 (8712) 21-22-24";
+                const email = "ipkro-chr@mail.ru";
+                const hours = "Пн-Пт: 9:00 - 18:00";
+                
+                const map = new ymaps.Map('footer-map', {
+                    center: coords,
+                    zoom: 16,
+                    controls: ['zoomControl']
+                });
+                
+                const placemark = new ymaps.Placemark(coords, {
+                    hintContent: 'ГБУ ДПО «ИРО ЧР»',
+                    balloonContent: `
+                        <div style="font-family: 'Inter', sans-serif; min-width: 200px;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #1a4f7a; padding-bottom: 8px;">
+                                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 40px;" alt="logo">
+                                <strong style="color: #1a4f7a; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
+                            </div>
+                            <p style="margin: 0 0 5px 0; font-size: 12px;">
+                                <strong>Институт развития образования<br>Чеченской Республики</strong>
+                            </p>
+                            <hr style="margin: 8px 0;">
+                            <p style="margin: 5px 0; font-size: 12px;">
+                                <i class="bi bi-geo-alt" style="color: #1a4f7a;"></i> ${address}<br>
+                                <i class="bi bi-telephone" style="color: #1a4f7a;"></i> ${phone}<br>
+                                <i class="bi bi-envelope" style="color: #1a4f7a;"></i> ${email}<br>
+                                <i class="bi bi-clock" style="color: #1a4f7a;"></i> ${hours}
+                            </p>
+                            <hr style="margin: 8px 0;">
+                            <a href="/map" style="color: #1a4f7a; text-decoration: none; font-size: 12px; font-weight: 500;">
+                                Подробная карта →
+                            </a>
+                        </div>
+                    `
+                }, {
+                    preset: 'islands#circleIcon',
+                    iconColor: '#1a4f7a'
+                });
+                
+                map.geoObjects.add(placemark);
+            } catch(e) {
+                console.warn('Map init error:', e);
+            }
         }
-    }
-}, { passive: true });
+    })();
 </script>
 
-<script src="/static/js/profile_check.js"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

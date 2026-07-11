@@ -79,7 +79,10 @@
         try {
             const mapElement = document.getElementById('full-map');
             if (!mapElement) return;
-            if (typeof ymaps === 'undefined') return;
+            if (typeof ymaps === 'undefined') {
+                console.warn('ymaps not loaded');
+                return;
+            }
             
             const map = new ymaps.Map('full-map', {
                 center: instituteCoords,
@@ -138,27 +141,24 @@
             
             map.geoObjects.add(placemark);
             
-            // Открываем балун через 500мс
-            setTimeout(() => {
+            setTimeout(function() {
                 try { placemark.balloon.open(); } catch(e) {}
             }, 500);
             
-            // Кнопка "Схема проезда"
-            const routeButton = new ymaps.control.Button({
-                data: { content: "📍 Схема проезда", title: "Проложить маршрут" },
-                options: { maxWidth: 160, selectOnClick: false }
-            });
-            
-            routeButton.events.add('click', function() {
-                window.open(`https://yandex.ru/maps/?text=${encodeURIComponent(instituteAddress)}`, '_blank');
-            });
-            
-            map.controls.add(routeButton, { float: 'right' });
-            
-            // Адаптация при изменении размера
-            window.addEventListener('resize', function() {
-                try { map.container.fitToViewport(); } catch(e) {}
-            });
+            try {
+                var routeButton = new ymaps.control.Button({
+                    data: { content: "📍 Схема проезда", title: "Проложить маршрут" },
+                    options: { maxWidth: 160, selectOnClick: false }
+                });
+                
+                routeButton.events.add('click', function() {
+                    window.open('https://yandex.ru/maps/?text=' + encodeURIComponent(instituteAddress), '_blank');
+                });
+                
+                map.controls.add(routeButton, { float: 'right' });
+            } catch(e) {
+                console.warn('Route button error:', e);
+            }
             
         } catch(e) {
             console.warn('Full map init error:', e);
@@ -166,32 +166,39 @@
     }
 
     // ============================================================
-    // ЗАГРУЗКА КАРТЫ — НЕ БЛОКИРУЕТ СТРАНИЦУ
+    // ЗАГРУЗКА КАРТЫ
     // ============================================================
-    try {
-        let ymapsLoaded = false;
-        const checkYmaps = setInterval(function() {
-            if (typeof ymaps !== 'undefined' && ymaps.ready) {
-                if (!ymapsLoaded) {
-                    ymapsLoaded = true;
-                    clearInterval(checkYmaps);
-                    ymaps.ready(function() {
-                        initFullMap();
-                    });
-                }
-            }
-        }, 200);
+    function loadYandexMaps() {
+        if (typeof ymaps !== 'undefined' && ymaps.ready) {
+            ymaps.ready(initFullMap);
+            return;
+        }
         
-        setTimeout(function() {
-            clearInterval(checkYmaps);
-        }, 10000);
-    } catch(e) {
-        console.warn('Yandex Maps init error:', e);
+        var script = document.createElement('script');
+        script.src = 'https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU&load=Map,Placemark,control.ZoomControl,control.FullscreenControl,control.GeolocationControl,control.RulerControl,control.Button';
+        script.async = true;
+        script.defer = true;
+        script.onload = function() {
+            if (typeof ymaps !== 'undefined') {
+                ymaps.ready(initFullMap);
+            }
+        };
+        script.onerror = function() {
+            console.warn('Failed to load Yandex Maps');
+        };
+        document.head.appendChild(script);
+    }
+
+    // Загружаем карту когда страница готова
+    if (document.readyState === 'complete') {
+        loadYandexMaps();
+    } else {
+        window.addEventListener('load', loadYandexMaps);
     }
 </script>
 
-<!-- AOS для анимаций -->
 <script>
+    // AOS анимации
     try {
         if (typeof AOS !== 'undefined') {
             AOS.init({

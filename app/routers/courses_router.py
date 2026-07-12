@@ -8,13 +8,13 @@ from app.services.moodle_service import MoodleService
 from app.dependencies import require_complete_profile
 from typing import Optional
 import json
+import os
 from datetime import datetime
 
 router = APIRouter(prefix="/api/courses", tags=["Courses"])
 
 
 def convert_video_url(url: str, platform: str = "youtube") -> str:
-    """Преобразует URL видео в embed формат для разных платформ"""
     if not url:
         return url
     
@@ -38,6 +38,22 @@ def convert_video_url(url: str, platform: str = "youtube") -> str:
     return url
 
 
+def delete_file_from_disk(file_url: str) -> bool:
+    if not file_url:
+        return False
+    
+    file_path = file_url.replace("/static/", "app/static/")
+    file_path = os.path.normpath(file_path)
+    
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        try:
+            os.remove(file_path)
+            return True
+        except Exception:
+            return False
+    return False
+
+
 @router.get("/")
 def get_courses(
     category_id: Optional[int] = Query(None),
@@ -47,11 +63,6 @@ def get_courses(
     db: Session = Depends(get_db),
     current_user: Optional[models.User] = Depends(auth.get_current_user_optional)
 ):
-    """
-    Получение списка курсов с пагинацией и оптимизированными запросами.
-    Использует joinedload для связи многие-к-одному (category) 
-    и selectinload для связи один-ко-многим (speakers).
-    """
     query = db.query(models.Course).filter(models.Course.is_active == True)
     
     if category_id:
@@ -187,7 +198,6 @@ def get_course(
     db: Session = Depends(get_db),
     current_user: Optional[models.User] = Depends(auth.get_current_user_optional)
 ):
-    """Получение одного курса с оптимизированной загрузкой связей"""
     course = db.query(models.Course).options(
         joinedload(models.Course.category),
         selectinload(models.Course.speakers)
@@ -280,6 +290,17 @@ def delete_course(
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
+    
+    speakers = db.query(models.CourseSpeaker).filter(
+        models.CourseSpeaker.course_id == course_id
+    ).all()
+    
+    for speaker in speakers:
+        if speaker.photo_url:
+            delete_file_from_disk(speaker.photo_url)
+    
+    if course.image_url:
+        delete_file_from_disk(course.image_url)
     
     db.query(models.CourseSpeaker).filter(models.CourseSpeaker.course_id == course_id).delete()
     db.query(models.UserFavorite).filter(models.UserFavorite.course_id == course_id).delete()
@@ -389,7 +410,6 @@ def register_for_course(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(require_complete_profile)
 ):
-    """Запись на курс с синхронизацией с Moodle"""
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -487,7 +507,6 @@ def check_registration_eligibility(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Проверяет, может ли пользователь записаться на курс"""
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         return {"eligible": False, "reason": "course_not_found", "message": "Курс не найден"}
@@ -537,7 +556,6 @@ def get_moodle_link(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить ссылку на курс в Moodle"""
     registration = db.query(models.CourseRegistration).filter(
         and_(
             models.CourseRegistration.user_id == current_user.id,
@@ -585,7 +603,6 @@ def get_moodle_course_progress(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить прогресс пользователя по курсу из Moodle"""
     registration = db.query(models.CourseRegistration).filter(
         and_(
             models.CourseRegistration.user_id == current_user.id,
@@ -653,7 +670,6 @@ def get_all_moodle_progress(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить прогресс по всем курсам пользователя в Moodle"""
     registrations = db.query(models.CourseRegistration).filter(
         models.CourseRegistration.user_id == current_user.id
     ).all()
@@ -730,7 +746,6 @@ def update_course_progress(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Обновление прогресса по курсу"""
     course = db.query(models.Course).filter(models.Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -941,7 +956,6 @@ def get_my_registrations(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    """Получить мои регистрации на курсы с прогрессом"""
     registrations = db.query(models.CourseRegistration).filter(
         models.CourseRegistration.user_id == current_user.id
     ).all()

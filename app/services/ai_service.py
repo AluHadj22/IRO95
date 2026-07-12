@@ -51,7 +51,7 @@ class AIService:
             remaining = int((self._rate_limited_until - datetime.now()).total_seconds())
             if remaining > 0:
                 return f'⏳ Достигнут лимит запросов к ИИ. Попробуйте через {remaining} секунд. Или обратитесь в поддержку: ipkro-chr@mail.ru'
-        return '⛔ Достигнут лимит запросов к ИИ. Пожалуйста, обратитесь в поддержку: ipkro-chr@mail.ru'
+        return ' Достигнут лимит запросов к ИИ. Пожалуйста, обратитесь в поддержку: ipkro-chr@mail.ru'
     
     def _clean_response(self, response_text: str) -> str:
         """Очищает ответ от размышлений модели."""
@@ -204,7 +204,7 @@ class AIService:
         """Отправляет сообщение в ИИ."""
         if not self.api_key or not self.account_id:
             return {
-                'response': '⚠️ Сервис ИИ временно недоступен. Обратитесь в поддержку: ipkro-chr@mail.ru',
+                'response': ' Сервис ИИ временно недоступен. Обратитесь в поддержку: ipkro-chr@mail.ru',
                 'model': 'offline',
                 'timestamp': datetime.now().isoformat()
             }
@@ -255,7 +255,7 @@ class AIService:
                         time.sleep(self.retry_delay)
                         continue
                     return {
-                        'response': '⏱️ Превышено время ожидания. Попробуйте задать вопрос короче или позже.',
+                        'response': ' Превышено время ожидания. Попробуйте задать вопрос короче или позже.',
                         'model': 'timeout',
                         'timestamp': datetime.now().isoformat()
                     }
@@ -274,7 +274,7 @@ class AIService:
                         time.sleep(self.retry_delay)
                         continue
                     return {
-                        'response': '⚠️ Сервис ИИ временно недоступен. Попробуйте позже.',
+                        'response': ' Сервис ИИ временно недоступен. Попробуйте позже.',
                         'model': 'error',
                         'timestamp': datetime.now().isoformat()
                     }
@@ -284,13 +284,13 @@ class AIService:
                     time.sleep(self.retry_delay)
                     continue
                 return {
-                    'response': '❌ Ошибка при обращении к ИИ. Обратитесь в поддержку: ipkro-chr@mail.ru',
+                    'response': ' Ошибка при обращении к ИИ. Обратитесь в поддержку: ipkro-chr@mail.ru',
                     'model': 'error',
                     'timestamp': datetime.now().isoformat()
                 }
         
         return {
-            'response': '❌ Не удалось получить ответ после нескольких попыток. Попробуйте позже.',
+            'response': ' Не удалось получить ответ после нескольких попыток. Попробуйте позже.',
             'model': 'error',
             'timestamp': datetime.now().isoformat()
         }
@@ -343,7 +343,7 @@ class AIService:
                         raise Exception("429 Rate limit exceeded")
                     
                     return {
-                        'response': f'⚠️ Ошибка ИИ: {error_msg}',
+                        'response': f' Ошибка ИИ: {error_msg}',
                         'model': 'error',
                         'timestamp': datetime.now().isoformat()
                     }
@@ -353,7 +353,7 @@ class AIService:
             else:
                 logger.error(f"Cloudflare API error: {response.status_code} - {response.text}")
                 return {
-                    'response': '⚠️ Сервис ИИ временно недоступен. Попробуйте позже.',
+                    'response': ' Сервис ИИ временно недоступен. Попробуйте позже.',
                     'model': 'error',
                     'timestamp': datetime.now().isoformat()
                 }

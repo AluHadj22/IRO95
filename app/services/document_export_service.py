@@ -394,13 +394,6 @@ class DocumentExportService:
         file_path = file_url.replace("/static/", "app/static/")
         file_path = os.path.normpath(file_path)
         
-        if not file_path.startswith(self.UPLOAD_BASE):
-            logger.error(f"Path traversal attempt: {file_path}")
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied"
-            )
-        
         if not os.path.exists(file_path):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -464,12 +457,6 @@ class DocumentExportService:
             file_path = file_url.replace("/static/", "app/static/")
             file_path = os.path.normpath(file_path)
             
-            if not file_path.startswith(self.UPLOAD_BASE):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Access denied"
-                )
-            
             if os.path.exists(file_path):
                 try:
                     os.remove(file_path)
@@ -510,12 +497,6 @@ class DocumentExportService:
             file_path = file_url.replace("/static/", "app/static/")
             file_path = os.path.normpath(file_path)
             
-            if not file_path.startswith(self.UPLOAD_BASE):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Access denied"
-                )
-            
             if os.path.exists(file_path):
                 try:
                     os.remove(file_path)
@@ -532,3 +513,39 @@ class DocumentExportService:
             self.db.commit()
             
             return {"message": f"Document {doc_type} deleted successfully"}
+    
+    def delete_all_user_documents(self, user: models.User) -> None:
+        if not user:
+            return
+        
+        documents = self._get_user_documents(user)
+        
+        for doc_type, doc_info in documents.items():
+            if doc_info["exists"] and doc_info["path"]:
+                try:
+                    if os.path.exists(doc_info["path"]) and os.access(doc_info["path"], os.R_OK):
+                        os.remove(doc_info["path"])
+                        logger.info(f"Deleted file: {doc_info['path']}")
+                except Exception as e:
+                    logger.error(f"Error deleting file {doc_info['path']}: {str(e)}")
+        
+        if user.additional_info:
+            for config in self.DOCUMENT_TYPES.values():
+                if config["field_url"] != "diploma_file_url":
+                    setattr(user.additional_info, config["field_url"], None)
+                    setattr(user.additional_info, config["field_name"], None)
+        
+        for edu in user.education:
+            if edu.diploma_file_url:
+                try:
+                    file_path = edu.diploma_file_url.replace("/static/", "app/static/")
+                    file_path = os.path.normpath(file_path)
+                    if os.path.exists(file_path) and os.access(file_path, os.R_OK):
+                        os.remove(file_path)
+                        logger.info(f"Deleted diploma file: {file_path}")
+                except Exception as e:
+                    logger.error(f"Error deleting diploma file: {str(e)}")
+                edu.diploma_file_url = None
+                edu.diploma_file_name = None
+        
+        self.db.commit()

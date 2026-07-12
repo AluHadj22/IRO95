@@ -10,7 +10,7 @@ CurrentAdmin = Depends(auth.get_current_admin)
 OptionalUser = Depends(auth.get_current_user_optional)
 
 
-# ========== ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ ==========
+#  ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ 
 
 def require_complete_profile(
     current_user: models.User = Depends(auth.get_current_active_user),
@@ -60,7 +60,7 @@ def require_complete_profile(
     return current_user
 
 
-# ========== ОПЦИОНАЛЬНАЯ ПРОВЕРКА ПРОФИЛЯ (ДЛЯ API) ==========
+# ОПЦИОНАЛЬНАЯ ПРОВЕРКА ПРОФИЛЯ (ДЛЯ API)
 
 def check_profile_complete_optional(
     current_user: models.User = Depends(auth.get_current_active_user),

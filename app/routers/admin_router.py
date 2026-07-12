@@ -96,6 +96,22 @@ def save_upload_file(file: UploadFile, save_dir: str, allowed_mimes: List[str] =
     }
 
 
+def delete_file_from_disk(file_url: str) -> bool:
+    if not file_url:
+        return False
+    
+    file_path = file_url.replace("/static/", "app/static/")
+    file_path = os.path.normpath(file_path)
+    
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        try:
+            os.remove(file_path)
+            return True
+        except Exception:
+            return False
+    return False
+
+
 @router.post("/upload/course-image")
 async def upload_course_image(
     file: UploadFile = File(...),
@@ -256,6 +272,17 @@ def admin_delete_course(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
+    
+    speakers = db.query(models.CourseSpeaker).filter(
+        models.CourseSpeaker.course_id == course_id
+    ).all()
+    
+    for speaker in speakers:
+        if speaker.photo_url:
+            delete_file_from_disk(speaker.photo_url)
+    
+    if course.image_url:
+        delete_file_from_disk(course.image_url)
     
     db.query(models.CourseSpeaker).filter(models.CourseSpeaker.course_id == course_id).delete()
     db.query(models.UserFavorite).filter(models.UserFavorite.course_id == course_id).delete()
@@ -729,3 +756,41 @@ def delete_user_document(
     doc_service = DocumentExportService(db)
     result = doc_service.delete_document(user_id, doc_type)
     return result
+
+
+@router.delete("/users/{user_id}")
+def admin_delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить самого себя"
+        )
+    
+    if user.role == models.UserRole.ADMIN:
+        admin_count = db.query(models.User).filter(
+            models.User.role == models.UserRole.ADMIN
+        ).count()
+        if admin_count <= 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Нельзя удалить последнего администратора. Сначала назначьте другого администратора."
+            )
+    
+    doc_service = DocumentExportService(db)
+    doc_service.delete_all_user_documents(user)
+    
+    db.delete(user)
+    db.commit()
+    
+    return {"message": "User deleted successfully"}

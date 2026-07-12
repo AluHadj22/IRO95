@@ -12,7 +12,7 @@ class UserRole(str, Enum):
     ADMIN = "admin"
 
 
-# ========== ДОЛЖНОСТИ (ПОЗИЦИИ) ==========
+# ДОЛЖНОСТИ (ПОЗИЦИИ) 
 
 POSITION_TYPES = [
     "Учитель",
@@ -22,7 +22,7 @@ POSITION_TYPES = [
 ]
 
 
-# ========== АУТЕНТИФИКАЦИЯ ==========
+# АУТЕНТИФИКАЦИЯ 
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -100,7 +100,7 @@ class Token(BaseModel):
     token_type: str
 
 
-# ========== АДМИНСКОЕ ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ ==========
+# АДМИНСКОЕ ОБНОВЛЕНИЕ ПОЛЬЗОВАТЕЛЯ 
 
 class UserAdminUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=2, max_length=255)
@@ -119,7 +119,7 @@ class UserAdminUpdate(BaseModel):
         return v
 
 
-# ========== УПРАВЛЕНИЕ РОЛЯМИ ==========
+#  УПРАВЛЕНИЕ РОЛЯМИ 
 
 class UserRoleUpdate(BaseModel):
     """
@@ -132,7 +132,7 @@ class UserRoleUpdate(BaseModel):
         use_enum_values = True
 
 
-# ========== КАТЕГОРИИ ==========
+#  КАТЕГОРИИ 
 
 class CategoryCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=255)
@@ -149,7 +149,7 @@ class CategoryResponse(BaseModel):
         from_attributes = True
 
 
-# ========== СПИКЕРЫ ==========
+#  СПИКЕРЫ  
 
 class SpeakerCreate(BaseModel):
     full_name: str = Field(..., min_length=1, max_length=255)
@@ -169,7 +169,7 @@ class SpeakerResponse(BaseModel):
         from_attributes = True
 
 
-# ========== КУРСЫ ==========
+#    КУРСЫ  
 
 class CourseCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=500)
@@ -253,7 +253,7 @@ class CourseResponse(BaseModel):
         from_attributes = True
 
 
-# ========== УВЕДОМЛЕНИЯ ==========
+#    УВЕДОМЛЕНИЯ    
 
 class NotificationResponse(BaseModel):
     id: int
@@ -266,9 +266,9 @@ class NotificationResponse(BaseModel):
         from_attributes = True
 
 
-# ========== ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ ==========
+#    ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ   
 
-# --- Личные данные ---
+#    Личные данные  
 
 class PersonalDataUpdate(BaseModel):
     last_name: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -309,7 +309,7 @@ class PersonalDataResponse(BaseModel):
         from_attributes = True
 
 
-# --- Образование ---
+#    Образование   
 
 EDUCATION_LEVELS = [
     "Высшее",
@@ -384,12 +384,12 @@ class EducationResponse(BaseModel):
         from_attributes = True
 
 
-# --- Работа ---
+#    Работа    
 
 ACTIVITY_TYPES = [
     "Управленческие кадры",
     "Педагогические работники",
-    "Специалисты системы ДПО",
+    "Специалисты системы ДПO",
     "Органы управления образованием"
 ]
 
@@ -474,7 +474,7 @@ class WorkResponse(BaseModel):
         from_attributes = True
 
 
-# --- Почтовый адрес ---
+#    Почтовый адрес    
 
 class AddressCreate(BaseModel):
     postal_index: Optional[str] = Field(None, max_length=10)
@@ -527,7 +527,7 @@ class AddressResponse(BaseModel):
         from_attributes = True
 
 
-# ========== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ ==========
+#    ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ  
 
 class AdditionalInfoUpdate(BaseModel):
     """Обновление дополнительной информации"""
@@ -544,7 +544,7 @@ class AdditionalInfoUpdate(BaseModel):
     @classmethod
     def validate_snils(cls, v: Optional[str]) -> Optional[str]:
         """
-        ✅ УПРОЩЁННАЯ ВАЛИДАЦИЯ СНИЛС
+             УПРОЩЁННАЯ ВАЛИДАЦИЯ СНИЛС
         Принимает: 12345678901, 123-456-789-01, 123-456-789 01
         Возвращает: 123-456-789 01
         """
@@ -600,7 +600,7 @@ class AdditionalInfoResponse(BaseModel):
         from_attributes = True
 
 
-# --- Полный профиль ---
+#    Полный профиль    
 
 class FullProfileResponse(BaseModel):
     user: UserResponse
@@ -615,7 +615,7 @@ class FullProfileResponse(BaseModel):
         from_attributes = True
 
 
-# --- Загрузка файлов ---
+#    Загрузка файлов   
 
 class FileUploadResponse(BaseModel):
     url: str
@@ -625,7 +625,7 @@ class FileUploadResponse(BaseModel):
     message: str
 
 
-# ========== ПРОВЕРКА ПРОФИЛЯ ==========
+#    ПРОВЕРКА ПРОФИЛЯ    
 
 class ProfileCompleteCheck(BaseModel):
     is_complete: bool

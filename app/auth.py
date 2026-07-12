@@ -12,7 +12,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 
-# === ХЕШИРОВАНИЕ ПАРОЛЯ (БЕЗ ОБРЕЗАНИЯ) ===
+# ХЕШИРОВАНИЕ ПАРОЛЯ (БЕЗ ОБРЕЗАНИЯ)
 def get_password_hash(password: str) -> str:
     """Хеширует пароль с помощью bcrypt."""
     return pwd_context.hash(password)
@@ -23,7 +23,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-# === СОЗДАНИЕ JWT ТОКЕНА ===
+# СОЗДАНИЕ JWT ТОКЕНА 
 def create_access_token(data: dict) -> str:
     """Создаёт JWT токен с audience и iat."""
     to_encode = data.copy()
@@ -36,17 +36,17 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-# === ПРОВЕРКА АДМИН-КОДА ===
+# ПРОВЕРКА АДМИН-КОДА 
 def check_admin_code(code: str) -> bool:
     return code == settings.ADMIN_SECRET_CODE
 
 
-# === ПОЛУЧЕНИЕ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ ===
+# ПОЛУЧЕНИЕ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """
     Получает текущего пользователя по JWT токену.
-    ✅ Проверяет audience (aud)
-    ✅ Обрабатывает все ошибки JWT явно
+         Проверяет audience (aud)
+         Обрабатывает все ошибки JWT явно
     """
     if not token:
         raise HTTPException(
@@ -108,7 +108,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
-# === ОПЦИОНАЛЬНАЯ АВТОРИЗАЦИЯ ===
+# ОПЦИОНАЛЬНАЯ АВТОРИЗАЦИЯ
 def get_current_user_optional(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     """
     Опциональная авторизация - не выдаёт ошибку если нет токена или он невалидный.
@@ -135,7 +135,7 @@ def get_current_user_optional(token: str = Depends(oauth2_scheme), db: Session =
     return user
 
 
-# === ТЕКУЩИЙ АКТИВНЫЙ ПОЛЬЗОВАТЕЛЬ ===
+# ТЕКУЩИЙ АКТИВНЫЙ ПОЛЬЗОВАТЕЛЬ
 def get_current_active_user(current_user: models.User = Depends(get_current_user)):
     """Проверяет, что пользователь не заблокирован."""
     if current_user.is_blocked:
@@ -146,7 +146,7 @@ def get_current_active_user(current_user: models.User = Depends(get_current_user
     return current_user
 
 
-# === ТЕКУЩИЙ АДМИНИСТРАТОР ===
+# ТЕКУЩИЙ АДМИНИСТРАТОР
 def get_current_admin(current_user: models.User = Depends(get_current_active_user)):
     """Проверяет, что пользователь является администратором."""
     if current_user.role != models.UserRole.ADMIN:

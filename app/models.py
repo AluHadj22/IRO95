@@ -8,9 +8,8 @@ import json
 
 
 class UserRole(str, enum.Enum):
-    """Технические роли пользователей в системе (определяют права доступа)"""
-    TEACHER = "teacher"      # Обычный пользователь
-    ADMIN = "admin"          # Администратор (полный доступ)
+    TEACHER = "teacher"
+    ADMIN = "admin"
 
 
 class User(Base):
@@ -19,38 +18,32 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
     full_name = Column(String(255), nullable=False)
-    position = Column(String(255), nullable=True)  # Должность: Учитель, Завуч, Директор или своя
+    position = Column(String(255), nullable=True)
     phone = Column(String(50), nullable=True)
     organization = Column(String(500), nullable=True)
-    # ✅ Увеличена длина для bcrypt хешей (обычно 60 символов, но с запасом)
     hashed_password = Column(String(300), nullable=False)
     role = Column(Enum(UserRole), default=UserRole.TEACHER)
     is_active = Column(Boolean, default=True)
     is_blocked = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # ========== НОВЫЕ ПОЛЯ ДЛЯ ПРОФИЛЯ ==========
-    # Личные данные
     last_name = Column(String(100), nullable=True)
     first_name = Column(String(100), nullable=True)
     middle_name = Column(String(100), nullable=True)
-    gender = Column(String(10), nullable=True)  # male/female
+    gender = Column(String(10), nullable=True)
     birth_date = Column(Date, nullable=True)
     citizenship = Column(String(100), nullable=True)
-    region = Column(String(200), nullable=True)  # Субъект РФ
+    region = Column(String(200), nullable=True)
     municipality = Column(String(200), nullable=True)
-    phone_raw = Column(String(20), nullable=True)  # телефон в формате +7XXXXXXXXXX
+    phone_raw = Column(String(20), nullable=True)
     consent_to_personal_data = Column(Boolean, default=False)
-    # ✅ Добавлено время согласия для логирования
     consent_given_at = Column(DateTime(timezone=True), nullable=True)
     
-    # Связи с новыми таблицами
     education = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
     work = relationship("UserWork", back_populates="user", cascade="all, delete-orphan")
     address = relationship("UserAddress", back_populates="user", cascade="all, delete-orphan", uselist=False)
     additional_info = relationship("UserAdditionalInfo", back_populates="user", cascade="all, delete-orphan", uselist=False)
     
-    # ========== СУЩЕСТВУЮЩИЕ СВЯЗИ ==========
     favorite_courses = relationship("UserFavorite", back_populates="user", cascade="all, delete-orphan")
     watch_later = relationship("UserWatchLater", back_populates="user", cascade="all, delete-orphan")
     registrations = relationship("CourseRegistration", back_populates="user", cascade="all, delete-orphan")
@@ -61,29 +54,23 @@ class User(Base):
     activity_logs = relationship("UserActivityLog", back_populates="user", cascade="all, delete-orphan")
     certificates = relationship("Certificate", back_populates="user", cascade="all, delete-orphan")
     
-    # ✅ Индексы для часто запрашиваемых полей
+    password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
+    
     __table_args__ = (
         Index('idx_user_email', 'email'),
         Index('idx_user_role', 'role'),
         Index('idx_user_is_blocked', 'is_blocked'),
     )
     
-    # ========== МЕТОДЫ ДЛЯ РАБОТЫ С РОЛЯМИ ==========
-    
     @property
     def is_admin(self) -> bool:
-        """Проверяет, является ли пользователь администратором"""
         return self.role == UserRole.ADMIN
     
     @property
     def is_teacher(self) -> bool:
-        """Проверяет, является ли пользователь учителем (техническая роль)"""
         return self.role == UserRole.TEACHER
     
     def get_role_display(self) -> str:
-        """
-        Возвращает понятное отображение технической роли на русском языке.
-        """
         role_names = {
             UserRole.TEACHER: "Преподаватель",
             UserRole.ADMIN: "Администратор"
@@ -91,15 +78,9 @@ class User(Base):
         return role_names.get(self.role, "Неизвестно")
     
     def get_position_display(self) -> str:
-        """
-        Возвращает должность пользователя или 'Не указана', если поле пустое.
-        """
         return self.position or "Не указана"
     
-    # ========== МЕТОДЫ ПРОВЕРКИ ПРОФИЛЯ ==========
-    
     def is_personal_data_complete(self) -> bool:
-        """Проверяет, заполнены ли все обязательные поля личных данных"""
         required_fields = [
             self.last_name, self.first_name, self.middle_name,
             self.gender, self.birth_date, self.citizenship,
@@ -109,11 +90,9 @@ class User(Base):
         return all(field is not None and field != "" for field in required_fields)
     
     def has_education(self) -> bool:
-        """Проверяет, есть ли хотя бы одна запись об образовании"""
         return self.education is not None and len(self.education) > 0
     
     def has_education_with_diploma(self) -> bool:
-        """Проверяет, есть ли запись об образовании с загруженным дипломом"""
         if not self.education:
             return False
         for edu in self.education:
@@ -122,11 +101,9 @@ class User(Base):
         return False
     
     def has_work(self) -> bool:
-        """Проверяет, есть ли хотя бы одна запись о работе"""
         return self.work is not None and len(self.work) > 0
     
     def has_work_with_subjects(self) -> bool:
-        """Проверяет, есть ли запись о работе с заполненными предметами"""
         if not self.work:
             return False
         for work in self.work:
@@ -140,40 +117,21 @@ class User(Base):
         return False
     
     def has_snils(self) -> bool:
-        """Проверяет, заполнен ли СНИЛС"""
         return self.additional_info is not None and bool(self.additional_info.snils)
     
     def has_snils_file(self) -> bool:
-        """Проверяет, загружен ли файл СНИЛС"""
         return self.additional_info is not None and bool(self.additional_info.snils_file_url)
     
     def has_passport_file(self) -> bool:
-        """Проверяет, загружен ли файл паспорта"""
         return self.additional_info is not None and bool(self.additional_info.passport_file_url)
     
     def has_inn_file(self) -> bool:
-        """Проверяет, загружен ли файл ИНН"""
         return self.additional_info is not None and bool(self.additional_info.inn_file_url)
     
     def has_data_confirmed(self) -> bool:
-        """Проверяет, подтверждены ли данные"""
         return self.additional_info is not None and self.additional_info.data_confirmed
     
     def is_profile_complete(self) -> bool:
-        """
-        ОСНОВНАЯ ПРОВЕРКА: заполнен ли профиль полностью для записи на курсы.
-        
-        Минимальные требования для записи на курс:
-        1. Личные данные (все обязательные поля со звездочкой)
-        2. Образование (хотя бы одна запись)
-        3. Копия диплома (загружен файл)
-        4. Работа (хотя бы одна запись)
-        5. СНИЛС (заполнен номер)
-        6. Копия СНИЛС (загружен файл)
-        7. Копия паспорта (загружен файл)
-        8. Копия ИНН (загружен файл)
-        9. Подтверждение данных
-        """
         return (
             self.is_personal_data_complete() and
             self.has_education() and
@@ -187,13 +145,8 @@ class User(Base):
         )
     
     def get_profile_completion_details(self) -> dict:
-        """
-        Возвращает детальную информацию о заполненности профиля.
-        Используется для отображения пользователю списка незаполненных разделов.
-        """
         missing_sections = []
         
-        # Проверка личных данных
         if not self.is_personal_data_complete():
             missing_fields = []
             if not self.last_name: missing_fields.append("Фамилия")
@@ -220,7 +173,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # Проверка образования
         if not self.has_education():
             missing_sections.append({
                 "section": "education",
@@ -243,7 +195,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # Проверка работы
         if not self.has_work():
             missing_sections.append({
                 "section": "work",
@@ -259,7 +210,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # Проверка документов
         doc_fields = []
         if not self.has_snils():
             doc_fields.append("Заполните номер СНИЛС")
@@ -285,7 +235,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # Проверка подтверждения данных
         if not self.has_data_confirmed():
             missing_sections.append({
                 "section": "confirmation",
@@ -349,10 +298,8 @@ class Course(Base):
     created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # ========== ПОЛЕ ДЛЯ MOODLE ==========
     moodle_course_id = Column(Integer, nullable=True, index=True)
     
-    # ✅ Индексы для часто запрашиваемых полей
     __table_args__ = (
         Index('idx_course_category_id', 'category_id'),
         Index('idx_course_is_active', 'is_active'),
@@ -434,7 +381,6 @@ class Notification(Base):
 
 
 class UserProgress(Base):
-    """Прогресс пользователя по курсу (общий)"""
     __tablename__ = "user_progress"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -493,10 +439,7 @@ class Certificate(Base):
     course = relationship("Course", back_populates="certificates", foreign_keys=[course_id])
 
 
-# ========== НОВЫЕ МОДЕЛИ ДЛЯ ПРОФИЛЯ ПОЛЬЗОВАТЕЛЯ ==========
-
 class UserEducation(Base):
-    """Образование пользователя"""
     __tablename__ = "user_education"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -524,7 +467,6 @@ class UserEducation(Base):
 
 
 class UserWork(Base):
-    """Место работы пользователя"""
     __tablename__ = "user_work"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -553,7 +495,6 @@ class UserWork(Base):
 
 
 class UserAddress(Base):
-    """Почтовый адрес пользователя"""
     __tablename__ = "user_address"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -576,13 +517,12 @@ class UserAddress(Base):
 
 
 class UserAdditionalInfo(Base):
-    """Дополнительная информация о пользователе"""
     __tablename__ = "user_additional_info"
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     
-    snils = Column(String(255), nullable=True)  # ✅ Увеличена длина для зашифрованных данных
+    snils = Column(String(255), nullable=True)
     snils_file_url = Column(String(500), nullable=True)
     snils_file_name = Column(String(500), nullable=True)
     
@@ -594,7 +534,7 @@ class UserAdditionalInfo(Base):
     passport_file_url = Column(String(500), nullable=True)
     passport_file_name = Column(String(500), nullable=True)
     
-    inn = Column(String(255), nullable=True)  # ✅ Увеличена длина для зашифрованных данных
+    inn = Column(String(255), nullable=True)
     inn_file_url = Column(String(500), nullable=True)
     inn_file_name = Column(String(500), nullable=True)
     
@@ -609,10 +549,7 @@ class UserAdditionalInfo(Base):
     user = relationship("User", back_populates="additional_info")
 
 
-# ========== МОДЕЛЬ ДЛЯ СБРОСА ПАРОЛЯ ==========
-
 class PasswordResetToken(Base):
-    """Токены для сброса пароля"""
     __tablename__ = "password_reset_tokens"
     
     id = Column(Integer, primary_key=True, index=True)
@@ -622,10 +559,8 @@ class PasswordResetToken(Base):
     expires_at = Column(DateTime(timezone=True), nullable=False)
     used = Column(Boolean, default=False)
     
-    # Связь с пользователем
     user = relationship("User", foreign_keys=[user_id])
     
-    # Индексы для быстрого поиска
     __table_args__ = (
         Index('idx_reset_token', 'token'),
         Index('idx_reset_user_id', 'user_id'),

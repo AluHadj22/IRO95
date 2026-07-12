@@ -9,7 +9,7 @@ load_dotenv(dotenv_path=env_path)
 
 
 class Settings:
-    # === ОСНОВНЫЕ НАСТРОЙКИ ===
+    # ОСНОВНЫЕ НАСТРОЙКИ
     DATABASE_URL: str = os.getenv("DATABASE_URL")
     SECRET_KEY: str = os.getenv("SECRET_KEY")
     ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
@@ -17,21 +17,21 @@ class Settings:
     ADMIN_SECRET_CODE: str = os.getenv("ADMIN_SECRET_CODE")
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     
-    # === БАЗОВЫЙ URL ДЛЯ ССЫЛОК ===
+    # БАЗОВЫЙ URL ДЛЯ ССЫЛОК 
     BASE_URL: str = os.getenv("BASE_URL", "http://localhost:8000")
     
-    # === НАСТРОЙКИ СБРОСА ПАРОЛЯ ===
+    # НАСТРОЙКИ СБРОСА ПАРОЛЯ
     RESET_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("RESET_TOKEN_EXPIRE_MINUTES", "60"))
     
-    # === ШИФРОВАНИЕ ДАННЫХ ===
+    # ШИФРОВАНИЕ ДАННЫХ 
     ENCRYPTION_KEY: str = os.getenv("ENCRYPTION_KEY")
     
-    # === НАСТРОЙКИ MOODLE ===
+    # НАСТРОЙКИ MOODLE
     MOODLE_URL: str = os.getenv("MOODLE_URL")
     MOODLE_API_TOKEN: str = os.getenv("MOODLE_API_TOKEN")
     MOODLE_DEFAULT_COURSE_ID: int = int(os.getenv("MOODLE_DEFAULT_COURSE_ID", "2"))
     
-    # === НАСТРОЙКИ SMTP ===
+    # НАСТРОЙКИ SMTP
     SMTP_HOST: str = os.getenv("SMTP_HOST")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
     SMTP_USER: str = os.getenv("SMTP_USER")
@@ -40,7 +40,7 @@ class Settings:
     SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "ИРО ЧР - Платформа повышения квалификации")
     SMTP_USE_TLS: bool = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
     
-    # === НАСТРОЙКИ ПУЛА СОЕДИНЕНИЙ БД ===
+    # НАСТРОЙКИ ПУЛА СОЕДИНЕНИЙ БД
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "30"))
     DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
     DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))

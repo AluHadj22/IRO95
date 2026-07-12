@@ -10,11 +10,6 @@
 <!-- Герой-секция (светлая) -->
 <div class="login-hero">
     <div class="container text-center">
-        <div class="hero-icon">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z" fill="#1a4f7a" opacity="0.9"/>
-            </svg>
-        </div>
         <div class="hero-badge">Система дистанционного обучения</div>
         <h1 class="display-5 fw-bold">
             <span class="gold">Вход</span> в систему
@@ -25,27 +20,20 @@
 
 <div class="container mt-4 mb-5 login-page">
     <div class="row justify-content-center">
-        <div class="col-md-5">
+        <div class="col-md-6 col-lg-5">
             <div class="card login-card">
                 <div class="card-header text-center">
-                    <div class="header-icon">
-                        <i class="bi bi-box-arrow-in-right"></i>
-                    </div>
                     <h3>Добро пожаловать</h3>
                     <p>Войдите в свою учётную запись</p>
                 </div>
                 <div class="card-body">
                     <form id="loginForm" novalidate>
                         <div class="mb-3">
-                            <label class="form-label" for="email">
-                                <i class="bi bi-envelope"></i> Email
-                            </label>
+                            <label class="form-label" for="email">Email</label>
                             <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required autocomplete="email" inputmode="email">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="password">
-                                <i class="bi bi-lock"></i> Пароль
-                            </label>
+                            <label class="form-label" for="password">Пароль</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password" placeholder="••••••" required autocomplete="current-password">
                                 <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Показать/скрыть пароль">
@@ -54,16 +42,12 @@
                             </div>
                         </div>
                         
-                        <!-- ✅ ССЫЛКА "ЗАБЫЛИ ПАРОЛЬ?" -->
+                        <!-- Ссылка "Забыли пароль?" -->
                         <div class="forgot-link">
-                            <a href="/forgot-password">
-                                <i class="bi bi-question-circle"></i> Забыли пароль?
-                            </a>
+                            <a href="/forgot-password">Забыли пароль?</a>
                         </div>
                         
-                        <button type="submit" class="btn-login" id="loginBtn">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Войти
-                        </button>
+                        <button type="submit" class="btn-login" id="loginBtn">Войти</button>
                     </form>
                     
                     <div class="login-divider">или</div>
@@ -116,7 +100,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         return;
     }
     
-    // Блокируем кнопку и показываем спиннер
     btn.disabled = true;
     const originalHtml = btn.innerHTML;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Вход...';
@@ -143,7 +126,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 window.showToast('Вход выполнен успешно!', 'success');
             }
             
-            // Восстанавливаем кнопку
             btn.disabled = false;
             btn.innerHTML = originalHtml;
             

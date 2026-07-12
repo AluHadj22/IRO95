@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block title %}Админ панель - ГБУ ДПО «ИРО ЧР»{% endblock %}
@@ -1128,7 +1127,7 @@
             var roleLabel = user.role === 'admin' ? 'Администратор' : 'Преподаватель';
             var roleBadge = user.role === 'admin' ? 'badge-danger' : 'badge-info';
 
-            html += '<tr class="user-row" data-user-id="' + user.id + '" onclick="toggleUserDetails(' + globalIndex + ')"><td onclick="event.stopPropagation();"><input type="checkbox" class="user-select-checkbox user-checkbox" data-user-id="' + user.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="toggleUserSelection(' + user.id + ', this.checked)"></td><td><span class="badge-gold">' + user.id + '</span></td><td><strong>' + escapeHtml(user.full_name) + '</strong><span class="expand-icon ' + (isSelected ? 'expanded' : '') + '" id="expandIcon_' + globalIndex + '"><i class="bi bi-chevron-right"></i></span></td><td>' + escapeHtml(user.email) + '</td><td><span class="' + roleBadge + '">' + roleLabel + '</span></td><td>' + profileStatus + '</td><td><div id="documents_' + user.id + '"><span class="text-muted" style="font-size:0.7rem;">Загрузка...</span></div></td><td><button class="btn-export-single" onclick="event.stopPropagation(); exportSingleUser(' + user.id + ')" title="Экспортировать данные пользователя"><i class="bi bi-download"></i> Экспорт</button><button class="btn-doc-zip" onclick="event.stopPropagation(); downloadUserDocuments(' + user.id + ')" title="Скачать документы пользователя"><i class="bi bi-file-zip"></i> Доки</button></td></tr><tr class="user-details-row" id="detailsRow_' + globalIndex + '" style="display: none;"><td colspan="8"><div class="details-grid"><div class="detail-item"><span class="label">Муниципалитет</span><span class="value ' + (!user.data.municipality ? 'empty' : '') + '">' + escapeHtml(user.data.municipality || '—') + '</span></div><div class="detail-item"><span class="label">Место работы</span><span class="value ' + (!user.data.organization ? 'empty' : '') + '">' + escapeHtml(user.data.organization || '—') + '</span></div><div class="detail-item"><span class="label">Должность</span><span class="value ' + (!user.data.position ? 'empty' : '') + '">' + escapeHtml(user.data.position || '—') + '</span></div><div class="detail-item"><span class="label">СНИЛС</span><span class="value ' + (!user.data.snils ? 'empty' : '') + '">' + escapeHtml(user.data.snils || '—') + '</span></div><div class="detail-item"><span class="label">Образование</span><span class="value ' + (!user.data.education ? 'empty' : '') + '">' + escapeHtml(user.data.education || '—') + '</span></div><div class="detail-item"><span class="label">Предметы</span><span class="value ' + (!user.data.subjects ? 'empty' : '') + '">' + escapeHtml(user.data.subjects || '—') + '</span></div><div class="detail-item"><span class="label">Педагогический стаж</span><span class="value ' + (!user.data.teaching_experience ? 'empty' : '') + '">' + (user.data.teaching_experience || '—') + '</span></div><div class="detail-item"><span class="label">Стаж в должности</span><span class="value ' + (!user.data.work_experience ? 'empty' : '') + '">' + (user.data.work_experience || '—') + '</span></div><div class="detail-item"><span class="label">Телефон</span><span class="value ' + (!user.data.phone ? 'empty' : '') + '">' + escapeHtml(user.data.phone || '—') + '</span></div><div class="detail-item"><span class="label">Дата регистрации</span><span class="value">' + (user.created_at || '—') + '</span></div></div></td></tr>';
+            html += '<tr class="user-row" data-user-id="' + user.id + '" onclick="toggleUserDetails(' + globalIndex + ')"><td onclick="event.stopPropagation();"><input type="checkbox" class="user-select-checkbox user-checkbox" data-user-id="' + user.id + '" ' + (isSelected ? 'checked' : '') + ' onchange="toggleUserSelection(' + user.id + ', this.checked)"></td><td><span class="badge-gold">' + user.id + '</span></td><td><strong>' + escapeHtml(user.full_name) + '</strong><span class="expand-icon ' + (isSelected ? 'expanded' : '') + '" id="expandIcon_' + globalIndex + '"><i class="bi bi-chevron-right"></i></span></td><td>' + escapeHtml(user.email) + '</td><td><span class="' + roleBadge + '">' + roleLabel + '</span></td><td>' + profileStatus + '</td><td><div id="documents_' + user.id + '"><span class="text-muted" style="font-size:0.7rem;">Загрузка...</span></div></td><td><button class="btn-export-single" onclick="event.stopPropagation(); exportSingleUser(' + user.id + ')" title="Экспортировать данные пользователя"><i class="bi bi-download"></i> Экспорт</button><button class="btn-doc-zip" onclick="event.stopPropagation(); downloadUserDocuments(' + user.id + ')" title="Скачать документы пользователя"><i class="bi bi-file-zip"></i> Доки</button><button class="btn-delete-user" onclick="event.stopPropagation(); deleteUserAccount(' + user.id + ')" title="Удалить пользователя"><i class="bi bi-trash"></i></button></td></tr><tr class="user-details-row" id="detailsRow_' + globalIndex + '" style="display: none;"><td colspan="8"><div class="details-grid"><div class="detail-item"><span class="label">Муниципалитет</span><span class="value ' + (!user.data.municipality ? 'empty' : '') + '">' + escapeHtml(user.data.municipality || '—') + '</span></div><div class="detail-item"><span class="label">Место работы</span><span class="value ' + (!user.data.organization ? 'empty' : '') + '">' + escapeHtml(user.data.organization || '—') + '</span></div><div class="detail-item"><span class="label">Должность</span><span class="value ' + (!user.data.position ? 'empty' : '') + '">' + escapeHtml(user.data.position || '—') + '</span></div><div class="detail-item"><span class="label">СНИЛС</span><span class="value ' + (!user.data.snils ? 'empty' : '') + '">' + escapeHtml(user.data.snils || '—') + '</span></div><div class="detail-item"><span class="label">Образование</span><span class="value ' + (!user.data.education ? 'empty' : '') + '">' + escapeHtml(user.data.education || '—') + '</span></div><div class="detail-item"><span class="label">Предметы</span><span class="value ' + (!user.data.subjects ? 'empty' : '') + '">' + escapeHtml(user.data.subjects || '—') + '</span></div><div class="detail-item"><span class="label">Педагогический стаж</span><span class="value ' + (!user.data.teaching_experience ? 'empty' : '') + '">' + (user.data.teaching_experience || '—') + '</span></div><div class="detail-item"><span class="label">Стаж в должности</span><span class="value ' + (!user.data.work_experience ? 'empty' : '') + '">' + (user.data.work_experience || '—') + '</span></div><div class="detail-item"><span class="label">Телефон</span><span class="value ' + (!user.data.phone ? 'empty' : '') + '">' + escapeHtml(user.data.phone || '—') + '</span></div><div class="detail-item"><span class="label">Дата регистрации</span><span class="value">' + (user.created_at || '—') + '</span></div></div></td></tr>';
         }
         tbody.innerHTML = html;
         for (var j = 0; j < users.length; j++) {
@@ -1478,6 +1477,31 @@
         }
     }
 
+    async function deleteUserAccount(userId) {
+        if (!confirm('ВНИМАНИЕ! Вы собираетесь полностью удалить пользователя. Все его данные, документы, регистрации и достижения будут удалены безвозвратно. Продолжить?')) return;
+        if (!confirm('Вы уверены? Действие необратимо.')) return;
+        
+        try {
+            var response = await fetch('/api/admin/users/' + userId, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                showToast('Пользователь удален успешно', 'success');
+                await loadUsers(currentUsersPage);
+                await loadUserData(currentUserdataPage);
+                await loadStats();
+            } else {
+                var error = await response.json();
+                showToast(error.detail || 'Ошибка при удалении пользователя', 'danger');
+            }
+        } catch (error) {
+            console.error('Delete user error:', error);
+            showToast('Ошибка соединения с сервером', 'danger');
+        }
+    }
+
     loadStats();
     loadCategories(1);
     loadCourses(1);
@@ -1532,6 +1556,7 @@
     window.downloadSelectedDocuments = downloadSelectedDocuments;
     window.downloadSingleDocument = downloadSingleDocument;
     window.deleteUserDocument = deleteUserDocument;
+    window.deleteUserAccount = deleteUserAccount;
 })();
 </script>
 {% endblock %}

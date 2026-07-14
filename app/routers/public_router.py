@@ -80,3 +80,10 @@ async def reset_password_page(request: Request, token: str = None):
         "request": request,
         "token": token
     })
+@router.get("/police", response_class=HTMLResponse)
+def police_page(request: Request):
+    return templates.TemplateResponse("police.html", {"request": request})
+
+@router.get("/accept", response_class=HTMLResponse)
+def accept_page(request: Request):
+    return templates.TemplateResponse("accept.html", {"request": request})

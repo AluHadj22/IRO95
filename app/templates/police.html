@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Политика конфиденциальности — ГБУ ДПО «ИРО ЧР»</title>
+
+    <!-- ===== PRECONNECT ===== -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com">
+
+    <!-- ===== DNS PREFETCH ===== -->
+    <link rel="dns-prefetch" href="https://api-maps.yandex.ru">
+    <link rel="dns-prefetch" href="https://yastatic.net">
+    <link rel="dns-prefetch" href="https://govzalla.ru">
+
+    <!-- ===== ШРИФТЫ ===== -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- ===== КРИТИЧЕСКИЙ CSS (ИНЛАЙН) ===== -->
+    <style>
+        :root {
+            --primary: #1a4f7a;
+            --primary-light: #2a6fa8;
+            --primary-dark: #0f3555;
+            --secondary: #e8f0fe;
+            --dark: #1a1a2e;
+            --gray: #6c757d;
+            --light-gray: #f8f9fa;
+            --border: #e9ecef;
+            --shadow: 0 10px 40px rgba(0,0,0,0.08);
+            --radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding-top: 80px;
+            background: #ffffff;
+            color: var(--dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        #mainNav {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            padding: 12px 0;
+            transition: var(--transition);
+        }
+
+        #mainNav.scrolled {
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.98);
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            padding: 0;
+        }
+
+        .navbar-brand img {
+            height: 45px;
+            width: auto;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .navbar-brand .title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+
+        .navbar-brand .title .accent { color: var(--primary); }
+
+        .navbar-brand .subtitle {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--gray);
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            line-height: 1.2;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: var(--light-gray);
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px rgba(26,79,122,0.15);
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--gray);
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: var(--primary);
+            background: var(--secondary);
+        }
+
+        /* ===== ПОЛИТИКА ===== */
+        .policy-section {
+            padding: 40px 0 60px;
+        }
+
+        .policy-section .page-title {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .policy-section .page-title .accent { color: var(--primary); }
+
+        .policy-section .policy-meta {
+            color: var(--gray);
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .policy-card {
+            background: #ffffff;
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 28px;
+        }
+
+        .policy-card h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .policy-card h2 .badge-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--secondary);
+            color: var(--primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .policy-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .policy-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .policy-card p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: var(--dark);
+            margin-bottom: 0.75rem;
+        }
+
+        .policy-card ul, .policy-card ol {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .policy-card li {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 0.35rem;
+        }
+
+        .policy-card .list-bullet {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .policy-card .list-bullet li {
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .policy-card .list-bullet li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: 700;
+            position: absolute;
+            left: 0;
+        }
+
+        .policy-table-wrap {
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .policy-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 560px;
+        }
+
+        .policy-table th {
+            background: var(--secondary);
+            color: var(--primary-dark);
+            font-weight: 600;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .policy-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        .policy-table tr:last-child td { border-bottom: none; }
+
+        .policy-table .highlight-cell {
+            background: var(--light-gray);
+        }
+
+        .policy-card .appendix-box {
+            background: var(--light-gray);
+            border-left: 4px solid var(--primary);
+            padding: 20px 24px;
+            border-radius: 0 12px 12px 0;
+            margin: 1.5rem 0;
+        }
+
+        .policy-card .appendix-box strong {
+            color: var(--primary);
+        }
+
+        .policy-card .checkbox-sample {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .policy-card .checkbox-sample .check-icon {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin-top: 2px;
+        }
+
+        .policy-card .checkbox-sample .check-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .policy-card .meta-note {
+            font-size: 0.85rem;
+            color: var(--gray);
+            background: var(--light-gray);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 12px;
+        }
+
+        .policy-card .badge-tag {
+            background: var(--secondary);
+            color: var(--primary);
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .footer-light {
+            background: var(--light-gray);
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        .footer-light h5 {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        .footer-light .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .footer-light .social-icons a:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .footer-light .map-container {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .footer-light .map-card-link { text-decoration: none; }
+
+        /* ===== ЧАТ-БОТ ===== */
+        .chatbot-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .chatbot-toggle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            font-size: 1.6rem;
+            box-shadow: 0 6px 30px rgba(26,79,122,0.4);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .chatbot-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 40px rgba(26,79,122,0.5);
+        }
+
+        .chatbot-toggle .chatbot-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ff4757;
+            color: #fff;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: chatbot-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes chatbot-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .chatbot-window {
+            position: absolute;
+            bottom: 76px;
+            right: 0;
+            width: 400px;
+            max-width: calc(100vw - 32px);
+            background: #ffffff;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            border: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
+            max-height: 600px;
+            overflow: hidden;
+            animation: chatbot-slide-up 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .chatbot-window.open { display: flex; }
+
+        @keyframes chatbot-slide-up {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .chatbot-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--primary);
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .chatbot-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chatbot-header-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .chatbot-header-title { font-weight: 700; font-size: 1rem; }
+        .chatbot-header-subtitle { font-size: 0.7rem; opacity: 0.8; }
+
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: var(--transition);
+            opacity: 0.7;
+            touch-action: manipulation;
+        }
+
+        .chatbot-close:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.15);
+        }
+
+        .chatbot-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            background: var(--light-gray);
+        }
+
+        .chatbot-body::-webkit-scrollbar { width: 4px; }
+        .chatbot-body::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .chatbot-greeting {
+            text-align: center;
+            padding: 12px 0 20px;
+        }
+
+        .chatbot-greeting .greeting-icon {
+            font-size: 2.8rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .chatbot-greeting h6 {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+
+        .chatbot-greeting p {
+            color: var(--gray);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .chatbot-question {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .chatbot-question:active { transform: scale(0.98); }
+
+        .chatbot-question .q-icon {
+            color: var(--primary);
+            margin-right: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .chatbot-question .q-text {
+            flex: 1;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .chatbot-question .q-arrow {
+            color: var(--gray);
+            font-size: 0.8rem;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .chatbot-question .q-content {
+            display: none;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .chatbot-question .q-content.show { display: block; }
+
+        .chatbot-question .q-content .step {
+            display: block;
+            padding: 4px 0 4px 24px;
+            position: relative;
+            font-size: 0.85rem;
+        }
+
+        .chatbot-question .q-content .step::before {
+            content: "•";
+            position: absolute;
+            left: 4px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .chatbot-question .q-content .highlight { color: var(--primary); }
+
+        .chatbot-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            background: #fff;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .chatbot-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .chatbot-footer a:hover { text-decoration: underline; }
+
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: calc(100% - 40px);
+        }
+
+        .toast-container .toast {
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+            border: none;
+            animation: toast-slide-in 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes toast-slide-in {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .toast-container .toast .toast-body {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0;
+        }
+
+        @media (max-width: 767.98px) {
+            body { padding-top: 70px; }
+            #mainNav { padding: 8px 0; }
+            .navbar-brand img { height: 38px; }
+            .navbar-brand .title { font-size: 0.95rem; }
+            .navbar-brand .subtitle {
+                font-size: 0.6rem;
+                max-width: 160px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .navbar-collapse {
+                background: #ffffff;
+                padding: 16px 12px 20px;
+                border-radius: var(--radius);
+                margin-top: 8px;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+                border: 1px solid var(--border);
+            }
+            .navbar-nav .nav-link {
+                padding: 12px 16px;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+            .policy-section { padding: 20px 0 40px; }
+            .policy-card { padding: 20px; }
+            .policy-card h2 { font-size: 1.1rem; }
+            .policy-card h3 { font-size: 1rem; }
+            .policy-card p, .policy-card li { font-size: 0.9rem; }
+            .policy-table { font-size: 0.8rem; min-width: 420px; }
+            .policy-table th, .policy-table td { padding: 8px 12px; }
+            .chatbot-container { bottom: 16px; right: 16px; }
+            .chatbot-toggle { width: 56px; height: 56px; font-size: 1.4rem; }
+            .chatbot-window {
+                bottom: 70px;
+                max-width: calc(100vw - 32px);
+                max-height: calc(100vh - 160px);
+                border-radius: 14px;
+            }
+            .chatbot-header { padding: 14px 16px; }
+            .chatbot-body { padding: 12px 14px; }
+            .chatbot-question { padding: 12px 14px; }
+            .footer-light .map-container { height: 180px !important; }
+        }
+
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            .policy-card { padding: 24px; }
+        }
+
+        @media (hover: none) {
+            .navbar-nav .nav-link:hover { background: none; }
+            .navbar-nav .nav-link:active { background: var(--secondary); }
+            .chatbot-question:active { transform: scale(0.98); }
+        }
+
+        @media print {
+            #mainNav, .chatbot-container, .footer-light .map-container, .toast-container { display: none !important; }
+            body { padding-top: 0 !important; }
+            .policy-section { padding: 20px 0 !important; }
+            .policy-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+        }
+    </style>
+
+    <!-- ===== АСИНХРОННЫЙ CSS ===== -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" media="print" onload="this.media='all';this.onload=null">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <noscript>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    </noscript>
+</head>
+<body>
+
+<div class="toast-container"></div>
+
+<!-- ===== НАВИГАЦИЯ ===== -->
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" loading="lazy" width="45" height="45" decoding="async" fetchpriority="high">
+            <span>
+                <span class="title fw-bold">ГБУ ДПО <span class="accent">«ИРО ЧР»</span></span>
+                <span class="subtitle">Институт развития образования Чеченской Республики</span>
+            </span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Переключить навигацию">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto" id="navLinks">
+                <li class="nav-item"><a class="nav-link" href="/">Главная</a></li>
+                <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
+                <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
+                <li class="nav-item"><a class="nav-link" href="/api/ai/chat">ИИ-помощник</a></li>
+                <li class="nav-item"><a class="nav-link" href="/login">Вход</a></li>
+                <li class="nav-item"><a class="nav-link" href="/register">Регистрация</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
+<main>
+    <section class="policy-section">
+        <div class="container">
+            <!-- Заголовок -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h1 class="page-title">
+                        <span class="accent">Политика</span> конфиденциальности
+                    </h1>
+                    <p class="policy-meta">
+                        <i class="bi bi-shield-lock me-2" style="color: var(--primary);"></i>
+                        персональных данных обучающихся Государственного бюджетного учреждения дополнительного профессионального образования «Институт развития образования Чеченской Республики»
+                        <br>
+                        <span class="badge-tag mt-1">г. Грозный</span>
+                        <span class="badge-tag">действует с 01.09.2025</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- ===== 1. ОБЩИЕ ПОЛОЖЕНИЯ ===== -->
+            <div class="policy-card">
+                <h2><span class="badge-number">1</span> ОБЩИЕ ПОЛОЖЕНИЯ</h2>
+                <p><strong>1.1.</strong> Настоящая Политика конфиденциальности персональных данных обучающихся Государственного бюджетного учреждения дополнительного профессионального образования «Институт развития образования Чеченской Республики» (далее – Политика конфиденциальности) разработана в соответствии с положениями Конституции Российской Федерации, Федерального закона от 27 июля 2006 г. N 149-ФЗ «Об информации, информационных технологиях и о защите информации», Федерального закона от 27 июля 2006 г. N 152-ФЗ «О персональных данных» (далее - Федеральный закон) и иными нормативными правовыми актами в области защиты и обработки персональных данных, действующими на территории Российской Федерации.</p>
+                <p><strong>1.2.</strong> В настоящей Политике конфиденциальности используются следующие понятия:</p>
+                <ul class="list-bullet">
+                    <li><strong>дистанционные образовательные технологии</strong> — образовательные технологии, реализуемые в основном с применением информационно-телекоммуникационных сетей при опосредованном (на расстоянии) взаимодействии обучающихся и педагогических работников;</li>
+                    <li><strong>участники образовательных отношений</strong> – обучающиеся по образовательным программам дополнительного профессионального образования;</li>
+                    <li><strong>сайт ГБУ ДПО «ИРО ЧР»</strong> — сайт в сети Интернет, на котором реализуются дополнительные профессиональные программы или их части с применением дистанционных образовательных технологий;</li>
+                    <li><strong>администрация сайта</strong> — уполномоченные на управление сайтом ГБУ ДПО «ИРО ЧР» работники, определяющие состав персональных данных обучающихся, цели сбора персональных данных, их обработку и хранение;</li>
+                    <li><strong>пользователь сайта (субъект персональных данных)</strong> — участник образовательных отношений, добровольно зарегистрировавшийся на сайте и предоставивший необходимые персональные данные при регистрации;</li>
+                    <li><strong>персональные данные</strong> — любая информация, относящаяся к прямо или косвенно определенному или определяемому физическому лицу (субъекту персональных данных);</li>
+                    <li><strong>обработка персональных данных</strong> — любое действие (операция) или совокупность действий (операций), совершаемых с использованием средств автоматизации или без использования таких средств с персональными данными, включая сбор, запись, систематизацию, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передачу, обезличивание, блокирование, удаление, уничтожение персональных данных.</li>
+                </ul>
+                <p><strong>1.3.</strong> Настоящая Политика конфиденциальности устанавливает порядок получения, защиты, хранения, обработки и передачи персональных данных обучающихся, действует в отношении всей информации, которую администрация сайта может получить об обучающихся во время использования ими сайта. Настоящая Политика конфиденциальности не распространяется на другие сайты и не применяется в отношении сайтов третьих лиц. Администрация сайта не несет ответственность за сайты третьих лиц, на которые обучающиеся могут перейти по ссылкам, доступным на сайте.</p>
+                <p><strong>1.4.</strong> Все персональные данные об обучающихся администрация сайта может получить только от них самих. Персональные данные обучающихся являются конфиденциальной информацией и не могут быть использованы администрацией сайта или любым иным лицом в личных целях.</p>
+                <p><strong>1.5.</strong> Администрация сайта обеспечивает обучающим свободный бесплатный доступ к своим персональным данным, включая право на получение копий любой записи, содержащей их персональные данные, за исключением случаев, предусмотренных законодательством.</p>
+                <p><strong>1.6.</strong> Администрация сайта разрабатывает меры защиты персональных данных обучающихся.</p>
+            </div>
+
+            <!-- ===== 2. ОБРАБОТКА, ХРАНЕНИЕ И ПЕРЕДАЧА ===== -->
+            <div class="policy-card">
+                <h2><span class="badge-number">2</span> ОБРАБОТКА, ХРАНЕНИЕ И ПЕРЕДАЧА ПЕРСОНАЛЬНЫХ ДАННЫХ ОБУЧАЮЩИХСЯ</h2>
+                <p><strong>2.1.</strong> Обработка персональных данных обучающихся осуществляется исключительно в целях реализации образовательных программ или их части.</p>
+                <p><strong>2.2.</strong> Обработка персональных данных обучающихся осуществляется как с использованием средств автоматизации, так и без использования таких средств.</p>
+                <p><strong>2.3.</strong> К категориям субъектов персональных данных относятся:</p>
+                <div class="policy-table-wrap">
+                    <table class="policy-table">
+                        <thead>
+                            <tr>
+                                <th>Категория субъектов</th>
+                                <th>Состав персональных данных</th>
+                                <th>Основание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Обучающиеся программ ДПО</td>
+                                <td>ФИО; дата рождения; паспортные данные; адрес регистрации; СНИЛС (скан); e-mail; телефон; сведения об образовании; скан-копия диплома, копия свидетельства о регистрации брака (при необходимости)</td>
+                                <td>Согласие (ст. 9); п. 2, 5 ч. 1 ст. 6 Закона; ФЗ № 273-ФЗ</td>
+                            </tr>
+                            <tr>
+                                <td>Контрагенты и их представители</td>
+                                <td>ФИО; должность; контактные данные; банковские реквизиты (для ИП)</td>
+                                <td>Исполнение договора (п. 5 ч. 1 ст. 6); законный интерес (п. 7 ч. 1 ст. 6)</td>
+                            </tr>
+                            <tr>
+                                <td>Посетители официального сайта</td>
+                                <td>IP-адрес; cookie; данные форм обратной связи; запись о факте принятия согласия (чекбокс) (Приложение №1 к настоящей Политике конфиденциальности)</td>
+                                <td>Согласие (cookie-баннер; чекбокс); законный интерес</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Персональные данные обучающихся по программам курсов повышения квалификации и программам профессиональной переподготовки хранятся в течение 10 лет.</p>
+
+                <p><strong>К целям обработки персональных данных относятся:</strong></p>
+                <div class="policy-table-wrap">
+                    <table class="policy-table">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Цель обработки</th>
+                                <th>Категории субъектов</th>
+                                <th>Правовое основание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>1</td><td>Организация и проведение обучения по программам ДПО, ведение личных дел обучающихся</td><td>Обучающиеся</td><td>Ст. 9, п. 5 ч. 1 ст. 6 152-ФЗ; ФЗ № 273-ФЗ</td></tr>
+                            <tr><td>2</td><td>Оформление и выдача документов об обучении</td><td>Обучающиеся</td><td>Ст. 9, п. 2 ч. 1 ст. 6 152-ФЗ</td></tr>
+                            <tr><td>3</td><td>Заключение и исполнение договоров об оказании образовательных услуг</td><td>Обучающиеся, контрагенты</td><td>П. 5 ч. 1 ст. 6 152-ФЗ</td></tr>
+                            <tr><td>4</td><td>Бухгалтерский и налоговый учёт</td><td>Обучающиеся, контрагенты</td><td>П. 2 ч. 1 ст. 6 152-ФЗ (НК РФ, ФЗ № 402-ФЗ)</td></tr>
+                            <tr><td>5</td><td>Статистическая и ведомственная отчётность</td><td>Обучающиеся</td><td>П. 2 ч. 1 ст. 6 152-ФЗ</td></tr>
+                            <tr><td>6</td><td>Информирование слушателей о ходе обучения, расписании, мероприятиях</td><td>Обучающиеся</td><td>Ст. 9 152-ФЗ (согласие)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Специальные категории персональных данных (ст. 10 Закона) не обрабатываются. Трансграничная передача персональных данных оператором не осуществляется. Распространение персональных данных обучающихся Оператором не осуществляется.</p>
+                <p><strong>2.4.</strong> Персональные данные обучающихся хранятся в электронном виде в информационной системе персональных данных сайта. При хранении персональных данных обучающихся соблюдаются организационные и технические меры, обеспечивающие их сохранность и исключающие несанкционированный доступ к ним. К обработке персональных данных обучающихся могут иметь доступ только работники администрации сайта, допущенные к работе с персональными данными обучающихся, подписавшие соглашение о неразглашении персональных данных обучающихся. Перечень работников сайта, имеющих доступ к персональным данным обучающихся, утверждается приказом ректора ГБУ ДПО «ИРО ЧР».</p>
+                <p><strong>2.5.</strong> В соответствии с ч. 1 ст. 19 Федерального закона от 27.07.2006 № 152-ФЗ и Постановлением Правительства РФ от 01.11.2012 № 1119 Организация принимает следующие меры для обеспечения безопасности персональных данных:</p>
+                <div class="policy-table-wrap">
+                    <table class="policy-table">
+                        <thead>
+                            <tr><th>Группа мер</th><th>Конкретные меры</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Организационные</td>
+                                <td>Назначение ответственного за организацию обработки ПДн; ознакомление работников с требованиями законодательства о ПДн; разграничение прав доступа к ПДн; ведение документации по вопросам ПДн; проведение внутренних проверок соблюдения требований к обработке ПДн</td>
+                            </tr>
+                            <tr>
+                                <td>Технические</td>
+                                <td>Применение средств криптографической защиты информации при передаче ПДн; использование антивирусного программного обеспечения; защита каналов передачи данных</td>
+                            </tr>
+                            <tr>
+                                <td>Правовые</td>
+                                <td>Применение режима конфиденциальности в отношении ПДн; закрепление обязанностей по соблюдению конфиденциальности в трудовых договорах работников</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== 3. ПРАВА И ОБЯЗАННОСТИ АДМИНИСТРАЦИИ ===== -->
+            <div class="policy-card">
+                <h2><span class="badge-number">3</span> ПРАВА И ОБЯЗАННОСТИ АДМИНИСТРАЦИИ САЙТА</h2>
+                <p><strong>3.1.</strong> Администрация сайта вправе устанавливать требования к составу персональных данных обучающихся, которые должны обязательно предоставляться для использования сайта, при этом администрация сайта руководствуется настоящей Политикой конфиденциальности, Конституцией Российской Федерации, иными федеральными законами.</p>
+                <p><strong>3.2.</strong> Администрация сайта не осуществляет проверку достоверности предоставляемых обучающимися персональных данных, полагая, что они действуют добросовестно и поддерживают информацию о своих персональных данных в актуальном состоянии.</p>
+                <p><strong>3.3.</strong> Администрация сайта не несет ответственности за добровольную передачу обучающими своих контактных данных, пароля или логина третьим лицам.</p>
+                <p><strong>3.4.</strong> Администрация сайта не вправе получать и обрабатывать персональные данные обучающихся о их политических, религиозных и иных убеждениях и частной жизни.</p>
+                <p><strong>3.5.</strong> Администрация сайта за свой счет обеспечивает защиту персональных данных обучающихся от неправомерного использования или утраты в порядке, установленном законодательством Российской Федерации.</p>
+                <p><strong>3.6.</strong> Администрация сайта принимает меры, необходимые и достаточные для обеспечения выполнения обязанностей, предусмотренных Законом о персональных данных и принятыми в соответствии с ним нормативными правовыми актами. Администрация сайта самостоятельно определяет состав и перечень мер, необходимых и достаточных для обеспечения выполнения обязанностей, предусмотренных Законом о персональных данных и принятыми в соответствии с ним нормативными правовыми актами. К таким мерам, в частности, относятся:</p>
+                <ul class="list-bullet">
+                    <li>назначение ответственного за организацию обработки персональных данных;</li>
+                    <li>осуществление внутреннего контроля и (или) аудита соответствия обработки персональных данных Закону о персональных данных и принятым в соответствии с ним нормативным правовым актам, требованиям к защите персональных данных, политике сайта в отношении обработки персональных данных, локальным актам сайта;</li>
+                    <li>оценка вреда, который может быть причинен обучающимся в случае нарушения Закона о персональных данных, соотношение указанного вреда и принимаемых администрацией сайта мер, направленных на обеспечение выполнения обязанностей, предусмотренных Законом о персональных данных;</li>
+                    <li>ознакомление работников сайта, непосредственно осуществляющих обработку персональных данных, с положениями законодательства Российской Федерации о персональных данных, в том числе требованиями к защите персональных данных, документами, определяющими политику сайта в отношении обработки персональных данных, локальными актами по вопросам обработки персональных данных, и (или) обучение указанных работников.</li>
+                </ul>
+            </div>
+
+            <!-- ===== 4. ПРАВА ОБУЧАЮЩИХСЯ ===== -->
+            <div class="policy-card">
+                <h2><span class="badge-number">4</span> ПРАВА ОБУЧАЮЩИХСЯ НА ЗАЩИТУ СВОИХ ПЕРСОНАЛЬНЫХ ДАННЫХ</h2>
+                <p><strong>4.1.</strong> Обучающиеся в целях обеспечения защиты своих персональных данных, хранящихся на сайте, имеют право:</p>
+                <ul class="list-bullet">
+                    <li>получать полную информацию о своих персональных данных, их обработке, хранении и передаче;</li>
+                    <li>определять своих представителей для защиты своих персональных данных;</li>
+                    <li>требовать исключения или исправления неверных или неполных персональных данных, а также данных, обработанных с нарушениями настоящей Политики конфиденциальности и законодательства Российской Федерации;</li>
+                    <li>требовать от администрации сайта извещения всех лиц, которым ранее были сообщены неверные или неполные персональные данные обучающихся, обо всех произведенных в них исключениях, исправлениях или дополнениях. При отказе администрации сайта исключить или исправить персональные данные обучающихся пользователи вправе заявить администрации сайта в письменном виде о своем несогласии с соответствующим обоснованием.</li>
+                </ul>
+                <p><strong>4.2.</strong> Обучающиеся вправе самостоятельно ограничить сбор информации третьими лицами, используя стандартные настройки конфиденциальности применяемого ими для работы с сайтом интернет-браузера, а также в любое время изменить, удалить или дополнить представленные ими персональные данные.</p>
+                <p><strong>4.3.</strong> Если обучающиеся считают, что обработка их персональных данных осуществляется с нарушением требований Закона о персональных данных или иным образом нарушает их права и свободы, они вправе обжаловать действия или бездействие администрации сайта в уполномоченный орган по защите прав субъектов персональных данных или в судебном порядке.</p>
+                <p><strong>4.4.</strong> Обучающиеся не должны отказываться от своих прав на сохранение и защиту тайны.</p>
+            </div>
+
+            <!-- ===== 5. ПОРЯДОК УНИЧТОЖЕНИЯ ===== -->
+            <div class="policy-card">
+                <h2><span class="badge-number">5</span> ПОРЯДОК УНИЧТОЖЕНИЯ, БЛОКИРОВАНИЯ ПЕРСОНАЛЬНЫХ ДАННЫХ</h2>
+                <p><strong>5.1.</strong> В случае выявления неправомерной обработки персональных данных при обращении обучающиеся администрация сайта осуществляет блокирование неправомерно обрабатываемых персональных данных, относящихся к этому пользователю, с момента такого обращения на период проверки.</p>
+                <p><strong>5.2.</strong> В случае выявления неточных персональных данных при обращении обучающегося администрация сайта осуществляет блокирование персональных данных, относящихся к этому пользователю, с момента такого обращения на период проверки, если блокирование персональных данных не нарушает права и законные интересы пользователя сайта или третьих лиц.</p>
+                <p><strong>5.3.</strong> В случае подтверждения факта неточности персональных данных администрация сайта на основании сведений, представленных обучающимися, или иных необходимых документов уточняет персональные данные в течение семи рабочих дней со дня представления таких сведений и снимает блокирование персональных данных.</p>
+                <p><strong>5.4.</strong> В случае выявления неправомерной обработки персональных данных, осуществляемой администрацией сайта, администрация сайта в срок, не превышающий трех рабочих дней с даты этого выявления, прекращает неправомерную обработку персональных данных.</p>
+                <p><strong>5.5.</strong> В случае если обеспечить правомерность обработки персональных данных невозможно, администрация сайта в срок, не превышающий десяти рабочих дней с даты выявления неправомерной обработки персональных данных, уничтожает такие персональные данные.</p>
+                <p><strong>5.6.</strong> Об устранении допущенных нарушений или об уничтожении персональных данных администрация сайта уведомляет обучающихся.</p>
+                <p><strong>5.7.</strong> В случае установления факта неправомерной или случайной передачи (предоставления, распространения, доступа) персональных данных, повлекшей нарушение прав пользователя сайта, администрация сайта с момента выявления такого инцидента администрацией сайта, уполномоченным органом по защите прав субъектов персональных данных или иным заинтересованным лицом уведомляет уполномоченный орган по защите прав субъектов персональных данных:</p>
+                <ul class="list-bullet">
+                    <li>в течение двадцати четырех часов о произошедшем инциденте, о предполагаемых причинах, повлекших нарушение прав пользователя сайта, и предполагаемом вреде, нанесенном правам пользователя сайта, о принятых мерах по устранению последствий соответствующего инцидента, а также предоставляет сведения о лице, уполномоченном администрацией сайта на взаимодействие с уполномоченным органом по защите прав субъектов персональных данных, по вопросам, связанным с выявленным инцидентом;</li>
+                    <li>в течение семидесяти двух часов о результатах внутреннего расследования выявленного инцидента, а также предоставляет сведения о лицах, действия которых стали причиной выявленного инцидента (при наличии).</li>
+                </ul>
+                <p><strong>5.8.</strong> В случае достижения цели обработки персональных данных администрация сайта прекращает обработку персональных данных и уничтожает персональные данные в срок, не превышающий тридцати дней с даты достижения цели обработки персональных данных.</p>
+                <p><strong>5.9.</strong> В случае отзыва обучающимся согласия на обработку его персональных данных администрация сайта прекращает их обработку и в случае, если сохранение персональных данных более не требуется для целей обработки персональных данных, уничтожает персональные данные в срок, не превышающий тридцати дней с даты поступления указанного отзыва.</p>
+                <p><strong>5.10.</strong> В случае обращения пользователя сайта к администрации сайта с требованием о прекращении обработки персональных данных администрация сайта в срок, не превышающий десяти рабочих дней с даты получения ей соответствующего требования, прекращает их обработку, за исключением случаев, предусмотренных Законом о персональных данных. Указанный срок может быть продлен, но не более чем на пять рабочих дней в случае направления администрацией сайта в адрес пользователя сайта мотивированного уведомления с указанием причин продления срока предоставления запрашиваемой информации.</p>
+                <p><strong>5.11.</strong> В случае отсутствия возможности уничтожения персональных данных в течение установленного срока, администрация сайта осуществляет блокирование таких персональных данных и обеспечивает уничтожение персональных данных в срок не более чем шесть месяцев, если иной срок не установлен федеральными законами.</p>
+                <p><strong>5.12.</strong> После истечения срока нормативного хранения документов, содержащих персональные данные пользователя сайта, или при наступлении иных законных оснований документы подлежат уничтожению.</p>
+                <p><strong>5.13.</strong> Администрация сайта для этих целей создает экспертную комиссию и проводит экспертизу ценности документов.</p>
+                <p><strong>5.14.</strong> По результатам экспертизы документы, содержащие персональные данные пользователя сайта и подлежащие уничтожению стираются с информационных носителей либо физически уничтожаются сами носители, на которых хранится информация.</p>
+                <p><strong>5.15.</strong> В случае если обработка персональных данных осуществлялась администрацией сайта без использования средств автоматизации, документом, подтверждающим уничтожение персональных данных обучающихся, является акт об уничтожении персональных данных.</p>
+                <p><strong>5.16.</strong> В случае если обработка персональных данных осуществлялась администрацией сайта с использованием средств автоматизации, документами, подтверждающими уничтожение персональных данных обучающихся, являются акт об уничтожении персональных данных и выгрузка из журнала регистрации событий в информационной системе персональных данных.</p>
+            </div>
+
+            <!-- ===== 6. ОТВЕТСТВЕННОСТЬ ===== -->
+            <div class="policy-card">
+                <h2><span class="badge-number">6</span> ОТВЕТСТВЕННОСТЬ ЗА НАРУШЕНИЕ НОРМ, РЕГУЛИРУЮЩИХ ОБРАБОТКУ И ЗАЩИТУ ПЕРСОНАЛЬНЫХ ДАННЫХ ОБУЧАЮЩИХСЯ</h2>
+                <p><strong>6.1.</strong> Лица, виновные в нарушении норм, регулирующих получение, обработку и защиту персональных данных обучающихся, привлекаются к дисциплинарной, материальной, гражданско-правовой, административной и уголовной ответственности в порядке, установленном действующим законодательством Российской Федерации.</p>
+                <p><strong>6.2.</strong> Моральный вред, причиненный пользователю сайта вследствие нарушения его прав, нарушения правил обработки персональных данных, установленных Законом о персональных данных, а также требований к защите персональных данных, установленных в соответствии с названным Федеральным законом, подлежит возмещению в соответствии с законодательством Российской Федерации. Возмещение морального вреда осуществляется независимо от возмещения имущественного вреда и понесенных обучающимся убытков.</p>
+            </div>
+
+            <!-- ===== 7. ИЗМЕНЕНИЕ ПОЛИТИКИ ===== -->
+            <div class="policy-card">
+                <h2><span class="badge-number">7</span> ИЗМЕНЕНИЕ ПОЛИТИКИ КОНФИДЕНЦИАЛЬНОСТИ</h2>
+                <p><strong>7.1.</strong> Настоящая политика конфиденциальности может быть изменена или прекращена администрацией сайта в одностороннем порядке без предварительного уведомления обучающегося. Новая редакция политики конфиденциальности вступает в силу с момента ее размещения на сайте, если иное не предусмотрено новой редакцией политики конфиденциальности.</p>
+                <p><strong>7.2.</strong> Действующая редакция Политики конфиденциальности находится на сайте в информационно-телекоммуникационной сети «Интернет» по адресу: <a href="https://govzalla.ru" style="color: var(--primary); text-decoration: none; font-weight: 500;">https://govzalla.ru</a></p>
+            </div>
+
+            <!-- ===== ПРИЛОЖЕНИЕ №1 ===== -->
+            <div class="policy-card" style="border-left: 4px solid var(--primary);">
+                <h2 style="color: var(--primary-dark);">
+                    <span class="badge-number" style="background: var(--primary); color: #fff;">П</span>
+                    ПРИЛОЖЕНИЕ №1
+                </h2>
+                <p style="font-weight: 600; font-size: 1.1rem; margin-top: -0.5rem;">ФОРМА СОГЛАСИЯ НА ОБРАБОТКУ ПЕРСОНАЛЬНЫХ ДАННЫХ</p>
+
+                <div class="appendix-box">
+                    <p style="font-weight: 600; font-size: 1.05rem; margin-bottom: 0.5rem;">СОГЛАСИЕ НА ОБРАБОТКУ ПЕРСОНАЛЬНЫХ ДАННЫХ</p>
+                    <p style="font-size: 0.9rem;">(в том числе с использованием информационных систем)</p>
+                </div>
+
+                <p>Я, на основании статей 9 Федерального закона от 27 июля 2006 г. N 152-ФЗ «О персональных данных» свободно, своей волей и в своём интересе даю настоящее конкретное, предметное, информированное и однозначное согласие оператору персональных данных Государственному бюджетному учреждению дополнительного профессионального образования «Институт развития образования Чеченской Республики», ИНН 2014003615, юридический адрес: 366007, ЧР, г. Грозный, ул. Лермонтова, 2 (далее — Оператор).</p>
+
+                <h3>1. ЦЕЛИ ОБРАБОТКИ ПЕРСОНАЛЬНЫХ ДАННЫХ</h3>
+                <p>Мои персональные данные обрабатываются в следующих целях:</p>
+                <ul class="list-bullet">
+                    <li>организация и проведение обучения по образовательным программам дополнительного профессионального образования;</li>
+                    <li>проверка наличия документа об образовании, дающего право на обучение по программе ДПО;</li>
+                    <li>оформление и выдача документа об обучении (удостоверение о повышении квалификации / диплом о профессиональной переподготовке);</li>
+                    <li>внесение сведений о выданном документе об обучении в ФИС ФРДО;</li>
+                    <li>заключение и исполнение договора об оказании образовательных услуг;</li>
+                    <li>учёт и статистическая отчётность;</li>
+                    <li>информирование обучающегося о ходе обучения.</li>
+                </ul>
+
+                <h3>2. ПЕРЕЧЕНЬ ПЕРСОНАЛЬНЫХ ДАННЫХ</h3>
+                <p>Даю согласие на обработку следующих персональных данных:</p>
+                <ul class="list-bullet">
+                    <li>фамилия, имя, отчество;</li>
+                    <li>дата рождения;</li>
+                    <li>паспортные данные (серия, номер, кем и когда выдан);</li>
+                    <li>СНИЛС;</li>
+                    <li>контактные данные (номер телефона, адрес электронной почты);</li>
+                    <li>сведения об образовании (наименование учебного заведения, специальность, год окончания, реквизиты диплома);</li>
+                    <li>копию свидетельства о регистрации брака (при необходимости);</li>
+                    <li>системные данные ID пользователя.</li>
+                </ul>
+
+                <h3>3. ПЕРЕЧЕНЬ ДЕЙСТВИЙ С ПЕРСОНАЛЬНЫМИ ДАННЫМИ</h3>
+                <p>Оператор вправе совершать следующие действия: сбор, запись, систематизация, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передача в ФИС ФРДО в установленном законом объёме, обезличивание, блокирование, удаление, уничтожение. Распространение (предоставление неограниченному кругу лиц) персональных данных не осуществляется.</p>
+
+                <h3>4. ТЕХНИЧЕСКАЯ ИНФРАСТРУКТУРА ХРАНЕНИЯ ПЕРСОНАЛЬНЫХ ДАННЫХ</h3>
+                <p>Персональные данные обучающегося, указанные в разделе 2 настоящего согласия, размещаются и хранятся Оператором на технической инфраструктуре (виртуальные серверы) ООО «ТАЙМВЭБ.КЛАУД»:</p>
+                <div class="policy-table-wrap">
+                    <table class="policy-table">
+                        <tbody>
+                            <tr><td style="font-weight: 600;">Наименование организации</td><td>ООО «ТАЙМВЭБ.КЛАУД», ИНН 7810945525</td></tr>
+                            <tr><td style="font-weight: 600;">Адрес (место нахождения)</td><td>420500, Республика Татарстан, М.р-н Верхнеуслонский, г.п. Город Иннополис, г. Иннополис, ул Университетская, д. 7, оф 605.</td></tr>
+                            <tr><td style="font-weight: 600;">Наименование платформы / сервиса</td><td>Платформа ТАЙМВЭБ.КЛАУД</td></tr>
+                            <tr><td style="font-weight: 600;">Цель передачи данных</td><td>Предоставление вычислительной инфраструктуры (виртуальных серверов Оператору)</td></tr>
+                            <tr><td style="font-weight: 600;">Действия с данными</td><td>Предоставление вычислительных мощностей и сетевой инфраструктуры; ООО «ТАЙМВЭБ.КЛАУД» не имеет доступа к персональным данным, размещённым в информационной системе Оператора</td></tr>
+                            <tr><td style="font-weight: 600;">Место хранения данных</td><td>Серверы, расположенные на территории Российской Федерации</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Провайдер технической инфраструктуры (ООО «ТАЙМВЭБ.КЛАУД», ИНН 7810945525) не является обработчиком персональных данных по смыслу Федерального закона от 27.07.2006 № 152-ФЗ, поскольку не имеет доступа к содержимому информационной системы Оператора и не совершает каких-либо операций с персональными данными обучающихся. Оператор является единственным лицом, имеющим доступ к персональным данным и несёт полную ответственность за их обработку в соответствии с требованиями законодательства Российской Федерации.</p>
+
+                <h3>5. СРОК ДЕЙСТВИЯ СОГЛАСИЯ</h3>
+                <p>Настоящее согласие действует с момента его подписания до истечения срока хранения личного дела обучающегося, установленного номенклатурой дел Оператора. Согласие хранится в течение срока хранения персональных данных (10 лет) и еще 3 года дополнительно.</p>
+
+                <h3>6. ПРАВО НА ОТЗЫВ СОГЛАСИЯ</h3>
+                <p>Я вправе в любое время отозвать настоящее согласие, направив письменное заявление в адрес Оператора: 366007, ЧР, г. Грозный, ул. Лермонтова, 2. После получения отзыва Оператор обязан прекратить обработку персональных данных и обеспечить их уничтожение в срок, не превышающий 30 (тридцати) дней, если иное не предусмотрено федеральным законом. Отзыв согласия не является основанием для прекращения выдачи ранее оформленных документов об обучении.</p>
+
+                <h3>7. ПРАВА СУБЪЕКТА ПЕРСОНАЛЬНЫХ ДАННЫХ</h3>
+                <p>Я ознакомлен(а) со своими правами субъекта персональных данных, предусмотренными главой 3 Федерального закона от 27.07.2006 № 152-ФЗ, в том числе правом на получение информации об обработке своих персональных данных, их уточнение, блокирование или уничтожение.</p>
+
+                <h3>8. СПОСОБ ВЫРАЖЕНИЯ СОГЛАСИЯ</h3>
+                <p>Настоящее согласие оформляется в форме электронного документа и выражается путём проставления обучающимся отметки (активация чекбокса) в соответствующем поле информационной системы Оператора после прохождения процедуры обязательной идентификации (авторизации по логину и паролю учётной записи). Проставление такой отметки признаётся простой электронной подписью (ПЭП) обучающихся в соответствии с ч. 2 ст. 6 Федерального закона от 06.04.2011 № 63-ФЗ «Об электронной подписи» и является равнозначным собственноручной подписи на бумажном носителе. Факт проставления отметки фиксируется информационной системой автоматически с указанием: идентификатора учётной записи обучающегося, даты и времени проставления отметки (по московскому времени), IP-адреса устройства, с которого выполнено действие.</p>
+
+                <div class="checkbox-sample">
+                    <span class="check-icon"><i class="bi bi-check-square-fill"></i></span>
+                    <div class="check-text">
+                        <strong>☐ Я понимаю и принимаю условия настоящего Согласия</strong>, выражаю своё добровольное согласие на обработку моих персональных данных Оператором.
+                    </div>
+                </div>
+
+                <h3>9. ЮРИДИЧЕСКИЙ СТАТУС ЭЛЕКТРОННОГО СОГЛАСИЯ И ИДЕНТИФИКАЦИЯ ОБУЧАЮЩЕГОСЯ</h3>
+                <p>Настоящее согласие, выраженное путём активации чекбокса авторизованным обучающимся в информационной системе Оператора, признаётся электронным документом, подписанным простой электронной подписью (ПЭП), и имеет равную юридическую силу с согласием, оформленным на бумажном носителе и подписанным собственноручно, на основании ч. 2 ст. 6 Федерального закона от 06.04.2011 № 63-ФЗ «Об электронной подписи».</p>
+                <p>Обучающийся подтверждает, что: (а) учётная запись в информационной системе Оператора создана лично им; (б) логин и пароль являются конфиденциальными и не передавались третьим лицам; (в) при активации чекбокса обучающийся действует добровольно, осознанно и от своего имени.</p>
+
+                <div class="meta-note">
+                    <i class="bi bi-info-circle me-2" style="color: var(--primary);"></i>
+                    Документ составлен в соответствии с требованиями Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных» (в ред. Федеральных законов № 266-ФЗ от 14.07.2022, № 156-ФЗ от 24.06.2025), а также с учётом изменений, вступивших в силу с 01.09.2025.
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<!-- ===== ФУТЕР ===== -->
+<footer class="footer-light">
+    <div class="container py-4 py-md-5">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" alt="ИРО ЧР" style="height: 50px; margin-bottom: 12px; border-radius: 8px;" loading="lazy" width="50" height="50" decoding="async">
+                <h5 style="color: var(--dark); font-size: clamp(0.95rem, 1.2vw, 1.1rem);">ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
+                <p class="small" style="color: var(--gray); opacity: 0.7;">Повышение квалификации педагогических работников</p>
+                <div class="social-icons mt-3">
+                    <a href="https://vk.com/public215702903" target="_blank" title="ВКонтакте" class="vk-link" style="color: var(--gray); border-color: var(--border);">ВК</a>
+                    <a href="https://govzalla.ru/" target="_blank" title="Сайт организации" style="color: var(--gray); border-color: var(--border);"><i class="bi bi-globe2"></i></a>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <h5 style="color: var(--dark);">Контакты</h5>
+                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-geo-alt me-2" style="color: var(--primary);"></i>г. Грозный, ул. Лермонтова, 2</p>
+                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-telephone me-2" style="color: var(--primary);"></i>+7 (8712) 21-22-24</p>
+                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-envelope me-2" style="color: var(--primary);"></i>ipkro-chr@mail.ru</p>
+                <p class="small" style="color: var(--gray);"><i class="bi bi-clock me-2" style="color: var(--primary);"></i>Пн-Пт: 9:00 - 18:00</p>
+            </div>
+            <div class="col-md-5 mb-4">
+                <h5 style="color: var(--dark);">Мы на карте</h5>
+                <a href="/map" class="map-card-link">
+                    <div class="map-container" id="footer-map" style="width: 100%; height: 200px; border-radius: 8px; cursor: pointer; background: #e8f0fe;"></div>
+                </a>
+                <p class="small mt-2 text-center" style="color: var(--gray);">
+                    <i class="bi bi-geo-alt me-1" style="color: var(--primary);"></i> г. Грозный, ул. Лермонтова, 2
+                    <a href="/map" class="ms-2" style="color: var(--gray); opacity: 0.6;">(открыть на полный экран →)</a>
+                </p>
+            </div>
+        </div>
+        <hr style="border-color: var(--border);">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <p class="mb-0 small" style="color: var(--gray); opacity: 0.5;">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ===== ЧАТ-БОТ ===== -->
+<div class="chatbot-container" id="chatbotContainer">
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Помощь">
+        <i class="bi bi-chat-dots-fill"></i>
+        <span class="chatbot-badge">?</span>
+    </button>
+    <div class="chatbot-window" id="chatbotWindow">
+        <div class="chatbot-header">
+            <div class="chatbot-header-left">
+                <div class="chatbot-header-avatar"><i class="bi bi-robot"></i></div>
+                <div>
+                    <div class="chatbot-header-title">Помощник ИРО ЧР</div>
+                    <div class="chatbot-header-subtitle">Часто задаваемые вопросы</div>
+                </div>
+            </div>
+            <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Закрыть"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="chatbot-body" id="chatbotBody">
+            <div class="chatbot-greeting">
+                <span class="greeting-icon"></span>
+                <h6>Здравствуйте!</h6>
+                <p>Выберите вопрос, чтобы получить ответ</p>
+            </div>
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-search"></i></span>
+                    <span class="q-text">Как найти нужный курс?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Чтобы найти интересующий вас курс:</p>
+                    <span class="step">Перейдите в раздел <strong class="highlight">«Курсы»</strong> в верхней навигационной панели.</span>
+                    <span class="step">Используйте поиск по <strong>названию</strong> или <strong>ключевым словам</strong>.</span>
+                    <span class="step">Отфильтруйте курсы по <strong>категории</strong>, чтобы быстрее найти нужный.</span>
+                    <span class="step">Нажмите на карточку курса, чтобы ознакомиться с программой и записаться.</span>
+                </div>
+            </div>
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-play-circle"></i></span>
+                    <span class="q-text">Я записался на курс. Как начать обучение?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Для начала обучения выполните следующие шаги:</p>
+                    <span class="step">Перейдите в раздел <strong class="highlight">«Кабинет»</strong> в верхней навигационной панели.</span>
+                    <span class="step">В личном кабинете откройте вкладку <strong class="highlight">«Мои курсы»</strong>.</span>
+                    <span class="step">Найдите запись о курсе, на который вы записались, и нажмите кнопку <strong class="highlight">«Перейти в Moodle»</strong>.</span>
+                    <span class="step">На странице входа в Moodle введите данные, которые были отправлены на вашу <strong>электронную почту</strong> при регистрации.</span>
+                </div>
+            </div>
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-exclamation-triangle"></i></span>
+                    <span class="q-text">Не могу записаться на курс. В чём причина?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Наиболее частой причиной является <strong>незаполненный профиль</strong>.</p>
+                    <span class="step">Перед записью на курс необходимо заполнить раздел <strong class="highlight">«Мои данные»</strong> в личном кабинете.</span>
+                    <span class="step">Укажите вашу <strong>должность, место работы, контактный телефон</strong> и другую запрашиваемую информацию.</span>
+                    <span class="step">После сохранения данных попробуйте записаться на курс снова.</span>
+                </div>
+            </div>
+            <div class="chatbot-question" onclick="toggleQuestion(this)">
+                <div class="d-flex align-items-center">
+                    <span class="q-icon"><i class="bi bi-file-text"></i></span>
+                    <span class="q-text">Как отозвать согласие на обработку данных?</span>
+                    <span class="q-arrow"><i class="bi bi-chevron-down"></i></span>
+                </div>
+                <div class="q-content">
+                    <p>Для отзыва согласия на обработку персональных данных:</p>
+                    <span class="step">Направьте <strong>письменное заявление</strong> на официальную электронную почту организации:</span>
+                    <span class="step" style="text-align: center; font-weight: 600; color: var(--primary); font-size: 1rem; padding: 8px 0;">
+                        <i class="bi bi-envelope-fill me-2"></i>ipkro-chr@mail.ru
+                    </span>
+                    <span class="step">В письме укажите ваши <strong>ФИО</strong> и <strong>контактные данные</strong> для идентификации.</span>
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-footer">
+            <div class="chatbot-email">
+                <i class="bi bi-envelope me-1"></i>
+                Не нашли ответ? Напишите нам:
+                <a href="mailto:ipkro-chr@mail.ru">ipkro-chr@mail.ru</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== СКРИПТЫ ===== -->
+<script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Навигация
+    (function initNavbar() {
+        const navbar = document.getElementById('mainNav');
+        if (!navbar) return;
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    navbar.classList.toggle('scrolled', window.scrollY > 30);
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    })();
+
+    // Чат-бот
+    window.toggleChatbot = function() {
+        const windowEl = document.getElementById('chatbotWindow');
+        const toggle = document.getElementById('chatbotToggle');
+        if (windowEl.classList.contains('open')) {
+            windowEl.classList.remove('open');
+            toggle.classList.remove('active');
+        } else {
+            windowEl.classList.add('open');
+            toggle.classList.add('active');
+            document.getElementById('chatbotBody').scrollTop = 0;
+        }
+    };
+
+    window.toggleQuestion = function(element) {
+        const content = element.querySelector('.q-content');
+        const arrow = element.querySelector('.q-arrow i');
+        if (content.classList.contains('show')) {
+            content.classList.remove('show');
+            if (arrow) arrow.className = 'bi bi-chevron-down';
+        } else {
+            document.querySelectorAll('.chatbot-question .q-content').forEach(c => c.classList.remove('show'));
+            document.querySelectorAll('.chatbot-question .q-arrow i').forEach(a => {
+                a.className = 'bi bi-chevron-down';
+            });
+            content.classList.add('show');
+            if (arrow) arrow.className = 'bi bi-chevron-up';
+            setTimeout(() => { element.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+        }
+    };
+
+    document.addEventListener('click', function(event) {
+        const container = document.getElementById('chatbotContainer');
+        const windowEl = document.getElementById('chatbotWindow');
+        if (windowEl && windowEl.classList.contains('open') && container && !container.contains(event.target)) {
+            window.toggleChatbot();
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const windowEl = document.getElementById('chatbotWindow');
+            if (windowEl && windowEl.classList.contains('open')) window.toggleChatbot();
+        }
+    });
+
+    // Яндекс карты (ленивая загрузка)
+    (function lazyLoadMaps() {
+        const mapElement = document.getElementById('footer-map');
+        if (!mapElement) return;
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        loadMapsScript();
+                        observer.disconnect();
+                    }
+                });
+            }, { rootMargin: '200px' });
+            observer.observe(mapElement);
+        } else {
+            setTimeout(loadMapsScript, 3000);
+        }
+
+        function loadMapsScript() {
+            if (typeof ymaps !== 'undefined') { initMaps(); return; }
+            const script = document.createElement('script');
+            script.src = 'https://api-maps.yandex.ru/2.1/?apikey=8fafeffd-5aba-46fe-8411-62e55c7943af&lang=ru_RU&load=Map,Placemark,control.ZoomControl';
+            script.async = true;
+            script.defer = true;
+            script.onload = function() {
+                if (typeof ymaps !== 'undefined') ymaps.ready(initMaps);
+            };
+            document.head.appendChild(script);
+        }
+
+        function initMaps() {
+            try {
+                const coords = [43.3181, 45.6941];
+                const map = new ymaps.Map('footer-map', {
+                    center: coords,
+                    zoom: 16,
+                    controls: ['zoomControl']
+                });
+                const placemark = new ymaps.Placemark(coords, {
+                    hintContent: 'ГБУ ДПО «ИРО ЧР»',
+                    balloonContent: `
+                        <div style="font-family: 'Inter', sans-serif; min-width: 200px;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border-bottom: 2px solid #1a4f7a; padding-bottom: 8px;">
+                                <img src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" style="height: 40px;" alt="logo">
+                                <strong style="color: #1a4f7a; font-size: 14px;">ГБУ ДПО «ИРО ЧР»</strong>
+                            </div>
+                            <p style="margin: 0 0 5px 0; font-size: 12px;">
+                                <strong>Институт развития образования<br>Чеченской Республики</strong>
+                            </p>
+                            <hr style="margin: 8px 0;">
+                            <p style="margin: 5px 0; font-size: 12px;">
+                                <i class="bi bi-geo-alt" style="color: #1a4f7a;"></i> г. Грозный, ул. Лермонтова, 2<br>
+                                <i class="bi bi-telephone" style="color: #1a4f7a;"></i> +7 (8712) 21-22-24<br>
+                                <i class="bi bi-envelope" style="color: #1a4f7a;"></i> ipkro-chr@mail.ru<br>
+                                <i class="bi bi-clock" style="color: #1a4f7a;"></i> Пн-Пт: 9:00 - 18:00
+                            </p>
+                            <hr style="margin: 8px 0;">
+                            <a href="/map" style="color: #1a4f7a; text-decoration: none; font-size: 12px; font-weight: 500;">Подробная карта →</a>
+                        </div>
+                    `
+                }, { preset: 'islands#circleIcon', iconColor: '#1a4f7a' });
+                map.geoObjects.add(placemark);
+            } catch(e) { console.warn('Map init error:', e); }
+        }
+    })();
+</script>
+</body>
+</html>

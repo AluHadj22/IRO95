@@ -141,24 +141,18 @@
                             </div>
                         </div>
                         
-                        <!-- Чекбоксы -->
+                        <!-- ===== ЧЕКБОКСЫ СОГЛАСИЙ (БЕЗ ОФЕРТЫ) ===== -->
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agree_policy" required>
                                 <label class="form-check-label" for="agree_policy">
-                                    Я принимаю <a href="/privacy-policy" target="_blank">Политику конфиденциальности</a> <span class="text-danger">*</span>
+                                    Я принимаю <a href="/police" target="_blank">Политику конфиденциальности</a> <span class="text-danger">*</span>
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agree_terms" required>
                                 <label class="form-check-label" for="agree_terms">
-                                    Я принимаю <a href="/terms" target="_blank">Пользовательское соглашение</a> <span class="text-danger">*</span>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="agree_offer" required>
-                                <label class="form-check-label" for="agree_offer">
-                                    Я принимаю условия <a href="/offer" target="_blank">Договора оферты</a> <span class="text-danger">*</span>
+                                    Я даю <a href="/accept" target="_blank">Согласие на обработку персональных данных</a> <span class="text-danger">*</span>
                                 </label>
                             </div>
                         </div>
@@ -306,17 +300,13 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     
     const btn = document.getElementById('registerBtn');
     
-    // Проверка чекбоксов
+    // Проверка чекбоксов (только политика и согласие на обработку ПД)
     if (!document.getElementById('agree_policy').checked) {
         if (window.showToast) window.showToast('Необходимо принять Политику конфиденциальности', 'danger');
         return;
     }
     if (!document.getElementById('agree_terms').checked) {
-        if (window.showToast) window.showToast('Необходимо принять Пользовательское соглашение', 'danger');
-        return;
-    }
-    if (!document.getElementById('agree_offer').checked) {
-        if (window.showToast) window.showToast('Необходимо принять условия Договора оферты', 'danger');
+        if (window.showToast) window.showToast('Необходимо дать Согласие на обработку персональных данных', 'danger');
         return;
     }
     

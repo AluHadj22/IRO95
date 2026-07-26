@@ -7,6 +7,7 @@ from app.database import get_db
 from app.services.excel_service import generate_full_registrations_excel
 from app.services.excel_export_service import ExcelExportService, generate_export_filename
 from app.services.document_export_service import DocumentExportService
+from app.services.moodle_service import MoodleService
 from typing import List, Optional
 import os
 import shutil
@@ -220,6 +221,22 @@ def delete_category(
     db.delete(category)
     db.commit()
     return {"message": "Category deleted"}
+
+
+@router.get("/moodle-courses")
+def get_moodle_courses(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    moodle = MoodleService()
+    try:
+        courses = moodle.get_courses()
+        return courses
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Ошибка загрузки курсов из Moodle: {str(e)}"
+        )
 
 
 @router.get("/courses")
@@ -521,7 +538,6 @@ def get_users_with_data(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    """Получить список пользователей с их данными для отображения в админке"""
     export_service = ExcelExportService(db)
     result = export_service.get_users_list_with_data(limit, offset)
     return result

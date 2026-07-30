@@ -30,8 +30,6 @@ ALLOWED_DOCUMENT_EXTENSIONS = {'.png', '.jpg', '.jpeg', '.pdf'}
 encryption = EncryptionService()
 
 
-# ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
-
 def validate_document_file(file: UploadFile) -> None:
     ext = os.path.splitext(file.filename)[1].lower()
     if ext not in ALLOWED_DOCUMENT_EXTENSIONS:
@@ -110,8 +108,6 @@ def delete_file(file_url: str) -> bool:
     return False
 
 
-# ========== ЛИЧНЫЕ ДАННЫЕ ==========
-
 @router.get("/personal-data")
 def get_personal_data(
     db: Session = Depends(get_db),
@@ -145,8 +141,6 @@ def update_personal_data(
     
     return {"message": "Личные данные обновлены"}
 
-
-# ========== ОБРАЗОВАНИЕ ==========
 
 @router.get("/education")
 def get_education(
@@ -319,8 +313,6 @@ async def upload_diploma(
         message="Диплом загружен"
     )
 
-
-# ========== РАБОТА ==========
 
 @router.get("/work")
 def get_work(
@@ -531,8 +523,6 @@ def delete_work(
     return {"message": "Место работы удалено"}
 
 
-# ========== ПОЧТОВЫЙ АДРЕС ==========
-
 @router.get("/address")
 def get_address(
     db: Session = Depends(get_db),
@@ -608,8 +598,6 @@ def update_address(
     
     return {"message": "Адрес обновлен"}
 
-
-# ========== ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ (С ШИФРОВАНИЕМ) ==========
 
 @router.get("/additional-info")
 def get_additional_info(
@@ -699,8 +687,6 @@ def update_additional_info(
     
     return {"message": "Дополнительная информация обновлена"}
 
-
-# ========== ЗАГРУЗКА ДОКУМЕНТОВ ==========
 
 @router.post("/upload/snils")
 async def upload_snils(
@@ -954,8 +940,6 @@ async def delete_marriage_certificate(
     )
 
 
-# ========== УДАЛЕНИЕ ДОКУМЕНТОВ (ОБЩЕЕ) ==========
-
 @router.delete("/document/{doc_type}")
 async def delete_document(
     doc_type: str,
@@ -1030,8 +1014,6 @@ async def delete_document(
     return {"message": f"Документ {doc_type} удален"}
 
 
-# ========== ПОЛНЫЙ ПРОФИЛЬ (ОПТИМИЗИРОВАННЫЙ) ==========
-
 @router.get("/full")
 def get_full_profile(
     db: Session = Depends(get_db),
@@ -1077,8 +1059,6 @@ def get_full_profile(
         is_profile_complete=user.is_profile_complete()
     )
 
-
-# ========== ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ ==========
 
 @router.get("/check-complete")
 def check_profile_complete(

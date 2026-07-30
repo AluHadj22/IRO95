@@ -87,6 +87,7 @@ def get_courses(
     
     user_favorites = set()
     user_watch_later = set()
+    user_registered = set()
     
     if current_user:
         favorites = db.query(models.UserFavorite).filter(
@@ -98,6 +99,11 @@ def get_courses(
             models.UserWatchLater.user_id == current_user.id
         ).all()
         user_watch_later = {wl.course_id for wl in watch_later}
+        
+        registrations = db.query(models.CourseRegistration).filter(
+            models.CourseRegistration.user_id == current_user.id
+        ).all()
+        user_registered = {reg.course_id for reg in registrations}
     
     result = []
     for c in courses:
@@ -120,6 +126,7 @@ def get_courses(
             "moodle_course_id": c.moodle_course_id,
             "is_favorite": c.id in user_favorites,
             "is_watch_later": c.id in user_watch_later,
+            "is_registered": c.id in user_registered,
             "start_date": c.start_date,
             "end_date": c.end_date,
             "speakers": [
@@ -208,6 +215,7 @@ def get_course(
     
     is_favorite = False
     is_watch_later = False
+    is_registered = False
     
     if current_user:
         fav = db.query(models.UserFavorite).filter(
@@ -225,6 +233,14 @@ def get_course(
             )
         ).first()
         is_watch_later = wl is not None
+        
+        reg = db.query(models.CourseRegistration).filter(
+            and_(
+                models.CourseRegistration.user_id == current_user.id,
+                models.CourseRegistration.course_id == course_id
+            )
+        ).first()
+        is_registered = reg is not None
     
     return {
         "id": course.id,
@@ -248,6 +264,7 @@ def get_course(
         "moodle_course_id": course.moodle_course_id,
         "is_favorite": is_favorite,
         "is_watch_later": is_watch_later,
+        "is_registered": is_registered,
         "speakers": [
             {
                 "id": s.id,

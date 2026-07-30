@@ -13,6 +13,7 @@ import os
 import shutil
 import uuid
 import magic
+import json
 from datetime import datetime
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
@@ -338,7 +339,9 @@ def get_course_registrations(
         "course": {
             "id": course.id,
             "title": course.title,
-            "moodle_course_id": course.moodle_course_id
+            "moodle_course_id": course.moodle_course_id,
+            "current_participants": course.current_participants,
+            "max_participants": course.max_participants
         },
         "registrations": [{
             "id": r.id,
@@ -348,8 +351,202 @@ def get_course_registrations(
             "position": r.user.position,
             "phone": r.user.phone,
             "organization": r.user.organization,
-            "registered_at": r.registered_at
-        } for r in registrations]
+            "registered_at": r.registered_at,
+            "is_active": not r.user.is_blocked
+        } for r in registrations],
+        "total": len(registrations)
+    }
+
+
+@router.delete("/courses/{course_id}/registrations")
+def remove_course_registrations(
+    course_id: int,
+    user_ids: List[int] = Query(..., description="Список ID пользователей для удаления"),
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    # 1. Получаем курс
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Курс не найден"
+        )
+    
+    if not user_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Не указаны ID пользователей для удаления"
+        )
+    
+    existing_users = db.query(models.User).filter(models.User.id.in_(user_ids)).all()
+    existing_user_ids = [u.id for u in existing_users]
+    not_found = set(user_ids) - set(existing_user_ids)
+    
+    if not_found:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Пользователи с ID {list(not_found)} не найдены"
+        )
+    
+    registrations = db.query(models.CourseRegistration).filter(
+        models.CourseRegistration.course_id == course_id,
+        models.CourseRegistration.user_id.in_(user_ids)
+    ).all()
+    
+    if not registrations:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ни один из указанных пользователей не зарегистрирован на этот курс"
+        )
+    
+    registered_user_ids = [r.user_id for r in registrations]
+    not_registered = set(user_ids) - set(registered_user_ids)
+    
+    # 2. Удаляем регистрации
+    for reg in registrations:
+        db.delete(reg)
+    
+    # ✅ 3. ВАЖНО: обновляем курс ПЕРЕД commit, но ПОСЛЕ удаления
+    # Перезагружаем курс из БД, чтобы получить актуальное состояние
+    db.flush()  # Принудительно отправляем DELETE в БД
+    
+    # ✅ 4. Пересчитываем количество участников
+    new_count = db.query(models.CourseRegistration).filter(
+        models.CourseRegistration.course_id == course_id
+    ).count()
+    
+    course.current_participants = new_count
+    
+    # 5. Логируем для проверки
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"=== УДАЛЕНИЕ РЕГИСТРАЦИЙ ===")
+    logger.info(f"course_id: {course_id}")
+    logger.info(f"course.title: {course.title}")
+    logger.info(f"Новое количество участников: {new_count}")
+    logger.info(f"course.current_participants: {course.current_participants}")
+    
+    for user_id in registered_user_ids:
+        activity = models.UserActivityLog(
+            user_id=user_id,
+            action_type="course_unregister_admin",
+            course_id=course_id,
+            extra_data=json.dumps({
+                "course_title": course.title,
+                "admin_id": current_user.id,
+                "admin_name": current_user.full_name
+            })
+        )
+        db.add(activity)
+    
+    # 6. Сохраняем изменения
+    db.commit()
+    
+    # 7. Для уверенности - еще раз перезагружаем курс после commit
+    db.refresh(course)
+    
+    return {
+        "message": f"Успешно удалено {len(registered_user_ids)} пользователей с курса",
+        "course_id": course_id,
+        "course_title": course.title,
+        "removed_users": registered_user_ids,
+        "not_registered": list(not_registered) if not_registered else [],
+        "remaining_participants": course.current_participants,
+        "updated_participants": course.current_participants,
+        "moodle_course_id": course.moodle_course_id
+    }
+
+
+@router.delete("/courses/{course_id}/registrations/all")
+def remove_all_course_registrations(
+    course_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if not course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Курс не найден"
+        )
+    
+    registrations = db.query(models.CourseRegistration).filter(
+        models.CourseRegistration.course_id == course_id
+    ).all()
+    
+    if not registrations:
+        return {
+            "message": "На курсе нет зарегистрированных пользователей",
+            "course_id": course_id,
+            "course_title": course.title,
+            "removed_count": 0,
+            "remaining_participants": 0
+        }
+    
+    removed_user_ids = [r.user_id for r in registrations]
+    
+    for reg in registrations:
+        db.delete(reg)
+    
+    # ✅ Обновляем курс
+    db.flush()
+    course.current_participants = 0
+    
+    for user_id in removed_user_ids:
+        activity = models.UserActivityLog(
+            user_id=user_id,
+            action_type="course_unregister_all_admin",
+            course_id=course_id,
+            extra_data=json.dumps({
+                "course_title": course.title,
+                "admin_id": current_user.id,
+                "admin_name": current_user.full_name
+            })
+        )
+        db.add(activity)
+    
+    db.commit()
+    db.refresh(course)
+    
+    return {
+        "message": f"Все {len(removed_user_ids)} пользователей удалены с курса",
+        "course_id": course_id,
+        "course_title": course.title,
+        "removed_count": len(removed_user_ids),
+        "removed_users": removed_user_ids,
+        "remaining_participants": 0
+    }
+    
+    removed_user_ids = [r.user_id for r in registrations]
+    
+    for reg in registrations:
+        db.delete(reg)
+    
+    course.current_participants = 0
+    
+    for user_id in removed_user_ids:
+        activity = models.UserActivityLog(
+            user_id=user_id,
+            action_type="course_unregister_all_admin",
+            course_id=course_id,
+            extra_data=json.dumps({
+                "course_title": course.title,
+                "admin_id": current_user.id,
+                "admin_name": current_user.full_name
+            })
+        )
+        db.add(activity)
+    
+    db.commit()
+    
+    return {
+        "message": f"Все {len(removed_user_ids)} пользователей удалены с курса",
+        "course_id": course_id,
+        "course_title": course.title,
+        "removed_count": len(removed_user_ids),
+        "removed_users": removed_user_ids,
+        "remaining_participants": 0
     }
 
 

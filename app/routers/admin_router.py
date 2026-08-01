@@ -1088,43 +1088,42 @@ async def admin_delete_user(
     db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    stmt = select(models.User).where(models.User.id == user_id)
-    result = await db.execute(stmt)
+    from sqlalchemy import select, func
+    
+    result = await db.execute(
+        select(models.User).filter(models.User.id == user_id)
+    )
     user = result.scalar_one_or_none()
+    
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="User not found")
     
     if user.id == current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Нельзя удалить самого себя"
-        )
+        raise HTTPException(status_code=400, detail="Нельзя удалить самого себя")
     
     if user.role == models.UserRole.ADMIN:
-        admin_count_stmt = select(func.count()).select_from(models.User).where(
-            models.User.role == models.UserRole.ADMIN
+        result = await db.execute(
+            select(func.count()).select_from(models.User).filter(
+                models.User.role == models.UserRole.ADMIN
+            )
         )
-        admin_count_result = await db.execute(admin_count_stmt)
-        admin_count = admin_count_result.scalar() or 0
+        admin_count = result.scalar()
         if admin_count <= 1:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=400,
                 detail="Нельзя удалить последнего администратора. Сначала назначьте другого администратора."
             )
     
-    sync_db = SessionLocal()
-    try:
-        doc_service = DocumentExportService(sync_db)
+    # Используем run_sync для синхронных операций с документами
+    def delete_documents_sync(session):
+        doc_service = DocumentExportService(session)
         doc_service.delete_all_user_documents(user)
-    finally:
-        sync_db.close()
+    
+    await db.run_sync(delete_documents_sync)
     
     await db.delete(user)
     await db.commit()
-    
+
     # Очищаем кэш статистики
     await cache_service.delete("admin_stats")
     

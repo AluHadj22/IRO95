@@ -96,7 +96,6 @@ class MoodleSyncService:
 
             self.db.commit()
 
-            self._notify_user(user, course)
             self._log_activity(user, course, True)
 
             logger.info(f"Задача {task.id} успешно завершена")
@@ -173,27 +172,6 @@ class MoodleSyncService:
         except Exception as e:
             logger.error(f"Ошибка зачисления пользователя {user.email} на курс {course.moodle_course_id}: {str(e)}")
             raise
-
-    def _notify_user(self, user: User, course: Course):
-        """
-        Уведомление пользователя об успешной синхронизации.
-        """
-        try:
-            logger.info(f"Отправка уведомления пользователю {user.email} о зачислении на курс {course.id}")
-
-            email_service.send_welcome_email(
-                to_email=user.email,
-                full_name=user.full_name,
-                moodle_username=user.email,
-                moodle_password="Пароль был отправлен при регистрации",
-                moodle_url=settings.MOODLE_URL,
-                moodle_course_name=course.title
-            )
-
-            logger.info(f"Уведомление отправлено пользователю {user.email}")
-
-        except Exception as e:
-            logger.error(f"Ошибка отправки уведомления пользователю {user.email}: {str(e)}")
 
     def _notify_admin(self, user: User, course: Course, error: str):
         """

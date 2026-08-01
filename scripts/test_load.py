@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 # ============================================================
 
 BASE_URL = "http://localhost:8000"
-COURSE_ID = 1
+COURSE_ID = 19
 NUM_USERS = 50
 MAX_WORKERS = 1  # ✅ УМЕНЬШЕНО ДО 1 (последовательные запросы)
 DELAY_BETWEEN_REQUESTS = 1.5  # ✅ УВЕЛИЧЕНО ДО 1.5 СЕКУНД

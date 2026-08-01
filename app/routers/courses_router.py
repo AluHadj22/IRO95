@@ -1,15 +1,19 @@
 # app/routers/courses_router.py
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import or_, and_
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, or_, and_, func
+from sqlalchemy.orm import selectinload, joinedload
 from app import models, schemas, auth
-from app.database import get_db
+from app.database import get_async_db, SessionLocal
 from app.services.moodle_service import MoodleService
+from app.services.moodle_sync_service import MoodleSyncService
+from app.services.cache_service import cached, cache_service
 from app.dependencies import require_complete_profile
 from typing import Optional
 import json
 import os
 from datetime import datetime
+import hashlib
 
 router = APIRouter(prefix="/api/courses", tags=["Courses"])
 
@@ -54,22 +58,36 @@ def delete_file_from_disk(file_url: str) -> bool:
     return False
 
 
-@router.get("/")
-def get_courses(
-    category_id: Optional[int] = Query(None),
-    search: Optional[str] = Query(None),
-    limit: int = Query(50, ge=1, le=200),
-    offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db),
-    current_user: Optional[models.User] = Depends(auth.get_current_user_optional)
-):
-    query = db.query(models.Course).filter(models.Course.is_active == True)
+def generate_courses_cache_key(category_id: Optional[int], search: Optional[str], limit: int, offset: int) -> str:
+    """Генерация ключа кэша для списка курсов"""
+    parts = ["courses_list"]
+    if category_id is not None:
+        parts.append(f"cat={category_id}")
+    if search is not None:
+        # Ограничиваем длину поискового запроса для ключа
+        search_part = search[:50] if search else ""
+        parts.append(f"q={search_part}")
+    parts.append(f"l={limit}")
+    parts.append(f"o={offset}")
+    return ":".join(parts)
+
+
+async def get_courses_from_db(
+    category_id: Optional[int],
+    search: Optional[str],
+    limit: int,
+    offset: int,
+    db: AsyncSession,
+    current_user: Optional[models.User] = None
+) -> dict:
+    """Вспомогательная функция для получения списка курсов из БД"""
+    stmt = select(models.Course).where(models.Course.is_active == True)
     
     if category_id:
-        query = query.filter(models.Course.category_id == category_id)
+        stmt = stmt.where(models.Course.category_id == category_id)
     
     if search:
-        query = query.filter(
+        stmt = stmt.where(
             or_(
                 models.Course.title.ilike(f"%{search}%"),
                 models.Course.description.ilike(f"%{search}%"),
@@ -77,37 +95,51 @@ def get_courses(
             )
         )
     
-    query = query.options(
+    stmt = stmt.options(
         joinedload(models.Course.category),
         selectinload(models.Course.speakers)
-    )
+    ).order_by(models.Course.created_at.desc()).offset(offset).limit(limit)
     
-    total = query.count()
-    courses = query.order_by(models.Course.created_at.desc()).offset(offset).limit(limit).all()
+    result = await db.execute(stmt)
+    courses = result.unique().scalars().all()
+    
+    count_stmt = select(func.count()).select_from(models.Course).where(models.Course.is_active == True)
+    if category_id:
+        count_stmt = count_stmt.where(models.Course.category_id == category_id)
+    if search:
+        count_stmt = count_stmt.where(
+            or_(
+                models.Course.title.ilike(f"%{search}%"),
+                models.Course.description.ilike(f"%{search}%"),
+                models.Course.hashtags.ilike(f"%{search}%")
+            )
+        )
+    total_result = await db.execute(count_stmt)
+    total = total_result.scalar() or 0
     
     user_favorites = set()
     user_watch_later = set()
     user_registered = set()
     
     if current_user:
-        favorites = db.query(models.UserFavorite).filter(
-            models.UserFavorite.user_id == current_user.id
-        ).all()
+        fav_stmt = select(models.UserFavorite).where(models.UserFavorite.user_id == current_user.id)
+        fav_result = await db.execute(fav_stmt)
+        favorites = fav_result.scalars().all()
         user_favorites = {fav.course_id for fav in favorites}
         
-        watch_later = db.query(models.UserWatchLater).filter(
-            models.UserWatchLater.user_id == current_user.id
-        ).all()
+        wl_stmt = select(models.UserWatchLater).where(models.UserWatchLater.user_id == current_user.id)
+        wl_result = await db.execute(wl_stmt)
+        watch_later = wl_result.scalars().all()
         user_watch_later = {wl.course_id for wl in watch_later}
         
-        registrations = db.query(models.CourseRegistration).filter(
-            models.CourseRegistration.user_id == current_user.id
-        ).all()
+        reg_stmt = select(models.CourseRegistration).where(models.CourseRegistration.user_id == current_user.id)
+        reg_result = await db.execute(reg_stmt)
+        registrations = reg_result.scalars().all()
         user_registered = {reg.course_id for reg in registrations}
     
-    result = []
+    result_items = []
     for c in courses:
-        result.append({
+        result_items.append({
             "id": c.id,
             "title": c.title,
             "short_description": c.short_description,
@@ -144,20 +176,92 @@ def get_courses(
         "total": total,
         "limit": limit,
         "offset": offset,
-        "items": result
+        "items": result_items
     }
 
 
+async def get_course_data_from_db(course_id: int, db: AsyncSession) -> Optional[dict]:
+    """Вспомогательная функция для получения данных курса из БД"""
+    stmt = select(models.Course).options(
+        joinedload(models.Course.category),
+        selectinload(models.Course.speakers)
+    ).where(models.Course.id == course_id)
+    
+    result = await db.execute(stmt)
+    course = result.unique().scalar_one_or_none()
+    
+    if not course:
+        return None
+    
+    return {
+        "id": course.id,
+        "title": course.title,
+        "description": course.description,
+        "short_description": course.short_description,
+        "image_url": course.image_url,
+        "video_url": course.video_url,
+        "video_platform": course.video_platform or "youtube",
+        "hashtags": course.hashtags,
+        "keywords": course.keywords,
+        "current_participants": course.current_participants,
+        "max_participants": course.max_participants,
+        "format_type": course.format_type or "online",
+        "is_open_ended": course.is_open_ended or False,
+        "category_id": course.category_id,
+        "category_name": course.category.name if course.category else None,
+        "start_date": course.start_date,
+        "end_date": course.end_date,
+        "is_active": course.is_active,
+        "moodle_course_id": course.moodle_course_id,
+        "speakers": [
+            {
+                "id": s.id,
+                "full_name": s.full_name,
+                "bio": s.bio,
+                "photo_url": s.photo_url,
+                "position": s.position
+            } for s in course.speakers
+        ]
+    }
+
+
+@router.get("/")
+async def get_courses(
+    category_id: Optional[int] = Query(None),
+    search: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_async_db),
+    current_user: Optional[models.User] = Depends(auth.get_current_user_optional)
+):
+    # Для неавторизованных пользователей используем кэш
+    if current_user is None:
+        cache_key = generate_courses_cache_key(category_id, search, limit, offset)
+        cached_data = await cache_service.get(cache_key)
+        if cached_data is not None:
+            return cached_data
+    
+    # Получаем данные из БД
+    result = await get_courses_from_db(category_id, search, limit, offset, db, current_user)
+    
+    # Для неавторизованных пользователей сохраняем в кэш
+    if current_user is None:
+        cache_key = generate_courses_cache_key(category_id, search, limit, offset)
+        await cache_service.set(cache_key, result, ttl=300)
+    
+    return result
+
+
 @router.post("/")
-def create_course(
-    course: schemas.CourseCreate, 
-    db: Session = Depends(get_db),
+async def create_course(
+    course: schemas.CourseCreate,
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
     if course.category_id:
-        category = db.query(models.Category).filter(
-            models.Category.id == course.category_id
-        ).first()
+        stmt = select(models.Category).where(models.Category.id == course.category_id)
+        result = await db.execute(stmt)
+        category = result.scalar_one_or_none()
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
     
@@ -182,8 +286,8 @@ def create_course(
         created_by=current_user.id
     )
     db.add(db_course)
-    db.commit()
-    db.refresh(db_course)
+    await db.commit()
+    await db.refresh(db_course)
     
     for speaker in course.speakers:
         db_speaker = models.CourseSpeaker(
@@ -195,96 +299,97 @@ def create_course(
         )
         db.add(db_speaker)
     
-    db.commit()
+    await db.commit()
+    
+    # Очищаем кэш курсов и статистики
+    await cache_service.delete_pattern("courses_list*")
+    await cache_service.delete("admin_stats")
+    
     return {"message": "Course created", "id": db_course.id}
 
 
 @router.get("/{course_id}")
-def get_course(
-    course_id: int, 
-    db: Session = Depends(get_db),
+async def get_course(
+    course_id: int,
+    db: AsyncSession = Depends(get_async_db),
     current_user: Optional[models.User] = Depends(auth.get_current_user_optional)
 ):
-    course = db.query(models.Course).options(
-        joinedload(models.Course.category),
-        selectinload(models.Course.speakers)
-    ).filter(models.Course.id == course_id).first()
+    # Для неавторизованных пользователей используем кэш
+    if current_user is None:
+        cache_key = f"course_detail:{course_id}"
+        cached_data = await cache_service.get(cache_key)
+        if cached_data is not None:
+            return cached_data
     
-    if not course:
+    # Получаем данные из БД
+    course_data = await get_course_data_from_db(course_id, db)
+    
+    if course_data is None:
         raise HTTPException(status_code=404, detail="Course not found")
     
+    # Для неавторизованных пользователей добавляем флаги в false
+    if current_user is None:
+        course_data.update({
+            "is_favorite": False,
+            "is_watch_later": False,
+            "is_registered": False
+        })
+        # Сохраняем в кэш
+        await cache_service.set(f"course_detail:{course_id}", course_data, ttl=300)
+        return course_data
+    
+    # Для авторизованных пользователей проверяем статусы
     is_favorite = False
     is_watch_later = False
     is_registered = False
     
-    if current_user:
-        fav = db.query(models.UserFavorite).filter(
-            and_(
-                models.UserFavorite.user_id == current_user.id,
-                models.UserFavorite.course_id == course_id
-            )
-        ).first()
-        is_favorite = fav is not None
-        
-        wl = db.query(models.UserWatchLater).filter(
-            and_(
-                models.UserWatchLater.user_id == current_user.id,
-                models.UserWatchLater.course_id == course_id
-            )
-        ).first()
-        is_watch_later = wl is not None
-        
-        reg = db.query(models.CourseRegistration).filter(
-            and_(
-                models.CourseRegistration.user_id == current_user.id,
-                models.CourseRegistration.course_id == course_id
-            )
-        ).first()
-        is_registered = reg is not None
+    fav_stmt = select(models.UserFavorite).where(
+        and_(
+            models.UserFavorite.user_id == current_user.id,
+            models.UserFavorite.course_id == course_id
+        )
+    )
+    fav_result = await db.execute(fav_stmt)
+    is_favorite = fav_result.scalar_one_or_none() is not None
     
-    return {
-        "id": course.id,
-        "title": course.title,
-        "description": course.description,
-        "short_description": course.short_description,
-        "image_url": course.image_url,
-        "video_url": course.video_url,
-        "video_platform": course.video_platform or "youtube",
-        "hashtags": course.hashtags,
-        "keywords": course.keywords,
-        "current_participants": course.current_participants,
-        "max_participants": course.max_participants,
-        "format_type": course.format_type or "online",
-        "is_open_ended": course.is_open_ended or False,
-        "category_id": course.category_id,
-        "category_name": course.category.name if course.category else None,
-        "start_date": course.start_date,
-        "end_date": course.end_date,
-        "is_active": course.is_active,
-        "moodle_course_id": course.moodle_course_id,
+    wl_stmt = select(models.UserWatchLater).where(
+        and_(
+            models.UserWatchLater.user_id == current_user.id,
+            models.UserWatchLater.course_id == course_id
+        )
+    )
+    wl_result = await db.execute(wl_stmt)
+    is_watch_later = wl_result.scalar_one_or_none() is not None
+    
+    reg_stmt = select(models.CourseRegistration).where(
+        and_(
+            models.CourseRegistration.user_id == current_user.id,
+            models.CourseRegistration.course_id == course_id
+        )
+    )
+    reg_result = await db.execute(reg_stmt)
+    is_registered = reg_result.scalar_one_or_none() is not None
+    
+    course_data.update({
         "is_favorite": is_favorite,
         "is_watch_later": is_watch_later,
-        "is_registered": is_registered,
-        "speakers": [
-            {
-                "id": s.id,
-                "full_name": s.full_name,
-                "bio": s.bio,
-                "photo_url": s.photo_url,
-                "position": s.position
-            } for s in course.speakers
-        ]
-    }
+        "is_registered": is_registered
+    })
+    
+    return course_data
 
 
 @router.put("/{course_id}")
-def update_course(
+async def update_course(
     course_id: int,
     course: schemas.CourseUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    db_course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    stmt = select(models.Course).where(models.Course.id == course_id)
+    result = await db.execute(stmt)
+    db_course = result.scalar_one_or_none()
+    
     if not db_course:
         raise HTTPException(status_code=404, detail="Course not found")
     
@@ -294,23 +399,32 @@ def update_course(
             value = convert_video_url(value, platform or "youtube")
         setattr(db_course, key, value)
     
-    db.commit()
+    await db.commit()
+    
+    # Очищаем кэш
+    await cache_service.delete_pattern("courses_list*")
+    await cache_service.delete(f"course_detail:{course_id}")
+    await cache_service.delete("admin_stats")
+    
     return {"message": "Course updated"}
 
 
 @router.delete("/{course_id}")
-def delete_course(
+async def delete_course(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    stmt = select(models.Course).where(models.Course.id == course_id)
+    result = await db.execute(stmt)
+    course = result.scalar_one_or_none()
+    
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    speakers = db.query(models.CourseSpeaker).filter(
-        models.CourseSpeaker.course_id == course_id
-    ).all()
+    speakers_stmt = select(models.CourseSpeaker).where(models.CourseSpeaker.course_id == course_id)
+    speakers_result = await db.execute(speakers_stmt)
+    speakers = speakers_result.scalars().all()
     
     for speaker in speakers:
         if speaker.photo_url:
@@ -319,160 +433,195 @@ def delete_course(
     if course.image_url:
         delete_file_from_disk(course.image_url)
     
-    db.query(models.CourseSpeaker).filter(models.CourseSpeaker.course_id == course_id).delete()
-    db.query(models.UserFavorite).filter(models.UserFavorite.course_id == course_id).delete()
-    db.query(models.UserWatchLater).filter(models.UserWatchLater.course_id == course_id).delete()
-    db.query(models.CourseRegistration).filter(models.CourseRegistration.course_id == course_id).delete()
-    db.query(models.UserProgress).filter(models.UserProgress.course_id == course_id).delete()
-    db.query(models.Certificate).filter(models.Certificate.course_id == course_id).delete()
+    await db.execute(models.CourseSpeaker.__table__.delete().where(models.CourseSpeaker.course_id == course_id))
+    await db.execute(models.UserFavorite.__table__.delete().where(models.UserFavorite.course_id == course_id))
+    await db.execute(models.UserWatchLater.__table__.delete().where(models.UserWatchLater.course_id == course_id))
+    await db.execute(models.CourseRegistration.__table__.delete().where(models.CourseRegistration.course_id == course_id))
+    await db.execute(models.UserProgress.__table__.delete().where(models.UserProgress.course_id == course_id))
+    await db.execute(models.Certificate.__table__.delete().where(models.Certificate.course_id == course_id))
     
-    db.delete(course)
-    db.commit()
+    await db.delete(course)
+    await db.commit()
+    
+    # Очищаем кэш
+    await cache_service.delete_pattern("courses_list*")
+    await cache_service.delete(f"course_detail:{course_id}")
+    await cache_service.delete("admin_stats")
+    
     return {"message": "Course deleted successfully"}
 
 
 @router.post("/{course_id}/favorite")
-def add_to_favorites(
+async def add_to_favorites(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    existing = db.query(models.UserFavorite).filter(
+    existing_stmt = select(models.UserFavorite).where(
         and_(
             models.UserFavorite.user_id == current_user.id,
             models.UserFavorite.course_id == course_id
         )
-    ).first()
+    )
+    existing_result = await db.execute(existing_stmt)
+    existing = existing_result.scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Already in favorites")
     
     favorite = models.UserFavorite(user_id=current_user.id, course_id=course_id)
     db.add(favorite)
-    db.commit()
+    await db.commit()
     return {"message": "Added to favorites"}
 
 
 @router.delete("/{course_id}/favorite")
-def remove_from_favorites(
+async def remove_from_favorites(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    favorite = db.query(models.UserFavorite).filter(
+    stmt = select(models.UserFavorite).where(
         and_(
             models.UserFavorite.user_id == current_user.id,
             models.UserFavorite.course_id == course_id
         )
-    ).first()
+    )
+    result = await db.execute(stmt)
+    favorite = result.scalar_one_or_none()
+    
     if not favorite:
         raise HTTPException(status_code=404, detail="Not in favorites")
     
-    db.delete(favorite)
-    db.commit()
+    await db.delete(favorite)
+    await db.commit()
     return {"message": "Removed from favorites"}
 
 
 @router.post("/{course_id}/watch-later")
-def add_to_watch_later(
+async def add_to_watch_later(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    existing = db.query(models.UserWatchLater).filter(
+    existing_stmt = select(models.UserWatchLater).where(
         and_(
             models.UserWatchLater.user_id == current_user.id,
             models.UserWatchLater.course_id == course_id
         )
-    ).first()
+    )
+    existing_result = await db.execute(existing_stmt)
+    existing = existing_result.scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Already in watch later")
     
     watch_later = models.UserWatchLater(user_id=current_user.id, course_id=course_id)
     db.add(watch_later)
-    db.commit()
+    await db.commit()
     return {"message": "Added to watch later"}
 
 
 @router.delete("/{course_id}/watch-later")
-def remove_from_watch_later(
+async def remove_from_watch_later(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    watch_later = db.query(models.UserWatchLater).filter(
+    stmt = select(models.UserWatchLater).where(
         and_(
             models.UserWatchLater.user_id == current_user.id,
             models.UserWatchLater.course_id == course_id
         )
-    ).first()
+    )
+    result = await db.execute(stmt)
+    watch_later = result.scalar_one_or_none()
+    
     if not watch_later:
         raise HTTPException(status_code=404, detail="Not in watch later")
     
-    db.delete(watch_later)
-    db.commit()
+    await db.delete(watch_later)
+    await db.commit()
     return {"message": "Removed from watch later"}
 
 
 @router.post("/{course_id}/register")
-def register_for_course(
-    course_id: int, 
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(require_complete_profile)
+async def register_for_course(
+    course_id: int,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
     if not course.is_active:
         raise HTTPException(status_code=400, detail="Course is not active")
     
-    existing = db.query(models.CourseRegistration).filter(
+    existing_stmt = select(models.CourseRegistration).where(
         and_(
             models.CourseRegistration.user_id == current_user.id,
             models.CourseRegistration.course_id == course_id
         )
-    ).first()
+    )
+    existing_result = await db.execute(existing_stmt)
+    existing = existing_result.scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Already registered")
     
     if course.current_participants >= course.max_participants:
         raise HTTPException(status_code=400, detail="Course is full")
     
-    moodle_enrolled = False
-    moodle_course_url = None
-    moodle_user_id = None
-    moodle_error = None
+    user_stmt = select(models.User).options(
+        selectinload(models.User.education),
+        selectinload(models.User.work),
+        selectinload(models.User.additional_info),
+        selectinload(models.User.address)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
     
-    if course.moodle_course_id:
-        moodle = MoodleService()
-        try:
-            moodle_user_id = moodle.sync_user(
-                email=current_user.email,
-                full_name=current_user.full_name
-            )
-            
-            is_enrolled = moodle.is_user_enrolled(moodle_user_id, course.moodle_course_id)
-            
-            if not is_enrolled:
-                moodle.enroll_user_to_course(moodle_user_id, course.moodle_course_id)
-            
-            moodle_enrolled = True
-            moodle_course_url = moodle.get_course_url(course.moodle_course_id)
-            
-        except Exception as e:
-            moodle_error = str(e)
-            print(f"Moodle sync error: {e}")
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    completion_details = user.get_profile_completion_details()
+    if not completion_details["is_complete"]:
+        missing_sections = []
+        for section in completion_details["sections"]:
+            if not section["is_complete"]:
+                missing_sections.append({
+                    "section": section["section"],
+                    "label": section["label"],
+                    "fields": section["fields"]
+                })
+        
+        section_names = [s["label"] for s in missing_sections]
+        message = f"Для записи на курс необходимо заполнить: {', '.join(section_names)}"
+        
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "code": "profile_incomplete",
+                "message": message,
+                "missing_sections": missing_sections,
+                "redirect": "/profile"
+            }
+        )
     
     registration = models.CourseRegistration(
-        user_id=current_user.id, 
+        user_id=current_user.id,
         course_id=course_id,
         is_paid=True
     )
@@ -486,49 +635,152 @@ def register_for_course(
     )
     db.add(user_progress)
     
+    task_created = False
+    task_id = None
+    
+    if course.moodle_course_id:
+        try:
+            sync_db = SessionLocal()
+            try:
+                sync_service = MoodleSyncService(sync_db)
+                task = sync_service.create_sync_task(current_user.id, course_id)
+                task_created = True
+                task_id = task.id
+            finally:
+                sync_db.close()
+        except Exception as e:
+            task_created = False
+            print(f"Ошибка создания задачи синхронизации: {e}")
+    
     activity = models.UserActivityLog(
         user_id=current_user.id,
         action_type="course_register",
         course_id=course_id,
         extra_data=json.dumps({
             "course_title": course.title,
-            "moodle_enrolled": moodle_enrolled,
             "moodle_course_id": course.moodle_course_id,
-            "moodle_error": moodle_error
+            "sync_task_created": task_created,
+            "sync_task_id": task_id
         })
     )
     db.add(activity)
     
-    db.commit()
+    await db.commit()
+    
+    # Очищаем кэш курса
+    await cache_service.delete(f"course_detail:{course_id}")
+    await cache_service.delete_pattern("courses_list*")
     
     response = {
-        "message": "Successfully registered",
+        "message": "Вы успешно записаны на курс!",
         "course_id": course_id,
         "course_title": course.title,
-        "moodle_enrolled": moodle_enrolled
+        "sync_task_created": task_created
     }
     
-    if moodle_course_url:
-        response["moodle_course_url"] = moodle_course_url
-        response["message"] = "Successfully registered! You can now access the course in Moodle."
-    elif moodle_error:
-        response["moodle_error"] = moodle_error
-        response["message"] = "Registered in the system, but Moodle sync failed. Please contact support."
+    if task_id:
+        response["sync_task_id"] = task_id
+    
+    if course.moodle_course_id and not task_created:
+        response["warning"] = "Запись выполнена, но возникла проблема с созданием задачи синхронизации. Пожалуйста, обратитесь в поддержку."
     
     return response
 
 
-@router.get("/{course_id}/check-registration-eligibility")
-def check_registration_eligibility(
+@router.get("/{course_id}/sync-status")
+async def get_sync_status(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    reg_stmt = select(models.CourseRegistration).where(
+        and_(
+            models.CourseRegistration.user_id == current_user.id,
+            models.CourseRegistration.course_id == course_id
+        )
+    )
+    reg_result = await db.execute(reg_stmt)
+    registration = reg_result.scalar_one_or_none()
+    
+    if not registration:
+        raise HTTPException(status_code=403, detail="Вы не записаны на этот курс")
+    
+    if not course.moodle_course_id:
+        return {
+            "has_moodle": False,
+            "status": "not_connected",
+            "message": "Курс не привязан к Moodle"
+        }
+    
+    sync_db = SessionLocal()
+    try:
+        sync_service = MoodleSyncService(sync_db)
+        status = sync_service.get_task_status(current_user.id, course_id)
+    finally:
+        sync_db.close()
+    
+    if not status:
+        return {
+            "has_moodle": True,
+            "status": "no_task",
+            "moodle_course_id": course.moodle_course_id,
+            "message": "Задача синхронизации не найдена. Возможно, синхронизация еще не запущена."
+        }
+    
+    status_map = {
+        "pending": "В очереди",
+        "processing": "Выполняется",
+        "completed": "Завершено",
+        "failed": "Ошибка"
+    }
+    
+    return {
+        "has_moodle": True,
+        "moodle_course_id": course.moodle_course_id,
+        "task_id": status["id"],
+        "status": status["status"],
+        "status_display": status_map.get(status["status"], status["status"]),
+        "attempts": status["attempts"],
+        "max_attempts": status["max_attempts"],
+        "last_error": status["last_error"],
+        "created_at": status["created_at"],
+        "processed_at": status["processed_at"],
+        "next_retry_at": status["next_retry_at"],
+        "moodle_user_id": status["moodle_user_id"]
+    }
+
+
+@router.get("/{course_id}/check-registration-eligibility")
+async def check_registration_eligibility(
+    course_id: int,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         return {"eligible": False, "reason": "course_not_found", "message": "Курс не найден"}
     
-    completion_details = current_user.get_profile_completion_details()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.education),
+        selectinload(models.User.work),
+        selectinload(models.User.additional_info),
+        selectinload(models.User.address)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
+    
+    if not user:
+        return {"eligible": False, "reason": "user_not_found", "message": "Пользователь не найден"}
+    
+    completion_details = user.get_profile_completion_details()
     
     if not completion_details["is_complete"]:
         missing_sections = []
@@ -552,12 +804,14 @@ def check_registration_eligibility(
             "completion_details": completion_details
         }
     
-    existing = db.query(models.CourseRegistration).filter(
+    existing_stmt = select(models.CourseRegistration).where(
         and_(
             models.CourseRegistration.user_id == current_user.id,
             models.CourseRegistration.course_id == course_id
         )
-    ).first()
+    )
+    existing_result = await db.execute(existing_stmt)
+    existing = existing_result.scalar_one_or_none()
     if existing:
         return {"eligible": False, "reason": "already_registered", "message": "Вы уже записаны на этот курс"}
     
@@ -568,22 +822,26 @@ def check_registration_eligibility(
 
 
 @router.get("/{course_id}/moodle-link")
-def get_moodle_link(
+async def get_moodle_link(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    registration = db.query(models.CourseRegistration).filter(
+    reg_stmt = select(models.CourseRegistration).where(
         and_(
             models.CourseRegistration.user_id == current_user.id,
             models.CourseRegistration.course_id == course_id
         )
-    ).first()
+    )
+    reg_result = await db.execute(reg_stmt)
+    registration = reg_result.scalar_one_or_none()
     
     if not registration:
         raise HTTPException(status_code=403, detail="You are not registered for this course")
     
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
@@ -615,22 +873,26 @@ def get_moodle_link(
 
 
 @router.get("/{course_id}/moodle-progress")
-def get_moodle_course_progress(
+async def get_moodle_course_progress(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    registration = db.query(models.CourseRegistration).filter(
+    reg_stmt = select(models.CourseRegistration).where(
         and_(
             models.CourseRegistration.user_id == current_user.id,
             models.CourseRegistration.course_id == course_id
         )
-    ).first()
+    )
+    reg_result = await db.execute(reg_stmt)
+    registration = reg_result.scalar_one_or_none()
     
     if not registration:
         raise HTTPException(status_code=403, detail="You are not registered for this course")
     
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
@@ -683,18 +945,21 @@ def get_moodle_course_progress(
 
 
 @router.get("/my/moodle-progress")
-def get_all_moodle_progress(
-    db: Session = Depends(get_db),
+async def get_all_moodle_progress(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    registrations = db.query(models.CourseRegistration).filter(
+    reg_stmt = select(models.CourseRegistration).where(
         models.CourseRegistration.user_id == current_user.id
-    ).all()
+    )
+    reg_result = await db.execute(reg_stmt)
+    registrations = reg_result.scalars().all()
     
     moodle_courses = []
-    course_ids = []
     for reg in registrations:
-        course = db.query(models.Course).filter(models.Course.id == reg.course_id).first()
+        course_stmt = select(models.Course).where(models.Course.id == reg.course_id)
+        course_result = await db.execute(course_stmt)
+        course = course_result.scalar_one_or_none()
         if course and course.moodle_course_id:
             moodle_courses.append({
                 'course_id': course.id,
@@ -702,7 +967,6 @@ def get_all_moodle_progress(
                 'moodle_course_id': course.moodle_course_id,
                 'registered_at': reg.registered_at
             })
-            course_ids.append(course.id)
     
     if not moodle_courses:
         return {
@@ -757,32 +1021,38 @@ def get_all_moodle_progress(
 
 
 @router.post("/{course_id}/progress")
-def update_course_progress(
+async def update_course_progress(
     course_id: int,
     progress: int = Query(..., ge=0, le=100),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
-    registration = db.query(models.CourseRegistration).filter(
+    reg_stmt = select(models.CourseRegistration).where(
         and_(
-            models.CourseRegistration.user_id == current_user.id, 
+            models.CourseRegistration.user_id == current_user.id,
             models.CourseRegistration.course_id == course_id
         )
-    ).first()
+    )
+    reg_result = await db.execute(reg_stmt)
+    registration = reg_result.scalar_one_or_none()
     
     if not registration:
         raise HTTPException(status_code=403, detail="You are not registered for this course")
     
-    user_progress = db.query(models.UserProgress).filter(
+    progress_stmt = select(models.UserProgress).where(
         and_(
             models.UserProgress.user_id == current_user.id,
             models.UserProgress.course_id == course_id
         )
-    ).first()
+    )
+    progress_result = await db.execute(progress_stmt)
+    user_progress = progress_result.scalar_one_or_none()
     
     if not user_progress:
         user_progress = models.UserProgress(
@@ -816,9 +1086,7 @@ def update_course_progress(
         )
         db.add(activity)
         
-        import hashlib
-        import time
-        cert_number = f"CERT-{current_user.id}-{course_id}-{int(time.time())}"
+        cert_number = f"CERT-{current_user.id}-{course_id}-{int(datetime.utcnow().timestamp())}"
         cert_hash = hashlib.md5(cert_number.encode()).hexdigest()[:16].upper()
         
         certificate = models.Certificate(
@@ -829,25 +1097,30 @@ def update_course_progress(
         db.add(certificate)
         
         from app.routers.achievements_router import check_and_award_achievements
-        check_and_award_achievements(current_user.id, db)
+        await check_and_award_achievements(current_user.id, db)
     
-    db.commit()
+    await db.commit()
     return {"message": "Progress updated", "progress": progress, "is_completed": user_progress.is_completed}
 
 
 @router.get("/my/progress")
-def get_my_progress(
-    db: Session = Depends(get_db),
+async def get_my_progress(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    progress = db.query(models.UserProgress).filter(
-        models.UserProgress.user_id == current_user.id
-    ).all()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.progress).selectinload(models.UserProgress.course)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
     
-    result = []
-    for p in progress:
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    result_items = []
+    for p in user.progress:
         if p.course:
-            result.append({
+            result_items.append({
                 "course_id": p.course_id,
                 "course_title": p.course.title,
                 "progress_percent": p.progress_percent,
@@ -856,67 +1129,24 @@ def get_my_progress(
                 "completed_at": p.completed_at,
                 "last_activity": p.last_activity
             })
-    return result
-
-
-@router.get("/my/stats")
-def get_my_stats(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
-):
-    registrations = db.query(models.CourseRegistration).filter(
-        models.CourseRegistration.user_id == current_user.id
-    ).all()
-    registered_courses = [r.course_id for r in registrations]
-    
-    completed_progress = db.query(models.UserProgress).filter(
-        and_(
-            models.UserProgress.user_id == current_user.id,
-            models.UserProgress.is_completed == True
-        )
-    ).count()
-    
-    in_progress = db.query(models.UserProgress).filter(
-        and_(
-            models.UserProgress.user_id == current_user.id,
-            models.UserProgress.is_completed == False,
-            models.UserProgress.progress_percent > 0
-        )
-    ).count()
-    
-    achievements_count = db.query(models.UserAchievement).filter(
-        models.UserAchievement.user_id == current_user.id
-    ).count()
-    
-    total_hours = completed_progress * 36
-    
-    favorites_count = db.query(models.UserFavorite).filter(
-        models.UserFavorite.user_id == current_user.id
-    ).count()
-    
-    watch_later_count = db.query(models.UserWatchLater).filter(
-        models.UserWatchLater.user_id == current_user.id
-    ).count()
-    
-    return {
-        "total_courses": len(registered_courses),
-        "completed_courses": completed_progress,
-        "in_progress_courses": in_progress,
-        "achievements_count": achievements_count,
-        "total_hours": total_hours,
-        "favorites_count": favorites_count,
-        "watch_later_count": watch_later_count
-    }
+    return result_items
 
 
 @router.get("/my/achievements")
-def get_my_achievements(
-    db: Session = Depends(get_db),
+async def get_my_achievements(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    achievements = db.query(models.UserAchievement).filter(
-        models.UserAchievement.user_id == current_user.id
-    ).order_by(models.UserAchievement.earned_at.desc()).all()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.achievements)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    achievements = sorted(user.achievements, key=lambda a: a.earned_at, reverse=True)
     
     return [{
         "id": a.id,
@@ -930,13 +1160,20 @@ def get_my_achievements(
 
 
 @router.get("/my/certificates")
-def get_my_certificates(
-    db: Session = Depends(get_db),
+async def get_my_certificates(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    certificates = db.query(models.Certificate).filter(
-        models.Certificate.user_id == current_user.id
-    ).order_by(models.Certificate.issue_date.desc()).all()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.certificates).selectinload(models.Certificate.course)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    certificates = sorted(user.certificates, key=lambda c: c.issue_date, reverse=True)
     
     return [{
         "id": c.id,
@@ -949,14 +1186,21 @@ def get_my_certificates(
 
 
 @router.get("/my/activity")
-def get_my_activity(
+async def get_my_activity(
     limit: int = Query(20, le=100),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    activities = db.query(models.UserActivityLog).filter(
-        models.UserActivityLog.user_id == current_user.id
-    ).order_by(models.UserActivityLog.created_at.desc()).limit(limit).all()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.activity_logs).selectinload(models.UserActivityLog.course)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    activities = sorted(user.activity_logs, key=lambda a: a.created_at, reverse=True)[:limit]
     
     return [{
         "id": a.id,
@@ -969,32 +1213,34 @@ def get_my_activity(
 
 
 @router.get("/my/registrations")
-def get_my_registrations(
-    db: Session = Depends(get_db),
+async def get_my_registrations(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    registrations = db.query(models.CourseRegistration).filter(
-        models.CourseRegistration.user_id == current_user.id
-    ).all()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.registrations).selectinload(models.CourseRegistration.course),
+        selectinload(models.User.progress)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
     
-    result = []
-    for r in registrations:
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    progress_map = {p.course_id: p for p in user.progress}
+    
+    result_items = []
+    for r in user.registrations:
         course = r.course
         progress_percent = 0
         is_completed = False
         
-        user_progress = db.query(models.UserProgress).filter(
-            and_(
-                models.UserProgress.user_id == current_user.id,
-                models.UserProgress.course_id == course.id
-            )
-        ).first()
+        if course and course.id in progress_map:
+            p = progress_map[course.id]
+            progress_percent = p.progress_percent
+            is_completed = p.is_completed
         
-        if user_progress:
-            progress_percent = user_progress.progress_percent
-            is_completed = user_progress.is_completed
-        
-        result.append({
+        result_items.append({
             "course_id": r.course_id,
             "course_title": course.title if course else "Unknown",
             "registered_at": r.registered_at,
@@ -1003,22 +1249,27 @@ def get_my_registrations(
             "moodle_course_id": course.moodle_course_id if course else None
         })
     
-    return result
+    return result_items
 
 
 @router.get("/my/favorites")
-def get_my_favorites(
-    db: Session = Depends(get_db),
+async def get_my_favorites(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    favorites = db.query(models.UserFavorite).filter(
-        models.UserFavorite.user_id == current_user.id
-    ).all()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.favorite_courses).selectinload(models.UserFavorite.course)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
     
-    result = []
-    for fav in favorites:
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    result_items = []
+    for fav in user.favorite_courses:
         if fav.course:
-            result.append({
+            result_items.append({
                 "id": fav.course.id,
                 "title": fav.course.title,
                 "short_description": fav.course.short_description,
@@ -1026,22 +1277,27 @@ def get_my_favorites(
                 "description": fav.course.description,
                 "moodle_course_id": fav.course.moodle_course_id
             })
-    return result
+    return result_items
 
 
 @router.get("/my/watch-later")
-def get_my_watch_later(
-    db: Session = Depends(get_db),
+async def get_my_watch_later(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
-    watch_later = db.query(models.UserWatchLater).filter(
-        models.UserWatchLater.user_id == current_user.id
-    ).all()
+    user_stmt = select(models.User).options(
+        selectinload(models.User.watch_later).selectinload(models.UserWatchLater.course)
+    ).where(models.User.id == current_user.id)
+    user_result = await db.execute(user_stmt)
+    user = user_result.unique().scalar_one_or_none()
     
-    result = []
-    for wl in watch_later:
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    result_items = []
+    for wl in user.watch_later:
         if wl.course:
-            result.append({
+            result_items.append({
                 "id": wl.course.id,
                 "title": wl.course.title,
                 "short_description": wl.course.short_description,
@@ -1049,4 +1305,4 @@ def get_my_watch_later(
                 "description": wl.course.description,
                 "moodle_course_id": wl.course.moodle_course_id
             })
-    return result
+    return result_items

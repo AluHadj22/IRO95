@@ -727,11 +727,21 @@
         renderPagination('categoriesPagination', 'categoriesPaginationInfo', 'categoriesPaginationControls', page, allCategoriesData.length, PAGE_SIZE, 'loadCategories');
     }
 
-    async function loadCourses(page) {
+    async function loadCourses(page, bypassCache) {
         page = page || 1;
         currentCoursesPage = page;
+        
+        var cacheBuster = bypassCache ? '?_t=' + Date.now() : '';
+        
         try {
-            var response = await fetch('/api/admin/courses', { headers: { 'Authorization': 'Bearer ' + token } });
+            var response = await fetch('/api/admin/courses' + cacheBuster, { 
+                headers: { 
+                    'Authorization': 'Bearer ' + token,
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                } 
+            });
             if (!response.ok) throw new Error('Ошибка загрузки курсов');
             var result = await response.json();
             if (result.items) {
@@ -739,7 +749,7 @@
             } else {
                 allCoursesData = result;
             }
-            filteredCoursesData = allCoursesData;
+            filteredCoursesData = allCoursesData.slice();
             renderCoursesPage(page);
         } catch (error) {
             console.error('Error loading courses:', error);
@@ -759,7 +769,7 @@
             var html = '';
             for (var i = 0; i < pageData.length; i++) {
                 var c = pageData[i];
-                html += '<tr><td><span class="badge-gold">' + c.id + '</span></td><td><i class="bi bi-book me-2" style="color: var(--primary);"></i>' + c.title + '</td><td>' + (c.category_name || '-') + '</td><td><span class="badge-info">' + (formatMap[c.format_type] || 'Онлайн') + '</span></td><td>' + c.current_participants + '/' + c.max_participants + '</td><td>' + (c.moodle_course_id ? '<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ' + c.moodle_course_id + '</span>' : '<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>') + '</td><td><span class="' + (c.is_active ? 'badge-success' : 'badge-danger') + '">' + (c.is_active ? 'Активен' : 'Неактивен') + '</span></td><td><button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(' + c.id + ')" title="Регистрации"><i class="bi bi-people"></i></button><button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(' + c.id + ', ' + (!c.is_active) + ')" title="Изменить статус"><i class="bi bi-power"></i></button><button class="btn btn-sm btn-danger" onclick="deleteCourseItem(' + c.id + ')" title="Удалить"><i class="bi bi-trash"></i></button></td></tr>';
+                html += '<tr><td><span class="badge-gold">' + c.id + '</span></td><td><i class="bi bi-book me-2" style="color: var(--primary);"></i>' + c.title + '</td><td>' + (c.category_name || '-') + '</td><td><span class="badge-info">' + (formatMap[c.format_type] || 'Онлайн') + '</span></td><td><span id="participants_' + c.id + '">' + c.current_participants + '</span>/' + c.max_participants + '</td><td>' + (c.moodle_course_id ? '<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ' + c.moodle_course_id + '</span>' : '<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>') + '</td><td><span class="' + (c.is_active ? 'badge-success' : 'badge-danger') + '">' + (c.is_active ? 'Активен' : 'Неактивен') + '</span></td><td><button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(' + c.id + ')" title="Регистрации"><i class="bi bi-people"></i></button><button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(' + c.id + ', ' + (!c.is_active) + ')" title="Изменить статус"><i class="bi bi-power"></i></button><button class="btn btn-sm btn-danger" onclick="deleteCourseItem(' + c.id + ')" title="Удалить"><i class="bi bi-trash"></i></button></td></tr>';
             }
             tbody.innerHTML = html;
         }
@@ -794,27 +804,206 @@
         }
     }
 
+    function updateCourseParticipantsInTable(courseId, newCount) {
+        var span = document.getElementById('participants_' + courseId);
+        if (span) {
+            span.textContent = newCount;
+        }
+    }
+
     async function viewCourseRegistrations(courseId) {
-        var response = await fetch('/api/admin/courses/' + courseId + '/registrations', { headers: { 'Authorization': 'Bearer ' + token } });
-        var data = await response.json();
-        var html = '<div class="mb-4"><h5>' + data.course.title + '</h5>';
-        if (data.course.moodle_course_id) {
-            html += '<p class="text-muted">Moodle ID: <strong>' + data.course.moodle_course_id + '</strong></p>';
-        }
-        html += '</div>';
-        if (!data.registrations || data.registrations.length === 0) {
-            html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет регистраций</p></div>';
-        } else {
-            html += '<div class="table-responsive"><table class="table table-striped"><thead class="table-light"><tr><th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Телефон</th><th>Организация</th><th>Дата</th></tr></thead><tbody>';
-            for (var i = 0; i < data.registrations.length; i++) {
-                var r = data.registrations[i];
-                html += '<tr><td>' + (i + 1) + '</td><td>' + r.full_name + '</td><td>' + r.email + '</td><td>' + (r.position || '-') + '</td><td>' + (r.phone || '-') + '</td><td>' + (r.organization || '-') + '</td><td>' + new Date(r.registered_at).toLocaleDateString() + '</td></tr>';
+        console.log('=== viewCourseRegistrations ===');
+        console.log('Получен courseId:', courseId, 'тип:', typeof courseId);
+        
+        try {
+            var response = await fetch('/api/admin/courses/' + courseId + '/registrations', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Ошибка загрузки регистраций');
+            
+            var data = await response.json();
+            console.log('Данные курса:', data);
+            
+            var html = '<div class="registrations-header">';
+            html += '<h5>' + escapeHtml(data.course.title) + '</h5>';
+            html += '<div class="registrations-stats">';
+            html += '<span>Участников: <strong id="registrationsCount">' + data.total + '</strong> / ' + data.course.max_participants + '</span>';
+            if (data.course.moodle_course_id) {
+                html += '<span class="moodle-badge">Moodle ID: ' + data.course.moodle_course_id + '</span>';
             }
-            html += '</tbody></table></div>';
-            html += '<div class="mt-3 text-center"><button class="btn btn-primary" onclick="exportRegistrations(' + courseId + ')"><i class="bi bi-download me-2"></i>Экспорт в Excel</button></div>';
+            html += '</div></div>';
+            
+            if (!data.registrations || data.registrations.length === 0) {
+                html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет зарегистрированных пользователей</p></div>';
+            } else {
+                html += '<div class="registrations-actions" data-course-id="' + courseId + '">';
+                html += '<div class="d-flex gap-2 flex-wrap align-items-center">';
+                html += '<button class="btn btn-sm btn-outline-primary" onclick="toggleAllRegistrations(this, true)"><i class="bi bi-check-all"></i> Выбрать всех</button>';
+                html += '<button class="btn btn-sm btn-outline-secondary" onclick="toggleAllRegistrations(this, false)"><i class="bi bi-deselect"></i> Снять всех</button>';
+                html += '<button class="btn btn-sm btn-danger" onclick="removeSelectedRegistrations(' + courseId + ')" id="removeSelectedBtn" disabled><i class="bi bi-person-x"></i> Удалить выбранных</button>';
+                html += '<button class="btn btn-sm btn-danger" onclick="removeAllRegistrations(' + courseId + ')"><i class="bi bi-people-x"></i> Удалить всех</button>';
+                html += '<button class="btn btn-sm btn-primary" onclick="exportRegistrations(' + courseId + ')"><i class="bi bi-download"></i> Экспорт</button>';
+                html += '</div>';
+                html += '<span class="selected-count" id="selectedRegistrationsCount">Выбрано: 0</span>';
+                html += '</div>';
+                
+                html += '<div class="table-responsive"><table class="table table-striped registrations-table"><thead class="table-light"><tr>';
+                html += '<th style="width:40px;"><input type="checkbox" id="selectAllRegistrations" onchange="toggleAllRegistrations(this, this.checked)"></th>';
+                html += '<th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Организация</th><th>Дата записи</th><th>Статус</th>';
+                html += '</tr></thead><tbody>';
+                
+                for (var i = 0; i < data.registrations.length; i++) {
+                    var r = data.registrations[i];
+                    var statusBadge = r.is_active ? '<span class="badge-success">Активен</span>' : '<span class="badge-danger">Заблокирован</span>';
+                    html += '<tr>';
+                    html += '<td><input type="checkbox" class="registration-checkbox" data-user-id="' + r.user_id + '" onchange="updateRemoveButtonState(' + courseId + ')"></td>';
+                    html += '<td>' + (i + 1) + '</td>';
+                    html += '<td>' + escapeHtml(r.full_name) + '</td>';
+                    html += '<td>' + escapeHtml(r.email) + '</td>';
+                    html += '<td>' + escapeHtml(r.position || '-') + '</td>';
+                    html += '<td>' + escapeHtml(r.organization || '-') + '</td>';
+                    html += '<td>' + new Date(r.registered_at).toLocaleDateString() + '</td>';
+                    html += '<td>' + statusBadge + '</td>';
+                    html += '</tr>';
+                }
+                html += '</tbody></table></div>';
+            }
+            
+            document.getElementById('registrationsContent').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('registrationsModal')).show();
+        } catch (error) {
+            console.error('Error loading registrations:', error);
+            document.getElementById('registrationsContent').innerHTML = '<div class="text-center py-4 text-danger">Ошибка загрузки регистраций</div>';
         }
-        document.getElementById('registrationsContent').innerHTML = html;
-        new bootstrap.Modal(document.getElementById('registrationsModal')).show();
+    }
+
+    function toggleAllRegistrations(element, checked) {
+        var checkboxes = document.querySelectorAll('.registration-checkbox');
+        checkboxes.forEach(function(cb) { cb.checked = checked; });
+        var courseId = parseInt(document.querySelector('.registrations-actions')?.dataset?.courseId);
+        if (courseId) updateRemoveButtonState(courseId);
+    }
+
+    function updateRemoveButtonState(courseId) {
+        var checkboxes = document.querySelectorAll('.registration-checkbox:checked');
+        var count = checkboxes.length;
+        var btn = document.getElementById('removeSelectedBtn');
+        var countEl = document.getElementById('selectedRegistrationsCount');
+        
+        if (btn) btn.disabled = count === 0;
+        if (countEl) countEl.textContent = 'Выбрано: ' + count;
+        if (btn) {
+            var ids = Array.from(checkboxes).map(function(cb) { return parseInt(cb.dataset.userId); });
+            btn.dataset.userIds = ids.join(',');
+        }
+    }
+
+    async function removeSelectedRegistrations(courseId) {
+        var checkboxes = document.querySelectorAll('.registration-checkbox:checked');
+        if (checkboxes.length === 0) {
+            showToast('Выберите пользователей для удаления', 'warning');
+            return;
+        }
+        
+        var userIds = Array.from(checkboxes).map(function(cb) { return parseInt(cb.dataset.userId); });
+        if (!confirm('Удалить ' + userIds.length + ' пользователей с этого курса?\n\nЭто действие НЕ удалит пользователей с платформы и НЕ удалит сам курс.')) return;
+        await performRemoveRegistrations(courseId, userIds);
+    }
+
+    async function removeAllRegistrations(courseId) {
+        var total = document.querySelectorAll('.registration-checkbox').length;
+        if (total === 0) {
+            showToast('На курсе нет зарегистрированных пользователей', 'warning');
+            return;
+        }
+        if (!confirm('Удалить ВСЕХ ' + total + ' пользователей с этого курса?\n\nЭто действие НЕ удалит пользователей с платформы и НЕ удалит сам курс.')) return;
+        await performRemoveRegistrations(courseId, 'all');
+    }
+
+    // ============================================================
+    // ✅ ИСПРАВЛЕННАЯ ФУНКЦИЯ: использует ВНУТРЕННИЙ ID курса
+    // ============================================================
+    async function performRemoveRegistrations(courseId, userIds) {
+        // courseId - это ВНУТРЕННИЙ ID курса (например, 10), НЕ moodle_id!
+        console.log('=== performRemoveRegistrations ===');
+        console.log('courseId (внутренний ID):', courseId);
+        console.log('userIds:', userIds);
+        
+        var btn = document.getElementById('removeSelectedBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Удаление...';
+        }
+        
+        try {
+            var url;
+            if (userIds === 'all') {
+                url = '/api/admin/courses/' + courseId + '/registrations/all';
+            } else {
+                url = '/api/admin/courses/' + courseId + '/registrations?user_ids=' + userIds.join(',');
+            }
+            
+            console.log('URL запроса:', url);
+            
+            var response = await fetch(url, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (response.ok) {
+                var result = await response.json();
+                console.log('Результат удаления:', result);
+                
+                // ✅ Используем правильное значение из ответа API
+                var newCount = result.remaining_participants || result.updated_participants || 0;
+                console.log('Новое количество участников:', newCount);
+                
+                // ✅ Обновляем счетчик в модальном окне
+                var countEl = document.getElementById('registrationsCount');
+                if (countEl) {
+                    countEl.textContent = newCount;
+                }
+                
+                // ✅ Обновляем счетчик в таблице курсов (используем ВНУТРЕННИЙ ID)
+                updateCourseParticipantsInTable(courseId, newCount);
+                
+                // Если участников не осталось - обновляем модальное окно
+                if (newCount === 0) {
+                    var content = document.getElementById('registrationsContent');
+                    var headerHtml = content.querySelector('.registrations-header')?.outerHTML || '';
+                    content.innerHTML = headerHtml + '<div class="empty-state"><i class="bi bi-people"></i><p>Нет зарегистрированных пользователей</p></div>';
+                } else {
+                    // Обновляем список регистраций
+                    setTimeout(function() { 
+                        viewCourseRegistrations(courseId); 
+                    }, 300);
+                }
+                
+                // Обновляем статистику и список курсов
+                await loadStats();
+                await loadCourses(currentCoursesPage, true);
+                
+                showToast(result.message || 'Пользователи успешно удалены с курса', 'success');
+                
+                setTimeout(function() {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('registrationsModal'));
+                    if (modal) modal.hide();
+                }, 1500);
+                
+            } else {
+                var error = await response.json();
+                console.error('Ошибка удаления:', error);
+                showToast(error.detail || 'Ошибка при удалении', 'danger');
+            }
+        } catch (error) {
+            console.error('Remove registrations error:', error);
+            showToast('Ошибка соединения с сервером', 'danger');
+        }
+        
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-person-x"></i> Удалить выбранных';
+        }
     }
 
     async function deleteCategoryItem(id) {
@@ -823,7 +1012,7 @@
         if (response.ok) {
             showToast('Категория успешно удалена', 'success');
             await loadCategories(currentCategoriesPage);
-            await loadCourses(currentCoursesPage);
+            await loadCourses(currentCoursesPage, true);
             await loadStats();
         } else {
             showToast('Ошибка при удалении категории', 'danger');
@@ -835,7 +1024,7 @@
         var response = await fetch('/api/admin/courses/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
         if (response.ok) {
             showToast('Курс успешно удален', 'success');
-            await loadCourses(currentCoursesPage);
+            await loadCourses(currentCoursesPage, true);
             await loadStats();
         } else {
             showToast('Ошибка при удалении курса', 'danger');
@@ -850,7 +1039,7 @@
         });
         if (response.ok) {
             showToast(isActive ? 'Курс активирован' : 'Курс деактивирован', 'success');
-            await loadCourses(currentCoursesPage);
+            await loadCourses(currentCoursesPage, true);
             await loadStats();
         } else {
             showToast('Ошибка при изменении статуса', 'danger');
@@ -1013,7 +1202,7 @@
             document.getElementById('createCourseForm').reset();
             speakersList = [];
             renderSpeakers();
-            await loadCourses(currentCoursesPage);
+            await loadCourses(currentCoursesPage, true);
             await loadStats();
         } else {
             var error = await response.json();
@@ -1529,6 +1718,12 @@
     window.renderCoursesPage = renderCoursesPage;
     window.loadUsers = loadUsers;
     window.viewCourseRegistrations = viewCourseRegistrations;
+    window.toggleAllRegistrations = toggleAllRegistrations;
+    window.updateRemoveButtonState = updateRemoveButtonState;
+    window.removeSelectedRegistrations = removeSelectedRegistrations;
+    window.removeAllRegistrations = removeAllRegistrations;
+    window.performRemoveRegistrations = performRemoveRegistrations;
+    window.updateCourseParticipantsInTable = updateCourseParticipantsInTable;
     window.deleteCategoryItem = deleteCategoryItem;
     window.deleteCourseItem = deleteCourseItem;
     window.toggleCourseStatusItem = toggleCourseStatusItem;

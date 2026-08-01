@@ -1,18 +1,22 @@
+# app/auth.py
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app import models
-from app.database import get_db
+from app.database import get_async_db
 from app.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 
-# ХЕШИРОВАНИЕ ПАРОЛЯ (БЕЗ ОБРЕЗАНИЯ)
+# ============================================================
+# ХЕШИРОВАНИЕ ПАРОЛЯ (СИНХРОННЫЕ - ОСТАВЛЯЕМ)
+# ============================================================
 def get_password_hash(password: str) -> str:
     """Хеширует пароль с помощью bcrypt."""
     return pwd_context.hash(password)
@@ -23,7 +27,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-# СОЗДАНИЕ JWT ТОКЕНА 
+# ============================================================
+# СОЗДАНИЕ JWT ТОКЕНА (СИНХРОННЫЙ - ОСТАВЛЯЕМ)
+# ============================================================
 def create_access_token(data: dict) -> str:
     """Создаёт JWT токен с audience и iat."""
     to_encode = data.copy()
@@ -36,17 +42,24 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-# ПРОВЕРКА АДМИН-КОДА 
+# ============================================================
+# ПРОВЕРКА АДМИН-КОДА (СИНХРОННЫЙ - ОСТАВЛЯЕМ)
+# ============================================================
 def check_admin_code(code: str) -> bool:
     return code == settings.ADMIN_SECRET_CODE
 
 
-# ПОЛУЧЕНИЕ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+# ============================================================
+# ПОЛУЧЕНИЕ ТЕКУЩЕГО ПОЛЬЗОВАТЕЛЯ (АСИНХРОННЫЙ)
+# ============================================================
+async def get_current_user(  # ← async def
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_async_db)  # ← асинхронная сессия
+):
     """
     Получает текущего пользователя по JWT токену.
-         Проверяет audience (aud)
-         Обрабатывает все ошибки JWT явно
+    Проверяет audience (aud)
+    Обрабатывает все ошибки JWT явно
     """
     if not token:
         raise HTTPException(
@@ -77,7 +90,6 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
     except jwt.JWTError as e:
-        # В python-jose все ошибки JWT попадают сюда
         error_msg = str(e)
         if "audience" in error_msg.lower() or "aud" in error_msg.lower():
             raise HTTPException(
@@ -97,7 +109,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    user = db.query(models.User).filter(models.User.email == email).first()
+    # Асинхронный запрос к БД
+    stmt = select(models.User).where(models.User.email == email)
+    result = await db.execute(stmt)  # ← await
+    user = result.scalar_one_or_none()
+    
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -108,8 +124,13 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     return user
 
 
-# ОПЦИОНАЛЬНАЯ АВТОРИЗАЦИЯ
-def get_current_user_optional(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+# ============================================================
+# ОПЦИОНАЛЬНАЯ АВТОРИЗАЦИЯ (АСИНХРОННЫЙ)
+# ============================================================
+async def get_current_user_optional(  # ← async def
+    token: str = Depends(oauth2_scheme),
+    db: AsyncSession = Depends(get_async_db)  # ← асинхронная сессия
+):
     """
     Опциональная авторизация - не выдаёт ошибку если нет токена или он невалидный.
     """
@@ -131,12 +152,20 @@ def get_current_user_optional(token: str = Depends(oauth2_scheme), db: Session =
     except Exception:
         return None
     
-    user = db.query(models.User).filter(models.User.email == email).first()
+    # Асинхронный запрос к БД
+    stmt = select(models.User).where(models.User.email == email)
+    result = await db.execute(stmt)  # ← await
+    user = result.scalar_one_or_none()
+    
     return user
 
 
-# ТЕКУЩИЙ АКТИВНЫЙ ПОЛЬЗОВАТЕЛЬ
-def get_current_active_user(current_user: models.User = Depends(get_current_user)):
+# ============================================================
+# ТЕКУЩИЙ АКТИВНЫЙ ПОЛЬЗОВАТЕЛЬ (СИНХРОННЫЙ - ОСТАВЛЯЕМ)
+# ============================================================
+def get_current_active_user(
+    current_user: models.User = Depends(get_current_user)  # ← Depends на асинхронную функцию
+):
     """Проверяет, что пользователь не заблокирован."""
     if current_user.is_blocked:
         raise HTTPException(
@@ -146,8 +175,12 @@ def get_current_active_user(current_user: models.User = Depends(get_current_user
     return current_user
 
 
-# ТЕКУЩИЙ АДМИНИСТРАТОР
-def get_current_admin(current_user: models.User = Depends(get_current_active_user)):
+# ============================================================
+# ТЕКУЩИЙ АДМИНИСТРАТОР (СИНХРОННЫЙ - ОСТАВЛЯЕМ)
+# ============================================================
+def get_current_admin(
+    current_user: models.User = Depends(get_current_active_user)
+):
     """Проверяет, что пользователь является администратором."""
     if current_user.role != models.UserRole.ADMIN:
         raise HTTPException(

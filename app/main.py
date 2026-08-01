@@ -10,8 +10,9 @@ from slowapi.errors import RateLimitExceeded
 from app.database import engine, Base
 from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router, ai_router
 from app.routers import profile_router
-from app.routers import password_reset_router  
+from app.routers import password_reset_router
 from app.config import settings
+from app.scheduler import start_scheduler, stop_scheduler
 import os
 import re
 import logging
@@ -165,13 +166,35 @@ app.include_router(profile_router.router)
 app.include_router(ai_router.router)
 app.include_router(password_reset_router.router)
 
+@app.on_event("startup")
+async def startup_event():
+    logging.info("Запуск приложения...")
+    try:
+        start_scheduler()
+        logging.info("Планировщик успешно запущен")
+    except Exception as e:
+        logging.error(f"Ошибка запуска планировщика: {str(e)}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logging.info("Остановка приложения...")
+    try:
+        stop_scheduler()
+        logging.info("Планировщик успешно остановлен")
+    except Exception as e:
+        logging.error(f"Ошибка остановки планировщика: {str(e)}")
+
 @app.get("/map")
 async def map_page(request: Request):
     return templates.TemplateResponse("map.html", {"request": request})
 
 @app.get("/health")
-def health():
+async def health():
     return {"status": "ok"}
+
+@app.get("/test")
+async def test():
+    return {"status": "ok", "message": "Сервер работает!"}
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

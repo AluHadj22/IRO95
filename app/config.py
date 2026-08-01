@@ -90,6 +90,11 @@ class Settings:
                 f"ENCRYPTION_KEY невалидный.\n"
                 f"Сгенерируйте новый: python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'"
             )
+    # НАСТРОЙКИ REDIS
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    CACHE_TTL_COURSES: int = int(os.getenv("CACHE_TTL_COURSES", "300"))  # 5 минут
+    CACHE_TTL_CATEGORIES: int = int(os.getenv("CACHE_TTL_CATEGORIES", "600"))  # 10 минут
+    CACHE_TTL_STATS: int = int(os.getenv("CACHE_TTL_STATS", "60"))  # 1 минута
 
 
 settings = Settings()

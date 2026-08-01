@@ -1,25 +1,25 @@
+# app/routers/auth_router.py
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from app import models, schemas, auth
-from app.database import get_db
+from app.database import get_async_db
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
 # === RATE LIMITER (ЗАЩИТА ОТ БРУТФОРСА) ===
-# Используем глобальный limiter из main.py или создаём локальный
-# Если в main.py уже есть limiter, используем его через Depends
 limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/register")
-@limiter.limit("5/minute")  # ✅ Не более 5 регистраций с одного IP в минуту
-def register(
-    request: Request,  # ✅ Добавляем Request для rate limiting
+@limiter.limit("5/minute")  #  Не более 5 регистраций с одного IP в минуту
+async def register(  # ← async def
+    request: Request,
     user: schemas.UserCreate,
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)  # ← асинхронная сессия
 ):
     """
     Регистрация нового пользователя.
@@ -28,8 +28,11 @@ def register(
     ✅ Поддержка админ-кода
     ✅ Выбор должности при регистрации
     """
-    # Проверка на существующего пользователя
-    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+    # Проверка на существующего пользователя (асинхронно)
+    stmt = select(models.User).where(models.User.email == user.email)
+    result = await db.execute(stmt)  # ← await
+    existing_user = result.scalar_one_or_none()
+    
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -73,8 +76,8 @@ def register(
     )
     
     db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    await db.commit()  # ← await
+    await db.refresh(db_user)  # ← await
     
     # Получаем понятное отображение роли
     role_display = db_user.get_role_display()
@@ -89,11 +92,11 @@ def register(
 
 
 @router.post("/login")
-@limiter.limit("5/minute")  # ✅ Не более 5 попыток входа с одного IP в минуту
-def login(
-    request: Request,  # ✅ Добавляем Request для rate limiting
+@limiter.limit("5/minute")  #  Не более 5 попыток входа с одного IP в минуту
+async def login(  # ← async def
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)  # ← асинхронная сессия
 ):
     """
     Вход в систему.
@@ -102,8 +105,10 @@ def login(
     ✅ Проверка блокировки
     ✅ Возвращает JWT токен
     """
-    # Ищем пользователя по email
-    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+    # Ищем пользователя по email (асинхронно)
+    stmt = select(models.User).where(models.User.email == form_data.username)
+    result = await db.execute(stmt)  # ← await
+    user = result.scalar_one_or_none()
     
     # Проверяем пароль
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
@@ -138,7 +143,7 @@ def login(
 
 
 @router.get("/me")
-def get_current_user(
+async def get_current_user(  # ← async def
     current_user: models.User = Depends(auth.get_current_active_user)
 ):
     """

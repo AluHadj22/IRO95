@@ -1,13 +1,16 @@
+# app/routers/admin_router.py
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy.orm import Session, joinedload, selectinload
-from sqlalchemy import desc, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, desc, func, and_, delete
+from sqlalchemy.orm import selectinload, joinedload, Session
 from app import models, schemas, auth
-from app.database import get_db
+from app.database import get_async_db, get_db, SessionLocal
 from app.services.excel_service import generate_full_registrations_excel
 from app.services.excel_export_service import ExcelExportService, generate_export_filename
 from app.services.document_export_service import DocumentExportService
 from app.services.moodle_service import MoodleService
+from app.services.cache_service import cached, cache_service
 from typing import List, Optional
 import os
 import shutil
@@ -140,15 +143,23 @@ async def upload_speaker_photo(
     }
 
 
-@router.get("/stats")
-def get_admin_stats(
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_admin)
-):
-    total_users = db.query(models.User).count()
-    total_courses = db.query(models.Course).count()
-    total_registrations = db.query(models.CourseRegistration).count()
-    total_categories = db.query(models.Category).count()
+async def get_admin_stats_from_db(db: AsyncSession) -> dict:
+    """Вспомогательная функция для получения статистики из БД"""
+    total_users_stmt = select(func.count()).select_from(models.User)
+    total_users_result = await db.execute(total_users_stmt)
+    total_users = total_users_result.scalar() or 0
+    
+    total_courses_stmt = select(func.count()).select_from(models.Course)
+    total_courses_result = await db.execute(total_courses_stmt)
+    total_courses = total_courses_result.scalar() or 0
+    
+    total_registrations_stmt = select(func.count()).select_from(models.CourseRegistration)
+    total_registrations_result = await db.execute(total_registrations_stmt)
+    total_registrations = total_registrations_result.scalar() or 0
+    
+    total_categories_stmt = select(func.count()).select_from(models.Category)
+    total_categories_result = await db.execute(total_categories_stmt)
+    total_categories = total_categories_result.scalar() or 0
     
     return {
         "total_users": total_users,
@@ -158,30 +169,76 @@ def get_admin_stats(
     }
 
 
-@router.get("/categories")
-def get_categories(
-    db: Session = Depends(get_db),
+@router.get("/stats")
+async def get_admin_stats(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    categories = db.query(models.Category).order_by(models.Category.id).all()
-    result = []
+    # Пробуем получить из кэша
+    cache_key = "admin_stats"
+    cached_data = await cache_service.get(cache_key)
+    if cached_data is not None:
+        return cached_data
+    
+    # Получаем из БД
+    stats = await get_admin_stats_from_db(db)
+    
+    # Сохраняем в кэш
+    await cache_service.set(cache_key, stats, ttl=60)
+    
+    return stats
+
+
+async def get_categories_from_db(db: AsyncSession) -> List[dict]:
+    """Вспомогательная функция для получения категорий из БД"""
+    stmt = select(models.Category).order_by(models.Category.id)
+    result = await db.execute(stmt)
+    categories = result.scalars().all()
+    
+    result_list = []
     for c in categories:
-        result.append({
+        count_stmt = select(func.count()).select_from(models.Course).where(models.Course.category_id == c.id)
+        count_result = await db.execute(count_stmt)
+        courses_count = count_result.scalar() or 0
+        
+        result_list.append({
             "id": c.id,
             "name": c.name,
             "description": c.description,
-            "courses_count": len(c.courses)
+            "courses_count": courses_count
         })
-    return result
+    return result_list
+
+
+@router.get("/categories")
+async def get_categories(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    # Пробуем получить из кэша
+    cache_key = "categories_list"
+    cached_data = await cache_service.get(cache_key)
+    if cached_data is not None:
+        return cached_data
+    
+    # Получаем из БД
+    categories = await get_categories_from_db(db)
+    
+    # Сохраняем в кэш
+    await cache_service.set(cache_key, categories, ttl=600)
+    
+    return categories
 
 
 @router.post("/categories")
-def create_category(
+async def create_category(
     category: schemas.CategoryCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    existing = db.query(models.Category).filter(models.Category.name == category.name).first()
+    stmt = select(models.Category).where(models.Category.name == category.name)
+    result = await db.execute(stmt)
+    existing = result.scalar_one_or_none()
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -193,8 +250,12 @@ def create_category(
         description=category.description
     )
     db.add(db_category)
-    db.commit()
-    db.refresh(db_category)
+    await db.commit()
+    await db.refresh(db_category)
+    
+    # Очищаем кэш категорий
+    await cache_service.delete_pattern("categories_list*")
+    
     return {
         "message": "Category created",
         "id": db_category.id,
@@ -203,30 +264,38 @@ def create_category(
 
 
 @router.delete("/categories/{category_id}")
-def delete_category(
+async def delete_category(
     category_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    category = db.query(models.Category).filter(models.Category.id == category_id).first()
+    stmt = select(models.Category).where(models.Category.id == category_id)
+    result = await db.execute(stmt)
+    category = result.scalar_one_or_none()
     if not category:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Category not found"
         )
     
-    db.query(models.Course).filter(
-        models.Course.category_id == category_id
-    ).update({models.Course.category_id: None})
+    await db.execute(
+        models.Course.__table__.update().where(
+            models.Course.category_id == category_id
+        ).values(category_id=None)
+    )
     
-    db.delete(category)
-    db.commit()
+    await db.delete(category)
+    await db.commit()
+    
+    # Очищаем кэш категорий
+    await cache_service.delete_pattern("categories_list*")
+    
     return {"message": "Category deleted"}
 
 
 @router.get("/moodle-courses")
-def get_moodle_courses(
-    db: Session = Depends(get_db),
+async def get_moodle_courses(
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
     moodle = MoodleService()
@@ -241,22 +310,26 @@ def get_moodle_courses(
 
 
 @router.get("/courses")
-def get_all_courses(
+async def get_all_courses(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    query = db.query(models.Course).options(
+    stmt = select(models.Course).options(
         joinedload(models.Course.category)
-    )
+    ).order_by(desc(models.Course.created_at)).offset(offset).limit(limit)
     
-    total = query.count()
-    courses = query.order_by(desc(models.Course.created_at)).offset(offset).limit(limit).all()
+    result = await db.execute(stmt)
+    courses = result.unique().scalars().all()
     
-    result = []
+    count_stmt = select(func.count()).select_from(models.Course)
+    count_result = await db.execute(count_stmt)
+    total = count_result.scalar() or 0
+    
+    result_list = []
     for c in courses:
-        result.append({
+        result_list.append({
             "id": c.id,
             "title": c.title,
             "current_participants": c.current_participants,
@@ -274,26 +347,28 @@ def get_all_courses(
         "total": total,
         "limit": limit,
         "offset": offset,
-        "items": result
+        "items": result_list
     }
 
 
 @router.delete("/courses/{course_id}")
-def admin_delete_course(
+async def admin_delete_course(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    stmt = select(models.Course).where(models.Course.id == course_id)
+    result = await db.execute(stmt)
+    course = result.scalar_one_or_none()
     if not course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
     
-    speakers = db.query(models.CourseSpeaker).filter(
-        models.CourseSpeaker.course_id == course_id
-    ).all()
+    speakers_stmt = select(models.CourseSpeaker).where(models.CourseSpeaker.course_id == course_id)
+    speakers_result = await db.execute(speakers_stmt)
+    speakers = speakers_result.scalars().all()
     
     for speaker in speakers:
         if speaker.photo_url:
@@ -302,38 +377,49 @@ def admin_delete_course(
     if course.image_url:
         delete_file_from_disk(course.image_url)
     
-    db.query(models.CourseSpeaker).filter(models.CourseSpeaker.course_id == course_id).delete()
-    db.query(models.UserFavorite).filter(models.UserFavorite.course_id == course_id).delete()
-    db.query(models.UserWatchLater).filter(models.UserWatchLater.course_id == course_id).delete()
-    db.query(models.CourseRegistration).filter(models.CourseRegistration.course_id == course_id).delete()
-    db.query(models.UserProgress).filter(models.UserProgress.course_id == course_id).delete()
-    db.query(models.Certificate).filter(models.Certificate.course_id == course_id).delete()
+    await db.execute(delete(models.CourseSpeaker).where(models.CourseSpeaker.course_id == course_id))
+    await db.execute(delete(models.UserFavorite).where(models.UserFavorite.course_id == course_id))
+    await db.execute(delete(models.UserWatchLater).where(models.UserWatchLater.course_id == course_id))
+    await db.execute(delete(models.CourseRegistration).where(models.CourseRegistration.course_id == course_id))
+    await db.execute(delete(models.UserProgress).where(models.UserProgress.course_id == course_id))
+    await db.execute(delete(models.Certificate).where(models.Certificate.course_id == course_id))
     
-    db.delete(course)
-    db.commit()
+    await db.delete(course)
+    await db.commit()
+    
+    # Очищаем кэш
+    await cache_service.delete_pattern("courses_list*")
+    await cache_service.delete(f"course_detail:{course_id}")
+    await cache_service.delete("admin_stats")
+    
     return {"message": "Course deleted successfully"}
 
 
 @router.get("/courses/{course_id}/registrations")
-def get_course_registrations(
+async def get_course_registrations(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
     
-    registrations = db.query(models.CourseRegistration).options(
+    registrations_stmt = select(models.CourseRegistration).options(
         selectinload(models.CourseRegistration.user)
-    ).filter(
+    ).where(
         models.CourseRegistration.course_id == course_id
     ).order_by(
         models.CourseRegistration.registered_at.desc()
-    ).all()
+    )
+    
+    registrations_result = await db.execute(registrations_stmt)
+    registrations = registrations_result.scalars().all()
     
     return {
         "course": {
@@ -359,14 +445,15 @@ def get_course_registrations(
 
 
 @router.delete("/courses/{course_id}/registrations")
-def remove_course_registrations(
+async def remove_course_registrations(
     course_id: int,
     user_ids: List[int] = Query(..., description="Список ID пользователей для удаления"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    # 1. Получаем курс
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -379,7 +466,9 @@ def remove_course_registrations(
             detail="Не указаны ID пользователей для удаления"
         )
     
-    existing_users = db.query(models.User).filter(models.User.id.in_(user_ids)).all()
+    users_stmt = select(models.User).where(models.User.id.in_(user_ids))
+    users_result = await db.execute(users_stmt)
+    existing_users = users_result.scalars().all()
     existing_user_ids = [u.id for u in existing_users]
     not_found = set(user_ids) - set(existing_user_ids)
     
@@ -389,10 +478,12 @@ def remove_course_registrations(
             detail=f"Пользователи с ID {list(not_found)} не найдены"
         )
     
-    registrations = db.query(models.CourseRegistration).filter(
+    registrations_stmt = select(models.CourseRegistration).where(
         models.CourseRegistration.course_id == course_id,
         models.CourseRegistration.user_id.in_(user_ids)
-    ).all()
+    )
+    registrations_result = await db.execute(registrations_stmt)
+    registrations = registrations_result.scalars().all()
     
     if not registrations:
         raise HTTPException(
@@ -403,29 +494,18 @@ def remove_course_registrations(
     registered_user_ids = [r.user_id for r in registrations]
     not_registered = set(user_ids) - set(registered_user_ids)
     
-    # 2. Удаляем регистрации
     for reg in registrations:
-        db.delete(reg)
+        await db.delete(reg)
     
-    # ✅ 3. ВАЖНО: обновляем курс ПЕРЕД commit, но ПОСЛЕ удаления
-    # Перезагружаем курс из БД, чтобы получить актуальное состояние
-    db.flush()  # Принудительно отправляем DELETE в БД
+    await db.flush()
     
-    # ✅ 4. Пересчитываем количество участников
-    new_count = db.query(models.CourseRegistration).filter(
+    count_stmt = select(func.count()).select_from(models.CourseRegistration).where(
         models.CourseRegistration.course_id == course_id
-    ).count()
+    )
+    count_result = await db.execute(count_stmt)
+    new_count = count_result.scalar() or 0
     
     course.current_participants = new_count
-    
-    # 5. Логируем для проверки
-    import logging
-    logger = logging.getLogger(__name__)
-    logger.info(f"=== УДАЛЕНИЕ РЕГИСТРАЦИЙ ===")
-    logger.info(f"course_id: {course_id}")
-    logger.info(f"course.title: {course.title}")
-    logger.info(f"Новое количество участников: {new_count}")
-    logger.info(f"course.current_participants: {course.current_participants}")
     
     for user_id in registered_user_ids:
         activity = models.UserActivityLog(
@@ -440,11 +520,13 @@ def remove_course_registrations(
         )
         db.add(activity)
     
-    # 6. Сохраняем изменения
-    db.commit()
+    await db.commit()
+    await db.refresh(course)
     
-    # 7. Для уверенности - еще раз перезагружаем курс после commit
-    db.refresh(course)
+    # Очищаем кэш
+    await cache_service.delete("admin_stats")
+    await cache_service.delete_pattern("courses_list*")
+    await cache_service.delete(f"course_detail:{course_id}")
     
     return {
         "message": f"Успешно удалено {len(registered_user_ids)} пользователей с курса",
@@ -459,21 +541,25 @@ def remove_course_registrations(
 
 
 @router.delete("/courses/{course_id}/registrations/all")
-def remove_all_course_registrations(
+async def remove_all_course_registrations(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Курс не найден"
         )
     
-    registrations = db.query(models.CourseRegistration).filter(
+    registrations_stmt = select(models.CourseRegistration).where(
         models.CourseRegistration.course_id == course_id
-    ).all()
+    )
+    registrations_result = await db.execute(registrations_stmt)
+    registrations = registrations_result.scalars().all()
     
     if not registrations:
         return {
@@ -487,10 +573,9 @@ def remove_all_course_registrations(
     removed_user_ids = [r.user_id for r in registrations]
     
     for reg in registrations:
-        db.delete(reg)
+        await db.delete(reg)
     
-    # ✅ Обновляем курс
-    db.flush()
+    await db.flush()
     course.current_participants = 0
     
     for user_id in removed_user_ids:
@@ -506,39 +591,13 @@ def remove_all_course_registrations(
         )
         db.add(activity)
     
-    db.commit()
-    db.refresh(course)
+    await db.commit()
+    await db.refresh(course)
     
-    return {
-        "message": f"Все {len(removed_user_ids)} пользователей удалены с курса",
-        "course_id": course_id,
-        "course_title": course.title,
-        "removed_count": len(removed_user_ids),
-        "removed_users": removed_user_ids,
-        "remaining_participants": 0
-    }
-    
-    removed_user_ids = [r.user_id for r in registrations]
-    
-    for reg in registrations:
-        db.delete(reg)
-    
-    course.current_participants = 0
-    
-    for user_id in removed_user_ids:
-        activity = models.UserActivityLog(
-            user_id=user_id,
-            action_type="course_unregister_all_admin",
-            course_id=course_id,
-            extra_data=json.dumps({
-                "course_title": course.title,
-                "admin_id": current_user.id,
-                "admin_name": current_user.full_name
-            })
-        )
-        db.add(activity)
-    
-    db.commit()
+    # Очищаем кэш
+    await cache_service.delete("admin_stats")
+    await cache_service.delete_pattern("courses_list*")
+    await cache_service.delete(f"course_detail:{course_id}")
     
     return {
         "message": f"Все {len(removed_user_ids)} пользователей удалены с курса",
@@ -551,19 +610,25 @@ def remove_all_course_registrations(
 
 
 @router.get("/courses/{course_id}/export")
-def export_course_registrations(
+async def export_course_registrations(
     course_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    course_stmt = select(models.Course).where(models.Course.id == course_id)
+    course_result = await db.execute(course_stmt)
+    course = course_result.scalar_one_or_none()
     if not course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
     
-    buffer = generate_full_registrations_excel(db, course_id, course.title)
+    sync_db = SessionLocal()
+    try:
+        buffer = generate_full_registrations_excel(sync_db, course_id, course.title)
+    finally:
+        sync_db.close()
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"registrations_course_{course_id}_{timestamp}.xlsx"
@@ -579,17 +644,22 @@ def export_course_registrations(
 
 
 @router.get("/users")
-def get_users(
+async def get_users(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    users = db.query(models.User).options(
+    stmt = select(models.User).options(
         selectinload(models.User.registrations)
-    ).order_by(models.User.id).offset(offset).limit(limit).all()
+    ).order_by(models.User.id).offset(offset).limit(limit)
     
-    total = db.query(models.User).count()
+    result = await db.execute(stmt)
+    users = result.unique().scalars().all()
+    
+    count_stmt = select(func.count()).select_from(models.User)
+    count_result = await db.execute(count_stmt)
+    total = count_result.scalar() or 0
     
     return [{
         "id": u.id,
@@ -602,12 +672,14 @@ def get_users(
 
 
 @router.post("/users/{user_id}/block")
-def block_user(
+async def block_user(
     user_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    stmt = select(models.User).where(models.User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -621,17 +693,23 @@ def block_user(
         )
     
     user.is_blocked = True
-    db.commit()
+    await db.commit()
+    
+    # Очищаем кэш статистики
+    await cache_service.delete("admin_stats")
+    
     return {"message": "User blocked"}
 
 
 @router.post("/users/{user_id}/unblock")
-def unblock_user(
+async def unblock_user(
     user_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    stmt = select(models.User).where(models.User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -639,18 +717,24 @@ def unblock_user(
         )
     
     user.is_blocked = False
-    db.commit()
+    await db.commit()
+    
+    # Очищаем кэш статистики
+    await cache_service.delete("admin_stats")
+    
     return {"message": "User unblocked"}
 
 
 @router.put("/users/{user_id}")
-def update_user(
+async def update_user(
     user_id: int,
     user_update: schemas.UserAdminUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    stmt = select(models.User).where(models.User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -661,8 +745,8 @@ def update_user(
     for key, value in update_data.items():
         setattr(user, key, value)
     
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     
     return {
         "message": "User updated successfully",
@@ -678,13 +762,15 @@ def update_user(
 
 
 @router.put("/users/{user_id}/role")
-def change_user_role(
+async def change_user_role(
     user_id: int,
     role_update: schemas.UserRoleUpdate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    stmt = select(models.User).where(models.User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -697,9 +783,11 @@ def change_user_role(
             detail="Нельзя изменить свою собственную роль"
         )
     
-    admin_count = db.query(models.User).filter(
+    admin_count_stmt = select(func.count()).select_from(models.User).where(
         models.User.role == models.UserRole.ADMIN
-    ).count()
+    )
+    admin_count_result = await db.execute(admin_count_stmt)
+    admin_count = admin_count_result.scalar() or 0
     
     if user.role == models.UserRole.ADMIN and admin_count <= 1 and role_update.role != models.UserRole.ADMIN:
         raise HTTPException(
@@ -709,8 +797,8 @@ def change_user_role(
     
     old_role = user.role.value
     user.role = role_update.role
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     
     role_names = {
         "admin": "Администратор",
@@ -729,24 +817,30 @@ def change_user_role(
 
 
 @router.get("/users/list")
-def get_users_with_data(
+async def get_users_with_data(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    export_service = ExcelExportService(db)
-    result = export_service.get_users_list_with_data(limit, offset)
-    return result
+    sync_db = SessionLocal()
+    try:
+        export_service = ExcelExportService(sync_db)
+        result = export_service.get_users_list_with_data(limit, offset)
+        return result
+    finally:
+        sync_db.close()
 
 
 @router.get("/users/export-all")
-def export_all_users(
-    db: Session = Depends(get_db),
+async def export_all_users(
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    export_service = ExcelExportService(db)
-    buffer = export_service.export_users_to_excel()
+    sync_db = SessionLocal()
+    try:
+        export_service = ExcelExportService(sync_db)
+        buffer = export_service.export_users_to_excel()
+    finally:
+        sync_db.close()
     
     filename = generate_export_filename("all")
     
@@ -761,20 +855,16 @@ def export_all_users(
 
 
 @router.get("/users/{user_id}/export")
-def export_single_user(
+async def export_single_user(
     user_id: int,
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-    
-    export_service = ExcelExportService(db)
-    buffer = export_service.export_single_user(user_id)
+    sync_db = SessionLocal()
+    try:
+        export_service = ExcelExportService(sync_db)
+        buffer = export_service.export_single_user(user_id)
+    finally:
+        sync_db.close()
     
     if not buffer:
         raise HTTPException(
@@ -795,9 +885,8 @@ def export_single_user(
 
 
 @router.get("/users/export-selected")
-def export_selected_users(
+async def export_selected_users(
     user_ids: str,
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
     if not user_ids:
@@ -820,8 +909,12 @@ def export_selected_users(
             detail="Не указаны ID пользователей"
         )
     
-    export_service = ExcelExportService(db)
-    buffer = export_service.export_users_to_excel(ids_list)
+    sync_db = SessionLocal()
+    try:
+        export_service = ExcelExportService(sync_db)
+        buffer = export_service.export_users_to_excel(ids_list)
+    finally:
+        sync_db.close()
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename = f"selected_users_{len(ids_list)}_{timestamp}.xlsx"
@@ -837,23 +930,29 @@ def export_selected_users(
 
 
 @router.get("/users/{user_id}/documents")
-def get_user_documents(
+async def get_user_documents(
     user_id: int,
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    doc_service = DocumentExportService(db)
-    return doc_service.get_user_documents_list(user_id)
+    sync_db = SessionLocal()
+    try:
+        doc_service = DocumentExportService(sync_db)
+        return doc_service.get_user_documents_list(user_id)
+    finally:
+        sync_db.close()
 
 
 @router.get("/users/{user_id}/documents/download")
-def download_user_documents(
+async def download_user_documents(
     user_id: int,
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    doc_service = DocumentExportService(db)
-    zip_content, filename = doc_service.create_user_zip(user_id)
+    sync_db = SessionLocal()
+    try:
+        doc_service = DocumentExportService(sync_db)
+        zip_content, filename = doc_service.create_user_zip(user_id)
+    finally:
+        sync_db.close()
     
     encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
     
@@ -868,9 +967,8 @@ def download_user_documents(
 
 
 @router.get("/users/documents/download-selected")
-def download_selected_users_documents(
+async def download_selected_users_documents(
     user_ids: str,
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
     if not user_ids:
@@ -893,8 +991,12 @@ def download_selected_users_documents(
             detail="Не указаны ID пользователей"
         )
     
-    doc_service = DocumentExportService(db)
-    zip_content, filename = doc_service.create_multiple_users_zip(ids_list)
+    sync_db = SessionLocal()
+    try:
+        doc_service = DocumentExportService(sync_db)
+        zip_content, filename = doc_service.create_multiple_users_zip(ids_list)
+    finally:
+        sync_db.close()
     
     encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
     
@@ -909,21 +1011,24 @@ def download_selected_users_documents(
 
 
 @router.get("/users/documents/download-all")
-def download_all_users_documents(
-    db: Session = Depends(get_db),
+async def download_all_users_documents(
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    users = db.query(models.User).all()
-    if not users:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Нет пользователей"
-        )
-    
-    user_ids = [user.id for user in users]
-    
-    doc_service = DocumentExportService(db)
-    zip_content, filename = doc_service.create_multiple_users_zip(user_ids)
+    sync_db = SessionLocal()
+    try:
+        users = sync_db.query(models.User).all()
+        if not users:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Нет пользователей"
+            )
+        
+        user_ids = [user.id for user in users]
+        
+        doc_service = DocumentExportService(sync_db)
+        zip_content, filename = doc_service.create_multiple_users_zip(user_ids)
+    finally:
+        sync_db.close()
     
     encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
     
@@ -938,14 +1043,17 @@ def download_all_users_documents(
 
 
 @router.get("/users/{user_id}/documents/{doc_type}/download")
-def download_user_document(
+async def download_user_document(
     user_id: int,
     doc_type: str,
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    doc_service = DocumentExportService(db)
-    content, filename, mime_type = doc_service.get_document_file(user_id, doc_type)
+    sync_db = SessionLocal()
+    try:
+        doc_service = DocumentExportService(sync_db)
+        content, filename, mime_type = doc_service.get_document_file(user_id, doc_type)
+    finally:
+        sync_db.close()
     
     encoded_filename = filename.encode('utf-8').decode('latin-1', errors='ignore')
     
@@ -960,24 +1068,29 @@ def download_user_document(
 
 
 @router.delete("/users/{user_id}/documents/{doc_type}")
-def delete_user_document(
+async def delete_user_document(
     user_id: int,
     doc_type: str,
-    db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    doc_service = DocumentExportService(db)
-    result = doc_service.delete_document(user_id, doc_type)
-    return result
+    sync_db = SessionLocal()
+    try:
+        doc_service = DocumentExportService(sync_db)
+        result = doc_service.delete_document(user_id, doc_type)
+        return result
+    finally:
+        sync_db.close()
 
 
 @router.delete("/users/{user_id}")
-def admin_delete_user(
+async def admin_delete_user(
     user_id: int,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    stmt = select(models.User).where(models.User.id == user_id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -991,19 +1104,28 @@ def admin_delete_user(
         )
     
     if user.role == models.UserRole.ADMIN:
-        admin_count = db.query(models.User).filter(
+        admin_count_stmt = select(func.count()).select_from(models.User).where(
             models.User.role == models.UserRole.ADMIN
-        ).count()
+        )
+        admin_count_result = await db.execute(admin_count_stmt)
+        admin_count = admin_count_result.scalar() or 0
         if admin_count <= 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Нельзя удалить последнего администратора. Сначала назначьте другого администратора."
             )
     
-    doc_service = DocumentExportService(db)
-    doc_service.delete_all_user_documents(user)
+    sync_db = SessionLocal()
+    try:
+        doc_service = DocumentExportService(sync_db)
+        doc_service.delete_all_user_documents(user)
+    finally:
+        sync_db.close()
     
-    db.delete(user)
-    db.commit()
+    await db.delete(user)
+    await db.commit()
+    
+    # Очищаем кэш статистики
+    await cache_service.delete("admin_stats")
     
     return {"message": "User deleted successfully"}

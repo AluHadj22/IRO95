@@ -12,6 +12,13 @@ class UserRole(str, enum.Enum):
     ADMIN = "admin"
 
 
+class MoodleSyncStatus(str, enum.Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
 class User(Base):
     __tablename__ = "users"
     
@@ -55,6 +62,8 @@ class User(Base):
     certificates = relationship("Certificate", back_populates="user", cascade="all, delete-orphan")
     
     password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
+    
+    moodle_sync_tasks = relationship("MoodleSyncTask", back_populates="user", cascade="all, delete-orphan")
     
     __table_args__ = (
         Index('idx_user_email', 'email'),
@@ -131,6 +140,9 @@ class User(Base):
     def has_data_confirmed(self) -> bool:
         return self.additional_info is not None and self.additional_info.data_confirmed
     
+    # ============================================================
+    # ✅ ПОЛНАЯ ПРОВЕРКА ПРОФИЛЯ (все документы обязательны)
+    # ============================================================
     def is_profile_complete(self) -> bool:
         return (
             self.is_personal_data_complete() and
@@ -144,9 +156,13 @@ class User(Base):
             self.has_data_confirmed()
         )
     
+    # ============================================================
+    # ✅ ПОЛНАЯ ДЕТАЛИЗАЦИЯ (включая файлы)
+    # ============================================================
     def get_profile_completion_details(self) -> dict:
         missing_sections = []
         
+        # 1. Личные данные
         if not self.is_personal_data_complete():
             missing_fields = []
             if not self.last_name: missing_fields.append("Фамилия")
@@ -173,6 +189,7 @@ class User(Base):
                 "is_complete": True
             })
         
+        # 2. Образование (с проверкой диплома)
         if not self.has_education():
             missing_sections.append({
                 "section": "education",
@@ -182,8 +199,8 @@ class User(Base):
             })
         elif not self.has_education_with_diploma():
             missing_sections.append({
-                "section": "education",
-                "label": "Образование",
+                "section": "education_diploma",
+                "label": "Диплом об образовании",
                 "fields": ["Загрузите копию диплома"],
                 "is_complete": False
             })
@@ -195,6 +212,7 @@ class User(Base):
                 "is_complete": True
             })
         
+        # 3. Место работы
         if not self.has_work():
             missing_sections.append({
                 "section": "work",
@@ -210,6 +228,7 @@ class User(Base):
                 "is_complete": True
             })
         
+        # 4. Документы (полная проверка)
         doc_fields = []
         if not self.has_snils():
             doc_fields.append("Заполните номер СНИЛС")
@@ -235,6 +254,7 @@ class User(Base):
                 "is_complete": True
             })
         
+        # 5. Подтверждение данных
         if not self.has_data_confirmed():
             missing_sections.append({
                 "section": "confirmation",
@@ -315,6 +335,8 @@ class Course(Base):
     progress = relationship("UserProgress", back_populates="course", cascade="all, delete-orphan")
     activity_logs = relationship("UserActivityLog", back_populates="course", cascade="all, delete-orphan")
     certificates = relationship("Certificate", back_populates="course", cascade="all, delete-orphan")
+    
+    moodle_sync_tasks = relationship("MoodleSyncTask", back_populates="course", cascade="all, delete-orphan")
 
 
 class CourseSpeaker(Base):
@@ -566,3 +588,53 @@ class PasswordResetToken(Base):
         Index('idx_reset_user_id', 'user_id'),
         Index('idx_reset_expires_at', 'expires_at'),
     )
+
+
+class MoodleSyncTask(Base):
+    __tablename__ = "moodle_sync_tasks"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    
+    status = Column(Enum(MoodleSyncStatus), default=MoodleSyncStatus.PENDING, nullable=False)
+    attempts = Column(Integer, default=0)
+    max_attempts = Column(Integer, default=5)
+    last_error = Column(Text, nullable=True)
+    error_code = Column(String(100), nullable=True)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    processed_at = Column(DateTime(timezone=True), nullable=True)
+    next_retry_at = Column(DateTime(timezone=True), nullable=True)
+    
+    moodle_user_id = Column(Integer, nullable=True)
+    moodle_enrollment_id = Column(Integer, nullable=True)
+    
+    user = relationship("User", back_populates="moodle_sync_tasks")
+    course = relationship("Course", back_populates="moodle_sync_tasks")
+    
+    __table_args__ = (
+        Index('idx_sync_status', 'status'),
+        Index('idx_sync_user_course', 'user_id', 'course_id'),
+        Index('idx_sync_next_retry', 'next_retry_at'),
+        Index('idx_sync_created_at', 'created_at'),
+    )
+    
+    def get_retry_delay(self) -> int:
+        delays = [30, 60, 120, 300, 600]
+        if self.attempts < len(delays):
+            return delays[self.attempts]
+        return 600
+    
+    def can_retry(self) -> bool:
+        return self.attempts < self.max_attempts
+    
+    def increment_attempts(self):
+        self.attempts += 1
+        if self.can_retry():
+            delay = self.get_retry_delay()
+            self.next_retry_at = func.now() + delay
+        else:
+            self.status = MoodleSyncStatus.FAILED
+            self.next_retry_at = None

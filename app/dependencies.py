@@ -1,20 +1,33 @@
+# app/dependencies.py
 from fastapi import Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from app.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import get_async_db
 from app import auth, models
 
-# Общие зависимости
-CommonDB = Depends(get_db)
+# ============================================================
+# ОБЩИЕ ЗАВИСИМОСТИ (АСИНХРОННЫЕ)
+# ============================================================
+
+# Асинхронная сессия БД
+CommonDB = Depends(get_async_db)
+
+# Текущий пользователь (асинхронный)
 CurrentUser = Depends(auth.get_current_active_user)
+
+# Текущий администратор (асинхронный)
 CurrentAdmin = Depends(auth.get_current_admin)
+
+# Опциональный пользователь (асинхронный)
 OptionalUser = Depends(auth.get_current_user_optional)
 
 
-#  ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ 
+# ============================================================
+# ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ (АСИНХРОННАЯ)
+# ============================================================
 
-def require_complete_profile(
+async def require_complete_profile(  # ← async def
     current_user: models.User = Depends(auth.get_current_active_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)  # ← асинхронная сессия
 ) -> models.User:
     """
     Проверяет, заполнен ли профиль пользователя полностью.
@@ -29,7 +42,8 @@ def require_complete_profile(
     Raises:
         HTTPException 403: С деталями о незаполненных разделах
     """
-    # Используем новый метод для получения детальной информации
+    # Используем метод модели для получения детальной информации
+    # (синхронный метод, не требует await)
     completion_details = current_user.get_profile_completion_details()
     
     if not completion_details["is_complete"]:
@@ -60,14 +74,17 @@ def require_complete_profile(
     return current_user
 
 
-# ОПЦИОНАЛЬНАЯ ПРОВЕРКА ПРОФИЛЯ (ДЛЯ API)
+# ============================================================
+# ОПЦИОНАЛЬНАЯ ПРОВЕРКА ПРОФИЛЯ (АСИНХРОННАЯ)
+# ============================================================
 
-def check_profile_complete_optional(
+async def check_profile_complete_optional(  # ← async def
     current_user: models.User = Depends(auth.get_current_active_user),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)  # ← асинхронная сессия
 ) -> dict:
     """
     Проверяет профиль и возвращает детальную информацию без выбрасывания исключения.
     Используется в эндпоинтах, где нужно только проверить статус.
     """
+    # Синхронный метод модели, не требует await
     return current_user.get_profile_completion_details()

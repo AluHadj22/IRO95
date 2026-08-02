@@ -4,65 +4,364 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="/static/css/login.css">
+<style>
+/* ===== СТЕКЛЯННЫЙ ХЕДЕР С АРТОМ ===== */
+.login-hero {
+    background: linear-gradient(135deg, rgba(26, 79, 122, 0.04) 0%, rgba(255, 255, 255, 0.2) 100%);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: clamp(25px, 4vh, 40px) 0 clamp(15px, 2.5vh, 25px);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Арт по центру хедера */
+.hero-art {
+    position: relative;
+    width: clamp(110px, 18vw, 160px);
+    height: clamp(110px, 18vw, 160px);
+    margin-bottom: clamp(8px, 1.5vh, 14px);
+}
+
+.hero-art .float-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    animation: floatShape 8s ease-in-out infinite;
+}
+.hero-art .float-shape.s1 { width: 28px; height: 28px; background: #1a4f7a; top: 0%; left: 0%; animation-delay: 0s; }
+.hero-art .float-shape.s2 { width: 18px; height: 18px; background: #3a7ca5; top: 60%; left: 80%; animation-delay: -2s; }
+.hero-art .float-shape.s3 { width: 14px; height: 14px; background: #0d3b5e; top: 20%; right: 0%; animation-delay: -4s; }
+.hero-art .float-shape.s4 { width: 22px; height: 22px; background: #1a4f7a; bottom: 0%; left: 10%; animation-delay: -6s; }
+
+@keyframes floatShape {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-8px) scale(1.05); }
+}
+
+.hero-art .art-ring {
+    position: absolute;
+    border: 1.5px solid rgba(26, 79, 122, 0.12);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.hero-art .art-ring.r1 { width: clamp(92px, 15vw, 138px); height: clamp(92px, 15vw, 138px); animation: pulseRing 4s ease-in-out infinite; }
+.hero-art .art-ring.r2 { width: clamp(72px, 11vw, 106px); height: clamp(72px, 11vw, 106px); animation: pulseRing 4s ease-in-out infinite 0.5s; }
+.hero-art .art-ring.r3 { width: clamp(52px, 7vw, 74px); height: clamp(52px, 7vw, 74px); animation: pulseRing 4s ease-in-out infinite 1s; }
+
+@keyframes pulseRing {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.1; }
+    50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.2; }
+}
+
+.hero-art .edu-illustration {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(76px, 12vw, 112px);
+    height: clamp(76px, 12vw, 112px);
+}
+
+/* Текст под артом */
+.hero-text {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-text .subtitle {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-weight: 500;
+    font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+    color: #4a5a6a;
+    letter-spacing: 0.08em;
+    margin: 0;
+    opacity: 0.7;
+}
+
+.hero-text .subtitle span {
+    color: #1a4f7a;
+    font-weight: 600;
+    opacity: 1;
+}
+
+/* Декоративные линии по бокам */
+.hero-lines {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 2vw, 20px);
+    margin-top: clamp(4px, 0.8vh, 8px);
+}
+
+.hero-lines .line {
+    width: clamp(30px, 6vw, 60px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(26, 79, 122, 0.2));
+}
+
+.hero-lines .line:last-child {
+    background: linear-gradient(90deg, rgba(26, 79, 122, 0.2), transparent);
+}
+
+.hero-lines .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(26, 79, 122, 0.25);
+    flex-shrink: 0;
+}
+
+/* ===== КОНТЕЙНЕР С КАРТОЧКОЙ ===== */
+.login-wrapper {
+    max-width: 520px;
+    margin: 20px auto 30px;
+    padding: 0 16px;
+}
+
+/* Карточка */
+.login-card {
+    margin: 0 !important;
+    width: 100%;
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .login-hero {
+        padding: 18px 0 12px;
+    }
+    
+    .hero-art {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 6px;
+    }
+    
+    .hero-art .art-ring.r1 { width: 76px; height: 76px; }
+    .hero-art .art-ring.r2 { width: 60px; height: 60px; }
+    .hero-art .art-ring.r3 { width: 44px; height: 44px; }
+    
+    .hero-art .edu-illustration {
+        width: 64px;
+        height: 64px;
+    }
+    
+    .hero-art .float-shape.s1 { width: 20px; height: 20px; }
+    .hero-art .float-shape.s2 { width: 14px; height: 14px; }
+    .hero-art .float-shape.s3 { width: 10px; height: 10px; }
+    .hero-art .float-shape.s4 { width: 16px; height: 16px; }
+    
+    .hero-text .subtitle {
+        font-size: 0.8rem;
+    }
+    
+    .hero-lines .line {
+        width: 20px;
+    }
+    
+    .login-wrapper {
+        margin: 10px auto 20px;
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 380px) {
+    .hero-art {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .hero-art .art-ring.r1 { width: 60px; height: 60px; }
+    .hero-art .art-ring.r2 { width: 48px; height: 48px; }
+    .hero-art .art-ring.r3 { width: 36px; height: 36px; }
+    
+    .hero-art .edu-illustration {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .hero-art .float-shape.s1 { width: 16px; height: 16px; }
+    .hero-art .float-shape.s2 { width: 12px; height: 12px; }
+    .hero-art .float-shape.s3 { width: 8px; height: 8px; }
+    .hero-art .float-shape.s4 { width: 14px; height: 14px; }
+    
+    .hero-text .subtitle {
+        font-size: 0.7rem;
+    }
+    
+    .hero-lines .line {
+        width: 14px;
+    }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+    .login-hero {
+        padding: 12px 0 8px;
+        flex-direction: row;
+        gap: 20px;
+    }
+    
+    .hero-art {
+        width: 70px;
+        height: 70px;
+        margin-bottom: 0;
+    }
+    
+    .hero-art .art-ring.r1 { width: 60px; height: 60px; }
+    .hero-art .art-ring.r2 { width: 48px; height: 48px; }
+    .hero-art .art-ring.r3 { width: 36px; height: 36px; }
+    
+    .hero-art .edu-illustration {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .hero-art .float-shape.s1 { width: 16px; height: 16px; }
+    .hero-art .float-shape.s2 { width: 12px; height: 12px; }
+    .hero-art .float-shape.s3 { width: 8px; height: 8px; }
+    .hero-art .float-shape.s4 { width: 14px; height: 14px; }
+    
+    .hero-text .subtitle {
+        font-size: 0.75rem;
+    }
+    
+    .hero-lines .line {
+        width: 20px;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    .login-hero {
+        background: linear-gradient(135deg, rgba(26, 79, 122, 0.12) 0%, rgba(30, 50, 70, 0.2) 100%);
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .hero-text .subtitle {
+        color: #b0c0d0;
+    }
+    
+    .hero-text .subtitle span {
+        color: #7ab0d4;
+    }
+    
+    .hero-lines .line {
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1));
+    }
+    
+    .hero-lines .line:last-child {
+        background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent);
+    }
+    
+    .hero-lines .dot {
+        background: rgba(255, 255, 255, 0.15);
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция (светлая) -->
+<!-- СТЕКЛЯННЫЙ ХЕДЕР С АРТОМ И ТЕКСТОМ -->
 <div class="login-hero">
-    <div class="container text-center">
-        <div class="hero-badge">Система дистанционного обучения</div>
-        <h1 class="display-5 fw-bold">
-            <span class="gold">Вход</span> в систему
-        </h1>
-        <p class="lead mb-0">ГБУ ДПО «Институт развития образования Чеченской Республики»</p>
+    <!-- АРТ -->
+    <div class="hero-art">
+        <div class="float-shape s1"></div>
+        <div class="float-shape s2"></div>
+        <div class="float-shape s3"></div>
+        <div class="float-shape s4"></div>
+        <div class="art-ring r1"></div>
+        <div class="art-ring r2"></div>
+        <div class="art-ring r3"></div>
+        <svg class="edu-illustration" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="50" y="80" width="100" height="70" rx="6" fill="rgba(26,79,122,0.1)" stroke="rgba(26,79,122,0.3)" stroke-width="1.5"/>
+            <rect x="55" y="85" width="90" height="60" rx="4" fill="rgba(255,255,255,0.8)"/>
+            <line x1="65" y1="100" x2="135" y2="100" stroke="rgba(26,79,122,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="65" y1="112" x2="125" y2="112" stroke="rgba(26,79,122,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="65" y1="124" x2="130" y2="124" stroke="rgba(26,79,122,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="65" y1="136" x2="115" y2="136" stroke="rgba(26,79,122,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M100 30 L140 50 L100 70 L60 50 Z" fill="rgba(26,79,122,0.15)" stroke="rgba(26,79,122,0.4)" stroke-width="1.5"/>
+            <path d="M60 50 L60 65 L100 85 L140 65 L140 50" fill="none" stroke="rgba(26,79,122,0.3)" stroke-width="1.5"/>
+            <line x1="100" y1="70" x2="100" y2="85" stroke="rgba(26,79,122,0.3)" stroke-width="1.5"/>
+            <line x1="140" y1="50" x2="155" y2="70" stroke="rgba(26,79,122,0.4)" stroke-width="1.5"/>
+            <circle cx="155" cy="72" r="3" fill="rgba(26,79,122,0.4)"/>
+            <rect x="30" y="145" width="60" height="35" rx="3" fill="rgba(26,79,122,0.08)" stroke="rgba(26,79,122,0.25)" stroke-width="1.5"/>
+            <rect x="35" y="150" width="50" height="25" rx="2" fill="rgba(255,255,255,0.6)"/>
+            <line x1="42" y1="158" x2="78" y2="158" stroke="rgba(26,79,122,0.2)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="42" y1="165" x2="68" y2="165" stroke="rgba(26,79,122,0.2)" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="155" cy="125" r="12" fill="rgba(26,79,122,0.12)" stroke="rgba(26,79,122,0.3)" stroke-width="1.5"/>
+            <path d="M140 155 Q155 135 170 155" fill="none" stroke="rgba(26,79,122,0.3)" stroke-width="1.5"/>
+            <path d="M100 85 Q100 110 100 130" stroke="rgba(26,79,122,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+            <path d="M60 50 Q45 70 30 100" stroke="rgba(26,79,122,0.1)" stroke-width="1" stroke-dasharray="4 4"/>
+            <path d="M140 50 Q155 70 155 100" stroke="rgba(26,79,122,0.1)" stroke-width="1" stroke-dasharray="4 4"/>
+            <circle cx="30" cy="60" r="3" fill="rgba(26,79,122,0.2)"/>
+            <circle cx="170" cy="40" r="2.5" fill="rgba(26,79,122,0.2)"/>
+            <circle cx="175" cy="90" r="2" fill="rgba(26,79,122,0.15)"/>
+            <circle cx="25" cy="120" r="2.5" fill="rgba(26,79,122,0.15)"/>
+        </svg>
+    </div>
+    
+    <!-- ТЕКСТ ПОД АРТОМ -->
+    <div class="hero-text">
+        <div class="hero-lines">
+            <span class="line"></span>
+            <span class="dot"></span>
+            <p class="subtitle">Пространство <span>профессионального</span> роста</p>
+            <span class="dot"></span>
+            <span class="line"></span>
+        </div>
     </div>
 </div>
 
-<div class="container mt-4 mb-5 login-page">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card login-card">
-                <div class="card-header text-center">
-                    <h3>Добро пожаловать</h3>
-                    <p>Войдите в свою учётную запись</p>
+<div class="login-wrapper">
+    <!-- КАРТОЧКА ВХОДА -->
+    <div class="card login-card">
+        <div class="card-header text-center">
+            <h3>Добро пожаловать</h3>
+            <p>Войдите в свою учётную запись</p>
+        </div>
+        <div class="card-body">
+            <form id="loginForm" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required autocomplete="email" inputmode="email">
                 </div>
-                <div class="card-body">
-                    <form id="loginForm" novalidate>
-                        <div class="mb-3">
-                            <label class="form-label" for="email">Email</label>
-                            <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required autocomplete="email" inputmode="email">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label" for="password">Пароль</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="password" placeholder="••••••" required autocomplete="current-password">
-                                <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Показать/скрыть пароль">
-                                    <i class="bi bi-eye" id="passwordIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Ссылка "Забыли пароль?" -->
-                        <div class="forgot-link">
-                            <a href="/forgot-password">Забыли пароль?</a>
-                        </div>
-                        
-                        <button type="submit" class="btn-login" id="loginBtn">Войти</button>
-                    </form>
-                    
-                    <div class="login-divider">или</div>
-                    
-                    <div class="text-center">
-                        <p class="register-link">
-                            Нет аккаунта? <a href="/register">Зарегистрируйтесь</a>
-                        </p>
-                    </div>
-                    
-                    <div class="demo-hint mt-3">
-                        <i class="bi bi-info-circle"></i>
-                        <span>Для входа используйте email и пароль, указанные при регистрации.</span>
+                <div class="mb-3">
+                    <label class="form-label" for="password">Пароль</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" placeholder="••••••" required autocomplete="current-password">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Показать/скрыть пароль">
+                            <i class="bi bi-eye" id="passwordIcon"></i>
+                        </button>
                     </div>
                 </div>
+
+                <div class="forgot-link">
+                    <a href="/forgot-password">Забыли пароль?</a>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">Войти</button>
+            </form>
+
+            <div class="login-divider">или</div>
+
+            <div class="text-center">
+                <p class="register-link">
+                    Нет аккаунта? <a href="/register">Зарегистрируйтесь</a>
+                </p>
+            </div>
+
+            <div class="demo-hint mt-3">
+                <i class="bi bi-info-circle"></i>
+                <span>Для входа используйте email и пароль, указанные при регистрации.</span>
             </div>
         </div>
     </div>
@@ -75,7 +374,7 @@
 document.getElementById('togglePassword').addEventListener('click', function() {
     const passwordInput = document.getElementById('password');
     const icon = document.getElementById('passwordIcon');
-    
+
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
         icon.className = 'bi bi-eye-slash';
@@ -90,25 +389,25 @@ document.getElementById('togglePassword').addEventListener('click', function() {
 // ============================================================
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const btn = document.getElementById('loginBtn');
-    
+
     if (!email || !password) {
         if (window.showToast) window.showToast('Заполните все поля', 'warning');
         return;
     }
-    
+
     btn.disabled = true;
     const originalHtml = btn.innerHTML;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Вход...';
-    
+
     try {
         const formData = new URLSearchParams();
         formData.append('username', email);
         formData.append('password', password);
-        
+
         const response = await fetch('/api/auth/login', { 
             method: 'POST', 
             body: formData,
@@ -116,19 +415,19 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('role', data.role);
-            
+
             if (window.showToast) {
                 window.showToast('Вход выполнен успешно!', 'success');
             }
-            
+
             btn.disabled = false;
             btn.innerHTML = originalHtml;
-            
+
             setTimeout(() => {
                 window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
             }, 1000);

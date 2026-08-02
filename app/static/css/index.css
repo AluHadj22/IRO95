@@ -1,516 +1,588 @@
-/* ===== КАЛЛИГРАФИЧЕСКИЕ ШРИФТЫ - АДАПТИВНЫЕ РАЗМЕРЫ ===== */
-    :root {
-        --hero-title-size: clamp(2.2rem, 7vw, 3.8rem);
-        --hero-subtitle-size: clamp(1.1rem, 3.5vw, 1.9rem);
-        --hero-region-size: clamp(0.9rem, 2.5vw, 1.4rem);
-        --section-title-size: clamp(1.6rem, 4.5vw, 2.4rem);
-        --section-subtitle-size: clamp(1rem, 2.5vw, 1.3rem);
-        --card-title-size: clamp(1rem, 2vw, 1.15rem);
-        --card-text-size: clamp(0.9rem, 1.8vw, 1.05rem);
-        --stat-number-size: clamp(1.8rem, 5vw, 2.6rem);
-        --btn-font-size: clamp(0.9rem, 1.5vw, 1.1rem);
-        --info-text-size: clamp(0.95rem, 2vw, 1.05rem);
-        --badge-font-size: clamp(0.6rem, 1.2vw, 0.8rem);
-    }
+/* ===== ПЕРЕМЕННЫЕ ===== */
+:root {
+    --hero-title-size: clamp(2.2rem, 7vw, 3.8rem);
+    --hero-subtitle-size: clamp(1.1rem, 3.5vw, 1.9rem);
+    --hero-region-size: clamp(0.9rem, 2.5vw, 1.4rem);
+    --section-title-size: clamp(1.6rem, 4.5vw, 2.4rem);
+    --section-subtitle-size: clamp(1rem, 2.5vw, 1.3rem);
+    --card-title-size: clamp(1rem, 2vw, 1.15rem);
+    --card-text-size: clamp(0.9rem, 1.8vw, 1.05rem);
+    --stat-number-size: clamp(1.8rem, 5vw, 2.6rem);
+    --btn-font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    --info-text-size: clamp(0.95rem, 2vw, 1.05rem);
+    --badge-font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    
+    --primary: #1a4f7a;
+    --primary-light: #2a6fa8;
+    --primary-dark: #0f3555;
+    --border: #e9ecef;
+    --light-gray: #f8f9fa;
+}
 
-    .hero-title {
-        font-family: 'Playfair Display', 'Georgia', serif;
-        font-weight: 700;
-        font-size: var(--hero-title-size);
-        letter-spacing: 0.02em;
-        line-height: 1.1;
-        color: #0d1b2a;
-        text-shadow: 0 1px 2px rgba(255,255,255,0.3);
-        word-break: break-word;
-    }
-    .hero-title .accent {
-        font-family: 'Playfair Display', 'Georgia', serif;
-        font-weight: 700;
-        font-style: italic;
-        color: var(--primary);
-        letter-spacing: 0.03em;
-        white-space: nowrap;
-    }
-    .hero-subtitle {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-weight: 500;
-        font-size: var(--hero-subtitle-size);
-        font-style: italic;
-        letter-spacing: 0.04em;
-        opacity: 0.85;
-        color: #1a2a3a;
-        word-break: break-word;
-    }
-    .hero-region {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-weight: 400;
-        font-size: var(--hero-region-size);
-        font-style: italic;
-        letter-spacing: 0.06em;
-        opacity: 0.6;
-        color: #2a3a4a;
-    }
-    .section-title {
-        font-family: 'Playfair Display', 'Georgia', serif;
-        font-weight: 700;
-        font-size: var(--section-title-size);
-        letter-spacing: 0.03em;
-        color: #0d1b2a;
-    }
-    .section-subtitle {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-size: var(--section-subtitle-size);
-        font-style: italic;
-        letter-spacing: 0.04em;
-        color: #3a4a5a;
-        font-weight: 500;
-    }
-    .card-title {
-        font-family: 'Playfair Display', 'Georgia', serif;
-        font-weight: 700;
-        font-size: var(--card-title-size);
-        letter-spacing: 0.02em;
-        color: #0d1b2a;
-    }
-    .card-text {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-size: var(--card-text-size);
-        line-height: 1.7;
-        letter-spacing: 0.02em;
-        color: #3a4a5a;
-        font-weight: 500;
-    }
-    .category-card h5 {
-        font-family: 'Playfair Display', 'Georgia', serif;
-        font-weight: 700;
-        font-size: var(--card-title-size);
-        letter-spacing: 0.02em;
-        color: #0d1b2a;
-    }
-    .category-card p {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-size: var(--card-text-size);
-        line-height: 1.6;
-        letter-spacing: 0.02em;
-        color: #4a5a6a;
-        font-weight: 500;
-    }
-    .info-text {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-size: var(--info-text-size);
-        font-style: italic;
-        letter-spacing: 0.03em;
-        line-height: 1.8;
-        color: #3a4a5a;
-        font-weight: 500;
-    }
-    .accent-badge {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-weight: 700;
-        font-size: var(--badge-font-size);
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-        background: rgba(26, 79, 122, 0.1);
-        color: var(--primary);
-        padding: 8px 28px;
-        border-radius: 4px;
-        border: 1px solid rgba(26, 79, 122, 0.08);
-        display: inline-block;
-    }
-    .stat-number {
-        font-family: 'Playfair Display', 'Georgia', serif;
-        font-weight: 700;
-        font-size: var(--stat-number-size);
-        letter-spacing: 0.03em;
-    }
-    .stat-label {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-size: clamp(0.8rem, 1.5vw, 0.95rem);
-        font-style: italic;
-        letter-spacing: 0.04em;
-        opacity: 0.85;
-    }
-    .btn-italic {
-        font-family: 'Cormorant Garamond', 'Georgia', serif;
-        font-weight: 700;
-        font-size: var(--btn-font-size);
-        letter-spacing: 0.04em;
-        font-style: italic;
-    }
-    .hero-section h1 {
-        color: #0d1b2a;
-    }
-    .hero-section .lead {
-        color: #1a2a3a;
-        opacity: 0.85;
-    }
+/* ===== ШРИФТЫ ===== */
+.hero-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: var(--hero-title-size);
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    color: #0d1b2a;
+    word-break: break-word;
+}
 
-    /* ===== ГЕРОЙ-СЕКЦИЯ ===== */
+.hero-title .accent {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--primary);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.hero-subtitle {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 500;
+    font-size: var(--hero-subtitle-size);
+    font-style: italic;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+    color: #1a2a3a;
+    word-break: break-word;
+}
+
+.hero-region {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 400;
+    font-size: var(--hero-region-size);
+    font-style: italic;
+    letter-spacing: 0.06em;
+    opacity: 0.6;
+    color: #2a3a4a;
+}
+
+.section-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: var(--section-title-size);
+    letter-spacing: 0.03em;
+    color: #0d1b2a;
+}
+
+.section-subtitle {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: var(--section-subtitle-size);
+    font-style: italic;
+    letter-spacing: 0.04em;
+    color: #3a4a5a;
+    font-weight: 500;
+}
+
+.card-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: var(--card-title-size);
+    letter-spacing: 0.02em;
+    color: #0d1b2a;
+}
+
+.card-text {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: var(--card-text-size);
+    line-height: 1.7;
+    letter-spacing: 0.02em;
+    color: #3a4a5a;
+    font-weight: 500;
+}
+
+.category-card h5 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: var(--card-title-size);
+    letter-spacing: 0.02em;
+    color: #0d1b2a;
+}
+
+.category-card p {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: var(--card-text-size);
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+    color: #4a5a6a;
+    font-weight: 500;
+}
+
+.info-text {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: var(--info-text-size);
+    font-style: italic;
+    letter-spacing: 0.03em;
+    line-height: 1.8;
+    color: #3a4a5a;
+    font-weight: 500;
+    max-width: 100%;
+}
+
+.info-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+    letter-spacing: 0.02em;
+    color: #0d1b2a;
+}
+
+.accent-badge {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: var(--badge-font-size);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
+    padding: 8px 28px;
+    border-radius: 4px;
+    border: 1px solid rgba(26, 79, 122, 0.08);
+    display: inline-block;
+}
+
+.stat-number {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+    font-size: var(--stat-number-size);
+    letter-spacing: 0.03em;
+}
+
+.stat-label {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+    font-style: italic;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+}
+
+.btn-italic {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 700;
+    font-size: var(--btn-font-size);
+    letter-spacing: 0.04em;
+    font-style: italic;
+}
+
+.badge-new {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.75rem;
+    font-style: italic;
+    color: #5a6a7a;
+    font-weight: 500;
+}
+
+.badge-new i {
+    font-size: 0.6rem;
+    margin-right: 0.25rem;
+}
+
+/* ===== ГЕРОЙ-СЕКЦИЯ ===== */
+.hero-section {
+    position: relative;
+    padding: 40px 0 20px;
+    background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
+    overflow: hidden;
+    min-height: auto;
+}
+
+.hero-section .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 20px 0;
+}
+
+.hero-section .hero-icon {
+    margin-bottom: 16px;
+}
+
+.hero-section .hero-icon svg {
+    width: clamp(48px, 10vw, 72px);
+    height: clamp(48px, 10vw, 72px);
+}
+
+.hero-waves {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23e8f0fe' fill-opacity='0.5' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,213.3C1248,203,1344,213,1392,218.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/%3E%3C/svg%3E") no-repeat bottom;
+    background-size: cover;
+    pointer-events: none;
+}
+
+/* ===== КНОПКИ ===== */
+.hero-actions .btn {
+    padding: clamp(10px, 1.5vw, 14px) clamp(24px, 3vw, 48px);
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hero-actions .btn-primary {
+    background: var(--primary);
+    border: none;
+    box-shadow: 0 2px 8px rgba(26, 79, 122, 0.2);
+}
+
+.hero-actions .btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(26, 79, 122, 0.25);
+}
+
+.hero-actions .btn-outline-primary {
+    border: 2px solid var(--primary);
+    color: var(--primary);
+}
+
+.hero-actions .btn-outline-primary:hover {
+    background: var(--primary);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* ===== КАТЕГОРИИ ===== */
+.category-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 20px 20px;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    height: 100%;
+    cursor: default;
+    touch-action: manipulation;
+    content-visibility: auto;
+    contain: layout style paint;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border-color: rgba(26, 79, 122, 0.15);
+}
+
+.category-card i {
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    color: var(--primary);
+}
+
+.category-card .btn-outline-primary {
+    border-color: var(--border);
+    color: var(--primary);
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.category-card .btn-outline-primary:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* ===== КАРТОЧКИ КУРСОВ ===== */
+.course-card-img {
+    height: clamp(160px, 25vw, 200px);
+    object-fit: cover;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    width: 100%;
+    display: block;
+}
+
+.course-card-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f4f8;
+    color: var(--primary);
+    opacity: 0.3;
+}
+
+.card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    overflow: hidden;
+    height: 100%;
+    touch-action: manipulation;
+    content-visibility: auto;
+    contain: layout style paint;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border-color: rgba(26, 79, 122, 0.15);
+}
+
+.card .badge-primary {
+    background: rgba(26, 79, 122, 0.1);
+    color: var(--primary);
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.card .btn-primary {
+    background: var(--primary);
+    border: none;
+    padding: 6px 16px;
+    font-size: clamp(0.8rem, 1.2vw, 0.9rem);
+    transition: background 0.2s ease;
+}
+
+.card .btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+/* ===== ИНФО-КАРТОЧКА ===== */
+.info-card-block {
+    background: #ffffff;
+    border-left: 4px solid var(--primary);
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    padding: clamp(20px, 3vw, 40px) clamp(16px, 3vw, 40px);
+    transition: box-shadow 0.3s ease;
+}
+
+.info-card-block:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.stat-box {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: 10px;
+    padding: clamp(16px, 2vw, 20px);
+    color: white;
+    min-width: 120px;
+    transition: transform 0.25s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-2px);
+}
+
+.stat-box .stat-number {
+    color: white;
+}
+
+.stat-box .stat-label {
+    color: rgba(255,255,255,0.85);
+}
+
+/* ===== МЕДИА-ЗАПРОСЫ ===== */
+@media (max-width: 767.98px) {
     .hero-section {
-        position: relative;
-        padding: 40px 0 20px;
-        background: linear-gradient(135deg, #f8faff 0%, #ffffff 100%);
-        overflow: hidden;
-        min-height: auto;
+        padding: 20px 0 10px;
     }
 
     .hero-section .hero-content {
-        position: relative;
-        z-index: 2;
-        padding: 20px 0;
+        padding: 10px 0;
     }
 
     .hero-section .hero-icon {
-        margin-bottom: 16px;
+        margin-bottom: 10px;
     }
 
-    .hero-section .hero-icon svg {
-        width: clamp(48px, 10vw, 72px);
-        height: clamp(48px, 10vw, 72px);
+    .hero-title .accent {
+        white-space: normal;
     }
 
-    .hero-waves {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 60px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23e8f0fe' fill-opacity='0.5' d='M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,213.3C1248,203,1344,213,1392,218.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'/%3E%3C/svg%3E") no-repeat bottom;
-        background-size: cover;
-        pointer-events: none;
+    .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px !important;
     }
 
-    /* ===== КНОПКИ ===== */
-    .hero-section .btn {
-        padding: clamp(10px, 1.5vw, 14px) clamp(24px, 3vw, 48px);
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
+    .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px 20px;
     }
 
-    .hero-section .btn-primary {
-        background: var(--primary);
-        border: none;
-        box-shadow: 0 4px 20px rgba(26, 79, 122, 0.25);
+    .accent-badge {
+        padding: 6px 20px;
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
     }
 
-    .hero-section .btn-primary:hover {
-        background: var(--primary-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(26, 79, 122, 0.35);
-    }
-
-    .hero-section .btn-outline-primary {
-        border: 2px solid var(--primary);
-        color: var(--primary);
-    }
-
-    .hero-section .btn-outline-primary:hover {
-        background: var(--primary);
-        color: #fff;
-        transform: translateY(-2px);
-    }
-
-    /* ===== КАТЕГОРИИ ===== */
     .category-card {
-        background: #ffffff;
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 24px 20px 20px;
-        text-align: center;
-        transition: all 0.3s ease;
-        height: 100%;
-        cursor: default;
-        touch-action: manipulation;
-    }
-
-    .category-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-        border-color: transparent;
+        padding: 20px 16px;
     }
 
     .category-card i {
-        font-size: clamp(2rem, 5vw, 2.8rem);
-        color: var(--primary);
-    }
-
-    .category-card .btn-outline-primary {
-        border-color: var(--border);
-        color: var(--primary);
-        padding: 6px 16px;
-        font-size: 0.85rem;
-    }
-
-    .category-card .btn-outline-primary:hover {
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
-    }
-
-    /* ===== КАРТОЧКИ КУРСОВ ===== */
-    .course-card-img {
-        height: clamp(160px, 25vw, 200px);
-        object-fit: cover;
-        border-top-left-radius: 12px;
-        border-top-right-radius: 12px;
-        width: 100%;
+        font-size: 2.2rem;
     }
 
     .card {
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        overflow: hidden;
-        height: 100%;
-        touch-action: manipulation;
-    }
-
-    .card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-        border-color: transparent;
-    }
-
-    .card .badge-primary {
-        background: rgba(26, 79, 122, 0.1);
-        color: var(--primary);
-        font-weight: 700;
-        padding: 4px 12px;
-        border-radius: 4px;
-    }
-
-    .card .btn-primary {
-        background: var(--primary);
-        border: none;
-        padding: 6px 16px;
-        font-size: clamp(0.8rem, 1.2vw, 0.9rem);
-    }
-
-    .card .btn-primary:hover {
-        background: var(--primary-dark);
-    }
-
-    /* ===== ИНФО-КАРТОЧКА ===== */
-    .info-card-block {
-        background: var(--white);
-        border-left: 4px solid var(--primary);
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        padding: clamp(20px, 3vw, 40px) clamp(16px, 3vw, 40px);
-    }
-
-    .info-card-block .stat-box {
-        background: linear-gradient(135deg, var(--primary), var(--primary-light));
         border-radius: 10px;
-        padding: clamp(16px, 2vw, 20px);
-        color: white;
-        min-width: 120px;
     }
 
-    .info-card-block .stat-box .stat-number {
-        color: white;
+    .course-card-img {
+        height: 160px;
     }
 
-    .info-card-block .stat-box .stat-label {
-        color: rgba(255,255,255,0.85);
+    .card .card-body {
+        padding: 16px;
     }
 
-    /* ===== МЕДИА-ЗАПРОСЫ ===== */
-    @media (max-width: 767.98px) {
-        .hero-section {
-            padding: 20px 0 10px;
-        }
-
-        .hero-section .hero-content {
-            padding: 10px 0;
-        }
-
-        .hero-section .hero-icon {
-            margin-bottom: 10px;
-        }
-
-        .hero-title .accent {
-            white-space: normal;
-        }
-
-        .hero-section .btn {
-            width: 100%;
-            justify-content: center;
-            padding: 14px 20px;
-        }
-
-        .hero-section .d-flex.gap-3 {
-            gap: 10px !important;
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .accent-badge {
-            padding: 6px 20px;
-            font-size: 0.65rem;
-            letter-spacing: 0.1em;
-        }
-
-        .category-card {
-            padding: 20px 16px;
-        }
-
-        .category-card i {
-            font-size: 2.2rem;
-        }
-
-        .card {
-            border-radius: 10px;
-        }
-
-        .course-card-img {
-            height: 160px;
-        }
-
-        .card .card-body {
-            padding: 16px;
-        }
-
-        .info-card-block {
-            padding: 20px 16px;
-        }
-
-        .info-card-block .stat-box {
-            padding: 14px;
-        }
-
-        .container {
-            padding-left: 16px;
-            padding-right: 16px;
-        }
-
-        .row.g-4 {
-            --bs-gutter-y: 1rem;
-            --bs-gutter-x: 1rem;
-        }
-
-        .section-title {
-            font-size: 1.6rem;
-        }
-
-        .section-subtitle {
-            font-size: 1rem;
-        }
-
-        .info-text {
-            font-size: 0.95rem;
-            max-width: 100% !important;
-        }
-
-        .btn-italic {
-            font-size: 0.9rem;
-        }
-
-        [data-aos] {
-            opacity: 1 !important;
-            transform: none !important;
-        }
+    .info-card-block {
+        padding: 20px 16px;
     }
 
-    @media (max-width: 575.98px) {
-        .hero-title {
-            font-size: 2rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1rem;
-        }
-
-        .hero-region {
-            font-size: 0.85rem;
-        }
-
-        .card-title {
-            font-size: 0.95rem;
-        }
-
-        .card-text {
-            font-size: 0.85rem;
-        }
-
-        .stat-number {
-            font-size: 1.6rem;
-        }
-
-        .category-card h5 {
-            font-size: 0.95rem;
-        }
-
-        .category-card p {
-            font-size: 0.85rem;
-        }
-
-        .course-card-img {
-            height: 140px;
-        }
-
-        .info-text {
-            font-size: 0.9rem;
-        }
+    .stat-box {
+        padding: 14px;
     }
 
-    @media (min-width: 768px) and (max-width: 991.98px) {
-        .hero-title {
-            font-size: 2.8rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.4rem;
-        }
-
-        .section-title {
-            font-size: 2rem;
-        }
+    .section-title {
+        font-size: 1.6rem;
     }
 
-    /* ===== УЛУЧШЕНИЯ ДЛЯ ТАЧ-УСТРОЙСТВ ===== */
-    @media (hover: none) {
-        .category-card:hover {
-            transform: none;
-            box-shadow: none;
-            border-color: var(--border);
-        }
-
-        .card:hover {
-            transform: none;
-            box-shadow: none;
-            border-color: var(--border);
-        }
-
-        .hero-section .btn:hover {
-            transform: none;
-        }
-
-        .hero-section .btn-primary:active {
-            transform: scale(0.97);
-        }
-
-        .hero-section .btn-outline-primary:active {
-            transform: scale(0.97);
-        }
-
-        .category-card:active {
-            transform: scale(0.98);
-            background: var(--light-gray);
-        }
-
-        .card:active {
-            transform: scale(0.99);
-        }
+    .section-subtitle {
+        font-size: 1rem;
     }
 
-    /* ===== АНИМАЦИИ ДЛЯ БОЛЬШИХ ЭКРАНОВ ===== */
-    @media (min-width: 992px) {
-        .hero-section {
-            min-height: 80vh;
-            display: flex;
-            align-items: center;
-        }
+    .info-text {
+        font-size: 0.95rem;
     }
+
+    .btn-italic {
+        font-size: 0.9rem;
+    }
+    
+    /* Отключаем AOS на мобильных для производительности */
+    [data-aos] {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-region {
+        font-size: 0.85rem;
+    }
+
+    .card-title {
+        font-size: 0.95rem;
+    }
+
+    .card-text {
+        font-size: 0.85rem;
+    }
+
+    .stat-number {
+        font-size: 1.6rem;
+    }
+
+    .category-card h5 {
+        font-size: 0.95rem;
+    }
+
+    .category-card p {
+        font-size: 0.85rem;
+    }
+
+    .course-card-img {
+        height: 140px;
+    }
+
+    .info-text {
+        font-size: 0.9rem;
+    }
+    
+    .info-heading {
+        font-size: 1.1rem;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .hero-title {
+        font-size: 2.8rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.4rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .hero-section {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* ===== ТАЧ-УСТРОЙСТВА ===== */
+@media (hover: none) {
+    .category-card:hover,
+    .card:hover,
+    .stat-box:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .category-card:hover {
+        border-color: var(--border);
+    }
+    
+    .card:hover {
+        border-color: var(--border);
+    }
+
+    .hero-actions .btn:hover {
+        transform: none;
+    }
+
+    .hero-actions .btn-primary:active,
+    .hero-actions .btn-outline-primary:active {
+        transform: scale(0.97);
+    }
+
+    .category-card:active {
+        transform: scale(0.98);
+        background: var(--light-gray);
+    }
+
+    .card:active {
+        transform: scale(0.99);
+    }
+}
+
+/* ===== REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .hero-waves {
+        display: none;
+    }
+}

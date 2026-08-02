@@ -1,0 +1,69 @@
+/* ============================================================
+   PERFORMANCE FIX для слабых ПК / ноутбуков
+   Подключать ПОСЛЕДНИМ в <head>
+   ============================================================ */
+
+/* 1. Убираем тяжелый glassmorphism (blur + saturate) */
+* {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+/* 2. Заменяем полупрозрачные фоны на чистые/легкие */
+.login-card, .register-card, .reset-card, .forgot-card,
+.chat-container, .filter-sidebar, .nav-pills-custom,
+.profile-card, .stat-item, .course-card, .info-alert,
+.map-card, .admin-sidebar, .table-card, .form-section,
+.moodle-progress-section, .document-card, .badge-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* 3. Убираем бесконечные анимации градиентов */
+.login-hero::before, .login-hero::after,
+.register-hero::before, .register-hero::after,
+.reset-hero::before, .reset-hero::after,
+.forgot-hero::before, .forgot-hero::after,
+.chat-hero::before, .chat-hero::after,
+.courses-hero::before, .courses-hero::after,
+.map-hero::before, .map-hero::after {
+    display: none !important;
+    animation: none !important;
+}
+
+/* 4. Упрощаем тени до минимума */
+.card, .course-card, .feature-card, .info-card,
+.login-card, .register-card, .chat-container,
+.filter-sidebar, .nav-pills-custom, .stat-item,
+.profile-card, .category-card, .table-card,
+.form-section, .document-card, .badge-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    transition: none !important;
+}
+
+/* 5. Отключаем hover-трансформации на тач/слабых (опционально) */
+@media (hover: none), (pointer: coarse) {
+    .course-card:hover, .feature-card:hover,
+    .category-card:hover, .card:hover,
+    .stat-item:hover, .btn:hover {
+        transform: none !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    }
+}
+
+/* 6. Упрощаем шрифты: убираем декоративные на слабых устройствах */
+@media (max-width: 768px) {
+    body, h1, h2, h3, h4, h5, h6, p, a, span, div, button, input, textarea, label {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+}
+
+/* 7. Отключаем анимации для пользователей, которые их предпочитают без */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

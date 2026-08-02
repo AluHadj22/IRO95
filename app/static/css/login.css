@@ -2,6 +2,8 @@
    СТИЛИ ДЛЯ СТРАНИЦЫ ВХОДА — СВЕТЛАЯ ТЕМА
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
 :root {
     --primary: #1a4f7a;
     --primary-dark: #0d3b5e;
@@ -55,8 +57,8 @@
 /* ===== ГЕРОЙ-СЕКЦИЯ ===== */
 .login-hero {
     background: linear-gradient(160deg, #e8edf3 0%, #d5dfea 50%, #e0e8f0 100%);
-    padding: clamp(30px, 6vh, 60px) 0 clamp(20px, 4vh, 40px);
-    margin-bottom: clamp(16px, 3vh, 30px);
+    padding: clamp(20px, 4vh, 40px) 0 clamp(16px, 3vh, 28px);
+    margin-bottom: 0;
     position: relative;
     overflow: hidden;
     border-bottom: 2px solid rgba(26, 79, 122, 0.08);
@@ -137,22 +139,134 @@
     padding: 0 clamp(8px, 2vw, 20px);
 }
 
+/* ===== ОСНОВНОЙ ЛЕЙАУТ ===== */
+.login-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(24px, 4vw, 60px);
+    padding: clamp(20px, 3vh, 36px) clamp(16px, 3vw, 40px);
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: auto;
+}
+
+/* ===== АРТ-СЕКЦИЯ ===== */
+.art-section {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.art-canvas {
+    width: clamp(180px, 22vw, 260px);
+    height: clamp(180px, 22vw, 260px);
+    position: relative;
+}
+
+/* Плавающие декоративные фигуры */
+.float-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    animation: floatShape 8s ease-in-out infinite;
+}
+
+.float-shape.s1 { width: 50px; height: 50px; background: var(--primary); top: 5%; left: 5%; animation-delay: 0s; }
+.float-shape.s2 { width: 35px; height: 35px; background: var(--primary-light); top: 55%; left: 80%; animation-delay: -2s; }
+.float-shape.s3 { width: 25px; height: 25px; background: var(--primary-dark); top: 25%; right: 0%; animation-delay: -4s; }
+.float-shape.s4 { width: 40px; height: 40px; background: var(--primary); bottom: 5%; left: 15%; animation-delay: -6s; }
+
+@keyframes floatShape {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.05); }
+}
+
+/* Концентрические кольца */
+.art-ring {
+    position: absolute;
+    border: 1.5px solid rgba(26, 79, 122, 0.1);
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.art-ring.r1 { width: clamp(140px, 18vw, 200px); height: clamp(140px, 18vw, 200px); animation: pulseRing 4s ease-in-out infinite; }
+.art-ring.r2 { width: clamp(110px, 14vw, 160px); height: clamp(110px, 14vw, 160px); animation: pulseRing 4s ease-in-out infinite 0.5s; }
+.art-ring.r3 { width: clamp(80px, 10vw, 120px); height: clamp(80px, 10vw, 120px); animation: pulseRing 4s ease-in-out infinite 1s; }
+
+@keyframes pulseRing {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.1; }
+    50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.18; }
+}
+
+/* SVG иллюстрация */
+.edu-illustration {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: clamp(100px, 13vw, 150px);
+    height: clamp(100px, 13vw, 150px);
+}
+
+/* Чипы-метки */
+.art-labels {
+    display: flex;
+    gap: clamp(6px, 1vw, 12px);
+    margin-top: clamp(12px, 2vh, 20px);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.art-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: clamp(4px, 0.8vh, 6px) clamp(10px, 1.5vw, 14px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 20px;
+    border: 1px solid rgba(26, 79, 122, 0.08);
+    font-size: clamp(0.75rem, 1vw, 0.85rem);
+    color: var(--dark);
+    font-weight: 500;
+    font-family: 'Inter', sans-serif !important;
+    transition: var(--transition);
+}
+
+.art-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 79, 122, 0.08);
+}
+
+.art-label svg {
+    width: 14px;
+    height: 14px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
 /* ===== КАРТОЧКА ВХОДА ===== */
 .login-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    flex: 0 0 400px;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     border-radius: var(--radius);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
     transition: var(--transition);
-    margin: 0 clamp(8px, 2vw, 16px);
 }
 
 .login-card:hover {
-    border-color: rgba(26, 79, 122, 0.1);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
 }
 
 .login-card .card-header {
@@ -199,6 +313,7 @@
     min-height: clamp(44px, 5vh, 50px);
     -webkit-appearance: none;
     appearance: none;
+    font-family: 'Inter', sans-serif;
 }
 
 .form-control:focus {
@@ -213,12 +328,11 @@
     opacity: 0.5;
 }
 
-/* ===== ГРУППА ПОЛЕЙ ===== */
 .mb-3 {
     margin-bottom: clamp(14px, 2vh, 18px);
 }
 
-/* ===== КНОПКА ПОКАЗА ПАРОЛЯ ===== */
+/* ===== ГРУППА ПОЛЕЙ ===== */
 .input-group {
     display: flex;
     flex-wrap: nowrap;
@@ -418,9 +532,10 @@
     line-height: 1.5;
 }
 
-.demo-hint i {
+.demo-hint svg {
     color: var(--primary);
-    font-size: clamp(1rem, 1.5vw, 1.1rem);
+    width: clamp(16px, 1.5vw, 18px);
+    height: clamp(16px, 1.5vw, 18px);
     flex-shrink: 0;
     margin-top: 1px;
 }
@@ -429,127 +544,170 @@
    МЕДИА-ЗАПРОСЫ
    ============================================================ */
 
+@media (max-width: 900px) {
+    .login-wrapper {
+        flex-direction: column;
+        gap: 24px;
+        padding: 20px 16px;
+    }
+
+    .art-section {
+        flex-direction: row;
+        gap: 16px;
+    }
+
+    .art-canvas {
+        width: 140px;
+        height: 140px;
+    }
+
+    .art-ring.r1 { width: 120px; height: 120px; }
+    .art-ring.r2 { width: 95px; height: 95px; }
+    .art-ring.r3 { width: 70px; height: 70px; }
+
+    .edu-illustration {
+        width: 90px;
+        height: 90px;
+    }
+
+    .art-labels {
+        flex-direction: column;
+        margin-top: 0;
+        align-items: flex-start;
+    }
+
+    .login-card {
+        flex: none;
+        width: 100%;
+        max-width: 420px;
+    }
+}
+
 @media (max-width: 768px) {
     .login-card {
         margin: 0 clamp(4px, 1.5vw, 12px);
         border-radius: calc(var(--radius) - 2px);
     }
-    
+
     .login-card .card-body {
         padding: clamp(16px, 2.5vh, 22px) clamp(16px, 2.5vw, 20px);
     }
-    
+
     .form-control {
         min-height: clamp(40px, 4.5vh, 46px);
         padding: clamp(8px, 1vh, 10px) clamp(12px, 1.5vw, 16px);
         font-size: clamp(0.85rem, 1.1vw, 0.9rem);
     }
-    
+
     .input-group .btn-outline-secondary {
         min-height: clamp(40px, 4.5vh, 46px);
         min-width: clamp(40px, 4.5vw, 46px);
         padding: clamp(8px, 1vh, 10px) clamp(12px, 1.5vw, 16px);
     }
-    
+
     .btn-login {
         min-height: clamp(44px, 5.5vh, 50px);
         padding: clamp(10px, 1.2vh, 12px);
         font-size: clamp(0.9rem, 1.1vw, 0.95rem);
     }
-    
+
     .login-hero .lead {
         font-size: clamp(0.9rem, 1.8vw, 1rem);
     }
 }
 
 @media (max-width: 480px) {
+    .art-section {
+        display: none;
+    }
+
     .login-hero {
         padding: clamp(20px, 4vh, 30px) 0 clamp(16px, 3vh, 20px);
     }
-    
+
     .login-hero h1 {
         font-size: clamp(1.4rem, 5.5vw, 1.8rem);
     }
-    
+
     .login-hero .lead {
         font-size: clamp(0.8rem, 2vw, 0.9rem);
         padding: 0 clamp(4px, 1.5vw, 8px);
     }
-    
+
     .hero-badge {
         font-size: clamp(0.55rem, 1.5vw, 0.65rem) !important;
         padding: clamp(4px, 0.6vh, 6px) clamp(12px, 3vw, 18px);
         letter-spacing: 0.1em !important;
     }
-    
+
     .login-card {
         margin: 0 clamp(4px, 1.5vw, 8px);
         border-radius: calc(var(--radius) - 4px);
     }
-    
+
     .login-card .card-header {
         padding: clamp(14px, 2.5vh, 18px) clamp(14px, 3vw, 18px) clamp(12px, 2vh, 14px);
     }
-    
+
     .login-card .card-header h3 {
         font-size: clamp(1rem, 3.5vw, 1.2rem);
     }
-    
+
     .login-card .card-header p {
         font-size: clamp(0.75rem, 2vw, 0.85rem);
     }
-    
+
     .login-card .card-body {
         padding: clamp(14px, 2.5vh, 18px) clamp(14px, 3vw, 18px);
     }
-    
+
     .form-label {
         font-size: clamp(0.75rem, 1.8vw, 0.8rem);
     }
-    
+
     .form-control {
         font-size: clamp(0.8rem, 2vw, 0.85rem);
         padding: clamp(8px, 1vh, 10px) clamp(12px, 2vw, 14px);
         min-height: clamp(38px, 5vh, 42px);
         border-radius: calc(var(--radius-sm) - 2px);
     }
-    
+
     .input-group .form-control {
         border-radius: calc(var(--radius-sm) - 2px) 0 0 calc(var(--radius-sm) - 2px);
     }
-    
+
     .input-group .btn-outline-secondary {
         border-radius: 0 calc(var(--radius-sm) - 2px) calc(var(--radius-sm) - 2px) 0;
         min-height: clamp(38px, 5vh, 42px);
         min-width: clamp(38px, 6vw, 42px);
         padding: clamp(6px, 0.8vh, 8px) clamp(10px, 1.5vw, 12px);
     }
-    
+
     .btn-login {
         font-size: clamp(0.85rem, 2.2vw, 0.9rem);
         padding: clamp(10px, 1.5vh, 12px);
         min-height: clamp(42px, 6vh, 46px);
         border-radius: calc(var(--radius-sm) - 2px);
     }
-    
+
     .forgot-link a {
         font-size: clamp(0.75rem, 1.8vw, 0.8rem);
     }
-    
+
     .register-link {
         font-size: clamp(0.8rem, 2vw, 0.85rem);
     }
-    
+
     .demo-hint {
         font-size: clamp(0.7rem, 1.8vw, 0.75rem);
         padding: clamp(10px, 1.5vh, 12px) clamp(12px, 2vw, 14px);
     }
-    
+
     .login-divider {
         font-size: clamp(0.7rem, 1.8vw, 0.75rem);
         margin: clamp(14px, 2vh, 16px) 0 clamp(12px, 1.5vh, 14px);
     }
-    
+
     .login-divider::before,
     .login-divider::after {
         margin: 0 clamp(8px, 1.5vw, 10px);
@@ -560,46 +718,46 @@
     .login-hero h1 {
         font-size: clamp(1.2rem, 5vw, 1.4rem);
     }
-    
+
     .login-hero .lead {
         font-size: clamp(0.7rem, 2.2vw, 0.8rem);
     }
-    
+
     .hero-badge {
         font-size: clamp(0.5rem, 1.8vw, 0.55rem) !important;
         padding: clamp(3px, 0.5vh, 4px) clamp(8px, 2vw, 12px);
     }
-    
+
     .login-card .card-body {
         padding: clamp(10px, 2vh, 14px) clamp(10px, 2vw, 14px);
     }
-    
+
     .login-card .card-header {
         padding: clamp(10px, 2vh, 12px) clamp(10px, 2vw, 12px) clamp(8px, 1.5vh, 10px);
     }
-    
+
     .form-control {
         padding: clamp(6px, 0.8vh, 8px) clamp(8px, 1.5vw, 10px);
         font-size: clamp(0.75rem, 2.2vw, 0.8rem);
         min-height: clamp(34px, 4.5vh, 38px);
     }
-    
+
     .input-group .btn-outline-secondary {
         min-height: clamp(34px, 4.5vh, 38px);
         min-width: clamp(34px, 6vw, 38px);
         padding: clamp(4px, 0.5vh, 6px) clamp(6px, 1.5vw, 8px);
     }
-    
+
     .btn-login {
         font-size: clamp(0.75rem, 2.5vw, 0.8rem);
         padding: clamp(8px, 1.2vh, 10px);
         min-height: clamp(38px, 5.5vh, 42px);
     }
-    
+
     .register-link {
         font-size: clamp(0.75rem, 2.2vw, 0.8rem);
     }
-    
+
     .demo-hint {
         font-size: clamp(0.65rem, 2vw, 0.7rem);
         padding: clamp(8px, 1.2vh, 10px) clamp(8px, 1.5vw, 10px);
@@ -610,66 +768,66 @@
     .login-hero {
         padding: clamp(12px, 3vh, 20px) 0 clamp(8px, 2vh, 12px);
     }
-    
+
     .login-hero h1 {
         font-size: clamp(1.2rem, 4vw, 1.6rem);
     }
-    
+
     .login-hero .lead {
         font-size: clamp(0.7rem, 1.5vw, 0.85rem);
     }
-    
+
     .hero-badge {
         font-size: clamp(0.5rem, 1vw, 0.6rem) !important;
         padding: clamp(2px, 0.5vh, 4px) clamp(10px, 2vw, 14px);
     }
-    
+
     .login-card .card-header {
         padding: clamp(10px, 2vh, 14px) clamp(14px, 2vw, 18px) clamp(8px, 1.5vh, 12px);
     }
-    
+
     .login-card .card-header h3 {
         font-size: clamp(0.9rem, 2vw, 1.1rem);
     }
-    
+
     .login-card .card-header p {
         font-size: clamp(0.7rem, 1.2vw, 0.85rem);
     }
-    
+
     .login-card .card-body {
         padding: clamp(10px, 2vh, 14px) clamp(14px, 2vw, 18px);
     }
-    
+
     .mb-3 {
         margin-bottom: clamp(8px, 1vh, 12px);
     }
-    
+
     .form-control {
         min-height: clamp(32px, 4vh, 38px);
         padding: clamp(6px, 0.8vh, 8px) clamp(10px, 1vw, 14px);
         font-size: clamp(0.75rem, 1.2vw, 0.85rem);
     }
-    
+
     .input-group .btn-outline-secondary {
         min-height: clamp(32px, 4vh, 38px);
         min-width: clamp(32px, 4vw, 38px);
         padding: clamp(4px, 0.5vh, 6px) clamp(8px, 1vw, 12px);
     }
-    
+
     .btn-login {
         min-height: clamp(36px, 4.5vh, 42px);
         padding: clamp(8px, 1vh, 10px);
         font-size: clamp(0.8rem, 1.2vw, 0.9rem);
     }
-    
+
     .forgot-link {
         margin-bottom: clamp(6px, 0.8vh, 10px);
     }
-    
+
     .login-divider {
         margin: clamp(10px, 1.5vh, 14px) 0 clamp(8px, 1vh, 12px);
     }
-    
+
     .demo-hint {
         padding: clamp(8px, 1vh, 12px) clamp(10px, 1.5vw, 14px);
         font-size: clamp(0.65rem, 1vw, 0.8rem);
@@ -686,7 +844,7 @@
         min-height: 44px;
         min-width: 44px;
     }
-    
+
     .forgot-link a,
     .register-link a {
         display: inline-flex;
@@ -700,7 +858,7 @@
     .login-card {
         background: rgba(255, 255, 255, 0.85);
     }
-    
+
     .form-control {
         background: white;
     }
@@ -712,93 +870,103 @@
         background: linear-gradient(160deg, #1a2a3a 0%, #2d4a6a 50%, #1a2a3a 100%);
         border-bottom-color: rgba(255, 255, 255, 0.05);
     }
-    
+
     .login-hero h1 {
         color: #e8edf3;
     }
-    
+
     .login-hero .lead {
         color: #b0c0d0;
     }
-    
+
     .hero-badge {
         background: rgba(255, 255, 255, 0.08);
         color: #7ab0d4;
         border-color: rgba(255, 255, 255, 0.05);
     }
-    
+
+    .art-label {
+        background: rgba(30, 50, 70, 0.7);
+        color: #d0d8e0;
+        border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .art-label svg {
+        color: var(--primary-light);
+    }
+
     .login-card {
         background: rgba(30, 50, 70, 0.85);
         backdrop-filter: blur(16px) saturate(180%);
         -webkit-backdrop-filter: blur(16px) saturate(180%);
         border-color: rgba(255, 255, 255, 0.05);
     }
-    
+
     .login-card .card-header {
         background: linear-gradient(135deg, #0d3b5e 0%, #1a4f7a 100%);
     }
-    
+
     .form-label {
         color: #d0d8e0;
     }
-    
+
     .form-control {
         background: rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 255, 255, 0.1);
         color: #e8edf3;
     }
-    
+
     .form-control:focus {
         background: rgba(255, 255, 255, 0.12);
         border-color: var(--primary-light);
         box-shadow: 0 0 0 3px rgba(26, 79, 122, 0.15);
     }
-    
+
     .form-control::placeholder {
         color: rgba(255, 255, 255, 0.25);
     }
-    
+
     .input-group .btn-outline-secondary {
         background: rgba(255, 255, 255, 0.06);
         border-color: rgba(255, 255, 255, 0.1);
         color: #b0c0d0;
     }
-    
+
     .input-group .btn-outline-secondary:hover {
         background: rgba(26, 79, 122, 0.2);
         color: var(--primary-light);
         border-color: var(--primary-light);
     }
-    
+
     .forgot-link a {
         color: #b0c0d0;
     }
-    
+
     .forgot-link a:hover {
         color: var(--primary-light);
     }
-    
+
     .register-link {
         color: #b0c0d0;
     }
-    
+
     .register-link a {
         color: var(--primary-light);
     }
-    
+
     .register-link a:hover {
         color: #7ab0d4;
     }
-    
+
     .demo-hint {
         background: rgba(26, 79, 122, 0.1);
         color: #b0c0d0;
     }
-    
+
     .login-divider {
         color: rgba(255, 255, 255, 0.2);
     }
-    
+
     .login-divider::before,
     .login-divider::after {
         border-bottom-color: rgba(255, 255, 255, 0.08);

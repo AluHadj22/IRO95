@@ -3,9 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="ГБУ ДПО «ИРО ЧР» — официальный портал повышения квалификации педагогических работников Чеченской Республики. Курсы, карта, ИИ-помощник.">
+    <meta name="theme-color" content="#1a4f7a">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}ГБУ ДПО «ИРО ЧР» - Повышение квалификации{% endblock %}">
+    <meta property="og:description" content="Официальный портал повышения квалификации педагогических работников Чеченской Республики">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png">
+    
     <title>{% block title %}ГБУ ДПО «ИРО ЧР» - Повышение квалификации{% endblock %}</title>
     
-    <!-- ===== PRECONNECT ДЛЯ БЫСТРЫХ СОЕДИНЕНИЙ ===== -->
+    <!-- ===== PRECONNECT ===== -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,12 +25,14 @@
     <link rel="dns-prefetch" href="https://yastatic.net">
     <link rel="dns-prefetch" href="https://govzalla.ru">
     
-    <!-- ===== ШРИФТЫ (НОРМАЛЬНАЯ ЗАГРУЗКА, БЕЗ PRELOAD) ===== -->
+    <!-- ===== FAVICON / ICONS ===== -->
+    <link rel="icon" type="image/png" href="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png">
+    
+    <!-- ===== FONTS ===== -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- ===== КРИТИЧЕСКИЙ CSS (ИНЛАЙН) ===== -->
+    <!-- ===== CRITICAL CSS ===== -->
     <style>
-        /* Минимальный критический CSS для быстрого рендеринга */
         :root {
             --primary: #1a4f7a;
             --primary-light: #2a6fa8;
@@ -38,6 +49,8 @@
         
         * { box-sizing: border-box; }
         
+        html { scroll-behavior: smooth; }
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             padding-top: 80px;
@@ -49,6 +62,18 @@
             margin: 0;
         }
         
+        ::selection {
+            background: rgba(26, 79, 122, 0.15);
+            color: var(--dark);
+        }
+        
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+        
+        /* Navbar */
         #mainNav {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(20px);
@@ -103,6 +128,39 @@
             background: var(--light-gray);
         }
         
+        .nav-link {
+            position: relative;
+            color: var(--gray);
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            transition: var(--transition);
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+            background: rgba(26, 79, 122, 0.04);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 1rem;
+            right: 1rem;
+            height: 2px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .nav-link:hover::after, .nav-link.active::after {
+            transform: scaleX(1);
+        }
+        
+        /* Hero */
         .hero-section {
             padding: 40px 0 30px;
             background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
@@ -113,6 +171,7 @@
             font-size: clamp(1.8rem, 5vw, 3.2rem);
             line-height: 1.2;
             font-weight: 800;
+            letter-spacing: -0.02em;
         }
         
         .hero-section h1 .accent { color: var(--primary); }
@@ -123,6 +182,229 @@
             padding: 24px 28px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+        }
+        
+        /* Footer */
+        .footer-light {
+            background: #ffffff;
+            border-top: 1px solid var(--border);
+            padding-top: 3rem;
+        }
+        
+        .footer-heading {
+            color: var(--dark);
+            font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+        }
+        
+        .footer-text {
+            color: var(--gray);
+            font-size: 0.875rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-text-muted { opacity: 0.7; }
+        
+        .social-icons {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+        
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            color: var(--gray);
+            text-decoration: none;
+            transition: var(--transition);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .social-link:hover {
+            background: var(--secondary);
+            color: var(--primary);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        
+        .map-container {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            cursor: pointer;
+            background: var(--secondary);
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .map-container::before {
+            content: 'Загрузка карты...';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .map-container:hover {
+            box-shadow: 0 4px 12px rgba(26, 79, 122, 0.1);
+        }
+        
+        .map-link {
+            color: var(--gray);
+            text-decoration: none;
+            opacity: 0.6;
+            transition: var(--transition);
+            font-size: 0.875rem;
+        }
+        
+        .map-link:hover {
+            opacity: 1;
+            color: var(--primary);
+        }
+        
+        .footer-logo {
+            height: 50px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+        
+        /* Chatbot (base — prevents FOUC) */
+        .chatbot-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1050;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .chatbot-toggle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(26, 79, 122, 0.3);
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .chatbot-toggle:hover {
+            transform: scale(1.05);
+            background: var(--primary-light);
+        }
+        
+        .chatbot-toggle.active {
+            background: var(--dark);
+            transform: rotate(90deg);
+        }
+        
+        .chatbot-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #dc3545;
+            color: #fff;
+            font-size: 0.7rem;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .chatbot-window {
+            position: absolute;
+            bottom: 72px;
+            right: 0;
+            width: 380px;
+            max-width: calc(100vw - 48px);
+            max-height: 70vh;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid var(--border);
+        }
+        
+        .chatbot-window.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: all;
+        }
+        
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        
+        .toast-item {
+            background: var(--dark);
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+            pointer-events: all;
+            max-width: 320px;
+            line-height: 1.4;
+        }
+        
+        .toast-item.success { background: #198754; }
+        .toast-item.error { background: #dc3545; }
+        
+        @media (prefers-reduced-motion: no-preference) {
+            .toast-item { animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+            @keyframes slideIn {
+                from { opacity: 0; transform: translateX(100%); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
         }
         
         @media (max-width: 767.98px) {
@@ -138,10 +420,24 @@
                 text-overflow: ellipsis;
             }
             .hero-section { padding: 20px 0 10px; }
+            .chatbot-window {
+                width: calc(100vw - 32px);
+                right: -8px;
+                bottom: 68px;
+                max-height: 65vh;
+            }
+            .chatbot-container { bottom: 16px; right: 16px; }
+            .toast-container {
+                right: 10px;
+                left: 10px;
+                top: 80px;
+                align-items: stretch;
+            }
+            .toast-item { max-width: 100%; }
         }
     </style>
     
-    <!-- ===== АСИНХРОННАЯ ЗАГРУЗКА CSS ===== -->
+    <!-- ===== ASYNC CSS ===== -->
     <link rel="stylesheet" href="/static/css/main.css" media="print" onload="this.media='all';this.onload=null">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" media="print" onload="this.media='all';this.onload=null">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" media="print" onload="this.media='all';this.onload=null">
@@ -154,18 +450,52 @@
     </noscript>
     
     {% block extra_css %}{% endblock %}
+    
+    <!-- ===== PERFORMANCE FIX (ПОСЛЕДНИМ!) ===== -->
+    <link rel="stylesheet" href="/static/css/performance-fix.css" media="print" onload="this.media='all';this.onload=null">
+    <noscript><link rel="stylesheet" href="/static/css/performance-fix.css"></noscript>
+    
+    <!-- ===== SCHEMA.ORG ===== -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "ГБУ ДПО «ИРО ЧР»",
+      "alternateName": "Институт развития образования Чеченской Республики",
+      "url": "https://govzalla.ru",
+      "logo": "https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "ул. Лермонтова, 2",
+        "addressLocality": "Грозный",
+        "addressRegion": "Чеченская Республика",
+        "addressCountry": "RU"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+7-8712-21-22-24",
+        "contactType": "customer service",
+        "email": "ipkro-chr@mail.ru",
+        "availableLanguage": "Russian"
+      },
+      "sameAs": [
+        "https://vk.com/public215702903",
+        "https://govzalla.ru/"
+      ]
+    }
+    </script>
 </head>
 <body>
 
 <div class="toast-container"></div>
 
-<nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
+<nav class="navbar navbar-expand-lg fixed-top" id="mainNav" role="navigation" aria-label="Главная навигация">
     <div class="container">
-        <a class="navbar-brand" href="/">
+        <a class="navbar-brand" href="/" aria-label="ГБУ ДПО ИРО ЧР — на главную">
             <img 
                 src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" 
-                alt="ИРО ЧР" 
-                loading="lazy" 
+                alt="Логотип ИРО ЧР" 
+                loading="eager" 
                 width="45" 
                 height="45"
                 decoding="async"
@@ -181,7 +511,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto" id="navLinks">
-                <li class="nav-item"><a class="nav-link active" href="/">Главная</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/" aria-current="page">Главная</a></li>
                 <li class="nav-item"><a class="nav-link" href="/courses">Курсы</a></li>
                 <li class="nav-item"><a class="nav-link" href="/map">Карта</a></li>
                 <li class="nav-item"><a class="nav-link" href="/api/ai/chat">ИИ-помощник</a></li>
@@ -192,52 +522,66 @@
     </div>
 </nav>
 
-<main>
+<main id="main-content">
     {% block content %}{% endblock %}
 </main>
 
-<footer class="footer-light">
+<footer class="footer-light" itemscope itemtype="https://schema.org/Organization">
     <div class="container py-4 py-md-5">
         <div class="row">
             <div class="col-md-4 mb-4">
                 <img 
                     src="https://govzalla.ru/wp-content/uploads/2023/05/logo-min-1.png" 
-                    alt="ИРО ЧР" 
-                    style="height: 50px; margin-bottom: 12px; border-radius: 8px;" 
+                    alt="Логотип ИРО ЧР" 
+                    class="footer-logo"
                     loading="lazy" 
                     width="50" 
                     height="50"
                     decoding="async"
+                    itemprop="logo"
                 >
-                <h5 style="color: var(--dark); font-size: clamp(0.95rem, 1.2vw, 1.1rem);">ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
-                <p class="small" style="color: var(--gray); opacity: 0.7;">Повышение квалификации педагогических работников</p>
+                <h5 class="footer-heading" itemprop="name">ГБУ ДПО «Институт развития образования Чеченской Республики»</h5>
+                <p class="footer-text footer-text-muted">Повышение квалификации педагогических работников</p>
                 <div class="social-icons mt-3">
-                    <a href="https://vk.com/public215702903" target="_blank" title="ВКонтакте" class="vk-link" style="color: var(--gray); border-color: var(--border);">ВК</a>
-                    <a href="https://govzalla.ru/" target="_blank" title="Сайт организации" style="color: var(--gray); border-color: var(--border);"><i class="bi bi-globe2"></i></a>
+                    <a href="https://vk.com/public215702903" target="_blank" rel="noopener noreferrer" title="ВКонтакте" class="social-link vk-link" aria-label="ВКонтакте">ВК</a>
+                    <a href="https://govzalla.ru/" target="_blank" rel="noopener noreferrer" title="Сайт организации" class="social-link" aria-label="Официальный сайт"><i class="bi bi-globe2"></i></a>
                 </div>
             </div>
             <div class="col-md-3 mb-4">
-                <h5 style="color: var(--dark);">Контакты</h5>
-                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-geo-alt me-2" style="color: var(--primary);"></i>г. Грозный, ул. Лермонтова, 2</p>
-                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-telephone me-2" style="color: var(--primary);"></i>+7 (8712) 21-22-24</p>
-                <p class="small mb-2" style="color: var(--gray);"><i class="bi bi-envelope me-2" style="color: var(--primary);"></i>ipkro-chr@mail.ru</p>
-                <p class="small" style="color: var(--gray);"><i class="bi bi-clock me-2" style="color: var(--primary);"></i>Пн-Пт: 9:00 - 18:00</p>
+                <h5 class="footer-heading">Контакты</h5>
+                <p class="footer-text mb-2" itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+                    <i class="bi bi-geo-alt me-2" style="color: var(--primary);"></i>
+                    <span itemprop="addressLocality">г. Грозный</span>, <span itemprop="streetAddress">ул. Лермонтова, 2</span>
+                </p>
+                <p class="footer-text mb-2">
+                    <i class="bi bi-telephone me-2" style="color: var(--primary);"></i>
+                    <a href="tel:+78712212224" style="color: inherit; text-decoration: none;" itemprop="telephone">+7 (8712) 21-22-24</a>
+                </p>
+                <p class="footer-text mb-2">
+                    <i class="bi bi-envelope me-2" style="color: var(--primary);"></i>
+                    <a href="mailto:ipkro-chr@mail.ru" style="color: inherit; text-decoration: none;" itemprop="email">ipkro-chr@mail.ru</a>
+                </p>
+                <p class="footer-text">
+                    <i class="bi bi-clock me-2" style="color: var(--primary);"></i>Пн-Пт: 9:00 - 18:00
+                </p>
             </div>
             <div class="col-md-5 mb-4">
-                <h5 style="color: var(--dark);">Мы на карте</h5>
-                <a href="/map" class="map-card-link">
-                    <div class="map-container" id="footer-map" style="width: 100%; height: 200px; border-radius: 8px; cursor: pointer; background: #e8f0fe;"></div>
+                <h5 class="footer-heading">Мы на карте</h5>
+                <a href="/map" class="map-card-link" aria-label="Открыть карту на весь экран">
+                    <div class="map-container" id="footer-map" role="img" aria-label="Карта расположения ИРО ЧР"></div>
                 </a>
-                <p class="small mt-2 text-center" style="color: var(--gray);">
+                <p class="footer-text mt-2 text-center">
                     <i class="bi bi-geo-alt me-1" style="color: var(--primary);"></i> г. Грозный, ул. Лермонтова, 2 
-                    <a href="/map" class="ms-2" style="color: var(--gray); opacity: 0.6;">(открыть на полный экран →)</a>
+                    <a href="/map" class="map-link ms-2">(открыть на полный экран →)</a>
                 </p>
             </div>
         </div>
-        <hr style="border-color: var(--border);">
+        <hr style="border-color: var(--border); margin: 2rem 0;">
         <div class="row">
             <div class="col-md-12 text-center">
-                <p class="mb-0 small" style="color: var(--gray); opacity: 0.5;">&copy; 2026 ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.</p>
+                <p class="mb-0 footer-text footer-text-muted">
+                    &copy; <span id="year">2026</span> ГБУ ДПО «Институт развития образования Чеченской Республики». Все права защищены.
+                </p>
             </div>
         </div>
     </div>
@@ -245,12 +589,12 @@
 
 <!-- ===== ЧАТ-БОТ ===== -->
 <div class="chatbot-container" id="chatbotContainer">
-    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Помощь">
+    <button class="chatbot-toggle" id="chatbotToggle" onclick="toggleChatbot()" aria-label="Открыть помощника" aria-expanded="false" aria-controls="chatbotWindow">
         <i class="bi bi-chat-dots-fill"></i>
-        <span class="chatbot-badge">?</span>
+        <span class="chatbot-badge" aria-hidden="true">?</span>
     </button>
 
-    <div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-window" id="chatbotWindow" role="dialog" aria-label="Чат-помощник ИРО ЧР" aria-hidden="true">
         <div class="chatbot-header">
             <div class="chatbot-header-left">
                 <div class="chatbot-header-avatar">
@@ -261,7 +605,7 @@
                     <div class="chatbot-header-subtitle">Часто задаваемые вопросы</div>
                 </div>
             </div>
-            <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Закрыть">
+            <button class="chatbot-close" onclick="toggleChatbot()" aria-label="Закрыть помощника">
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
@@ -347,14 +691,14 @@
     </div>
 </div>
 
-<!-- ===== СКРИПТЫ (все с defer) ===== -->
+<!-- ===== SCRIPTS (defer) ===== -->
 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script defer src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script defer src="/static/js/profile_check.js"></script>
 
 <script>
     // ============================================================
-    // 1. ИНИЦИАЛИЗАЦИЯ AOS
+    // 1. AOS INIT
     // ============================================================
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof AOS !== 'undefined') {
@@ -367,10 +711,17 @@
                 });
             } catch(e) {}
         }
+        
+        // Auto year
+        const yearEl = document.getElementById('year');
+        if (yearEl) {
+            const currentYear = new Date().getFullYear();
+            if (currentYear > 2026) yearEl.textContent = '2026 – ' + currentYear;
+        }
     });
 
     // ============================================================
-    // 2. НАВИГАЦИЯ
+    // 2. NAVBAR SCROLL
     // ============================================================
     (function initNavbar() {
         let ticking = false;
@@ -389,7 +740,7 @@
     })();
 
     // ============================================================
-    // 3. ЧАТ-БОТ
+    // 3. CHATBOT
     // ============================================================
     window.toggleChatbot = function() {
         const windowEl = document.getElementById('chatbotWindow');
@@ -397,10 +748,14 @@
         
         if (windowEl.classList.contains('open')) {
             windowEl.classList.remove('open');
+            windowEl.setAttribute('aria-hidden', 'true');
             toggle.classList.remove('active');
+            toggle.setAttribute('aria-expanded', 'false');
         } else {
             windowEl.classList.add('open');
+            windowEl.setAttribute('aria-hidden', 'false');
             toggle.classList.add('active');
+            toggle.setAttribute('aria-expanded', 'true');
             document.getElementById('chatbotBody').scrollTop = 0;
         }
     };
@@ -408,18 +763,23 @@
     window.toggleQuestion = function(element) {
         const content = element.querySelector('.q-content');
         const arrow = element.querySelector('.q-arrow i');
+        const isOpen = content.classList.contains('show');
         
-        if (content.classList.contains('show')) {
-            content.classList.remove('show');
-            if (arrow) arrow.className = 'bi bi-chevron-down';
-        } else {
-            document.querySelectorAll('.chatbot-question .q-content').forEach(c => c.classList.remove('show'));
-            document.querySelectorAll('.chatbot-question .q-arrow i').forEach(a => {
-                a.className = 'bi bi-chevron-down';
-            });
-            
+        // Close all
+        document.querySelectorAll('.chatbot-question .q-content').forEach(c => {
+            c.classList.remove('show');
+            c.style.maxHeight = null;
+        });
+        document.querySelectorAll('.chatbot-question .q-arrow i').forEach(a => {
+            a.className = 'bi bi-chevron-down';
+        });
+        document.querySelectorAll('.chatbot-question').forEach(q => q.setAttribute('aria-expanded', 'false'));
+        
+        if (!isOpen) {
             content.classList.add('show');
+            content.style.maxHeight = content.scrollHeight + 'px';
             if (arrow) arrow.className = 'bi bi-chevron-up';
+            element.setAttribute('aria-expanded', 'true');
             
             setTimeout(() => {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -427,7 +787,7 @@
         }
     };
 
-    // Клик вне чата - закрытие
+    // Close on outside click
     document.addEventListener('click', function(event) {
         const container = document.getElementById('chatbotContainer');
         const windowEl = document.getElementById('chatbotWindow');
@@ -436,7 +796,7 @@
         }
     });
 
-    // Escape - закрытие
+    // Close on Escape
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             const windowEl = document.getElementById('chatbotWindow');
@@ -445,23 +805,37 @@
     });
 
     // ============================================================
-    // 4. ТОСТ-УВЕДОМЛЕНИЯ
+    // 4. TOAST NOTIFICATIONS
     // ============================================================
     window.showToast = function(message, type = 'success') {
         try {
             const container = document.querySelector('.toast-container');
             if (!container) return;
+            
             const toast = document.createElement('div');
-            toast.className = `toast show bg-${type === 'success' ? 'success' : 'danger'} text-white`;
+            const icon = type === 'success' ? 'check-circle' : 'exclamation-triangle';
+            toast.className = `toast-item ${type}`;
             toast.setAttribute('role', 'alert');
-            toast.innerHTML = `<div class="toast-body"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>${message}</div>`;
+            toast.setAttribute('aria-live', 'polite');
+            toast.innerHTML = `
+                <i class="bi bi-${icon}" aria-hidden="true"></i>
+                <span>${message}</span>
+            `;
+            
             container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            
+            // Auto remove with fade out
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         } catch(e) {}
     };
 
     // ============================================================
-    // 5. АУТЕНТИФИКАЦИЯ
+    // 5. AUTH
     // ============================================================
     window.logout = function() {
         try {
@@ -510,8 +884,15 @@
                     ['#', 'Выйти', 'window.logout()']
                 ];
                 
-                navLinks.innerHTML = links.map(([href, text, onclick]) => 
-                    `<li class="nav-item"><a class="nav-link" href="${href}"${onclick ? ` onclick="${onclick}"` : ''}>${text}</a></li>`
+                navLinks.innerHTML = links.map(([href, text, onclick], index) => 
+                    `<li class="nav-item">
+                        <a class="nav-link ${href === window.location.pathname ? 'active' : ''}" 
+                           href="${href}" 
+                           ${onclick ? ` onclick="${onclick}"` : ''}
+                           ${index === 0 && href === '/' ? ' aria-current="page"' : ''}>
+                           ${text}
+                        </a>
+                    </li>`
                 ).join('');
             })
             .catch(function() {
@@ -522,7 +903,7 @@
     });
 
     // ============================================================
-    // 6. ЯНДЕКС КАРТЫ (ЛЕНИВАЯ ЗАГРУЗКА)
+    // 6. YANDEX MAPS (LAZY)
     // ============================================================
     (function lazyLoadMaps() {
         const mapElement = document.getElementById('footer-map');

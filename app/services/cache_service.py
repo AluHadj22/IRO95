@@ -17,31 +17,60 @@ class CacheService:
         self.redis_url = getattr(settings, 'REDIS_URL', 'redis://localhost:6379/0')
         self.default_ttl = 300
         self._client = None
+        self._available = False  # Флаг доступности Redis
     
-    async def get_client(self) -> aioredis.Redis:
+    async def get_client(self) -> Optional[aioredis.Redis]:
+        """Получение клиента Redis с поддержкой RESP2 протокола"""
         if self._client is None:
-            self._client = await aioredis.from_url(
-                self.redis_url,
-                encoding="utf-8",
-                decode_responses=False
-            )
-            logger.info(f"✅ Redis connected to {self.redis_url}")
-        return self._client
+            try:
+                # Явно указываем RESP2 протокол для совместимости со старыми версиями Redis
+                self._client = await aioredis.from_url(
+                    self.redis_url,
+                    encoding="utf-8",
+                    decode_responses=False,
+                    protocol=2,  # ← RESP2 протокол (решает проблему с HELLO)
+                    socket_connect_timeout=3,
+                    socket_timeout=3,
+                    retry_on_timeout=True,
+                    max_connections=10
+                )
+                # Проверяем подключение
+                await self._client.ping()
+                self._available = True
+                logger.info(f"✅ Redis connected to {self.redis_url} (RESP2)")
+            except Exception as e:
+                self._client = None
+                self._available = False
+                logger.warning(f"⚠️ Redis unavailable: {str(e)}. Cache will be disabled.")
+        return self._client if self._available else None
     
     async def get(self, key: str) -> Optional[Any]:
+        """Получение данных из кэша с graceful fallback"""
+        if not self._available:
+            return None
+        
         try:
             client = await self.get_client()
+            if client is None:
+                return None
             data = await client.get(key)
             if data:
                 return pickle.loads(data)
             return None
         except Exception as e:
-            logger.error(f"Redis get error for key {key}: {str(e)}")
+            logger.debug(f"Redis get error for key {key}: {str(e)}")
+            self._available = False
             return None
     
     async def set(self, key: str, value: Any, ttl: int = None) -> bool:
+        """Сохранение данных в кэш с graceful fallback"""
+        if not self._available:
+            return False
+        
         try:
             client = await self.get_client()
+            if client is None:
+                return False
             ttl = ttl or self.default_ttl
             
             serialized = pickle.dumps(value)
@@ -49,42 +78,62 @@ class CacheService:
             logger.debug(f"✅ Cached: {key} (TTL: {ttl}s, size: {len(serialized)} bytes)")
             return True
         except Exception as e:
-            logger.error(f"Redis set error for key {key}: {str(e)}")
+            logger.debug(f"Redis set error for key {key}: {str(e)}")
+            self._available = False
             return False
     
     async def delete(self, key: str) -> bool:
+        """Удаление данных из кэша"""
+        if not self._available:
+            return False
+        
         try:
             client = await self.get_client()
+            if client is None:
+                return False
             await client.delete(key)
             logger.debug(f"🗑️ Deleted cache key: {key}")
             return True
         except Exception as e:
-            logger.error(f"Redis delete error: {str(e)}")
+            logger.debug(f"Redis delete error: {str(e)}")
             return False
     
     async def delete_pattern(self, pattern: str) -> bool:
+        """Удаление данных по шаблону"""
+        if not self._available:
+            return False
+        
         try:
             client = await self.get_client()
+            if client is None:
+                return False
             keys = await client.keys(pattern)
             if keys:
                 await client.delete(*keys)
                 logger.info(f"🗑️ Deleted {len(keys)} cache keys by pattern: {pattern}")
             return True
         except Exception as e:
-            logger.error(f"Redis delete_pattern error: {str(e)}")
+            logger.debug(f"Redis delete_pattern error: {str(e)}")
             return False
     
     async def clear_all(self) -> bool:
+        """Очистка всего кэша"""
+        if not self._available:
+            return False
+        
         try:
             client = await self.get_client()
+            if client is None:
+                return False
             await client.flushdb()
             logger.info("🗑️ All cache cleared")
             return True
         except Exception as e:
-            logger.error(f"Redis clear_all error: {str(e)}")
+            logger.debug(f"Redis clear_all error: {str(e)}")
             return False
     
     def generate_key(self, *parts: str) -> str:
+        """Генерация ключа для кэша"""
         return ":".join(parts)
 
 
@@ -166,7 +215,7 @@ def cached(ttl: int = 300, key_prefix: str = None):
                 if result is not None:
                     success = await cache.set(cache_key, result, ttl)
                     if not success:
-                        logger.warning(f"⚠️ Failed to cache {cache_key}")
+                        logger.debug(f"⚠️ Failed to cache {cache_key}")
                 
                 return result
                 

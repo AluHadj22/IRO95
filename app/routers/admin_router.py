@@ -11,6 +11,7 @@ from app.services.excel_export_service import ExcelExportService, generate_expor
 from app.services.document_export_service import DocumentExportService
 from app.services.moodle_service import MoodleService
 from app.services.cache_service import cached, cache_service
+from app.services.password_reminder_service import PasswordReminderService
 from typing import List, Optional
 import os
 import shutil
@@ -1128,3 +1129,101 @@ async def admin_delete_user(
     await cache_service.delete("admin_stats")
     
     return {"message": "User deleted successfully"}
+
+
+@router.post("/users/send-password-reminders")
+async def send_password_reminders(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Отправляет напоминания о паролях пользователям,
+    у которых был аккаунт в Moodle до регистрации на платформе.
+    """
+    sync_db = SessionLocal()
+    try:
+        service = PasswordReminderService(sync_db)
+        result = service.send_password_reminders_to_all()
+        return result
+    finally:
+        sync_db.close()
+
+
+@router.get("/users/existing-moodle-accounts")
+async def get_users_with_existing_moodle_accounts(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Получает список пользователей, у которых был аккаунт в Moodle до регистрации.
+    """
+    sync_db = SessionLocal()
+    try:
+        service = PasswordReminderService(sync_db)
+        users = service.get_users_with_existing_moodle_account()
+        
+        result = []
+        for user in users:
+            moodle_service = MoodleService()
+            moodle_user = moodle_service.get_user_by_email(user.email)
+            username = moodle_user.get('username', user.email.split('@')[0]) if moodle_user else user.email.split('@')[0]
+            
+            result.append({
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "username": username,
+                "password_sent": user.moodle_password_sent,
+                "registered_at": user.created_at.isoformat() if user.created_at else None
+            })
+        
+        return {
+            "total": len(result),
+            "users": result
+        }
+    finally:
+        sync_db.close()
+
+
+@router.get("/users/moodle-accounts")
+async def get_moodle_accounts_paginated(
+    page: int = Query(1, ge=1, description="Номер страницы"),
+    per_page: int = Query(20, ge=1, le=100, description="Записей на странице"),
+    search: Optional[str] = Query(None, description="Поиск по email или ФИО"),
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Получает список ВСЕХ пользователей с аккаунтами в Moodle с пагинацией.
+    """
+    sync_db = SessionLocal()
+    try:
+        service = PasswordReminderService(sync_db)
+        result = service.get_all_moodle_users_with_pagination(page, per_page, search)
+        return result
+    finally:
+        sync_db.close()
+
+
+@router.post("/users/send-password-reminders-selected")
+async def send_password_reminders_selected(
+    user_ids: List[int] = Query(..., description="Список ID пользователей"),
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Отправляет напоминания о паролях выбранным пользователям.
+    """
+    if not user_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Не указаны ID пользователей"
+        )
+    
+    sync_db = SessionLocal()
+    try:
+        service = PasswordReminderService(sync_db)
+        result = service.send_password_reminders_to_selected(user_ids)
+        return result
+    finally:
+        sync_db.close()

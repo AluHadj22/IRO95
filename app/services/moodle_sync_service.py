@@ -131,16 +131,37 @@ class MoodleSyncService:
     def _sync_user_to_moodle(self, user: User) -> int:
         """
         Синхронизация пользователя с Moodle.
+        Определяет, был ли пользователь создан в Moodle до регистрации на платформе.
         """
         logger.info(f"Синхронизация пользователя {user.email} с Moodle")
 
         try:
-            moodle_user_id = self.moodle.sync_user(
-                email=user.email,
-                full_name=user.full_name
-            )
-            logger.info(f"Пользователь {user.email} синхронизирован, Moodle ID: {moodle_user_id}")
-            return moodle_user_id
+            existing_moodle_user = self.moodle.get_user_by_email(user.email)
+
+            if existing_moodle_user:
+                moodle_user_id = existing_moodle_user['id']
+                logger.info(f"Пользователь {user.email} уже существует в Moodle (ID: {moodle_user_id})")
+
+                if not user.moodle_account_existed_before:
+                    user.moodle_account_existed_before = True
+                    user.moodle_password_sent = False
+                    self.db.commit()
+                    logger.info(f"Отмечен пользователь {user.email} как имеющий существующий аккаунт в Moodle")
+
+                return moodle_user_id
+            else:
+                moodle_user_id = self.moodle.sync_user(
+                    email=user.email,
+                    full_name=user.full_name
+                )
+                logger.info(f"Создан новый пользователь в Moodle, ID: {moodle_user_id}")
+
+                user.moodle_account_existed_before = False
+                user.moodle_password_sent = False
+                self.db.commit()
+
+                return moodle_user_id
+
         except Exception as e:
             logger.error(f"Ошибка синхронизации пользователя {user.email}: {str(e)}")
             raise

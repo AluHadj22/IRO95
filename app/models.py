@@ -46,6 +46,9 @@ class User(Base):
     consent_to_personal_data = Column(Boolean, default=False)
     consent_given_at = Column(DateTime(timezone=True), nullable=True)
     
+    moodle_account_existed_before = Column(Boolean, default=False)
+    moodle_password_sent = Column(Boolean, default=False)
+    
     education = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
     work = relationship("UserWork", back_populates="user", cascade="all, delete-orphan")
     address = relationship("UserAddress", back_populates="user", cascade="all, delete-orphan", uselist=False)
@@ -140,9 +143,6 @@ class User(Base):
     def has_data_confirmed(self) -> bool:
         return self.additional_info is not None and self.additional_info.data_confirmed
     
-    # ============================================================
-    # ✅ ПОЛНАЯ ПРОВЕРКА ПРОФИЛЯ (все документы обязательны)
-    # ============================================================
     def is_profile_complete(self) -> bool:
         return (
             self.is_personal_data_complete() and
@@ -156,13 +156,9 @@ class User(Base):
             self.has_data_confirmed()
         )
     
-    # ============================================================
-    # ✅ ПОЛНАЯ ДЕТАЛИЗАЦИЯ (включая файлы)
-    # ============================================================
     def get_profile_completion_details(self) -> dict:
         missing_sections = []
         
-        # 1. Личные данные
         if not self.is_personal_data_complete():
             missing_fields = []
             if not self.last_name: missing_fields.append("Фамилия")
@@ -189,7 +185,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # 2. Образование (с проверкой диплома)
         if not self.has_education():
             missing_sections.append({
                 "section": "education",
@@ -212,7 +207,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # 3. Место работы
         if not self.has_work():
             missing_sections.append({
                 "section": "work",
@@ -228,7 +222,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # 4. Документы (полная проверка)
         doc_fields = []
         if not self.has_snils():
             doc_fields.append("Заполните номер СНИЛС")
@@ -254,7 +247,6 @@ class User(Base):
                 "is_complete": True
             })
         
-        # 5. Подтверждение данных
         if not self.has_data_confirmed():
             missing_sections.append({
                 "section": "confirmation",

@@ -8,6 +8,8 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app import models
+import tempfile
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +17,13 @@ logger = logging.getLogger(__name__)
 class DocumentExportService:
     
     UPLOAD_BASE = "app/static/uploads/profile/documents"
+    
+    # Максимальный размер архива в байтах (500 MB)
+    MAX_ZIP_SIZE = 500 * 1024 * 1024
+    # Максимальное количество файлов в архиве
+    MAX_FILES_IN_ZIP = 1000
+    # Таймаут на создание архива (в секундах)
+    ZIP_TIMEOUT = 300  # 5 минут
     
     DOCUMENT_TYPES = {
         "snils": {
@@ -153,13 +162,22 @@ class DocumentExportService:
                 file_path = url.replace("/static/", "app/static/")
                 exists = os.path.exists(file_path)
                 
+                # Получаем размер файла
+                file_size = 0
+                if exists:
+                    try:
+                        file_size = os.path.getsize(file_path)
+                    except Exception:
+                        pass
+                
                 documents[doc_type] = {
                     "url": url,
                     "filename": filename,
                     "exists": exists,
                     "path": file_path if exists else None,
                     "label": config["label"],
-                    "prefix": config["filename_prefix"]
+                    "prefix": config["filename_prefix"],
+                    "size": file_size
                 }
             else:
                 documents[doc_type] = {
@@ -168,7 +186,8 @@ class DocumentExportService:
                     "exists": False,
                     "path": None,
                     "label": config["label"],
-                    "prefix": config["filename_prefix"]
+                    "prefix": config["filename_prefix"],
+                    "size": 0
                 }
         
         return documents
@@ -263,10 +282,25 @@ class DocumentExportService:
         return zip_buffer.getvalue(), filename
     
     def create_multiple_users_zip(self, user_ids: List[int]) -> Tuple[bytes, str]:
+        """
+        Создает ZIP-архив с документами для нескольких пользователей.
+        Оптимизирован для больших объемов данных:
+        - Использует временный файл на диске вместо памяти
+        - Проверяет лимиты по размеру и количеству файлов
+        - Обрабатывает ошибки по каждому файлу отдельно
+        - Логирует прогресс
+        """
         if not user_ids:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No user IDs provided"
+            )
+        
+        # Ограничиваем количество пользователей для предотвращения таймаута
+        if len(user_ids) > 500:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Слишком много пользователей ({len(user_ids)}). Максимум 500."
             )
         
         users = self.db.query(models.User).filter(models.User.id.in_(user_ids)).all()
@@ -277,55 +311,119 @@ class DocumentExportService:
                 detail="No users found"
             )
         
-        zip_buffer = BytesIO()
+        logger.info(f"Starting ZIP creation for {len(users)} users")
+        start_time = time.time()
+        
+        # Используем временный файл на диске вместо BytesIO
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
+        temp_path = temp_file.name
+        temp_file.close()
+        
         total_files = 0
+        failed_files = 0
         used_names = set()
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        total_size = 0
         
         try:
-            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                for user in users:
-                    folder_name = self._get_user_folder_name(user)
+            with zipfile.ZipFile(temp_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                for user_idx, user in enumerate(users):
+                    # Логируем прогресс каждые 10 пользователей
+                    if user_idx % 10 == 0:
+                        logger.info(f"Processing user {user_idx + 1}/{len(users)}...")
                     
+                    folder_name = self._get_user_folder_name(user)
                     documents = self._get_user_documents(user)
                     
                     for doc_type, doc_info in documents.items():
                         if doc_info["exists"] and doc_info["path"]:
                             try:
-                                if os.path.exists(doc_info["path"]) and os.access(doc_info["path"], os.R_OK):
-                                    file_ext = os.path.splitext(doc_info["filename"])[1]
-                                    if not file_ext:
-                                        file_ext = ".pdf"
+                                # Проверяем лимиты
+                                if total_files >= self.MAX_FILES_IN_ZIP:
+                                    logger.warning(f"Reached max files limit: {self.MAX_FILES_IN_ZIP}")
+                                    break
+                                
+                                if total_size >= self.MAX_ZIP_SIZE:
+                                    logger.warning(f"Reached max ZIP size limit: {self.MAX_ZIP_SIZE / (1024*1024):.1f} MB")
+                                    break
+                                
+                                if not os.path.exists(doc_info["path"]) or not os.access(doc_info["path"], os.R_OK):
+                                    logger.warning(f"File not accessible: {doc_info['path']}")
+                                    failed_files += 1
+                                    continue
+                                
+                                # Проверяем размер файла
+                                file_size = doc_info.get("size", 0)
+                                if file_size == 0:
+                                    try:
+                                        file_size = os.path.getsize(doc_info["path"])
+                                    except Exception:
+                                        file_size = 0
+                                
+                                # Пропускаем пустые файлы
+                                if file_size == 0:
+                                    logger.warning(f"Skipping empty file: {doc_info['path']}")
+                                    failed_files += 1
+                                    continue
+                                
+                                # Пропускаем слишком большие файлы (> 50 MB)
+                                if file_size > 50 * 1024 * 1024:
+                                    logger.warning(f"Skipping too large file ({file_size / (1024*1024):.1f} MB): {doc_info['path']}")
+                                    failed_files += 1
+                                    continue
+                                
+                                file_ext = os.path.splitext(doc_info["filename"])[1]
+                                if not file_ext:
+                                    file_ext = ".pdf"
+                                
+                                safe_prefix = self._sanitize_filename(doc_info['prefix'])
+                                if not safe_prefix:
+                                    safe_prefix = f"doc_{doc_type}"
+                                
+                                base_name = f"{safe_prefix}_{timestamp}"
+                                archive_filename = f"{folder_name}/{base_name}{file_ext}"
+                                
+                                # Уникализируем имя
+                                if archive_filename in used_names:
+                                    counter = 1
+                                    while f"{folder_name}/{base_name}_{counter}{file_ext}" in used_names:
+                                        counter += 1
+                                    archive_filename = f"{folder_name}/{base_name}_{counter}{file_ext}"
+                                
+                                used_names.add(archive_filename)
+                                
+                                # Добавляем файл в архив
+                                zip_file.write(doc_info["path"], archive_filename)
+                                total_files += 1
+                                total_size += file_size
+                                
+                                if total_files % 50 == 0:
+                                    logger.info(f"Added {total_files} files to ZIP ({total_size / (1024*1024):.1f} MB)")
                                     
-                                    safe_prefix = self._sanitize_filename(doc_info['prefix'])
-                                    if not safe_prefix:
-                                        safe_prefix = f"doc_{doc_type}"
-                                    
-                                    base_name = f"{safe_prefix}_{timestamp}"
-                                    archive_filename = f"{folder_name}/{base_name}{file_ext}"
-                                    
-                                    if archive_filename in used_names:
-                                        counter = 1
-                                        while f"{folder_name}/{base_name}_{counter}{file_ext}" in used_names:
-                                            counter += 1
-                                        archive_filename = f"{folder_name}/{base_name}_{counter}{file_ext}"
-                                    
-                                    used_names.add(archive_filename)
-                                    
-                                    zip_file.write(doc_info["path"], archive_filename)
-                                    total_files += 1
-                                    logger.info(f"Added file to ZIP: {archive_filename}")
                             except Exception as e:
-                                logger.error(f"Error adding file for user {user.id}: {str(e)}")
+                                logger.error(f"Error adding file for user {user.id} ({doc_type}): {str(e)}")
+                                failed_files += 1
                                 continue
+                    
+                    # Проверяем лимиты после каждого пользователя
+                    if total_files >= self.MAX_FILES_IN_ZIP or total_size >= self.MAX_ZIP_SIZE:
+                        logger.warning(f"Stopping due to limits: files={total_files}, size={total_size / (1024*1024):.1f} MB")
+                        break
             
-            zip_buffer.seek(0)
-            
+            # Проверяем, что есть файлы в архиве
             if total_files == 0:
+                os.unlink(temp_path)
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="No valid documents found for selected users"
                 )
+            
+            # Читаем zip-файл в память для отправки
+            with open(temp_path, 'rb') as f:
+                zip_content = f.read()
+            
+            elapsed = time.time() - start_time
+            logger.info(f"ZIP created successfully: {total_files} files, {total_size / (1024*1024):.1f} MB, {failed_files} failed, elapsed: {elapsed:.2f}s")
             
         except Exception as e:
             logger.error(f"Error creating ZIP for multiple users: {str(e)}")
@@ -333,10 +431,17 @@ class DocumentExportService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error creating ZIP archive: {str(e)}"
             )
+        finally:
+            # Удаляем временный файл
+            try:
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete temp file {temp_path}: {str(e)}")
         
         filename = f"documents_users_{timestamp}.zip"
         
-        return zip_buffer.getvalue(), filename
+        return zip_content, filename
     
     def get_document_file(self, user_id: int, doc_type: str) -> Tuple[bytes, str, str]:
         if doc_type not in self.DOCUMENT_TYPES:
@@ -549,3 +654,56 @@ class DocumentExportService:
                 edu.diploma_file_name = None
         
         self.db.commit()
+    
+    def get_zip_info(self, user_ids: List[int]) -> Dict[str, Any]:
+        """
+        Получает информацию о документах для выбранных пользователей
+        (размер, количество файлов) без создания ZIP-архива.
+        Используется для прогресс-бара на фронтенде.
+        """
+        if not user_ids:
+            return {"total_users": 0, "total_files": 0, "total_size": 0, "users": []}
+        
+        users = self.db.query(models.User).filter(models.User.id.in_(user_ids)).all()
+        
+        result = {
+            "total_users": len(users),
+            "total_files": 0,
+            "total_size": 0,
+            "users": []
+        }
+        
+        for user in users:
+            documents = self._get_user_documents(user)
+            user_files = []
+            user_size = 0
+            
+            for doc_type, doc_info in documents.items():
+                if doc_info["exists"] and doc_info["path"]:
+                    size = doc_info.get("size", 0)
+                    if size == 0:
+                        try:
+                            size = os.path.getsize(doc_info["path"])
+                        except Exception:
+                            size = 0
+                    
+                    if size > 0:
+                        user_files.append({
+                            "type": doc_type,
+                            "label": doc_info["label"],
+                            "size": size,
+                            "filename": doc_info["filename"]
+                        })
+                        user_size += size
+            
+            if user_files:
+                result["total_files"] += len(user_files)
+                result["total_size"] += user_size
+                result["users"].append({
+                    "id": user.id,
+                    "name": self._get_user_display_name(user),
+                    "files": user_files,
+                    "total_size": user_size
+                })
+        
+        return result

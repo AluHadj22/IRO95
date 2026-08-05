@@ -311,9 +311,9 @@
                     <div class="search-wrapper">
                         <input type="text" class="form-control" id="userSearchInput" 
                                placeholder="Поиск по ФИО, email..." 
-                               oninput="filterUserTable(this.value)">
+                               oninput="handleUserSearch(this.value)">
                         <span class="search-icon"><i class="bi bi-search"></i></span>
-                        <button class="clear-search" onclick="document.getElementById('userSearchInput').value=''; filterUserTable('');">
+                        <button class="clear-search" onclick="clearSearch()">
                             <i class="bi bi-x-circle"></i>
                         </button>
                     </div>
@@ -636,6 +636,10 @@
     let moodleTotalUsers = 0;
     let moodleSearchQuery = '';
 
+    // Переменные для поиска с debounce
+    let searchTimeout = null;
+    let currentSearchQuery = '';
+
     function showToast(message, type) {
         type = type || 'success';
         var toastContainer = document.querySelector('.toast-container');
@@ -709,43 +713,136 @@
         controls.innerHTML = html;
     }
 
-    function filterUserTable(query) {
-        query = query.toLowerCase().trim();
-        var rows = document.querySelectorAll('#userDataList .user-row');
-        var visibleCount = 0;
-
-        for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
-            var fio = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
-            var email = row.querySelector('td:nth-child(4)')?.textContent?.toLowerCase() || '';
-            var id = row.querySelector('td:nth-child(2)')?.textContent || '';
-            var match = !query || fio.indexOf(query) !== -1 || email.indexOf(query) !== -1 || id.indexOf(query) !== -1;
-            row.style.display = match ? '' : 'none';
-            if (!match) {
-                var detailsRow = row.nextElementSibling;
-                if (detailsRow && detailsRow.classList.contains('user-details-row')) {
-                    detailsRow.style.display = 'none';
-                }
+    // ============================================================
+    // НОВАЯ ФУНКЦИЯ ПОИСКА (СЕРВЕРНЫЙ ПОИСК С DEBOUNCE)
+    // ============================================================
+    function handleUserSearch(query) {
+        // Сохраняем поисковый запрос
+        currentSearchQuery = query.trim();
+        
+        // Отменяем предыдущий таймаут
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        
+        // Устанавливаем новый таймаут (300 мс)
+        searchTimeout = setTimeout(function() {
+            // Если строка поиска пустая, просто перезагружаем первую страницу
+            if (!currentSearchQuery) {
+                loadUserData(1);
+                return;
             }
-            if (match) visibleCount++;
-        }
-
-        document.getElementById('userCountInfo').textContent = 'Показано: ' + visibleCount + ' из ' + allUsersData.length + ' пользователей';
-        updateSelectAllState();
+            
+            // Иначе выполняем поиск с первой страницы
+            loadUserDataWithSearch(1, currentSearchQuery);
+        }, 300);
     }
 
-    function updateSelectAllState() {
-        var visibleCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox');
-        var checkedCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox:checked');
-        var selectAll = document.getElementById('selectAllUsers');
-        if (visibleCheckboxes.length > 0) {
-            selectAll.checked = visibleCheckboxes.length === checkedCheckboxes.length;
-            selectAll.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < visibleCheckboxes.length;
-        } else {
-            selectAll.checked = false;
-            selectAll.indeterminate = false;
+    // ============================================================
+    // ФУНКЦИЯ ЗАГРУЗКИ ДАННЫХ С ПОИСКОМ
+    // ============================================================
+    async function loadUserDataWithSearch(page, searchQuery) {
+        page = page || 1;
+        currentUserdataPage = page;
+        var tbody = document.getElementById('userDataList');
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4"><div class="loading-spinner"></div><p class="mt-2 text-muted">' + (searchQuery ? 'Поиск "' + escapeHtml(searchQuery) + '"...' : 'Загрузка данных...') + '</p></td></tr>';
+
+        try {
+            var offset = (page - 1) * PAGE_SIZE;
+            var url = '/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset;
+            
+            // Добавляем поисковый запрос, если он есть
+            if (searchQuery && searchQuery.trim()) {
+                url += '&search=' + encodeURIComponent(searchQuery.trim());
+            }
+            
+            var response = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Ошибка загрузки данных');
+            var result = await response.json();
+            allUsersData = result.items || [];
+            filteredUsersData = allUsersData.slice();
+            selectedUserIds = new Set();
+            document.getElementById('selectAllUsers').checked = false;
+            updateExportButton();
+            updateDocZipButton();
+            renderUserData(allUsersData);
+            
+            var totalText = 'Всего: ' + result.total + ' пользователей';
+            if (searchQuery && searchQuery.trim()) {
+                totalText += ' (найдено по запросу "' + escapeHtml(searchQuery.trim()) + '")';
+            }
+            document.getElementById('userCountInfo').textContent = totalText;
+            
+            renderPagination('userdataPagination', 'userdataPaginationInfo', 'userdataPaginationControls', page, result.total, PAGE_SIZE, 
+                function(newPage) {
+                    if (searchQuery && searchQuery.trim()) {
+                        loadUserDataWithSearch(newPage, searchQuery);
+                    } else {
+                        loadUserData(newPage);
+                    }
+                }
+            );
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle fs-2"></i><p class="mt-2">Ошибка загрузки данных: ' + error.message + '</p></td></tr>';
         }
     }
+
+    // ============================================================
+    // ОБНОВЛЕННАЯ ФУНКЦИЯ loadUserData (ПОДДЕРЖИВАЕТ ПОИСК)
+    // ============================================================
+    async function loadUserData(page) {
+        // Если есть активный поиск, используем его
+        if (currentSearchQuery) {
+            await loadUserDataWithSearch(page || currentUserdataPage, currentSearchQuery);
+            return;
+        }
+        
+        page = page || 1;
+        currentUserdataPage = page;
+        var tbody = document.getElementById('userDataList');
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4"><div class="loading-spinner"></div><p class="mt-2 text-muted">Загрузка данных...</p></td></tr>';
+
+        try {
+            var offset = (page - 1) * PAGE_SIZE;
+            var response = await fetch('/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Ошибка загрузки данных');
+            var result = await response.json();
+            allUsersData = result.items || [];
+            filteredUsersData = allUsersData.slice();
+            selectedUserIds = new Set();
+            document.getElementById('selectAllUsers').checked = false;
+            updateExportButton();
+            updateDocZipButton();
+            renderUserData(allUsersData);
+            document.getElementById('userCountInfo').textContent = 'Всего: ' + result.total + ' пользователей';
+            renderPagination('userdataPagination', 'userdataPaginationInfo', 'userdataPaginationControls', page, result.total, PAGE_SIZE, 'loadUserData');
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle fs-2"></i><p class="mt-2">Ошибка загрузки данных: ' + error.message + '</p></td></tr>';
+        }
+    }
+
+    // ============================================================
+    // ФУНКЦИЯ ОЧИСТКИ ПОИСКА
+    // ============================================================
+    function clearSearch() {
+        document.getElementById('userSearchInput').value = '';
+        currentSearchQuery = '';
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+            searchTimeout = null;
+        }
+        loadUserData(1);
+    }
+
+    // ============================================================
+    // ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ)
+    // ============================================================
 
     async function fetchMoodleCourses() {
         var container = document.getElementById('moodleCoursesList');
@@ -1691,41 +1788,13 @@
     }
 
     // ============================================================
-    // ОСТАЛЬНЫЕ ФУНКЦИИ (сохранены без изменений)
+    // ФУНКЦИИ ДЛЯ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ (ОБНОВЛЕНЫ)
     // ============================================================
-
-    async function loadUserData(page) {
-        page = page || 1;
-        currentUserdataPage = page;
-        var tbody = document.getElementById('userDataList');
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4"><div class="loading-spinner"></div><p class="mt-2 text-muted">Загрузка данных...</p></td></tr>';
-
-        try {
-            var offset = (page - 1) * PAGE_SIZE;
-            var response = await fetch('/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
-            if (!response.ok) throw new Error('Ошибка загрузки данных');
-            var result = await response.json();
-            allUsersData = result.items || [];
-            filteredUsersData = allUsersData.slice();
-            selectedUserIds = new Set();
-            document.getElementById('selectAllUsers').checked = false;
-            updateExportButton();
-            updateDocZipButton();
-            renderUserData(allUsersData);
-            document.getElementById('userCountInfo').textContent = 'Всего: ' + result.total + ' пользователей';
-            renderPagination('userdataPagination', 'userdataPaginationInfo', 'userdataPaginationControls', page, result.total, PAGE_SIZE, 'loadUserData');
-        } catch (error) {
-            console.error('Error loading user data:', error);
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle fs-2"></i><p class="mt-2">Ошибка загрузки данных: ' + error.message + '</p></td></tr>';
-        }
-    }
 
     function renderUserData(users) {
         var tbody = document.getElementById('userDataList');
         if (!users || users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted"><i class="bi bi-people fs-2"></i><p class="mt-2">Нет пользователей</p></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-muted"><i class="bi bi-people fs-2"></i><p class="mt-2">' + (currentSearchQuery ? 'Пользователи не найдены' : 'Нет пользователей') + '</p></td></tr>';
             return;
         }
         var html = '';
@@ -1833,6 +1902,19 @@
         var btn = document.getElementById('docZipSelectedBtn');
         btn.disabled = selectedUserIds.size === 0;
         btn.innerHTML = selectedUserIds.size > 0 ? '<i class="bi bi-file-zip me-2"></i>Доки выбранных (' + selectedUserIds.size + ')' : '<i class="bi bi-file-zip me-2"></i>Доки выбранных';
+    }
+
+    function updateSelectAllState() {
+        var visibleCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox');
+        var checkedCheckboxes = document.querySelectorAll('#userDataList .user-row:not([style*="display: none"]) .user-checkbox:checked');
+        var selectAll = document.getElementById('selectAllUsers');
+        if (visibleCheckboxes.length > 0) {
+            selectAll.checked = visibleCheckboxes.length === checkedCheckboxes.length;
+            selectAll.indeterminate = checkedCheckboxes.length > 0 && checkedCheckboxes.length < visibleCheckboxes.length;
+        } else {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+        }
     }
 
     async function exportAllUsers() {
@@ -2112,7 +2194,9 @@
         }
     }
 
-    // Инициализация
+    // ============================================================
+    // ИНИЦИАЛИЗАЦИЯ
+    // ============================================================
     loadStats();
     loadCategories(1);
     loadCourses(1);
@@ -2123,8 +2207,8 @@
     window.showToast = showToast;
     window.escapeHtml = escapeHtml;
     window.renderPagination = renderPagination;
-    window.filterUserTable = filterUserTable;
-    window.updateSelectAllState = updateSelectAllState;
+    window.handleUserSearch = handleUserSearch;
+    window.clearSearch = clearSearch;
     window.fetchMoodleCourses = fetchMoodleCourses;
     window.exportRegistrations = exportRegistrations;
     window.uploadFile = uploadFile;
@@ -2158,6 +2242,7 @@
     window.showCreateCategoryModal = showCreateCategoryModal;
     window.showCreateCourseModal = showCreateCourseModal;
     window.loadUserData = loadUserData;
+    window.loadUserDataWithSearch = loadUserDataWithSearch;
     window.renderUserData = renderUserData;
     window.loadUserDocuments = loadUserDocuments;
     window.renderUserDocuments = renderUserDocuments;

@@ -5,8 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func
 from sqlalchemy.orm import joinedload, selectinload
 from app import models, schemas, auth
-from app.database import get_async_db
+from app.database import get_async_db, SessionLocal
 from app.services.encryption_service import EncryptionService
+from app.services.moodle_service import MoodleService
+from app.services.password_reminder_service import PasswordReminderService
 from typing import Optional, List
 import os
 import uuid
@@ -1178,3 +1180,89 @@ async def check_profile_complete(
         "total_sections": completion_details["total_sections"],
         "completed_sections": completion_details["completed_sections"]
     }
+
+
+@router.post("/reset-moodle-password")
+async def reset_moodle_password(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Сбрасывает пароль пользователя в Moodle на Password1!
+    и отправляет письмо с логином и паролем.
+    Также возвращает логин и пароль в ответе.
+    """
+    sync_db = SessionLocal()
+    try:
+        service = PasswordReminderService(sync_db)
+        
+        # Проверяем, есть ли у пользователя аккаунт в Moodle
+        moodle_user = service.moodle.get_user_by_email(current_user.email)
+        
+        if not moodle_user:
+            return {
+                "success": False,
+                "has_moodle_account": False,
+                "message": "У вас нет аккаунта в Moodle. Обратитесь в поддержку."
+            }
+        
+        # Получаем username из Moodle
+        username = moodle_user.get('username', current_user.email.split('@')[0])
+        
+        # Обновляем пароль и отправляем письмо
+        result = service.send_password_reminder(current_user)
+        
+        if result:
+            return {
+                "success": True,
+                "has_moodle_account": True,
+                "username": username,
+                "password": service.DEFAULT_PASSWORD,
+                "message": "Пароль успешно сброшен! Проверьте вашу почту или скопируйте пароль ниже."
+            }
+        else:
+            return {
+                "success": False,
+                "has_moodle_account": True,
+                "message": "Не удалось сбросить пароль. Попробуйте позже или обратитесь в поддержку."
+            }
+            
+    except Exception as e:
+        logger.error(f"Ошибка сброса пароля Moodle для {current_user.email}: {str(e)}")
+        return {
+            "success": False,
+            "has_moodle_account": False,
+            "message": f"Произошла ошибка: {str(e)}"
+        }
+    finally:
+        sync_db.close()
+
+
+@router.get("/moodle-status")
+async def get_moodle_status(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Проверяет, есть ли у пользователя аккаунт в Moodle.
+    """
+    moodle = MoodleService()
+    try:
+        moodle_user = moodle.get_user_by_email(current_user.email)
+        
+        if moodle_user:
+            return {
+                "has_moodle_account": True,
+                "username": moodle_user.get('username', current_user.email.split('@')[0]),
+                "moodle_user_id": moodle_user.get('id')
+            }
+        else:
+            return {
+                "has_moodle_account": False
+            }
+    except Exception as e:
+        logger.error(f"Ошибка проверки Moodle для {current_user.email}: {str(e)}")
+        return {
+            "has_moodle_account": False,
+            "error": str(e)
+        }

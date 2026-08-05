@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, func, and_, delete
+from sqlalchemy import select, desc, func, and_, delete, or_
 from sqlalchemy.orm import selectinload, joinedload, Session
 from app import models, schemas, auth
 from app.database import get_async_db, get_db, SessionLocal
@@ -817,17 +817,118 @@ async def change_user_role(
     }
 
 
+# ============================================================
+# ✅ ИСПРАВЛЕННЫЙ ЭНДПОИНТ /users/list С ПОДДЕРЖКОЙ ПОИСКА
+# ============================================================
 @router.get("/users/list")
 async def get_users_with_data(
     limit: int = Query(50, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    search: Optional[str] = Query(None, description="Поиск по ФИО, email или ID"),
     current_user: models.User = Depends(auth.get_current_admin)
 ):
+    """
+    Получает список пользователей с их данными.
+    Поддерживает поиск по ФИО (включая отдельные части), email и ID.
+    """
     sync_db = SessionLocal()
     try:
+        # Базовый запрос с подгрузкой связанных данных
+        query = sync_db.query(models.User).options(
+            joinedload(models.User.work),
+            joinedload(models.User.education),
+            joinedload(models.User.additional_info)
+        )
+
+        # === ПОИСК (если передан) ===
+        if search:
+            search_term = f"%{search}%"
+            # Проверяем, не является ли search числом (поиск по ID)
+            is_numeric = False
+            try:
+                int(search)
+                is_numeric = True
+            except ValueError:
+                pass
+
+            if is_numeric:
+                # Поиск по ID
+                query = query.filter(models.User.id == int(search))
+            else:
+                # Поиск по ФИО (составные части) и email
+                # Разбиваем поисковый запрос на слова для поиска по частям ФИО
+                search_parts = search.strip().split()
+                
+                # Строим условия для поиска по ФИО
+                name_conditions = []
+                
+                # Ищем по полному ФИО (full_name)
+                name_conditions.append(models.User.full_name.ilike(search_term))
+                
+                # Ищем по отдельным частям (фамилия, имя, отчество)
+                if len(search_parts) >= 1:
+                    name_conditions.append(models.User.last_name.ilike(f"%{search_parts[0]}%"))
+                    name_conditions.append(models.User.first_name.ilike(f"%{search_parts[0]}%"))
+                    name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[0]}%"))
+                
+                if len(search_parts) >= 2:
+                    name_conditions.append(models.User.last_name.ilike(f"%{search_parts[1]}%"))
+                    name_conditions.append(models.User.first_name.ilike(f"%{search_parts[1]}%"))
+                    name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[1]}%"))
+                
+                if len(search_parts) >= 3:
+                    name_conditions.append(models.User.last_name.ilike(f"%{search_parts[2]}%"))
+                    name_conditions.append(models.User.first_name.ilike(f"%{search_parts[2]}%"))
+                    name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[2]}%"))
+                
+                # Также ищем по email
+                name_conditions.append(models.User.email.ilike(search_term))
+                
+                # Применяем все условия через OR
+                if name_conditions:
+                    from sqlalchemy import or_
+                    query = query.filter(or_(*name_conditions))
+
+        total = query.count()
+
+        if limit is not None:
+            query = query.offset(offset).limit(limit)
+
+        users = query.all()
+
+        # Получаем данные для всех пользователей одним запросом
         export_service = ExcelExportService(sync_db)
-        result = export_service.get_users_list_with_data(limit, offset)
-        return result
+        users_data = export_service._get_user_export_data_batch(users)
+
+        result = []
+        for user in users:
+            data = users_data.get(user.id, {})
+
+            full_name = f"{user.last_name or ''} {user.first_name or ''} {user.middle_name or ''}".strip()
+            if not full_name:
+                full_name = user.full_name or ""
+
+            result.append({
+                "id": user.id,
+                "email": export_service._escape_excel_string(user.email),
+                "role": user.role.value if user.role else "teacher",
+                "is_blocked": user.is_blocked,
+                "created_at": user.created_at.strftime("%d.%m.%Y %H:%M") if user.created_at else "",
+                "full_name": export_service._escape_excel_string(full_name),
+                "data": data,
+                "has_complete_profile": user.is_profile_complete()
+            })
+
+        return {
+            "total": total,
+            "items": result
+        }
+
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error getting users list: {str(e)}")
+        return {"total": 0, "items": []}
     finally:
         sync_db.close()
 

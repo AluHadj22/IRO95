@@ -40,25 +40,25 @@ def validate_document_file(file: UploadFile) -> None:
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Неподдерживаемый формат файла. Разрешены: {', '.join(ALLOWED_DOCUMENT_EXTENSIONS)}"
         )
-    
+
     file.file.seek(0, 2)
     file_size = file.file.tell()
     file.file.seek(0)
-    
+
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Файл слишком большой (макс. {MAX_FILE_SIZE // (1024 * 1024)}MB)"
         )
-    
+
     try:
         import magic
         file.file.seek(0)
         mime = magic.from_buffer(file.file.read(1024), mime=True)
         file.file.seek(0)
-        
+
         allowed_mimes = ['image/jpeg', 'image/png', 'application/pdf']
-        
+
         if mime not in allowed_mimes:
             logger.warning(f"Файл {file.filename} имеет MIME-тип {mime}, но расширение {ext} разрешено")
     except ImportError:
@@ -69,15 +69,15 @@ def validate_document_file(file: UploadFile) -> None:
 
 def save_file(file: UploadFile, subfolder: str = "") -> dict:
     validate_document_file(file)
-    
+
     ext = os.path.splitext(file.filename)[1].lower()
     filename = f"{uuid.uuid4().hex}{ext}"
-    
+
     subfolder_path = os.path.join(DOCUMENTS_DIR, subfolder) if subfolder else DOCUMENTS_DIR
     os.makedirs(subfolder_path, exist_ok=True)
-    
+
     filepath = os.path.join(subfolder_path, filename)
-    
+
     try:
         with open(filepath, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -86,9 +86,9 @@ def save_file(file: UploadFile, subfolder: str = "") -> dict:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Ошибка сохранения файла: {str(e)}"
         )
-    
+
     file_url = f"/static/uploads/profile/documents/{subfolder}/{filename}" if subfolder else f"/static/uploads/profile/documents/{filename}"
-    
+
     return {
         "url": file_url,
         "filename": file.filename,
@@ -100,7 +100,7 @@ def save_file(file: UploadFile, subfolder: str = "") -> dict:
 def delete_file(file_url: str) -> bool:
     if not file_url:
         return False
-    
+
     relative_path = file_url.replace("/static/", "app/static/")
     if os.path.exists(relative_path):
         try:
@@ -113,8 +113,8 @@ def delete_file(file_url: str) -> bool:
 
 @router.get("/personal-data")
 async def get_personal_data(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     return schemas.PersonalDataResponse(
         last_name=current_user.last_name,
@@ -132,39 +132,39 @@ async def get_personal_data(
 
 @router.put("/personal-data")
 async def update_personal_data(
-    data: schemas.PersonalDataUpdate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        data: schemas.PersonalDataUpdate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(current_user, key, value)
-    
+
     await db.commit()
     await db.refresh(current_user)
-    
+
     return {"message": "Личные данные обновлены"}
 
 
 @router.get("/education")
 async def get_education(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserEducation).where(
         models.UserEducation.user_id == current_user.id
     ).order_by(models.UserEducation.is_main.desc())
-    
+
     result = await db.execute(stmt)
     education = result.scalars().all()
-    
+
     return [schemas.EducationResponse.model_validate(e) for e in education]
 
 
 @router.get("/education/{education_id}")
 async def get_education_item(
-    education_id: int,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        education_id: int,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserEducation).where(
         and_(
@@ -174,21 +174,21 @@ async def get_education_item(
     )
     result = await db.execute(stmt)
     education = result.scalar_one_or_none()
-    
+
     if not education:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Запись об образовании не найдена"
         )
-    
+
     return schemas.EducationResponse.model_validate(education)
 
 
 @router.post("/education")
 async def create_education(
-    data: schemas.EducationCreate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        data: schemas.EducationCreate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     education = models.UserEducation(
         user_id=current_user.id,
@@ -205,7 +205,7 @@ async def create_education(
         diploma_middle_name=data.diploma_middle_name,
         is_main=data.is_main
     )
-    
+
     if data.is_main:
         await db.execute(
             models.UserEducation.__table__.update().where(
@@ -215,20 +215,20 @@ async def create_education(
                 )
             ).values(is_main=False)
         )
-    
+
     db.add(education)
     await db.commit()
     await db.refresh(education)
-    
+
     return {"message": "Образование добавлено", "id": education.id}
 
 
 @router.put("/education/{education_id}")
 async def update_education(
-    education_id: int,
-    data: schemas.EducationUpdate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        education_id: int,
+        data: schemas.EducationUpdate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserEducation).where(
         and_(
@@ -238,16 +238,16 @@ async def update_education(
     )
     result = await db.execute(stmt)
     education = result.scalar_one_or_none()
-    
+
     if not education:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Запись об образовании не найдена"
         )
-    
+
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(education, key, value)
-    
+
     if data.is_main:
         await db.execute(
             models.UserEducation.__table__.update().where(
@@ -258,18 +258,18 @@ async def update_education(
                 )
             ).values(is_main=False)
         )
-    
+
     await db.commit()
     await db.refresh(education)
-    
+
     return {"message": "Образование обновлено"}
 
 
 @router.delete("/education/{education_id}")
 async def delete_education(
-    education_id: int,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        education_id: int,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserEducation).where(
         and_(
@@ -279,28 +279,28 @@ async def delete_education(
     )
     result = await db.execute(stmt)
     education = result.scalar_one_or_none()
-    
+
     if not education:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Запись об образовании не найдена"
         )
-    
+
     if education.diploma_file_url:
         delete_file(education.diploma_file_url)
-    
+
     await db.delete(education)
     await db.commit()
-    
+
     return {"message": "Образование удалено"}
 
 
 @router.post("/education/{education_id}/upload-diploma")
 async def upload_diploma(
-    education_id: int,
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        education_id: int,
+        file: UploadFile = File(...),
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserEducation).where(
         and_(
@@ -310,23 +310,23 @@ async def upload_diploma(
     )
     result = await db.execute(stmt)
     education = result.scalar_one_or_none()
-    
+
     if not education:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Запись об образовании не найдена"
         )
-    
+
     if education.diploma_file_url:
         delete_file(education.diploma_file_url)
-    
+
     result = save_file(file, "diplomas")
-    
+
     education.diploma_file_url = result["url"]
     education.diploma_file_name = result["filename"]
-    
+
     await db.commit()
-    
+
     return schemas.FileUploadResponse(
         url=result["url"],
         filename=result["filename"],
@@ -338,16 +338,16 @@ async def upload_diploma(
 
 @router.get("/work")
 async def get_work(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserWork).where(
         models.UserWork.user_id == current_user.id
     ).order_by(models.UserWork.is_current.desc())
-    
+
     result = await db.execute(stmt)
     work = result.scalars().all()
-    
+
     result_list = []
     for w in work:
         subjects = []
@@ -356,7 +356,7 @@ async def get_work(
                 subjects = json.loads(w.subjects)
             except:
                 pass
-        
+
         result_list.append(schemas.WorkResponse(
             id=w.id,
             user_id=w.user_id,
@@ -378,15 +378,15 @@ async def get_work(
             created_at=w.created_at,
             updated_at=w.updated_at
         ))
-    
+
     return result_list
 
 
 @router.get("/work/{work_id}")
 async def get_work_item(
-    work_id: int,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        work_id: int,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserWork).where(
         and_(
@@ -396,20 +396,20 @@ async def get_work_item(
     )
     result = await db.execute(stmt)
     work = result.scalar_one_or_none()
-    
+
     if not work:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Место работы не найдено"
         )
-    
+
     subjects = []
     if work.subjects:
         try:
             subjects = json.loads(work.subjects)
         except:
             pass
-    
+
     return schemas.WorkResponse(
         id=work.id,
         user_id=work.user_id,
@@ -435,24 +435,24 @@ async def get_work_item(
 
 @router.post("/work")
 async def create_work(
-    data: schemas.WorkCreate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        data: schemas.WorkCreate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     if not data.activity_type:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Вид деятельности обязателен для заполнения"
         )
-    
+
     if not data.subjects or len(data.subjects) == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Добавьте хотя бы один предмет"
         )
-    
+
     subjects_json = json.dumps(data.subjects) if data.subjects else None
-    
+
     work = models.UserWork(
         user_id=current_user.id,
         organization=data.organization,
@@ -471,7 +471,7 @@ async def create_work(
         work_start_date=data.work_start_date,
         work_end_date=data.work_end_date
     )
-    
+
     if data.is_current:
         await db.execute(
             models.UserWork.__table__.update().where(
@@ -481,20 +481,20 @@ async def create_work(
                 )
             ).values(is_current=False)
         )
-    
+
     db.add(work)
     await db.commit()
     await db.refresh(work)
-    
+
     return {"message": "Место работы добавлено", "id": work.id}
 
 
 @router.put("/work/{work_id}")
 async def update_work(
-    work_id: int,
-    data: schemas.WorkUpdate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        work_id: int,
+        data: schemas.WorkUpdate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserWork).where(
         and_(
@@ -504,20 +504,20 @@ async def update_work(
     )
     result = await db.execute(stmt)
     work = result.scalar_one_or_none()
-    
+
     if not work:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Место работы не найдено"
         )
-    
+
     update_data = data.model_dump(exclude_unset=True)
     if 'subjects' in update_data and update_data['subjects'] is not None:
         update_data['subjects'] = json.dumps(update_data['subjects'])
-    
+
     for key, value in update_data.items():
         setattr(work, key, value)
-    
+
     if data.is_current:
         await db.execute(
             models.UserWork.__table__.update().where(
@@ -528,18 +528,18 @@ async def update_work(
                 )
             ).values(is_current=False)
         )
-    
+
     await db.commit()
     await db.refresh(work)
-    
+
     return {"message": "Место работы обновлено"}
 
 
 @router.delete("/work/{work_id}")
 async def delete_work(
-    work_id: int,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        work_id: int,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserWork).where(
         and_(
@@ -549,54 +549,54 @@ async def delete_work(
     )
     result = await db.execute(stmt)
     work = result.scalar_one_or_none()
-    
+
     if not work:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Место работы не найдено"
         )
-    
+
     await db.delete(work)
     await db.commit()
-    
+
     return {"message": "Место работы удалено"}
 
 
 @router.get("/address")
 async def get_address(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAddress).where(
         models.UserAddress.user_id == current_user.id
     )
     result = await db.execute(stmt)
     address = result.scalar_one_or_none()
-    
+
     if not address:
         return None
-    
+
     return schemas.AddressResponse.model_validate(address)
 
 
 @router.post("/address")
 async def create_address(
-    data: schemas.AddressCreate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        data: schemas.AddressCreate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAddress).where(
         models.UserAddress.user_id == current_user.id
     )
     result = await db.execute(stmt)
     existing = result.scalar_one_or_none()
-    
+
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Адрес уже существует. Используйте PUT для обновления"
         )
-    
+
     address = models.UserAddress(
         user_id=current_user.id,
         postal_index=data.postal_index,
@@ -609,164 +609,155 @@ async def create_address(
         apartment=data.apartment,
         is_main=data.is_main
     )
-    
+
     db.add(address)
     await db.commit()
     await db.refresh(address)
-    
+
     return {"message": "Адрес создан", "id": address.id}
 
 
 @router.put("/address")
 async def update_address(
-    data: schemas.AddressUpdate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        data: schemas.AddressUpdate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAddress).where(
         models.UserAddress.user_id == current_user.id
     )
     result = await db.execute(stmt)
     address = result.scalar_one_or_none()
-    
+
     if not address:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Адрес не найден"
         )
-    
+
     for key, value in data.model_dump(exclude_unset=True).items():
         setattr(address, key, value)
-    
+
     await db.commit()
     await db.refresh(address)
-    
+
     return {"message": "Адрес обновлен"}
 
 
 @router.get("/additional-info")
 async def get_additional_info(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     info = result.scalar_one_or_none()
-    
+
     if not info:
         return None
-    
+
     response_data = schemas.AdditionalInfoResponse.model_validate(info)
     response_data.snils = encryption.decrypt(info.snils) if info.snils else None
-    response_data.inn = encryption.decrypt(info.inn) if info.inn else None
-    
+    # Убираем inn, так как мы удалили это поле из модели
+
     return response_data
 
 
 @router.post("/additional-info")
 async def create_additional_info(
-    data: schemas.AdditionalInfoUpdate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        data: schemas.AdditionalInfoUpdate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     existing = result.scalar_one_or_none()
-    
+
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Дополнительная информация уже существует. Используйте PUT для обновления"
         )
-    
+
     encrypted_snils = encryption.encrypt(data.snils) if data.snils else None
-    encrypted_inn = encryption.encrypt(data.inn) if data.inn else None
-    
+
     info = models.UserAdditionalInfo(
         user_id=current_user.id,
         snils=encrypted_snils,
-        passport_series=data.passport_series,
-        passport_number=data.passport_number,
-        passport_issued_by=data.passport_issued_by,
-        passport_issued_date=data.passport_issued_date,
-        passport_department_code=data.passport_department_code,
-        inn=encrypted_inn,
         data_confirmed=data.data_confirmed or False
     )
-    
+
     db.add(info)
     await db.commit()
     await db.refresh(info)
-    
+
     return {"message": "Дополнительная информация создана", "id": info.id}
 
 
 @router.put("/additional-info")
 async def update_additional_info(
-    data: schemas.AdditionalInfoUpdate,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        data: schemas.AdditionalInfoUpdate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     info = result.scalar_one_or_none()
-    
+
     if not info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Дополнительная информация не найдена"
         )
-    
+
     update_data = data.model_dump(exclude_unset=True)
-    
+
     if 'snils' in update_data and update_data['snils'] is not None:
         update_data['snils'] = encryption.encrypt(update_data['snils'])
-    if 'inn' in update_data and update_data['inn'] is not None:
-        update_data['inn'] = encryption.encrypt(update_data['inn'])
-    
+
     for key, value in update_data.items():
         setattr(info, key, value)
-    
+
     await db.commit()
     await db.refresh(info)
-    
+
     return {"message": "Дополнительная информация обновлена"}
 
 
 @router.post("/upload/snils")
 async def upload_snils(
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        file: UploadFile = File(...),
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     info = result.scalar_one_or_none()
-    
+
     if not info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
         )
-    
+
     if info.snils_file_url:
         delete_file(info.snils_file_url)
-    
+
     result = save_file(file, "snils")
-    
+
     info.snils_file_url = result["url"]
     info.snils_file_name = result["filename"]
-    
+
     await db.commit()
-    
+
     return schemas.FileUploadResponse(
         url=result["url"],
         filename=result["filename"],
@@ -778,196 +769,67 @@ async def upload_snils(
 
 @router.delete("/upload/snils")
 async def delete_snils(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     info = result.scalar_one_or_none()
-    
+
     if not info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Дополнительная информация не найдена"
         )
-    
+
     if info.snils_file_url:
         delete_file(info.snils_file_url)
         info.snils_file_url = None
         info.snils_file_name = None
         await db.commit()
         return {"message": "Файл СНИЛС удален"}
-    
+
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Файл не найден"
     )
 
 
-@router.post("/upload/passport")
-async def upload_passport(
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
-):
-    stmt = select(models.UserAdditionalInfo).where(
-        models.UserAdditionalInfo.user_id == current_user.id
-    )
-    result = await db.execute(stmt)
-    info = result.scalar_one_or_none()
-    
-    if not info:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
-        )
-    
-    if info.passport_file_url:
-        delete_file(info.passport_file_url)
-    
-    result = save_file(file, "passports")
-    
-    info.passport_file_url = result["url"]
-    info.passport_file_name = result["filename"]
-    
-    await db.commit()
-    
-    return schemas.FileUploadResponse(
-        url=result["url"],
-        filename=result["filename"],
-        file_size=result["file_size"],
-        file_type=result["file_type"],
-        message="Паспорт загружен"
-    )
-
-
-@router.delete("/upload/passport")
-async def delete_passport(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
-):
-    stmt = select(models.UserAdditionalInfo).where(
-        models.UserAdditionalInfo.user_id == current_user.id
-    )
-    result = await db.execute(stmt)
-    info = result.scalar_one_or_none()
-    
-    if not info:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Дополнительная информация не найдена"
-        )
-    
-    if info.passport_file_url:
-        delete_file(info.passport_file_url)
-        info.passport_file_url = None
-        info.passport_file_name = None
-        await db.commit()
-        return {"message": "Файл паспорта удален"}
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Файл не найден"
-    )
-
-
-@router.post("/upload/inn")
-async def upload_inn(
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
-):
-    stmt = select(models.UserAdditionalInfo).where(
-        models.UserAdditionalInfo.user_id == current_user.id
-    )
-    result = await db.execute(stmt)
-    info = result.scalar_one_or_none()
-    
-    if not info:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
-        )
-    
-    if info.inn_file_url:
-        delete_file(info.inn_file_url)
-    
-    result = save_file(file, "inn")
-    
-    info.inn_file_url = result["url"]
-    info.inn_file_name = result["filename"]
-    
-    await db.commit()
-    
-    return schemas.FileUploadResponse(
-        url=result["url"],
-        filename=result["filename"],
-        file_size=result["file_size"],
-        file_type=result["file_type"],
-        message="ИНН загружен"
-    )
-
-
-@router.delete("/upload/inn")
-async def delete_inn(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
-):
-    stmt = select(models.UserAdditionalInfo).where(
-        models.UserAdditionalInfo.user_id == current_user.id
-    )
-    result = await db.execute(stmt)
-    info = result.scalar_one_or_none()
-    
-    if not info:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Дополнительная информация не найдена"
-        )
-    
-    if info.inn_file_url:
-        delete_file(info.inn_file_url)
-        info.inn_file_url = None
-        info.inn_file_name = None
-        await db.commit()
-        return {"message": "Файл ИНН удален"}
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Файл не найден"
-    )
+# ============================================================
+# УДАЛЕНЫ ЭНДПОИНТЫ /upload/passport И /upload/inn
+# ============================================================
 
 
 @router.post("/upload/marriage-certificate")
 async def upload_marriage_certificate(
-    file: UploadFile = File(...),
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        file: UploadFile = File(...),
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     info = result.scalar_one_or_none()
-    
+
     if not info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Дополнительная информация не найдена. Сначала создайте запись через сохранение СНИЛС."
         )
-    
+
     if info.marriage_certificate_file_url:
         delete_file(info.marriage_certificate_file_url)
-    
+
     result = save_file(file, "marriage")
-    
+
     info.marriage_certificate_file_url = result["url"]
     info.marriage_certificate_file_name = result["filename"]
-    
+
     await db.commit()
-    
+
     return schemas.FileUploadResponse(
         url=result["url"],
         filename=result["filename"],
@@ -979,28 +841,28 @@ async def upload_marriage_certificate(
 
 @router.delete("/upload/marriage-certificate")
 async def delete_marriage_certificate(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     info = result.scalar_one_or_none()
-    
+
     if not info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Дополнительная информация не найдена"
         )
-    
+
     if info.marriage_certificate_file_url:
         delete_file(info.marriage_certificate_file_url)
         info.marriage_certificate_file_url = None
         info.marriage_certificate_file_name = None
         await db.commit()
         return {"message": "Файл свидетельства о браке удален"}
-    
+
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Файл не найден"
@@ -1009,9 +871,9 @@ async def delete_marriage_certificate(
 
 @router.delete("/document/{doc_type}")
 async def delete_document(
-    doc_type: str,
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        doc_type: str,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     if doc_type == "diploma":
         stmt = select(models.UserEducation).where(
@@ -1022,75 +884,73 @@ async def delete_document(
         )
         result = await db.execute(stmt)
         education = result.scalar_one_or_none()
-        
+
         if not education:
             stmt = select(models.UserEducation).where(
                 models.UserEducation.user_id == current_user.id
             ).order_by(models.UserEducation.created_at.desc())
             result = await db.execute(stmt)
             education = result.scalar_one_or_none()
-        
+
         if not education or not education.diploma_file_url:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Диплом не найден"
             )
-        
+
         file_url = education.diploma_file_url
         delete_file(file_url)
-        
+
         education.diploma_file_url = None
         education.diploma_file_name = None
         await db.commit()
-        
+
         return {"message": "Диплом удален"}
-    
+
     stmt = select(models.UserAdditionalInfo).where(
         models.UserAdditionalInfo.user_id == current_user.id
     )
     result = await db.execute(stmt)
     info = result.scalar_one_or_none()
-    
+
     if not info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Дополнительная информация не найдена"
         )
-    
+
     doc_map = {
-        "passport": ("passport_file_url", "passport_file_name"),
-        "inn": ("inn_file_url", "inn_file_name"),
         "marriage": ("marriage_certificate_file_url", "marriage_certificate_file_name"),
         "snils": ("snils_file_url", "snils_file_name")
     }
-    
+
     if doc_type not in doc_map:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Неизвестный тип документа"
         )
-    
+
     url_field, name_field = doc_map[doc_type]
     file_url = getattr(info, url_field)
-    
+
     if not file_url:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Файл не найден"
         )
-    
+
     delete_file(file_url)
     setattr(info, url_field, None)
     setattr(info, name_field, None)
     await db.commit()
-    
+
     return {"message": f"Документ {doc_type} удален"}
 
 
 @router.get("/full")
 async def get_full_profile(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     stmt = select(models.User).options(
         joinedload(models.User.address),
@@ -1098,22 +958,22 @@ async def get_full_profile(
         selectinload(models.User.work),
         selectinload(models.User.additional_info)
     ).where(models.User.id == current_user.id)
-    
+
     result = await db.execute(stmt)
     user = result.unique().scalar_one_or_none()
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Пользователь не найден"
         )
-    
+
     additional_info_response = None
     if user.additional_info:
         additional_info_response = schemas.AdditionalInfoResponse.model_validate(user.additional_info)
-        additional_info_response.snils = encryption.decrypt(user.additional_info.snils) if user.additional_info.snils else None
-        additional_info_response.inn = encryption.decrypt(user.additional_info.inn) if user.additional_info.inn else None
-    
+        additional_info_response.snils = encryption.decrypt(
+            user.additional_info.snils) if user.additional_info.snils else None
+
     return schemas.FullProfileResponse(
         user=schemas.UserResponse.model_validate(user),
         personal_data=schemas.PersonalDataResponse(
@@ -1138,8 +998,8 @@ async def get_full_profile(
 
 @router.get("/check-complete")
 async def check_profile_complete(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     # ВАЖНО: ЗАГРУЖАЕМ ВСЕ СВЯЗАННЫЕ ДАННЫЕ ПЕРЕД ВЫЗОВОМ МЕТОДА
     stmt = select(models.User).options(
@@ -1148,30 +1008,30 @@ async def check_profile_complete(
         selectinload(models.User.work),
         selectinload(models.User.additional_info)
     ).where(models.User.id == current_user.id)
-    
+
     result = await db.execute(stmt)
     user = result.unique().scalar_one_or_none()
-    
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Пользователь не найден"
         )
-    
+
     completion_details = user.get_profile_completion_details()
-    
+
     missing_fields = []
     for section in completion_details["sections"]:
         if not section["is_complete"]:
             for field in section["fields"]:
                 missing_fields.append(field)
-    
+
     if completion_details["is_complete"]:
         message = "Профиль заполнен полностью"
     else:
         incomplete_sections = [s["label"] for s in completion_details["sections"] if not s["is_complete"]]
         message = f"Не заполнены: {', '.join(incomplete_sections)}"
-    
+
     return {
         "is_complete": completion_details["is_complete"],
         "missing_fields": missing_fields,
@@ -1184,8 +1044,8 @@ async def check_profile_complete(
 
 @router.post("/reset-moodle-password")
 async def reset_moodle_password(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     """
     Сбрасывает пароль пользователя в Moodle на Password1!
@@ -1195,23 +1055,23 @@ async def reset_moodle_password(
     sync_db = SessionLocal()
     try:
         service = PasswordReminderService(sync_db)
-        
+
         # Проверяем, есть ли у пользователя аккаунт в Moodle
         moodle_user = service.moodle.get_user_by_email(current_user.email)
-        
+
         if not moodle_user:
             return {
                 "success": False,
                 "has_moodle_account": False,
                 "message": "У вас нет аккаунта в Moodle. Обратитесь в поддержку."
             }
-        
+
         # Получаем username из Moodle
         username = moodle_user.get('username', current_user.email.split('@')[0])
-        
+
         # Обновляем пароль и отправляем письмо
         result = service.send_password_reminder(current_user)
-        
+
         if result:
             return {
                 "success": True,
@@ -1226,7 +1086,7 @@ async def reset_moodle_password(
                 "has_moodle_account": True,
                 "message": "Не удалось сбросить пароль. Попробуйте позже или обратитесь в поддержку."
             }
-            
+
     except Exception as e:
         logger.error(f"Ошибка сброса пароля Moodle для {current_user.email}: {str(e)}")
         return {
@@ -1240,8 +1100,8 @@ async def reset_moodle_password(
 
 @router.get("/moodle-status")
 async def get_moodle_status(
-    db: AsyncSession = Depends(get_async_db),
-    current_user: models.User = Depends(auth.get_current_active_user)
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
 ):
     """
     Проверяет, есть ли у пользователя аккаунт в Moodle.
@@ -1249,7 +1109,7 @@ async def get_moodle_status(
     moodle = MoodleService()
     try:
         moodle_user = moodle.get_user_by_email(current_user.email)
-        
+
         if moodle_user:
             return {
                 "has_moodle_account": True,

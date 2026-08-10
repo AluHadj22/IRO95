@@ -300,44 +300,6 @@
                     </div>
                 </div>
 
-                <!-- Паспорт -->
-                <div class="document-card" id="passportDoc">
-                    <div class="doc-icon"><i class="bi bi-person-vcard"></i></div>
-                    <div class="doc-name">Копия паспорта</div>
-                    <div class="doc-status missing" id="passportStatus">Не загружен</div>
-                    <div class="doc-actions">
-                        <button class="btn btn-upload btn-sm" onclick="document.getElementById('passportFileInput').click()">
-                            <i class="bi bi-upload"></i> Загрузить
-                        </button>
-                        <button class="btn btn-download btn-sm" id="passportDownloadBtn" style="display: none;" onclick="downloadDocument('passport')">
-                            <i class="bi bi-download"></i> Скачать
-                        </button>
-                        <button class="btn btn-delete-doc btn-sm" id="passportDeleteBtn" style="display: none;" onclick="deleteDocument('passport')">
-                            <i class="bi bi-trash"></i> Удалить
-                        </button>
-                        <input type="file" id="passportFileInput" style="display: none;" accept=".png,.jpg,.jpeg,.pdf" onchange="uploadDocument('passport', this.files[0])">
-                    </div>
-                </div>
-
-                <!-- ИНН -->
-                <div class="document-card" id="innDoc">
-                    <div class="doc-icon"><i class="bi bi-file-earmark-text"></i></div>
-                    <div class="doc-name">Копия ИНН</div>
-                    <div class="doc-status missing" id="innStatus">Не загружен</div>
-                    <div class="doc-actions">
-                        <button class="btn btn-upload btn-sm" onclick="document.getElementById('innFileInput').click()">
-                            <i class="bi bi-upload"></i> Загрузить
-                        </button>
-                        <button class="btn btn-download btn-sm" id="innDownloadBtn" style="display: none;" onclick="downloadDocument('inn')">
-                            <i class="bi bi-download"></i> Скачать
-                        </button>
-                        <button class="btn btn-delete-doc btn-sm" id="innDeleteBtn" style="display: none;" onclick="deleteDocument('inn')">
-                            <i class="bi bi-trash"></i> Удалить
-                        </button>
-                        <input type="file" id="innFileInput" style="display: none;" accept=".png,.jpg,.jpeg,.pdf" onchange="uploadDocument('inn', this.files[0])">
-                    </div>
-                </div>
-
                 <!-- Свидетельство о браке -->
                 <div class="document-card" id="marriageDoc">
                     <div class="doc-icon"><i class="bi bi-heart"></i></div>
@@ -934,7 +896,7 @@ let currentWorkId = null;
 function formatSnils(input) {
     let value = input.value.replace(/\D/g, '');
     if (value.length > 11) value = value.slice(0, 11);
-    
+
     let formatted = '';
     for (let i = 0; i < value.length; i++) {
         if (i === 3 || i === 6) {
@@ -946,7 +908,7 @@ function formatSnils(input) {
 }
 
 // ============================================================
-// НАВИГАЦИЯ ПО ВКЛАДКАМ
+// НАВИГАЦИЯ ПО ВКЛАДКАМ С ОБНОВЛЕНИЕМ СТАТУСОВ
 // ============================================================
 document.querySelectorAll('.profile-nav .nav-btn').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -956,6 +918,15 @@ document.querySelectorAll('.profile-nav .nav-btn').forEach(btn => {
         const tab = this.dataset.tab;
         document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
         document.getElementById(`tab-${tab}`).classList.add('active');
+
+        // При переключении на вкладку "Документы" обновляем статусы
+        if (tab === 'documents') {
+            // Небольшая задержка для надежности
+            setTimeout(() => {
+                loadAdditionalInfo();
+                checkDiplomaStatus();
+            }, 100);
+        }
     });
 });
 
@@ -1231,7 +1202,7 @@ document.getElementById('addEducationForm').addEventListener('submit', async (e)
 
 function editEducation(id) {
     document.getElementById('edit_education_id').value = id;
-    
+
     showToast('Загрузка данных...', 'info');
     fetch(`/api/profile/education/${id}`, {
         headers: { 'Authorization': 'Bearer ' + token }
@@ -1345,7 +1316,10 @@ async function deleteEducation(id) {
 async function checkDiplomaStatus() {
     try {
         const response = await fetch('/api/profile/education', {
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Cache-Control': 'no-cache'
+            }
         });
         if (response.ok) {
             const eduData = await response.json();
@@ -1539,18 +1513,18 @@ function renderEditSubjects() {
 
 document.getElementById('addWorkForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const activityType = document.getElementById('work_activity_type').value;
     if (!activityType) {
         showToast('Пожалуйста, выберите вид деятельности', 'danger');
         return;
     }
-    
+
     if (selectedSubjects.length === 0) {
         showToast('Пожалуйста, добавьте хотя бы один предмет или выберите "Иное"', 'danger');
         return;
     }
-    
+
     const btn = e.target.querySelector('.btn-save');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сохранение...';
@@ -1634,18 +1608,18 @@ function editWork(id) {
 
 document.getElementById('editWorkForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const activityType = document.getElementById('edit_work_activity_type').value;
     if (!activityType) {
         showToast('Пожалуйста, выберите вид деятельности', 'danger');
         return;
     }
-    
+
     if (editSelectedSubjects.length === 0) {
         showToast('Пожалуйста, добавьте хотя бы один предмет или выберите "Иное"', 'danger');
         return;
     }
-    
+
     const id = document.getElementById('edit_work_id').value || currentWorkId;
     const btn = e.target.querySelector('.btn-save');
     btn.disabled = true;
@@ -1718,12 +1692,15 @@ async function deleteWork(id) {
 }
 
 // ============================================================
-// ДОКУМЕНТЫ (СНИЛС, загрузка файлов)
+// ДОКУМЕНТЫ (СНИЛС, загрузка файлов) - ОБНОВЛЕНО
 // ============================================================
 async function loadAdditionalInfo() {
     try {
         const response = await fetch('/api/profile/additional-info', {
-            headers: { 'Authorization': 'Bearer ' + token }
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Cache-Control': 'no-cache'
+            }
         });
         if (response.ok) {
             const data = await response.json();
@@ -1732,8 +1709,6 @@ async function loadAdditionalInfo() {
                 document.getElementById('data_confirmed').checked = data.data_confirmed || false;
 
                 // Обновляем статусы документов
-                updateDocumentStatus('passport', data.passport_file_url);
-                updateDocumentStatus('inn', data.inn_file_url);
                 updateDocumentStatus('marriage', data.marriage_certificate_file_url);
 
                 // Обработка СНИЛС
@@ -1745,8 +1720,6 @@ async function loadAdditionalInfo() {
                 }
             } else {
                 // Если нет дополнительной информации - все документы не загружены
-                updateDocumentStatus('passport', null);
-                updateDocumentStatus('inn', null);
                 updateDocumentStatus('marriage', null);
                 const preview = document.getElementById('snilsFilePreview');
                 if (preview) preview.style.display = 'none';
@@ -1765,16 +1738,18 @@ function updateDocumentStatus(docType, fileUrl) {
     const downloadBtn = document.getElementById(`${docType}DownloadBtn`);
     const deleteBtn = document.getElementById(`${docType}DeleteBtn`);
 
-    if (fileUrl) {
-        statusEl.className = 'doc-status uploaded';
-        statusEl.innerHTML = 'Загружен';
-        if (downloadBtn) downloadBtn.style.display = 'inline-block';
-        if (deleteBtn) deleteBtn.style.display = 'inline-block';
-    } else {
-        statusEl.className = 'doc-status missing';
-        statusEl.innerHTML = 'Не загружен';
-        if (downloadBtn) downloadBtn.style.display = 'none';
-        if (deleteBtn) deleteBtn.style.display = 'none';
+    if (statusEl) {
+        if (fileUrl) {
+            statusEl.className = 'doc-status uploaded';
+            statusEl.innerHTML = 'Загружен';
+            if (downloadBtn) downloadBtn.style.display = 'inline-block';
+            if (deleteBtn) deleteBtn.style.display = 'inline-block';
+        } else {
+            statusEl.className = 'doc-status missing';
+            statusEl.innerHTML = 'Не загружен';
+            if (downloadBtn) downloadBtn.style.display = 'none';
+            if (deleteBtn) deleteBtn.style.display = 'none';
+        }
     }
 }
 
@@ -1812,8 +1787,6 @@ async function uploadDocument(type, file) {
 
     const endpoints = {
         'diploma': '/api/profile/education/upload-diploma',
-        'passport': '/api/profile/upload/passport',
-        'inn': '/api/profile/upload/inn',
         'marriage': '/api/profile/upload/marriage-certificate',
         'snils': '/api/profile/upload/snils'
     };
@@ -1838,6 +1811,13 @@ async function uploadDocument(type, file) {
         }
     }
 
+    // Показываем индикатор загрузки
+    const statusEl = document.getElementById(`${type}Status`);
+    if (statusEl) {
+        statusEl.className = 'doc-status uploading';
+        statusEl.innerHTML = 'Загрузка...';
+    }
+
     try {
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -1850,30 +1830,47 @@ async function uploadDocument(type, file) {
             const labelMap = {
                 'snils': 'СНИЛС',
                 'diploma': 'Диплом',
-                'passport': 'Паспорт',
-                'inn': 'ИНН',
                 'marriage': 'Свидетельство о браке'
             };
             showToast(`${labelMap[type] || 'Документ'} загружен`, 'success');
 
+            // Обновляем статус
             if (type === 'snils') {
                 showFilePreview('snils', result.filename, 'СНИЛС');
-                await loadAdditionalInfo();
+                // Задержка для синхронизации с сервером
+                setTimeout(async () => {
+                    await loadAdditionalInfo();
+                }, 300);
             } else if (type === 'diploma') {
+                // Сначала проверяем статус диплома
                 setTimeout(() => {
                     checkDiplomaStatus();
+                }, 300);
+                // И обновляем дополнительную информацию
+                setTimeout(async () => {
+                    await loadAdditionalInfo();
                 }, 500);
-                await loadAdditionalInfo();
             } else {
-                await loadAdditionalInfo();
+                setTimeout(async () => {
+                    await loadAdditionalInfo();
+                }, 300);
             }
         } else {
             const error = await response.json();
             showToast(error.detail || 'Ошибка загрузки', 'danger');
+            // Возвращаем статус в исходное состояние
+            if (statusEl) {
+                statusEl.className = 'doc-status missing';
+                statusEl.innerHTML = 'Не загружен';
+            }
         }
     } catch (error) {
         console.error('Upload error:', error);
         showToast('Ошибка соединения', 'danger');
+        if (statusEl) {
+            statusEl.className = 'doc-status missing';
+            statusEl.innerHTML = 'Не загружен';
+        }
     }
 }
 
@@ -1905,8 +1902,6 @@ function downloadDocument(type) {
     .then(res => res.json())
     .then(data => {
         const urls = {
-            'passport': data.passport_file_url,
-            'inn': data.inn_file_url,
             'marriage': data.marriage_certificate_file_url
         };
         const url = urls[type];
@@ -1925,11 +1920,9 @@ async function deleteDocument(type) {
     const labels = {
         'snils': 'СНИЛС',
         'diploma': 'диплом',
-        'passport': 'паспорт',
-        'inn': 'ИНН',
         'marriage': 'свидетельство о браке'
     };
-    
+
     if (!confirm(`Удалить ${labels[type] || 'документ'}?`)) return;
 
     try {
@@ -1940,7 +1933,7 @@ async function deleteDocument(type) {
 
         if (response.ok) {
             showToast(`Файл ${labels[type] || 'документа'} удален`, 'success');
-            
+
             if (type === 'snils') {
                 const preview = document.getElementById('snilsFilePreview');
                 if (preview) preview.style.display = 'none';
@@ -1951,7 +1944,10 @@ async function deleteDocument(type) {
             } else {
                 updateDocumentStatus(type, null);
             }
-            await loadAdditionalInfo();
+            // Обновляем дополнительную информацию
+            setTimeout(async () => {
+                await loadAdditionalInfo();
+            }, 300);
         } else {
             const error = await response.json();
             showToast(error.detail || 'Ошибка удаления', 'danger');
@@ -1966,12 +1962,12 @@ async function deleteDocument(type) {
 // ============================================================
 async function saveAdditionalInfo() {
     let snilsValue = document.getElementById('snils').value;
-    
+
     if (snilsValue && snilsValue.length >= 11 && !snilsValue.includes(' ')) {
         snilsValue = snilsValue.replace(/(\d{3}-\d{3}-\d{3})(\d{2})/, '$1 $2');
         document.getElementById('snils').value = snilsValue;
     }
-    
+
     const snilsRegex = /^\d{3}-\d{3}-\d{3} \d{2}$/;
     if (snilsValue && !snilsRegex.test(snilsValue)) {
         showToast('Некорректный формат СНИЛС. Используйте формат: XXX-XXX-XXX XX', 'danger');
@@ -2047,7 +2043,7 @@ async function confirmAllData() {
 }
 
 // ============================================================
-// ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ (ОБНОВЛЕНО)
+// ПРОВЕРКА ЗАПОЛНЕННОСТИ ПРОФИЛЯ
 // ============================================================
 async function checkProfileComplete() {
     try {
@@ -2057,14 +2053,13 @@ async function checkProfileComplete() {
         if (response.ok) {
             const data = await response.json();
             const badge = document.getElementById('profileStatusBadge');
-            
+
             if (data.is_complete) {
                 badge.className = 'profile-complete-badge complete';
                 badge.innerHTML = '<i class="bi bi-check-circle-fill"></i><span>Профиль заполнен полностью</span>';
             } else {
                 badge.className = 'profile-complete-badge incomplete';
-                
-                // Используем детальную информацию из ответа
+
                 if (data.sections) {
                     const incompleteSections = data.sections.filter(s => !s.is_complete);
                     if (incompleteSections.length > 0) {

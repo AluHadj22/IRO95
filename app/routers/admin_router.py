@@ -435,11 +435,9 @@ async def get_course_registrations(
         user = r.user
         has_documents = False
 
-        # Проверяем наличие документов у пользователя
+        # Проверяем наличие документов у пользователя (только СНИЛС, диплом, свидетельство о браке)
         if user.additional_info:
             if (user.additional_info.snils_file_url or
-                user.additional_info.passport_file_url or
-                user.additional_info.inn_file_url or
                 user.additional_info.marriage_certificate_file_url):
                 has_documents = True
 
@@ -460,7 +458,7 @@ async def get_course_registrations(
             "organization": user.organization,
             "registered_at": r.registered_at,
             "is_active": not user.is_blocked,
-            "has_documents": has_documents  # ✅ Новое поле
+            "has_documents": has_documents
         })
 
     return {
@@ -548,7 +546,6 @@ async def download_course_registrations_documents(
         doc_service = DocumentExportService(sync_db)
 
         # Проверяем, есть ли у выбранных пользователей документы
-        # Сначала получаем список пользователей с документами
         users_with_docs = []
         for uid in user_ids_to_export:
             user = sync_db.query(models.User).filter(models.User.id == uid).first()

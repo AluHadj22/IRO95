@@ -35,6 +35,9 @@ class DocumentExportService:
     # Использовать STORED (без сжатия) для быстрых ZIP
     USE_STORED = True
 
+    # ============================================================
+    # УБРАНЫ ПАСПОРТ И ИНН
+    # ============================================================
     DOCUMENT_TYPES = {
         "snils": {
             "field_url": "snils_file_url",
@@ -47,18 +50,6 @@ class DocumentExportService:
             "field_name": "diploma_file_name",
             "label": "Диплом",
             "filename_prefix": "Diploma"
-        },
-        "passport": {
-            "field_url": "passport_file_url",
-            "field_name": "passport_file_name",
-            "label": "Паспорт",
-            "filename_prefix": "Passport"
-        },
-        "inn": {
-            "field_url": "inn_file_url",
-            "field_name": "inn_file_name",
-            "label": "ИНН",
-            "filename_prefix": "INN"
         },
         "marriage": {
             "field_url": "marriage_certificate_file_url",

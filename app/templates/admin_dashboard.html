@@ -5,6 +5,137 @@
 {% block extra_css %}
 <link rel="stylesheet" href="/static/css/admin_dashboard.css">
 <style>
+    /* ===== СТИЛИ ДЛЯ ПОИСКА В РАЗДЕЛЕ ПОЛЬЗОВАТЕЛЕЙ ===== */
+    .users-search-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .users-search-wrapper .search-input-wrap {
+        flex: 1;
+        min-width: 200px;
+        position: relative;
+    }
+    .users-search-wrapper .search-input-wrap input {
+        width: 100%;
+        padding: 8px 40px 8px 38px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+    .users-search-wrapper .search-input-wrap input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(26, 79, 122, 0.1);
+        outline: none;
+    }
+    .users-search-wrapper .search-input-wrap .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-size: 1rem;
+    }
+    .users-search-wrapper .search-input-wrap .clear-search-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--gray);
+        cursor: pointer;
+        padding: 4px;
+        display: none;
+        font-size: 1.1rem;
+    }
+    .users-search-wrapper .search-input-wrap .clear-search-btn:hover {
+        color: var(--danger);
+    }
+    .users-search-wrapper .search-input-wrap .clear-search-btn.visible {
+        display: block;
+    }
+    .users-search-wrapper .btn-refresh-users {
+        padding: 8px 16px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--gray);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    .users-search-wrapper .btn-refresh-users:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--secondary);
+    }
+
+    /* ===== СТИЛИ ДЛЯ ДОКУМЕНТОВ В ТАБЛИЦЕ РЕГИСТРАЦИЙ ===== */
+    .doc-status-icon {
+        font-size: 1.2rem;
+    }
+    .doc-status-icon.has {
+        color: #10b981;
+    }
+    .doc-status-icon.no {
+        color: #ef4444;
+    }
+    .registrations-actions .btn-doc-zip {
+        background: #8b5cf6;
+        color: #fff;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .registrations-actions .btn-doc-zip:hover:not(:disabled) {
+        background: #7c3aed;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+    }
+    .registrations-actions .btn-doc-zip:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+    .registrations-actions .btn-doc-zip-selected {
+        background: #f59e0b;
+        color: #fff;
+        border: none;
+        padding: 4px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .registrations-actions .btn-doc-zip-selected:hover:not(:disabled) {
+        background: #d97706;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+    }
+    .registrations-actions .btn-doc-zip-selected:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
     .moodle-users-modal .user-checkbox-item {
         width: 20px;
         height: 20px;
@@ -276,10 +407,26 @@
             </div>
 
             <div id="usersSection" style="display: none;">
-                <div class="mb-4">
+                <div class="mb-3">
                     <h2 class="section-title">Управление пользователями</h2>
                     <p class="text-muted">Блокировка, разблокировка и управление правами пользователей</p>
                 </div>
+
+                <div class="users-search-wrapper">
+                    <div class="search-input-wrap">
+                        <span class="search-icon"><i class="bi bi-search"></i></span>
+                        <input type="text" id="usersSearchInput"
+                               placeholder="Поиск по ФИО, email, ID..."
+                               oninput="handleUsersSearch(this.value)">
+                        <button class="clear-search-btn" id="usersClearSearchBtn" onclick="clearUsersSearch()">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                    <button class="btn-refresh-users" onclick="loadUsers(currentUsersPage)">
+                        <i class="bi bi-arrow-repeat"></i> Обновить
+                    </button>
+                </div>
+
                 <div class="table-card">
                     <div class="table-responsive">
                         <table class="table mb-0">
@@ -289,7 +436,14 @@
                                     <th>Курсов</th><th>Статус</th><th>Действия</th>
                                 </tr>
                             </thead>
-                            <tbody id="usersList"></tbody>
+                            <tbody id="usersList">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="loading-spinner"></div>
+                                        <p class="mt-2 text-muted">Загрузка пользователей...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                     <div class="pagination-wrapper" id="usersPagination">
@@ -309,8 +463,8 @@
 
                 <div class="export-actions">
                     <div class="search-wrapper">
-                        <input type="text" class="form-control" id="userSearchInput" 
-                               placeholder="Поиск по ФИО, email..." 
+                        <input type="text" class="form-control" id="userSearchInput"
+                               placeholder="Поиск по ФИО, email..."
                                oninput="handleUserSearch(this.value)">
                         <span class="search-icon"><i class="bi bi-search"></i></span>
                         <button class="clear-search" onclick="clearSearch()">
@@ -386,8 +540,8 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="moodleUsersBody">
-                <input type="text" class="search-input-modal" id="moodleUsersSearch" 
-                       placeholder="Поиск по email, ФИО..." 
+                <input type="text" class="search-input-modal" id="moodleUsersSearch"
+                       placeholder="Поиск по email, ФИО..."
                        oninput="loadMoodleUsersPage(1, this.value)">
                 <div id="moodleUsersListContainer">
                     <div class="text-center py-4">
@@ -468,7 +622,7 @@
                         <label><i class="bi bi-box-arrow-up-right me-2"></i>Интеграция с Moodle</label>
                         <div class="mb-3">
                             <label class="form-label">ID курса в Moodle</label>
-                            <input type="number" class="form-control" id="moodle_course_id" 
+                            <input type="number" class="form-control" id="moodle_course_id"
                                    placeholder="Например: 2" value="">
                             <div class="help-text">
                                 <i class="bi bi-info-circle me-1"></i>
@@ -621,12 +775,16 @@
     let filteredCoursesData = [];
     let allCategoriesData = [];
     let selectedUserIds = new Set();
-    
+
     const PAGE_SIZE = 10;
     let currentCoursesPage = 1;
     let currentUsersPage = 1;
     let currentUserdataPage = 1;
     let currentCategoriesPage = 1;
+
+    // Переменные для поиска в разделе пользователей
+    let usersSearchTimeout = null;
+    let currentUsersSearchQuery = '';
 
     // Переменные для модального окна
     let moodleUsersData = [];
@@ -636,7 +794,7 @@
     let moodleTotalUsers = 0;
     let moodleSearchQuery = '';
 
-    // Переменные для поиска с debounce
+    // Переменные для поиска с debounce (раздел Данные пользователей)
     let searchTimeout = null;
     let currentSearchQuery = '';
 
@@ -714,28 +872,159 @@
     }
 
     // ============================================================
-    // НОВАЯ ФУНКЦИЯ ПОИСКА (СЕРВЕРНЫЙ ПОИСК С DEBOUNCE)
+    // НОВАЯ ФУНКЦИЯ ПОИСКА ДЛЯ РАЗДЕЛА ПОЛЬЗОВАТЕЛЕЙ
+    // ============================================================
+    function handleUsersSearch(query) {
+        currentUsersSearchQuery = query.trim();
+
+        if (usersSearchTimeout) {
+            clearTimeout(usersSearchTimeout);
+        }
+
+        var clearBtn = document.getElementById('usersClearSearchBtn');
+        if (clearBtn) {
+            clearBtn.classList.toggle('visible', currentUsersSearchQuery.length > 0);
+        }
+
+        usersSearchTimeout = setTimeout(function() {
+            loadUsersWithSearch(1, currentUsersSearchQuery);
+        }, 300);
+    }
+
+    function clearUsersSearch() {
+        document.getElementById('usersSearchInput').value = '';
+        currentUsersSearchQuery = '';
+        if (usersSearchTimeout) {
+            clearTimeout(usersSearchTimeout);
+            usersSearchTimeout = null;
+        }
+        var clearBtn = document.getElementById('usersClearSearchBtn');
+        if (clearBtn) clearBtn.classList.remove('visible');
+        loadUsers(1);
+    }
+
+    // ============================================================
+    // ЗАГРУЗКА ПОЛЬЗОВАТЕЛЕЙ С ПОИСКОМ
+    // ============================================================
+    async function loadUsersWithSearch(page, searchQuery) {
+        page = page || 1;
+        currentUsersPage = page;
+        var tbody = document.getElementById('usersList');
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="loading-spinner"></div><p class="mt-2 text-muted">' + (searchQuery ? 'Поиск "' + escapeHtml(searchQuery) + '"...' : 'Загрузка пользователей...') + '</p></td></tr>';
+
+        try {
+            var offset = (page - 1) * PAGE_SIZE;
+            var url = '/api/admin/users?limit=' + PAGE_SIZE + '&offset=' + offset;
+
+            if (searchQuery && searchQuery.trim()) {
+                url += '&search=' + encodeURIComponent(searchQuery.trim());
+            }
+
+            var response = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Ошибка загрузки пользователей');
+
+            var users = await response.json();
+
+            var userList = Array.isArray(users) ? users : users.items || [];
+            var total = Array.isArray(users) ? userList.length : (users.total || 0);
+
+            renderUsersPage(userList, page, total);
+
+        } catch (error) {
+            console.error('Error loading users:', error);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки: ' + error.message + '</td></tr>';
+        }
+    }
+
+    // ============================================================
+    // ОБНОВЛЕННАЯ ФУНКЦИЯ loadUsers
+    // ============================================================
+    async function loadUsers(page) {
+        if (currentUsersSearchQuery) {
+            await loadUsersWithSearch(page || currentUsersPage, currentUsersSearchQuery);
+            return;
+        }
+
+        page = page || 1;
+        currentUsersPage = page;
+        var tbody = document.getElementById('usersList');
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="loading-spinner"></div><p class="mt-2 text-muted">Загрузка пользователей...</p></td></tr>';
+
+        try {
+            var offset = (page - 1) * PAGE_SIZE;
+            var response = await fetch('/api/admin/users?limit=' + PAGE_SIZE + '&offset=' + offset, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!response.ok) throw new Error('Ошибка загрузки пользователей');
+
+            var users = await response.json();
+
+            var userList = Array.isArray(users) ? users : users.items || [];
+            var total = Array.isArray(users) ? userList.length : (users.total || 0);
+
+            renderUsersPage(userList, page, total);
+
+        } catch (error) {
+            console.error('Error loading users:', error);
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки: ' + error.message + '</td></tr>';
+        }
+    }
+
+    function renderUsersPage(users, page, total) {
+        var tbody = document.getElementById('usersList');
+
+        if (!users || users.length === 0) {
+            var emptyMsg = currentUsersSearchQuery ? 'Пользователи не найдены' : 'Нет пользователей';
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>' + emptyMsg + '</p></td></tr>';
+            renderPagination('usersPagination', 'usersPaginationInfo', 'usersPaginationControls', page, 0, PAGE_SIZE, 'loadUsers');
+            return;
+        }
+
+        var html = '';
+        for (var i = 0; i < users.length; i++) {
+            var u = users[i];
+            html += '<tr><td><span class="badge-gold">' + u.id + '</span></td><td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>' + escapeHtml(u.full_name) + '</td><td>' + escapeHtml(u.email) + '</td><td><span class="' + (u.role === 'admin' ? 'badge-danger' : 'badge-info') + '">' + (u.role === 'admin' ? 'Администратор' : 'Преподаватель') + '</span></td><td><span class="badge-info">' + (u.registrations_count || 0) + '</span></td><td><span class="' + (!u.is_blocked ? 'badge-success' : 'badge-danger') + '">' + (!u.is_blocked ? 'Активен' : 'Заблокирован') + '</span></td><td>' + (!u.is_blocked ? '<button class="btn btn-sm btn-warning" onclick="blockUserItem(' + u.id + ')" title="Заблокировать"><i class="bi bi-lock"></i></button>' : '<button class="btn btn-sm btn-success" onclick="unblockUserItem(' + u.id + ')" title="Разблокировать"><i class="bi bi-unlock"></i></button>') + '<button class="btn btn-sm ' + (u.role === 'admin' ? 'btn-role btn-role-danger' : 'btn-role') + '" onclick="openRoleModal(' + u.id + ', \'' + escapeHtml(u.full_name) + '\', \'' + u.role + '\')" title="' + (u.role === 'admin' ? 'Забрать права администратора' : 'Сделать администратором') + '"><i class="bi ' + (u.role === 'admin' ? 'bi-person-x' : 'bi-person-plus') + '"></i></button></td></tr>';
+        }
+        tbody.innerHTML = html;
+
+        renderPagination('usersPagination', 'usersPaginationInfo', 'usersPaginationControls', page, total, PAGE_SIZE, function(newPage) {
+            if (currentUsersSearchQuery) {
+                loadUsersWithSearch(newPage, currentUsersSearchQuery);
+            } else {
+                loadUsers(newPage);
+            }
+        });
+    }
+
+    // ============================================================
+    // ФУНКЦИЯ ПОИСКА В РАЗДЕЛЕ "ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ"
     // ============================================================
     function handleUserSearch(query) {
-        // Сохраняем поисковый запрос
         currentSearchQuery = query.trim();
-        
-        // Отменяем предыдущий таймаут
+
         if (searchTimeout) {
             clearTimeout(searchTimeout);
         }
-        
-        // Устанавливаем новый таймаут (300 мс)
+
         searchTimeout = setTimeout(function() {
-            // Если строка поиска пустая, просто перезагружаем первую страницу
             if (!currentSearchQuery) {
                 loadUserData(1);
                 return;
             }
-            
-            // Иначе выполняем поиск с первой страницы
             loadUserDataWithSearch(1, currentSearchQuery);
         }, 300);
+    }
+
+    function clearSearch() {
+        document.getElementById('userSearchInput').value = '';
+        currentSearchQuery = '';
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+            searchTimeout = null;
+        }
+        loadUserData(1);
     }
 
     // ============================================================
@@ -750,12 +1039,11 @@
         try {
             var offset = (page - 1) * PAGE_SIZE;
             var url = '/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset;
-            
-            // Добавляем поисковый запрос, если он есть
+
             if (searchQuery && searchQuery.trim()) {
                 url += '&search=' + encodeURIComponent(searchQuery.trim());
             }
-            
+
             var response = await fetch(url, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
@@ -768,14 +1056,14 @@
             updateExportButton();
             updateDocZipButton();
             renderUserData(allUsersData);
-            
+
             var totalText = 'Всего: ' + result.total + ' пользователей';
             if (searchQuery && searchQuery.trim()) {
                 totalText += ' (найдено по запросу "' + escapeHtml(searchQuery.trim()) + '")';
             }
             document.getElementById('userCountInfo').textContent = totalText;
-            
-            renderPagination('userdataPagination', 'userdataPaginationInfo', 'userdataPaginationControls', page, result.total, PAGE_SIZE, 
+
+            renderPagination('userdataPagination', 'userdataPaginationInfo', 'userdataPaginationControls', page, result.total, PAGE_SIZE,
                 function(newPage) {
                     if (searchQuery && searchQuery.trim()) {
                         loadUserDataWithSearch(newPage, searchQuery);
@@ -790,16 +1078,12 @@
         }
     }
 
-    // ============================================================
-    // ОБНОВЛЕННАЯ ФУНКЦИЯ loadUserData (ПОДДЕРЖИВАЕТ ПОИСК)
-    // ============================================================
     async function loadUserData(page) {
-        // Если есть активный поиск, используем его
         if (currentSearchQuery) {
             await loadUserDataWithSearch(page || currentUserdataPage, currentSearchQuery);
             return;
         }
-        
+
         page = page || 1;
         currentUserdataPage = page;
         var tbody = document.getElementById('userDataList');
@@ -828,20 +1112,7 @@
     }
 
     // ============================================================
-    // ФУНКЦИЯ ОЧИСТКИ ПОИСКА
-    // ============================================================
-    function clearSearch() {
-        document.getElementById('userSearchInput').value = '';
-        currentSearchQuery = '';
-        if (searchTimeout) {
-            clearTimeout(searchTimeout);
-            searchTimeout = null;
-        }
-        loadUserData(1);
-    }
-
-    // ============================================================
-    // ОСТАЛЬНЫЕ ФУНКЦИИ (БЕЗ ИЗМЕНЕНИЙ)
+    // ОСТАЛЬНЫЕ ФУНКЦИИ
     // ============================================================
 
     async function fetchMoodleCourses() {
@@ -1023,17 +1294,17 @@
     async function loadCourses(page, bypassCache) {
         page = page || 1;
         currentCoursesPage = page;
-        
+
         var cacheBuster = bypassCache ? '?_t=' + Date.now() : '';
-        
+
         try {
-            var response = await fetch('/api/admin/courses' + cacheBuster, { 
-                headers: { 
+            var response = await fetch('/api/admin/courses' + cacheBuster, {
+                headers: {
                     'Authorization': 'Bearer ' + token,
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
                     'Pragma': 'no-cache',
                     'Expires': '0'
-                } 
+                }
             });
             if (!response.ok) throw new Error('Ошибка загрузки курсов');
             var result = await response.json();
@@ -1069,34 +1340,6 @@
         renderPagination('coursesPagination', 'coursesPaginationInfo', 'coursesPaginationControls', page, filteredCoursesData.length, PAGE_SIZE, 'loadCourses');
     }
 
-    async function loadUsers(page) {
-        page = page || 1;
-        currentUsersPage = page;
-        try {
-            var response = await fetch('/api/admin/users', { headers: { 'Authorization': 'Bearer ' + token } });
-            if (!response.ok) throw new Error('Ошибка загрузки пользователей');
-            var users = await response.json();
-            var tbody = document.getElementById('usersList');
-            var start = (page - 1) * PAGE_SIZE;
-            var end = Math.min(start + PAGE_SIZE, users.length);
-            var pageData = users.slice(start, end);
-            if (!users || users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><i class="bi bi-people-x"></i><p>Нет пользователей</p></td></tr>';
-            } else {
-                var html = '';
-                for (var i = 0; i < pageData.length; i++) {
-                    var u = pageData[i];
-                    html += '<tr><td><span class="badge-gold">' + u.id + '</span></td><td><i class="bi bi-person-circle me-2" style="color: var(--primary);"></i>' + u.full_name + '</td><td>' + u.email + '</td><td><span class="' + (u.role === 'admin' ? 'badge-danger' : 'badge-info') + '">' + (u.role === 'admin' ? 'Администратор' : 'Преподаватель') + '</span></td><td><span class="badge-info">' + (u.registrations_count || 0) + '</span></td><td><span class="' + (!u.is_blocked ? 'badge-success' : 'badge-danger') + '">' + (!u.is_blocked ? 'Активен' : 'Заблокирован') + '</span></td><td>' + (!u.is_blocked ? '<button class="btn btn-sm btn-warning" onclick="blockUserItem(' + u.id + ')" title="Заблокировать"><i class="bi bi-lock"></i></button>' : '<button class="btn btn-sm btn-success" onclick="unblockUserItem(' + u.id + ')" title="Разблокировать"><i class="bi bi-unlock"></i></button>') + '<button class="btn btn-sm ' + (u.role === 'admin' ? 'btn-role btn-role-danger' : 'btn-role') + '" onclick="openRoleModal(' + u.id + ', \'' + escapeHtml(u.full_name) + '\', \'' + u.role + '\')" title="' + (u.role === 'admin' ? 'Забрать права администратора' : 'Сделать администратором') + '"><i class="bi ' + (u.role === 'admin' ? 'bi-person-x' : 'bi-person-plus') + '"></i></button></td></tr>';
-                }
-                tbody.innerHTML = html;
-            }
-            renderPagination('usersPagination', 'usersPaginationInfo', 'usersPaginationControls', page, users.length, PAGE_SIZE, 'loadUsers');
-        } catch (error) {
-            console.error('Error loading users:', error);
-            document.getElementById('usersList').innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Ошибка загрузки: ' + error.message + '</td></tr>';
-        }
-    }
-
     function updateCourseParticipantsInTable(courseId, newCount) {
         var span = document.getElementById('participants_' + courseId);
         if (span) {
@@ -1104,19 +1347,23 @@
         }
     }
 
+    // ============================================================
+    // ФУНКЦИИ ДЛЯ МОДАЛКИ РЕГИСТРАЦИЙ
+    // ============================================================
+
     async function viewCourseRegistrations(courseId) {
         console.log('=== viewCourseRegistrations ===');
-        console.log('Получен courseId:', courseId, 'тип:', typeof courseId);
-        
+        console.log('Получен courseId:', courseId);
+
         try {
             var response = await fetch('/api/admin/courses/' + courseId + '/registrations', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             if (!response.ok) throw new Error('Ошибка загрузки регистраций');
-            
+
             var data = await response.json();
             console.log('Данные курса:', data);
-            
+
             var html = '<div class="registrations-header">';
             html += '<h5>' + escapeHtml(data.course.title) + '</h5>';
             html += '<div class="registrations-stats">';
@@ -1125,7 +1372,7 @@
                 html += '<span class="moodle-badge">Moodle ID: ' + data.course.moodle_course_id + '</span>';
             }
             html += '</div></div>';
-            
+
             if (!data.registrations || data.registrations.length === 0) {
                 html += '<div class="empty-state"><i class="bi bi-people"></i><p>Нет зарегистрированных пользователей</p></div>';
             } else {
@@ -1136,20 +1383,35 @@
                 html += '<button class="btn btn-sm btn-danger" onclick="removeSelectedRegistrations(' + courseId + ')" id="removeSelectedBtn" disabled><i class="bi bi-person-x"></i> Удалить выбранных</button>';
                 html += '<button class="btn btn-sm btn-danger" onclick="removeAllRegistrations(' + courseId + ')"><i class="bi bi-people-x"></i> Удалить всех</button>';
                 html += '<button class="btn btn-sm btn-primary" onclick="exportRegistrations(' + courseId + ')"><i class="bi bi-download"></i> Экспорт</button>';
+
+                // ============================================================
+                // ✅ НОВЫЕ КНОПКИ ДЛЯ СКАЧИВАНИЯ ДОКУМЕНТОВ
+                // ============================================================
+                html += '<button class="btn-doc-zip" onclick="downloadCourseRegistrationsDocuments(' + courseId + ', null)"><i class="bi bi-file-zip"></i> Документы всех</button>';
+                html += '<button class="btn-doc-zip-selected" id="docZipRegistrationsBtn" onclick="downloadSelectedCourseRegistrationsDocuments(' + courseId + ')" disabled><i class="bi bi-file-zip"></i> Доки выбранных</button>';
+
                 html += '</div>';
                 html += '<span class="selected-count" id="selectedRegistrationsCount">Выбрано: 0</span>';
                 html += '</div>';
-                
+
                 html += '<div class="table-responsive"><table class="table table-striped registrations-table"><thead class="table-light"><tr>';
                 html += '<th style="width:40px;"><input type="checkbox" id="selectAllRegistrations" onchange="toggleAllRegistrations(this, this.checked)"></th>';
                 html += '<th>№</th><th>ФИО</th><th>Email</th><th>Должность</th><th>Организация</th><th>Дата записи</th><th>Статус</th>';
+                // ✅ НОВАЯ КОЛОНКА ДЛЯ ДОКУМЕНТОВ
+                html += '<th style="text-align:center;">Документы</th>';
                 html += '</tr></thead><tbody>';
-                
+
                 for (var i = 0; i < data.registrations.length; i++) {
                     var r = data.registrations[i];
                     var statusBadge = r.is_active ? '<span class="badge-success">Активен</span>' : '<span class="badge-danger">Заблокирован</span>';
+
+                    // ✅ ИКОНКА СТАТУСА ДОКУМЕНТОВ
+                    var docIcon = r.has_documents
+                        ? '<span class="doc-status-icon has" title="Есть документы">📄</span>'
+                        : '<span class="doc-status-icon no" title="Нет документов">❌</span>';
+
                     html += '<tr>';
-                    html += '<td><input type="checkbox" class="registration-checkbox" data-user-id="' + r.user_id + '" onchange="updateRemoveButtonState(' + courseId + ')"></td>';
+                    html += '<td><input type="checkbox" class="registration-checkbox" data-user-id="' + r.user_id + '" onchange="updateRemoveButtonState(' + courseId + '); updateDocZipButtonState(' + courseId + ')"></td>';
                     html += '<td>' + (i + 1) + '</td>';
                     html += '<td>' + escapeHtml(r.full_name) + '</td>';
                     html += '<td>' + escapeHtml(r.email) + '</td>';
@@ -1157,11 +1419,12 @@
                     html += '<td>' + escapeHtml(r.organization || '-') + '</td>';
                     html += '<td>' + new Date(r.registered_at).toLocaleDateString() + '</td>';
                     html += '<td>' + statusBadge + '</td>';
+                    html += '<td style="text-align:center;">' + docIcon + '</td>';
                     html += '</tr>';
                 }
                 html += '</tbody></table></div>';
             }
-            
+
             document.getElementById('registrationsContent').innerHTML = html;
             new bootstrap.Modal(document.getElementById('registrationsModal')).show();
         } catch (error) {
@@ -1170,11 +1433,85 @@
         }
     }
 
+    // ============================================================
+    // ✅ ФУНКЦИЯ ОБНОВЛЕНИЯ СОСТОЯНИЯ КНОПКИ "ДОКИ ВЫБРАННЫХ"
+    // ============================================================
+    function updateDocZipButtonState(courseId) {
+        var checkboxes = document.querySelectorAll('.registration-checkbox:checked');
+        var hasChecked = checkboxes.length > 0;
+        var btn = document.getElementById('docZipRegistrationsBtn');
+        if (btn) {
+            btn.disabled = !hasChecked;
+        }
+    }
+
+    // ============================================================
+    // ✅ СКАЧИВАНИЕ ДОКУМЕНТОВ ВСЕХ ЗАРЕГИСТРИРОВАННЫХ
+    // ============================================================
+    async function downloadCourseRegistrationsDocuments(courseId, userIds) {
+        try {
+            var url = '/api/admin/courses/' + courseId + '/registrations/documents';
+            if (userIds) {
+                url += '?user_ids=' + userIds.join(',');
+            }
+
+            var response = await fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!response.ok) {
+                var error = await response.json();
+                throw new Error(error.detail || 'Ошибка скачивания документов');
+            }
+
+            var blob = await response.blob();
+            var urlBlob = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = urlBlob;
+
+            var contentDisposition = response.headers.get('Content-Disposition');
+            var filename = 'course_registrations_documents.zip';
+            if (contentDisposition) {
+                var match = contentDisposition.match(/filename=([^;]+)/);
+                if (match) filename = match[1].trim();
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(urlBlob);
+            showToast('Документы скачаны успешно', 'success');
+        } catch (error) {
+            console.error('Download documents error:', error);
+            showToast(error.message || 'Ошибка при скачивании документов', 'danger');
+        }
+    }
+
+    // ============================================================
+    // ✅ СКАЧИВАНИЕ ДОКУМЕНТОВ ВЫБРАННЫХ ЗАРЕГИСТРИРОВАННЫХ
+    // ============================================================
+    async function downloadSelectedCourseRegistrationsDocuments(courseId) {
+        var checkboxes = document.querySelectorAll('.registration-checkbox:checked');
+        if (checkboxes.length === 0) {
+            showToast('Выберите пользователей', 'warning');
+            return;
+        }
+
+        var userIds = Array.from(checkboxes).map(function(cb) {
+            return parseInt(cb.dataset.userId);
+        });
+
+        await downloadCourseRegistrationsDocuments(courseId, userIds);
+    }
+
     function toggleAllRegistrations(element, checked) {
         var checkboxes = document.querySelectorAll('.registration-checkbox');
         checkboxes.forEach(function(cb) { cb.checked = checked; });
         var courseId = parseInt(document.querySelector('.registrations-actions')?.dataset?.courseId);
-        if (courseId) updateRemoveButtonState(courseId);
+        if (courseId) {
+            updateRemoveButtonState(courseId);
+            updateDocZipButtonState(courseId);
+        }
     }
 
     function updateRemoveButtonState(courseId) {
@@ -1182,7 +1519,7 @@
         var count = checkboxes.length;
         var btn = document.getElementById('removeSelectedBtn');
         var countEl = document.getElementById('selectedRegistrationsCount');
-        
+
         if (btn) btn.disabled = count === 0;
         if (countEl) countEl.textContent = 'Выбрано: ' + count;
         if (btn) {
@@ -1197,7 +1534,7 @@
             showToast('Выберите пользователей для удаления', 'warning');
             return;
         }
-        
+
         var userIds = Array.from(checkboxes).map(function(cb) { return parseInt(cb.dataset.userId); });
         if (!confirm('Удалить ' + userIds.length + ' пользователей с этого курса?\n\nЭто действие НЕ удалит пользователей с платформы и НЕ удалит сам курс.')) return;
         await performRemoveRegistrations(courseId, userIds);
@@ -1217,13 +1554,13 @@
         console.log('=== performRemoveRegistrations ===');
         console.log('courseId (внутренний ID):', courseId);
         console.log('userIds:', userIds);
-        
+
         var btn = document.getElementById('removeSelectedBtn');
         if (btn) {
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Удаление...';
         }
-        
+
         try {
             var url;
             if (userIds === 'all') {
@@ -1231,48 +1568,48 @@
             } else {
                 url = '/api/admin/courses/' + courseId + '/registrations?user_ids=' + userIds.join(',');
             }
-            
+
             console.log('URL запроса:', url);
-            
+
             var response = await fetch(url, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (response.ok) {
                 var result = await response.json();
                 console.log('Результат удаления:', result);
-                
+
                 var newCount = result.remaining_participants || result.updated_participants || 0;
                 console.log('Новое количество участников:', newCount);
-                
+
                 var countEl = document.getElementById('registrationsCount');
                 if (countEl) {
                     countEl.textContent = newCount;
                 }
-                
+
                 updateCourseParticipantsInTable(courseId, newCount);
-                
+
                 if (newCount === 0) {
                     var content = document.getElementById('registrationsContent');
                     var headerHtml = content.querySelector('.registrations-header')?.outerHTML || '';
                     content.innerHTML = headerHtml + '<div class="empty-state"><i class="bi bi-people"></i><p>Нет зарегистрированных пользователей</p></div>';
                 } else {
-                    setTimeout(function() { 
-                        viewCourseRegistrations(courseId); 
+                    setTimeout(function() {
+                        viewCourseRegistrations(courseId);
                     }, 300);
                 }
-                
+
                 await loadStats();
                 await loadCourses(currentCoursesPage, true);
-                
+
                 showToast(result.message || 'Пользователи успешно удалены с курса', 'success');
-                
+
                 setTimeout(function() {
                     var modal = bootstrap.Modal.getInstance(document.getElementById('registrationsModal'));
                     if (modal) modal.hide();
                 }, 1500);
-                
+
             } else {
                 var error = await response.json();
                 console.error('Ошибка удаления:', error);
@@ -1282,7 +1619,7 @@
             console.error('Remove registrations error:', error);
             showToast('Ошибка соединения с сервером', 'danger');
         }
-        
+
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-person-x"></i> Удалить выбранных';
@@ -1577,26 +1914,26 @@
         if (search !== undefined) {
             moodleSearchQuery = search;
         }
-        
+
         var container = document.getElementById('moodleUsersListContainer');
         container.innerHTML = '<div class="text-center py-4"><div class="loading-spinner"></div><p class="mt-2 text-muted">Загрузка пользователей...</p></div>';
-        
+
         try {
             var url = '/api/admin/users/moodle-accounts?page=' + page + '&per_page=20';
             if (moodleSearchQuery) {
                 url += '&search=' + encodeURIComponent(moodleSearchQuery);
             }
-            
+
             var response = await fetch(url, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (response.ok) {
                 var data = await response.json();
                 moodleUsersData = data.users || [];
                 moodleTotalUsers = data.total || 0;
                 moodleTotalPages = data.total_pages || 1;
-                
+
                 renderMoodleUsersList();
             } else {
                 var error = await response.json();
@@ -1610,7 +1947,7 @@
 
     function renderMoodleUsersList() {
         var container = document.getElementById('moodleUsersListContainer');
-        
+
         if (moodleUsersData.length === 0) {
             container.innerHTML = `
                 <div class="empty-state-modal">
@@ -1621,7 +1958,7 @@
             `;
             return;
         }
-        
+
         var html = '<div class="list-header">';
         html += '<span style="width: 40px;"><input type="checkbox" id="selectAllMoodleUsers" onchange="toggleAllMoodleUsers(this.checked)" style="width: 18px; height: 18px; cursor: pointer;"></span>';
         html += '<span class="header-email">Email</span>';
@@ -1629,13 +1966,13 @@
         html += '<span class="header-username">Логин в Moodle</span>';
         html += '<span class="header-status">Статус</span>';
         html += '</div>';
-        
+
         for (var i = 0; i < moodleUsersData.length; i++) {
             var user = moodleUsersData[i];
             var isChecked = moodleSelectedUserIds.has(user.id);
             var statusClass = user.password_sent ? 'sent' : 'not-sent';
             var statusText = user.password_sent ? '✅ Отправлен' : '⏳ Не отправлен';
-            
+
             html += '<div class="user-row-item">';
             html += '<span style="width: 40px;"><input type="checkbox" class="user-checkbox-item" data-user-id="' + user.id + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleMoodleUser(' + user.id + ', this.checked)"></span>';
             html += '<span class="user-email">' + escapeHtml(user.email) + '</span>';
@@ -1644,41 +1981,38 @@
             html += '<span class="user-status ' + statusClass + '">' + statusText + '</span>';
             html += '</div>';
         }
-        
-        // Пагинация
+
         html += '<div class="pagination-info-modal">';
         html += '<span>Показано: ' + moodleUsersData.length + ' из ' + moodleTotalUsers + '</span>';
         html += '<div class="pagination-controls-modal">';
-        
+
         html += '<button class="page-btn-modal" onclick="loadMoodleUsersPage(' + (moodleCurrentPage - 1) + ')" ' + (moodleCurrentPage <= 1 ? 'disabled' : '') + '>‹</button>';
-        
+
         var startPage = Math.max(1, moodleCurrentPage - 2);
         var endPage = Math.min(moodleTotalPages, moodleCurrentPage + 2);
-        
+
         if (startPage > 1) {
             html += '<button class="page-btn-modal" onclick="loadMoodleUsersPage(1)">1</button>';
             if (startPage > 2) html += '<span class="page-btn-modal" style="border: none; background: none;">…</span>';
         }
-        
+
         for (var p = startPage; p <= endPage; p++) {
             html += '<button class="page-btn-modal ' + (p === moodleCurrentPage ? 'active' : '') + '" onclick="loadMoodleUsersPage(' + p + ')">' + p + '</button>';
         }
-        
+
         if (endPage < moodleTotalPages) {
             if (endPage < moodleTotalPages - 1) html += '<span class="page-btn-modal" style="border: none; background: none;">…</span>';
             html += '<button class="page-btn-modal" onclick="loadMoodleUsersPage(' + moodleTotalPages + ')">' + moodleTotalPages + '</button>';
         }
-        
+
         html += '<button class="page-btn-modal" onclick="loadMoodleUsersPage(' + (moodleCurrentPage + 1) + ')" ' + (moodleCurrentPage >= moodleTotalPages ? 'disabled' : '') + '>›</button>';
-        
+
         html += '</div></div>';
-        
+
         container.innerHTML = html;
-        
-        // Обновляем счетчик выбранных
+
         updateMoodleSelectedCount();
-        
-        // Обновляем состояние "выбрать всех"
+
         var selectAll = document.getElementById('selectAllMoodleUsers');
         if (selectAll) {
             var visibleIds = moodleUsersData.map(function(u) { return u.id; });
@@ -1695,8 +2029,7 @@
             moodleSelectedUserIds.delete(userId);
         }
         updateMoodleSelectedCount();
-        
-        // Обновляем состояние "выбрать всех"
+
         var selectAll = document.getElementById('selectAllMoodleUsers');
         if (selectAll) {
             var visibleIds = moodleUsersData.map(function(u) { return u.id; });
@@ -1714,18 +2047,17 @@
                 moodleSelectedUserIds.delete(user.id);
             }
         });
-        
-        // Обновляем чекбоксы в списке
+
         document.querySelectorAll('.user-checkbox-item').forEach(function(cb) {
             cb.checked = checked;
         });
-        
+
         var selectAll = document.getElementById('selectAllMoodleUsers');
         if (selectAll) {
             selectAll.checked = checked;
             selectAll.indeterminate = false;
         }
-        
+
         updateMoodleSelectedCount();
     }
 
@@ -1740,34 +2072,32 @@
             showToast('Выберите хотя бы одного пользователя', 'warning');
             return;
         }
-        
+
         var userIds = Array.from(moodleSelectedUserIds);
         if (!confirm('Отправить напоминания о паролях ' + userIds.length + ' пользователям?')) {
             return;
         }
-        
+
         var btn = document.getElementById('sendSelectedBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Отправка...';
-        
+
         try {
             var url = '/api/admin/users/send-password-reminders-selected?user_ids=' + userIds.join(',');
             var response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (response.ok) {
                 var result = await response.json();
                 showToast(result.message || 'Напоминания отправлены', 'success');
                 if (result.total > 0) {
                     showToast('Отправлено: ' + result.sent + ', ошибок: ' + result.failed, 'info');
                 }
-                
-                // Обновляем список
+
                 await loadMoodleUsersPage(moodleCurrentPage);
-                
-                // Если все отправлены - закрываем модалку через 2 секунды
+
                 if (result.failed === 0 && result.sent > 0) {
                     setTimeout(function() {
                         var modal = bootstrap.Modal.getInstance(document.getElementById('moodleUsersModal'));
@@ -1782,13 +2112,13 @@
             console.error('Error sending reminders:', error);
             showToast('Ошибка соединения с сервером', 'danger');
         }
-        
+
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-send me-1"></i>Отправить выбранным';
     }
 
     // ============================================================
-    // ФУНКЦИИ ДЛЯ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ (ОБНОВЛЕНЫ)
+    // ФУНКЦИИ ДЛЯ РАБОТЫ С ПОЛЬЗОВАТЕЛЯМИ (РАЗДЕЛ ДАННЫЕ)
     // ============================================================
 
     function renderUserData(users) {
@@ -2172,13 +2502,13 @@
     async function deleteUserAccount(userId) {
         if (!confirm('ВНИМАНИЕ! Вы собираетесь полностью удалить пользователя. Все его данные, документы, регистрации и достижения будут удалены безвозвратно. Продолжить?')) return;
         if (!confirm('Вы уверены? Действие необратимо.')) return;
-        
+
         try {
             var response = await fetch('/api/admin/users/' + userId, {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
-            
+
             if (response.ok) {
                 showToast('Пользователь удален успешно', 'success');
                 await loadUsers(currentUsersPage);
@@ -2208,6 +2538,8 @@
     window.escapeHtml = escapeHtml;
     window.renderPagination = renderPagination;
     window.handleUserSearch = handleUserSearch;
+    window.handleUsersSearch = handleUsersSearch;
+    window.clearUsersSearch = clearUsersSearch;
     window.clearSearch = clearSearch;
     window.fetchMoodleCourses = fetchMoodleCourses;
     window.exportRegistrations = exportRegistrations;
@@ -2224,7 +2556,11 @@
     window.loadCourses = loadCourses;
     window.renderCoursesPage = renderCoursesPage;
     window.loadUsers = loadUsers;
+    window.loadUsersWithSearch = loadUsersWithSearch;
     window.viewCourseRegistrations = viewCourseRegistrations;
+    window.downloadCourseRegistrationsDocuments = downloadCourseRegistrationsDocuments;
+    window.downloadSelectedCourseRegistrationsDocuments = downloadSelectedCourseRegistrationsDocuments;
+    window.updateDocZipButtonState = updateDocZipButtonState;
     window.toggleAllRegistrations = toggleAllRegistrations;
     window.updateRemoveButtonState = updateRemoveButtonState;
     window.removeSelectedRegistrations = removeSelectedRegistrations;
@@ -2260,8 +2596,7 @@
     window.downloadSingleDocument = downloadSingleDocument;
     window.deleteUserDocument = deleteUserDocument;
     window.deleteUserAccount = deleteUserAccount;
-    
-    // Новые функции для модального окна
+
     window.openMoodleUsersModal = openMoodleUsersModal;
     window.loadMoodleUsersPage = loadMoodleUsersPage;
     window.toggleMoodleUser = toggleMoodleUser;

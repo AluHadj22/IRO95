@@ -49,6 +49,8 @@ class User(Base):
 
     moodle_account_existed_before = Column(Boolean, default=False)
     moodle_password_sent = Column(Boolean, default=False)
+    moodle_password = Column(String(255), nullable=True)  # Храним последний сгенерированный пароль для Moodle
+    moodle_username = Column(String(255), nullable=True)  # Храним логин в Moodle
 
     education = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
     work = relationship("UserWork", back_populates="user", cascade="all, delete-orphan")

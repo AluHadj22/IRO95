@@ -153,6 +153,49 @@
         color: var(--gray);
         margin-top: 8px;
     }
+
+    /* ===== КНОПКА КОПИРОВАНИЯ ===== */
+    .copy-btn {
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 2px 10px;
+        font-size: 0.7rem;
+        color: var(--gray);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 6px;
+    }
+    .copy-btn:hover {
+        background: var(--secondary);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    .copy-btn.copied {
+        border-color: #10b981;
+        color: #10b981;
+        background: #d1fae5;
+    }
+
+    /* ===== БЛОК С СОХРАНЁННЫМИ ДАННЫМИ ===== */
+    .saved-credentials-section {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+    }
+    .saved-credentials-section .section-title {
+        font-weight: 600;
+        color: #065f46;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .saved-credentials-section .section-title i {
+        color: #10b981;
+    }
 </style>
 {% endblock %}
 
@@ -300,6 +343,56 @@
                     <i class="bi bi-box-arrow-up-right me-2" style="color: var(--primary);"></i> Доступ к Moodle
                 </h5>
 
+                <!-- ===== БЛОК С СОХРАНЁННЫМИ ДАННЫМИ ===== -->
+                <div id="savedCredentialsBlock" style="display: none;">
+                    <div class="saved-credentials-section">
+                        <div class="section-title">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Ваши данные для входа в Moodle
+                        </div>
+                        <div class="moodle-credentials-box">
+                            <div class="cred-row">
+                                <span class="cred-label"><i class="bi bi-globe2 me-1"></i>Ссылка:</span>
+                                <span class="cred-value" style="border: none; background: none; font-family: inherit;">
+                                    <a href="https://iro-lms.ru/" target="_blank" style="color: var(--primary); text-decoration: none;">https://iro-lms.ru/</a>
+                                </span>
+                            </div>
+                            <div class="cred-row">
+                                <span class="cred-label"><i class="bi bi-person me-1"></i>Логин:</span>
+                                <span class="cred-value" id="savedUsername" style="border: none; background: none; font-family: inherit; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span id="savedUsernameText">-</span>
+                                    <button class="copy-btn" onclick="copyText('savedUsernameText')">
+                                        <i class="bi bi-clipboard"></i> Копировать логин
+                                    </button>
+                                </span>
+                            </div>
+                            <div class="cred-row">
+                                <span class="cred-label"><i class="bi bi-key me-1"></i>Пароль:</span>
+                                <span class="cred-value password" id="savedPassword" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <span id="savedPasswordText">••••••••</span>
+                                    <span style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                        <button class="password-reveal-btn" onclick="toggleSavedPassword()">
+                                            <i class="bi bi-eye"></i> Показать
+                                        </button>
+                                        <button class="copy-btn" onclick="copyText('savedPasswordText')">
+                                            <i class="bi bi-clipboard"></i> Копировать пароль
+                                        </button>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                            <a href="https://iro-lms.ru/login/" target="_blank" class="moodle-link-btn" style="font-size: 0.85rem; padding: 6px 16px;">
+                                <i class="bi bi-box-arrow-up-right me-1"></i> Перейти в Moodle
+                            </a>
+                        </div>
+                        <div class="moodle-info-text mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Данные сохранены после записи на курс. Если пароль не подходит, нажмите кнопку сброса ниже.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="profile-card" id="moodleStatusCard">
                     <div class="profile-body text-center py-4">
                         <div class="spinner-border" style="color: var(--primary);"></div>
@@ -338,6 +431,8 @@
     let userAchievements = [];
     let userCourses = [];
     let moodleProgressCache = {};
+    let savedCredentials = null;
+    let passwordVisible = false;
 
     function escapeHtml(text) {
         if (!text) return '';
@@ -368,6 +463,54 @@
         }
 
         return map[status] || map['not_started'];
+    }
+
+    // ========== КОПИРОВАНИЕ ==========
+    function copyText(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        const text = el.textContent.trim();
+        if (!text || text === '••••••••') return;
+
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = el.parentElement.querySelector('.copy-btn');
+            if (btn) {
+                btn.classList.add('copied');
+                btn.innerHTML = '<i class="bi bi-check"></i> Скопировано';
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '<i class="bi bi-clipboard"></i> Копировать ' + (elementId === 'savedUsernameText' ? 'логин' : 'пароль');
+                }, 2000);
+            }
+            if (window.showToast) window.showToast('Скопировано!', 'success');
+        }).catch(() => {
+            // Fallback
+            const range = document.createRange();
+            range.selectNode(el);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            if (window.showToast) window.showToast('Скопировано!', 'success');
+        });
+    }
+
+    function toggleSavedPassword() {
+        const textEl = document.getElementById('savedPasswordText');
+        const btn = textEl.parentElement.querySelector('.password-reveal-btn');
+        if (passwordVisible) {
+            textEl.textContent = '••••••••';
+            btn.innerHTML = '<i class="bi bi-eye"></i> Показать';
+            passwordVisible = false;
+        } else {
+            if (savedCredentials && savedCredentials.password) {
+                textEl.textContent = savedCredentials.password;
+            } else {
+                textEl.textContent = 'Password1!';
+            }
+            btn.innerHTML = '<i class="bi bi-eye-slash"></i> Скрыть';
+            passwordVisible = true;
+        }
     }
 
     // ========== ФУНКЦИЯ ПЕРЕХОДА В MOODLE ==========
@@ -849,6 +992,43 @@
     }
 
     // ============================================================
+    // ФУНКЦИЯ ЗАГРУЗКИ СОХРАНЁННЫХ ДАННЫХ MOODLE
+    // ============================================================
+    async function loadSavedMoodleCredentials() {
+        try {
+            const response = await fetch('/api/profile/moodle-credentials', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                savedCredentials = data;
+
+                const block = document.getElementById('savedCredentialsBlock');
+                const usernameText = document.getElementById('savedUsernameText');
+                const passwordText = document.getElementById('savedPasswordText');
+
+                if (data.has_credentials && data.username) {
+                    usernameText.textContent = data.username;
+                    if (data.password) {
+                        passwordText.textContent = '••••••••';
+                        savedCredentials.password = data.password;
+                    } else {
+                        passwordText.textContent = '•••••••• (сбросьте пароль)';
+                        savedCredentials.password = null;
+                    }
+                    block.style.display = 'block';
+                    passwordVisible = false;
+                } else {
+                    block.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading saved credentials:', error);
+        }
+    }
+
+    // ============================================================
     // ФУНКЦИИ ДЛЯ РАЗДЕЛА MOODLE
     // ============================================================
 
@@ -925,8 +1105,18 @@
             const data = await response.json();
 
             if (data.success) {
-                // Показываем логин и пароль
-                let passwordDisplay = data.password || 'Password1!';
+                // Обновляем сохранённые данные
+                savedCredentials = {
+                    has_credentials: true,
+                    username: data.username,
+                    password: data.password
+                };
+                document.getElementById('savedUsernameText').textContent = data.username;
+                document.getElementById('savedPasswordText').textContent = '••••••••';
+                document.getElementById('savedCredentialsBlock').style.display = 'block';
+                passwordVisible = false;
+
+                // Показываем результат с паролем
                 let maskedPassword = '••••••••';
 
                 resultDiv.innerHTML = `
@@ -955,7 +1145,7 @@
                                     Пароль также отправлен на вашу почту.
                                 </div>
                                 <div class="mt-2">
-                                    <a href="${'https://iro-lms.ru/login/'}" target="_blank" class="moodle-link-btn">
+                                    <a href="https://iro-lms.ru/login/" target="_blank" class="moodle-link-btn">
                                         <i class="bi bi-box-arrow-up-right me-1"></i> Перейти в Moodle
                                     </a>
                                 </div>
@@ -965,9 +1155,6 @@
                 `;
                 resultDiv.style.display = 'block';
                 showToast('Пароль сброшен! Проверьте почту или скопируйте пароль выше', 'success');
-
-                // НЕ обновляем статус и НЕ сворачиваем панель - оставляем результат видимым
-                // loadMoodleStatus() - убрано!
 
             } else {
                 resultDiv.innerHTML = `
@@ -1005,13 +1192,12 @@
         btn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Сбросить пароль от Moodle';
     }
 
-    // Функция показа/скрытия пароля - без перезагрузки страницы
+    // Функция показа/скрытия пароля
     function togglePasswordReveal(password) {
         const display = document.getElementById('passwordDisplay');
         if (display) {
             const currentText = display.textContent.trim();
             if (currentText.includes('••••••••')) {
-                // Показываем пароль
                 display.innerHTML = `
                     ${escapeHtml(password)}
                     <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(password)}')">
@@ -1019,7 +1205,6 @@
                     </button>
                 `;
             } else {
-                // Скрываем пароль
                 display.innerHTML = `
                     ••••••••
                     <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(password)}')">
@@ -1079,9 +1264,22 @@
             loadWatchLater();
         } else if (section === 'moodle') {
             document.getElementById('moodleSection').style.display = 'block';
+            loadSavedMoodleCredentials();
             loadMoodleStatus();
         }
     }
+
+    // ========== ПРОВЕРКА, НУЖНО ЛИ ОТКРЫТЬ РАЗДЕЛ MOODLE ==========
+    (function checkMoodleRedirect() {
+        const shouldOpenMoodle = localStorage.getItem('openMoodleSection');
+        if (shouldOpenMoodle === 'true') {
+            localStorage.removeItem('openMoodleSection');
+            // Небольшая задержка, чтобы страница успела загрузиться
+            setTimeout(() => {
+                showSection('moodle');
+            }, 300);
+        }
+    })();
 
     // Обновляем прогресс из Moodle каждые 60 секунд
     setInterval(() => {

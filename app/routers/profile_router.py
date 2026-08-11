@@ -660,7 +660,6 @@ async def get_additional_info(
 
     response_data = schemas.AdditionalInfoResponse.model_validate(info)
     response_data.snils = encryption.decrypt(info.snils) if info.snils else None
-    # Убираем inn, так как мы удалили это поле из модели
 
     return response_data
 
@@ -795,11 +794,6 @@ async def delete_snils(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Файл не найден"
     )
-
-
-# ============================================================
-# УДАЛЕНЫ ЭНДПОИНТЫ /upload/passport И /upload/inn
-# ============================================================
 
 
 @router.post("/upload/marriage-certificate")
@@ -1073,6 +1067,11 @@ async def reset_moodle_password(
         result = service.send_password_reminder(current_user)
 
         if result:
+            # Сохраняем пароль в базу
+            current_user.moodle_username = username
+            current_user.moodle_password = service.DEFAULT_PASSWORD
+            await db.commit()
+
             return {
                 "success": True,
                 "has_moodle_account": True,
@@ -1125,4 +1124,61 @@ async def get_moodle_status(
         return {
             "has_moodle_account": False,
             "error": str(e)
+        }
+
+
+# ============================================================
+# НОВЫЙ ЭНДПОИНТ: ПОЛУЧЕНИЕ ЛОГИНА И ПАРОЛЯ MOODLE
+# ============================================================
+@router.get("/moodle-credentials")
+async def get_moodle_credentials(
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_active_user)
+):
+    """
+    Возвращает логин и пароль от Moodle для текущего пользователя.
+    Используется для отображения в личном кабинете.
+    """
+    # Проверяем, есть ли сохранённые данные
+    if current_user.moodle_username and current_user.moodle_password:
+        return {
+            "has_credentials": True,
+            "username": current_user.moodle_username,
+            "password": current_user.moodle_password,
+            "moodle_url": "https://iro-lms.ru/"
+        }
+
+    # Если данных нет - пробуем получить из Moodle
+    try:
+        moodle = MoodleService()
+        moodle_user = moodle.get_user_by_email(current_user.email)
+
+        if moodle_user:
+            username = moodle_user.get('username', current_user.email.split('@')[0])
+            # Сохраняем username в базу
+            current_user.moodle_username = username
+            await db.commit()
+
+            # Пароль не можем получить из Moodle, но можем сгенерировать и сохранить
+            # (пользователь сможет сбросить через кнопку)
+            return {
+                "has_credentials": True,
+                "username": username,
+                "password": None,  # Пароль не сохранён, нужно сбросить
+                "moodle_url": "https://iro-lms.ru/",
+                "needs_reset": True,
+                "message": "Для получения пароля нажмите 'Сбросить пароль'"
+            }
+
+        return {
+            "has_credentials": False,
+            "message": "У вас нет аккаунта в Moodle. Обратитесь в поддержку."
+        }
+
+    except Exception as e:
+        logger.error(f"Ошибка получения данных Moodle для {current_user.email}: {str(e)}")
+        return {
+            "has_credentials": False,
+            "error": str(e),
+            "message": "Ошибка получения данных. Попробуйте позже."
         }

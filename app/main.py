@@ -8,7 +8,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from app.database import engine, Base
-from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, achievements_router, ai_router
+from app.routers import auth_router, courses_router, admin_router, notifications_router, public_router, \
+    achievements_router, ai_router
 from app.routers import profile_router
 from app.routers import password_reset_router
 from app.config import settings
@@ -16,6 +17,7 @@ from app.scheduler import start_scheduler, stop_scheduler
 import os
 import re
 import logging
+
 
 class SensitiveDataFilter(logging.Filter):
     def filter(self, record):
@@ -32,6 +34,7 @@ class SensitiveDataFilter(logging.Filter):
             record.msg = re.sub(r'"token":"[^"]*"', '"token":"***"', record.msg)
         return True
 
+
 logging.getLogger('uvicorn.access').addFilter(SensitiveDataFilter())
 logging.getLogger('uvicorn.error').addFilter(SensitiveDataFilter())
 
@@ -46,15 +49,22 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
-    
+
     response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
+    # ✅ ИЗМЕНЕНИЕ: X-Frame-Options устанавливается в зависимости от пути
+    # Для статических файлов (документов) разрешаем отображение во фрейме
+    if request.url.path.startswith("/static/uploads/profile/documents"):
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    else:
+        response.headers["X-Frame-Options"] = "DENY"
+
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    
+
     if settings.DEBUG:
         response.headers["Content-Security-Policy"] = (
             "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; "
@@ -112,8 +122,9 @@ async def add_security_headers(request: Request, call_next):
             "base-uri 'self'; "
             "form-action 'self'; "
         )
-    
+
     return response
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -166,6 +177,7 @@ app.include_router(profile_router.router)
 app.include_router(ai_router.router)
 app.include_router(password_reset_router.router)
 
+
 @app.on_event("startup")
 async def startup_event():
     logging.info("Запуск приложения...")
@@ -174,6 +186,7 @@ async def startup_event():
         logging.info("Планировщик успешно запущен")
     except Exception as e:
         logging.error(f"Ошибка запуска планировщика: {str(e)}")
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -184,17 +197,21 @@ async def shutdown_event():
     except Exception as e:
         logging.error(f"Ошибка остановки планировщика: {str(e)}")
 
+
 @app.get("/map")
 async def map_page(request: Request):
     return templates.TemplateResponse("map.html", {"request": request})
+
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
+
 @app.get("/test")
 async def test():
     return {"status": "ok", "message": "Сервер работает!"}
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

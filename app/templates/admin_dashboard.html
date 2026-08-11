@@ -279,6 +279,126 @@
         margin-bottom: 12px;
         opacity: 0.4;
     }
+
+    /* ===== СТИЛИ ДЛЯ ПРЕДПРОСМОТРА ДОКУМЕНТОВ ===== */
+    #documentPreviewBody img {
+        max-width: 100%;
+        max-height: 80vh;
+        display: block;
+        margin: 0 auto;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+    #documentPreviewBody .pdf-container {
+        width: 100%;
+        height: 80vh;
+        background: #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        padding: 20px;
+    }
+    #documentPreviewBody .pdf-container .pdf-icon {
+        font-size: 4rem;
+        color: #dc2626;
+        margin-bottom: 16px;
+    }
+    #documentPreviewBody .pdf-container .pdf-message {
+        color: var(--gray);
+        font-size: 1rem;
+        margin-bottom: 16px;
+    }
+    #documentPreviewBody .pdf-container .pdf-actions {
+        display: flex;
+        gap: 12px;
+    }
+    #documentPreviewBody .pdf-container .pdf-actions .btn {
+        padding: 8px 20px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    #documentPreviewBody .pdf-container .pdf-actions .btn-primary {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+    }
+    #documentPreviewBody .pdf-container .pdf-actions .btn-primary:hover {
+        background: var(--primary-dark);
+    }
+    #documentPreviewBody .pdf-container .pdf-actions .btn-outline {
+        background: transparent;
+        color: var(--gray);
+        border: 1px solid var(--border);
+    }
+    #documentPreviewBody .pdf-container .pdf-actions .btn-outline:hover {
+        background: var(--light-gray);
+    }
+    .document-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .document-item:last-child {
+        border-bottom: none;
+    }
+    .doc-label {
+        cursor: pointer;
+        color: var(--primary);
+        font-weight: 500;
+        font-size: 0.8rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        flex: 1;
+    }
+    .doc-label:hover {
+        background: var(--secondary);
+        text-decoration: underline;
+    }
+    .doc-actions-inline {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+    .doc-download-btn {
+        background: none;
+        border: none;
+        color: var(--primary);
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+    }
+    .doc-download-btn:hover {
+        background: var(--secondary);
+        color: var(--primary-dark);
+    }
+    .doc-delete-btn {
+        background: none;
+        border: none;
+        color: #dc2626;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+    }
+    .doc-delete-btn:hover {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+    .documents-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
 </style>
 {% endblock %}
 
@@ -762,6 +882,25 @@
     </div>
 </div>
 
+<!-- ===== МОДАЛЬНОЕ ОКНО ДЛЯ ПРЕДПРОСМОТРА ДОКУМЕНТОВ ===== -->
+<div class="modal fade" id="documentPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentPreviewTitle">Просмотр документа</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="documentPreviewBody" style="text-align:center; padding:10px;">
+                <!-- Содержимое будет вставлено -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button class="btn btn-primary" id="documentPreviewDownloadBtn" onclick="downloadFromPreview()">Скачать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 (function() {
     const token = localStorage.getItem('token');
@@ -797,6 +936,9 @@
     // Переменные для поиска с debounce (раздел Данные пользователей)
     let searchTimeout = null;
     let currentSearchQuery = '';
+
+    // Словарь названий документов
+    const docLabels = { 'snils': 'СНИЛС', 'diploma': 'Диплом', 'marriage': 'Св-во о браке' };
 
     function showToast(message, type) {
         type = type || 'success';
@@ -2161,6 +2303,9 @@
         }
     }
 
+    // ============================================================
+    // ✅ ОБНОВЛЕННАЯ ФУНКЦИЯ ОТОБРАЖЕНИЯ ДОКУМЕНТОВ
+    // ============================================================
     function renderUserDocuments(userId, data) {
         var container = document.getElementById('documents_' + userId);
         if (!container) return;
@@ -2169,15 +2314,72 @@
             return;
         }
         var html = '<div class="documents-container">';
-        var docLabels = { 'snils': 'СНИЛС', 'diploma': 'Диплом', 'passport': 'Паспорт', 'inn': 'ИНН', 'marriage': 'Св-во о браке' };
+        var docLabelsLocal = { 'snils': 'СНИЛС', 'diploma': 'Диплом', 'marriage': 'Св-во о браке' };
         for (var docType in data.documents) {
             if (data.documents[docType].exists) {
-                var label = docLabels[docType] || docType;
-                html += '<div class="document-item"><span class="doc-label" onclick="event.stopPropagation(); downloadSingleDocument(' + userId + ', \'' + docType + '\')" title="Скачать ' + label + '">' + label + '</span><span class="doc-actions-inline"><button class="doc-delete-btn" onclick="event.stopPropagation(); deleteUserDocument(' + userId + ', \'' + docType + '\')" title="Удалить документ"><i class="bi bi-x"></i></button></span></div>';
+                var label = docLabelsLocal[docType] || docType;
+                var url = data.documents[docType].url;
+                html += '<div class="document-item">';
+                html += '<span class="doc-label" data-url="' + url + '" data-user-id="' + userId + '" data-doc-type="' + docType + '" onclick="previewDocument(this)" title="Просмотр">' + label + '</span>';
+                html += '<span class="doc-actions-inline">';
+                html += '<button class="doc-download-btn" onclick="event.stopPropagation(); downloadSingleDocument(' + userId + ', \'' + docType + '\')" title="Скачать"><i class="bi bi-download"></i></button>';
+                html += '<button class="doc-delete-btn" onclick="event.stopPropagation(); deleteUserDocument(' + userId + ', \'' + docType + '\')" title="Удалить документ"><i class="bi bi-x"></i></button>';
+                html += '</span>';
+                html += '</div>';
             }
         }
         html += '</div>';
         container.innerHTML = html;
+    }
+
+    // ============================================================
+    // ✅ ФУНКЦИЯ ПРЕДПРОСМОТРА ДОКУМЕНТА (PDF открывается в новой вкладке)
+    // ============================================================
+    function previewDocument(element) {
+        var url = element.dataset.url;
+        var userId = element.dataset.userId;
+        var docType = element.dataset.docType;
+        if (!url) {
+            showToast('Ссылка на документ не найдена', 'warning');
+            return;
+        }
+        // Сохраняем данные в модальном окне для кнопки скачивания
+        var modal = document.getElementById('documentPreviewModal');
+        modal.dataset.userId = userId;
+        modal.dataset.docType = docType;
+
+        var ext = url.split('.').pop().toLowerCase();
+        var isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
+
+        var modalBody = document.getElementById('documentPreviewBody');
+        var modalTitle = document.getElementById('documentPreviewTitle');
+        modalTitle.textContent = 'Просмотр документа: ' + (docLabels[docType] || docType);
+
+        if (isImage) {
+            modalBody.innerHTML = '<img src="' + url + '" alt="Документ">';
+            var modalInstance = new bootstrap.Modal(document.getElementById('documentPreviewModal'));
+            modalInstance.show();
+        } else {
+            // Для PDF и других файлов открываем в новой вкладке
+            window.open(url, '_blank');
+            // Закрываем модальное окно, если оно открыто
+            var modalInstance = bootstrap.Modal.getInstance(document.getElementById('documentPreviewModal'));
+            if (modalInstance) modalInstance.hide();
+        }
+    }
+
+    // ============================================================
+    // ✅ ФУНКЦИЯ СКАЧИВАНИЯ ИЗ МОДАЛЬНОГО ОКНА
+    // ============================================================
+    function downloadFromPreview() {
+        var modal = document.getElementById('documentPreviewModal');
+        var userId = modal.dataset.userId;
+        var docType = modal.dataset.docType;
+        if (userId && docType) {
+            downloadSingleDocument(parseInt(userId), docType);
+        } else {
+            showToast('Не удалось определить документ для скачивания', 'warning');
+        }
     }
 
     function toggleUserDetails(index) {
@@ -2479,8 +2681,8 @@
     }
 
     async function deleteUserDocument(userId, docType) {
-        var docLabels = { 'snils': 'СНИЛС', 'diploma': 'Диплом', 'passport': 'Паспорт', 'inn': 'ИНН', 'marriage': 'Свидетельство о браке' };
-        var label = docLabels[docType] || docType;
+        var docLabelsLocal = { 'snils': 'СНИЛС', 'diploma': 'Диплом', 'passport': 'Паспорт', 'inn': 'ИНН', 'marriage': 'Свидетельство о браке' };
+        var label = docLabelsLocal[docType] || docType;
         if (!confirm('Удалить документ "' + label + '" у пользователя?')) return;
         try {
             var response = await fetch('/api/admin/users/' + userId + '/documents/' + docType, {
@@ -2602,6 +2804,13 @@
     window.toggleMoodleUser = toggleMoodleUser;
     window.toggleAllMoodleUsers = toggleAllMoodleUsers;
     window.sendSelectedPasswords = sendSelectedPasswords;
+
+    // ============================================================
+    // ДОБАВЛЯЕМ НОВЫЕ ФУНКЦИИ В ГЛОБАЛЬНУЮ ОБЛАСТЬ
+    // ============================================================
+    window.previewDocument = previewDocument;
+    window.downloadFromPreview = downloadFromPreview;
+    window.docLabels = docLabels;
 })();
 </script>
 {% endblock %}

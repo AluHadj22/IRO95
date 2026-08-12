@@ -284,7 +284,7 @@
                 <!-- Диплом -->
                 <div class="document-card" id="diplomaDoc">
                     <div class="doc-icon"><i class="bi bi-award"></i></div>
-                    <div class="doc-name">Копия диплома</div>
+                    <div class="doc-name">Копия диплома или студенческий</div>
                     <div class="doc-status missing" id="diplomaStatus">Не загружен</div>
                     <div class="doc-actions">
                         <button class="btn btn-upload btn-sm" onclick="document.getElementById('diplomaFileInput').click()">
@@ -354,7 +354,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Уровень образования <span class="required">*</span></label>
-                            <select class="form-select" id="edu_level" required>
+                            <select class="form-select" id="edu_level" required onchange="handleEducationLevelChange('add')">
                                 <option value="">Выберите уровень</option>
                                 <option value="Высшее">Высшее</option>
                                 <option value="Среднее профессиональное">Среднее профессиональное</option>
@@ -370,7 +370,7 @@
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Серия документа</label>
+                            <label class="form-label">Серия документа <span class="required" id="edu_series_required_marker">*</span></label>
                             <input type="text" class="form-control" id="edu_document_series" placeholder="Серия">
                         </div>
                         <div class="col-md-4 mb-3">
@@ -378,7 +378,7 @@
                             <input type="text" class="form-control" id="edu_registration_number" placeholder="Рег. номер">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Номер документа</label>
+                            <label class="form-label">Номер документа <span class="required" id="edu_number_required_marker">*</span></label>
                             <input type="text" class="form-control" id="edu_document_number" placeholder="Номер">
                         </div>
                     </div>
@@ -415,7 +415,7 @@
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Загрузить диплом</label>
+                            <label class="form-label">Загрузить диплом или студенческий</label>
                             <input type="file" class="form-control" id="edu_diploma_file" accept=".png,.jpg,.jpeg,.pdf">
                             <small class="help-text">Макс. 20MB</small>
                         </div>
@@ -625,7 +625,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Уровень образования <span class="required">*</span></label>
-                            <select class="form-select" id="edit_edu_level" required>
+                            <select class="form-select" id="edit_edu_level" required onchange="handleEducationLevelChange('edit')">
                                 <option value="">Выберите уровень</option>
                                 <option value="Высшее">Высшее</option>
                                 <option value="Среднее профессиональное">Среднее профессиональное</option>
@@ -640,7 +640,7 @@
 
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Серия документа</label>
+                            <label class="form-label">Серия документа <span class="required" id="edit_edu_series_required_marker">*</span></label>
                             <input type="text" class="form-control" id="edit_edu_document_series" placeholder="Серия">
                         </div>
                         <div class="col-md-4 mb-3">
@@ -648,7 +648,7 @@
                             <input type="text" class="form-control" id="edit_edu_registration_number" placeholder="Рег. номер">
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Номер документа</label>
+                            <label class="form-label">Номер документа <span class="required" id="edit_edu_number_required_marker">*</span></label>
                             <input type="text" class="form-control" id="edit_edu_document_number" placeholder="Номер">
                         </div>
                     </div>
@@ -684,7 +684,7 @@
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Загрузить диплом</label>
+                            <label class="form-label">Загрузить диплом или студенческий</label>
                             <input type="file" class="form-control" id="edit_edu_diploma_file" accept=".png,.jpg,.jpeg,.pdf">
                             <small class="help-text">Макс. 20MB</small>
                         </div>
@@ -905,6 +905,53 @@ function formatSnils(input) {
         formatted += value[i];
     }
     input.value = formatted;
+}
+
+// ============================================================
+// ОБРАБОТКА ИЗМЕНЕНИЯ УРОВНЯ ОБРАЗОВАНИЯ (ДЛЯ СТУДЕНТОВ)
+// ============================================================
+function handleEducationLevelChange(mode) {
+    const prefix = mode === 'edit' ? 'edit_' : '';
+    const levelSelect = document.getElementById(`${prefix}edu_level`);
+    const qualificationInput = document.getElementById(`${prefix}edu_qualification`);
+    const seriesInput = document.getElementById(`${prefix}edu_document_series`);
+    const numberInput = document.getElementById(`${prefix}edu_document_number`);
+    const seriesMarker = document.getElementById(`${prefix}edu_series_required_marker`);
+    const numberMarker = document.getElementById(`${prefix}edu_number_required_marker`);
+
+    const isStudent = levelSelect.value === 'Среднее общее (студент)';
+
+    if (isStudent) {
+        // Студент: автозаполнение и блокировка
+        qualificationInput.value = 'Пользователь студент';
+        qualificationInput.disabled = true;
+        seriesInput.value = 'Студент';
+        seriesInput.disabled = true;
+        numberInput.value = 'Студент';
+        numberInput.disabled = true;
+        if (seriesMarker) seriesMarker.style.display = 'none';
+        if (numberMarker) numberMarker.style.display = 'none';
+    } else {
+        // Не студент: разблокировка и очистка
+        qualificationInput.disabled = false;
+        if (qualificationInput.value === 'Пользователь студент') {
+            qualificationInput.value = '';
+        }
+        seriesInput.disabled = false;
+        if (seriesInput.value === 'Студент') {
+            seriesInput.value = '';
+        }
+        numberInput.disabled = false;
+        if (numberInput.value === 'Студент') {
+            numberInput.value = '';
+        }
+        if (seriesMarker) seriesMarker.style.display = 'inline';
+        if (numberMarker) numberMarker.style.display = 'inline';
+
+        // Делаем поля обязательными
+        seriesInput.required = true;
+        numberInput.required = true;
+    }
 }
 
 // ============================================================
@@ -1131,7 +1178,7 @@ function renderEducation(data) {
                     ${edu.issue_date ? `<span><strong>Дата выдачи:</strong> ${new Date(edu.issue_date).toLocaleDateString()}</span>` : ''}
                     ${edu.academic_degree && edu.academic_degree !== 'Нет степени' ? `<span><strong>Степень:</strong> ${edu.academic_degree}</span>` : ''}
                     ${edu.academic_title && edu.academic_title !== 'Нет звания' ? `<span><strong>Звание:</strong> ${edu.academic_title}</span>` : ''}
-                    ${edu.diploma_file_url ? `<span><a href="${edu.diploma_file_url}" target="_blank"><i class="bi bi-file-earmark-pdf"></i> Диплом</a></span>` : ''}
+                    ${edu.diploma_file_url ? `<span><a href="${edu.diploma_file_url}" target="_blank"><i class="bi bi-file-earmark-pdf"></i> Диплом/Студенческий</a></span>` : ''}
                 </div>
             </div>
         `;
@@ -1147,6 +1194,21 @@ document.getElementById('addEducationForm').addEventListener('submit', async (e)
 
     const diplomaFile = document.getElementById('edu_diploma_file').files[0];
 
+    // Проверка обязательных полей для не-студентов
+    const level = document.getElementById('edu_level').value;
+    const isStudent = level === 'Среднее общее (студент)';
+    const series = document.getElementById('edu_document_series').value;
+    const number = document.getElementById('edu_document_number').value;
+
+    if (!isStudent) {
+        if (!series || !number) {
+            showToast('Для не-студентов поля "Серия документа" и "Номер документа" обязательны для заполнения', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = 'Добавить образование';
+            return;
+        }
+    }
+
     try {
         const response = await fetch('/api/profile/education', {
             method: 'POST',
@@ -1155,11 +1217,11 @@ document.getElementById('addEducationForm').addEventListener('submit', async (e)
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                education_level: document.getElementById('edu_level').value,
+                education_level: level,
                 qualification: document.getElementById('edu_qualification').value,
-                document_series: document.getElementById('edu_document_series').value,
+                document_series: series,
                 registration_number: document.getElementById('edu_registration_number').value,
-                document_number: document.getElementById('edu_document_number').value,
+                document_number: number,
                 issue_date: document.getElementById('edu_issue_date').value || null,
                 academic_degree: document.getElementById('edu_academic_degree').value,
                 academic_title: document.getElementById('edu_academic_title').value,
@@ -1221,6 +1283,11 @@ function editEducation(id) {
         document.getElementById('edit_edu_diploma_first_name').value = data.diploma_first_name || '';
         document.getElementById('edit_edu_diploma_middle_name').value = data.diploma_middle_name || '';
         document.getElementById('edit_edu_is_main').checked = data.is_main || false;
+
+        // Применяем логику для студента при загрузке
+        setTimeout(() => {
+            handleEducationLevelChange('edit');
+        }, 100);
     })
     .catch(error => console.error('Error loading education for edit:', error));
 
@@ -1234,12 +1301,26 @@ document.getElementById('editEducationForm').addEventListener('submit', async (e
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сохранение...';
 
+    const level = document.getElementById('edit_edu_level').value;
+    const isStudent = level === 'Среднее общее (студент)';
+    const series = document.getElementById('edit_edu_document_series').value;
+    const number = document.getElementById('edit_edu_document_number').value;
+
+    if (!isStudent) {
+        if (!series || !number) {
+            showToast('Для не-студентов поля "Серия документа" и "Номер документа" обязательны для заполнения', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = 'Сохранить изменения';
+            return;
+        }
+    }
+
     const data = {
-        education_level: document.getElementById('edit_edu_level').value,
+        education_level: level,
         qualification: document.getElementById('edit_edu_qualification').value,
-        document_series: document.getElementById('edit_edu_document_series').value,
+        document_series: series,
         registration_number: document.getElementById('edit_edu_registration_number').value,
-        document_number: document.getElementById('edit_edu_document_number').value,
+        document_number: number,
         issue_date: document.getElementById('edit_edu_issue_date').value || null,
         academic_degree: document.getElementById('edit_edu_academic_degree').value,
         academic_title: document.getElementById('edit_edu_academic_title').value,
@@ -1829,7 +1910,7 @@ async function uploadDocument(type, file) {
             const result = await response.json();
             const labelMap = {
                 'snils': 'СНИЛС',
-                'diploma': 'Диплом',
+                'diploma': 'Диплом/Студенческий',
                 'marriage': 'Свидетельство о браке'
             };
             showToast(`${labelMap[type] || 'Документ'} загружен`, 'success');
@@ -1919,7 +2000,7 @@ function downloadDocument(type) {
 async function deleteDocument(type) {
     const labels = {
         'snils': 'СНИЛС',
-        'diploma': 'диплом',
+        'diploma': 'диплом/студенческий',
         'marriage': 'свидетельство о браке'
     };
 
@@ -2115,6 +2196,14 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ============================================================
 function showAddEducationModal() {
     document.getElementById('addEducationForm').reset();
+    // Сбрасываем состояние полей
+    document.getElementById('edu_qualification').disabled = false;
+    document.getElementById('edu_document_series').disabled = false;
+    document.getElementById('edu_document_number').disabled = false;
+    document.getElementById('edu_document_series').required = true;
+    document.getElementById('edu_document_number').required = true;
+    document.getElementById('edu_series_required_marker').style.display = 'inline';
+    document.getElementById('edu_number_required_marker').style.display = 'inline';
     new bootstrap.Modal(document.getElementById('addEducationModal')).show();
 }
 

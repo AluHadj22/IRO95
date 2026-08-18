@@ -7,84 +7,106 @@
 {% endblock %}
 
 {% block content %}
-<div class="courses-hero">
-    <div class="hero-waves"></div>
-    <div class="container text-center">
-        <div class="hero-badge">Система дистанционного обучения</div>
-        <h1 class="fw-bold">
-            <span class="accent">Все</span> курсы
-        </h1>
-        <p class="lead mb-0">Выберите программу повышения квалификации</p>
+<!-- Top search hero: prominent search and quick filters -->
+<section class="courses-hero-compact py-5" aria-label="Поиск курсов">
+    <div class="container">
+        <div class="d-flex align-items-center gap-3 flex-column flex-md-row justify-content-between">
+            <div style="flex:1; min-width:220px">
+                <h1 class="mb-2 fw-bold"><span class="accent">Все</span> курсы</h1>
+                <p class="lead text-muted mb-3">Найдите подходящие программы повышения квалификации — фильтры и быстрый поиск помогут сузить результаты.</p>
+                <div class="d-flex gap-2">
+                    <div class="input-group shadow-sm w-100">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input id="searchInput" type="text" class="form-control form-control-lg" placeholder="Поиск по названию, описанию или теме..." aria-label="Поиск курсов">
+                    </div>
+                    <select id="sortSelect" class="form-select form-select-lg" style="max-width:220px">
+                        <option value="relevance">По релевантности</option>
+                        <option value="newest">Сначала новые</option>
+                        <option value="popular">По популярности</option>
+                    </select>
+                </div>
+            </div>
+            <div class="d-flex gap-2 mt-3 mt-md-0 align-items-center">
+                <button class="btn btn-outline-primary" onclick="resetFilters()"><i class="bi bi-arrow-clockwise me-1"></i>Сбросить</button>
+                <a href="/register" class="btn btn-primary btn-lg">Записаться</a>
+            </div>
+        </div>
     </div>
-</div>
+</section>
 
-<div class="container mt-3 mt-md-4 mb-4 mb-md-5">
-    <div class="row g-3 g-md-4">
-        <div class="col-lg-3">
-            <div class="filter-sidebar">
-                <h5 class="filter-title"><i class="bi bi-funnel me-2"></i>Фильтры</h5>
-                
-                <div class="filter-group">
-                    <label><i class="bi bi-search me-1"></i>Поиск</label>
-                    <div class="search-input">
-                        <i class="bi bi-search"></i>
-                        <input type="text" class="form-control" id="searchInput" placeholder="Название курса...">
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <!-- Sidebar filters (sticky on desktop) -->
+        <aside class="col-lg-3 mb-4">
+            <div class="card shadow-sm sticky-top" style="top:90px;">
+                <div class="card-body">
+                    <h6 class="mb-3"><i class="bi bi-funnel me-2"></i>Фильтры</h6>
+
+                    <div class="mb-3">
+                        <label class="form-label small mb-2">Категории</label>
+                        <div id="categoriesList" class="d-flex flex-column gap-2"></div>
                     </div>
-                </div>
-                
-                <div class="filter-group">
-                    <label><i class="bi bi-folder me-1"></i>Категории</label>
-                    <div id="categoriesList"></div>
-                </div>
-                
-                <div class="filter-group">
-                    <label><i class="bi bi-calendar-event me-1"></i>Формат обучения</label>
-                    <div class="filter-check">
-                        <input type="checkbox" id="formatOnline">
-                        <label for="formatOnline">Онлайн</label>
+
+                    <div class="mb-3">
+                        <label class="form-label small mb-2">Формат</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="formatOnline">
+                            <label class="form-check-label" for="formatOnline">Онлайн</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="formatFullTime">
+                            <label class="form-check-label" for="formatFullTime">Очный</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="formatPartTime">
+                            <label class="form-check-label" for="formatPartTime">Заочный</label>
+                        </div>
                     </div>
-                    <div class="filter-check">
-                        <input type="checkbox" id="formatFullTime">
-                        <label for="formatFullTime">Очный</label>
+
+                    <div class="d-grid">
+                        <button class="btn btn-primary" onclick="filterCourses()">Применить</button>
                     </div>
-                    <div class="filter-check">
-                        <input type="checkbox" id="formatPartTime">
-                        <label for="formatPartTime">Заочный</label>
-                    </div>
-                    <div class="filter-check">
-                        <input type="checkbox" id="formatFullPartTime">
-                        <label for="formatFullPartTime">Очно-заочный</label>
-                    </div>
-                </div>
-                
-                <button class="clear-filters" onclick="resetFilters()">
-                    <i class="bi bi-arrow-clockwise me-2"></i>Сбросить фильтры
-                </button>
-            </div>
-        </div>
-        
-        <div class="col-lg-9">
-            <div id="resultCount" class="result-count">
-                <i class="bi bi-grid-3x3-gap-fill me-2" style="color: #1a4f7a;"></i>
-                <span id="coursesCount">Загрузка...</span>
-            </div>
-            <div class="row g-3 g-md-4" id="coursesList">
-                <div class="text-center py-5">
-                    <div class="loading-spinner"></div>
-                    <p class="loading-text">Загрузка курсов...</p>
                 </div>
             </div>
-        </div>
+        </aside>
+
+        <!-- Results -->
+        <section class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="text-muted small" id="resultCount"><i class="bi bi-grid-3x3-gap-fill me-1"></i> <span id="coursesCount">Загрузка...</span></div>
+                <div>
+                    <div class="btn-group" role="group" aria-label="View toggles">
+                        <button class="btn btn-outline-secondary active" id="gridViewBtn" title="Сетка"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+                        <button class="btn btn-outline-secondary" id="listViewBtn" title="Список"><i class="bi bi-list"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="coursesList" class="row g-3">
+                <!-- Filled by JS -->
+                <div class="text-center py-5 w-100" id="coursesLoading">
+                    <div class="loading-spinner mb-3"></div>
+                    <p class="text-muted">Загрузка курсов...</p>
+                </div>
+            </div>
+
+            <nav class="mt-4" aria-label="Pagination">
+                <ul id="pagination" class="pagination justify-content-center"></ul>
+            </nav>
+        </section>
     </div>
 </div>
 
 <script>
+// Reuse existing client-side filtering logic (keeps compatibility with API)
 (function() {
     const token = localStorage.getItem('token');
     let allCourses = [];
     let allCategories = [];
     let filteredCount = 0;
     let filterTimeout = null;
+    let currentView = 'grid'; // 'grid' or 'list'
+    let sortBy = 'relevance';
 
     function escapeHtml(text) {
         if (!text) return '';
@@ -114,6 +136,10 @@
             if (response.ok) {
                 allCategories = await response.json();
                 renderCategoriesFilter();
+                // после рендера категорий применяем фильтр, если курсы уже загружены
+                if (allCourses.length > 0) {
+                    filterCourses();
+                }
             }
         } catch (error) {
             console.error('Error loading categories:', error);
@@ -125,7 +151,7 @@
         if (!container) return;
 
         if (allCategories.length === 0) {
-            container.innerHTML = '<p style="font-family: \'Cormorant Garamond\', serif; font-size: clamp(0.85rem, 1.3vw, 0.9rem); color: #4a5a6a;">Нет категорий</p>';
+            container.innerHTML = '<div class="text-muted">Нет категорий</div>';
             return;
         }
 
@@ -133,10 +159,12 @@
         for (const cat of allCategories) {
             const count = cat.courses_count || 0;
             html += `
-                <div class="category-check">
-                    <input type="checkbox" class="category-checkbox" id="cat_${cat.id}" value="${cat.id}">
-                    <label for="cat_${cat.id}">${escapeHtml(cat.name)}</label>
-                    <span class="count-badge">${count}</span>
+                <div class="form-check d-flex justify-content-between align-items-center">
+                    <div>
+                        <input class="form-check-input category-checkbox me-2" type="checkbox" id="cat_${cat.id}" value="${cat.id}">
+                        <label class="form-check-label" for="cat_${cat.id}">${escapeHtml(cat.name)}</label>
+                    </div>
+                    <small class="text-muted">${count}</small>
                 </div>
             `;
         }
@@ -160,7 +188,6 @@
         if (document.getElementById('formatOnline')?.checked) formats.push('online');
         if (document.getElementById('formatFullTime')?.checked) formats.push('full_time');
         if (document.getElementById('formatPartTime')?.checked) formats.push('part_time');
-        if (document.getElementById('formatFullPartTime')?.checked) formats.push('full_part_time');
         return formats;
     }
 
@@ -191,8 +218,19 @@
             });
         }
 
+        // Сортировка
+        sortBy = document.getElementById('sortSelect')?.value || 'relevance';
+        if (sortBy === 'newest') {
+            filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        } else if (sortBy === 'popular') {
+            filtered.sort((a, b) => (b.current_participants || 0) - (a.current_participants || 0));
+        } else {
+            // relevance — оставляем как есть (или сортируем по названию)
+            filtered.sort((a, b) => a.title.localeCompare(b.title));
+        }
+
         filteredCount = filtered.length;
-        renderCourses(filtered);
+        renderCourses(filtered, currentView);
         updateResultCount();
     }
 
@@ -230,11 +268,11 @@
         } catch (error) {
             console.error('Error loading courses:', error);
             document.getElementById('coursesList').innerHTML = `
-                <div class="no-results">
-                    <i class="bi bi-exclamation-triangle" style="color: #dc2626;"></i>
-                    <h5>Ошибка загрузки</h5>
-                    <p>Не удалось загрузить курсы. Пожалуйста, попробуйте позже.</p>
-                    <button class="btn-primary" onclick="loadCourses()">
+                <div class="no-results w-100 text-center py-5">
+                    <i class="bi bi-exclamation-triangle fs-1" style="color: #dc2626;"></i>
+                    <h5 class="mt-3">Ошибка загрузки</h5>
+                    <p class="text-muted">Не удалось загрузить курсы. Пожалуйста, попробуйте позже.</p>
+                    <button class="btn btn-primary" onclick="loadCourses()">
                         <i class="bi bi-arrow-repeat me-2"></i>Повторить
                     </button>
                 </div>
@@ -243,58 +281,88 @@
         }
     }
 
-    function renderCourses(courses) {
+    function renderCourses(courses, view) {
         const container = document.getElementById('coursesList');
 
         if (!courses || courses.length === 0) {
             container.innerHTML = `
-                <div class="no-results">
-                    <i class="bi bi-inbox"></i>
-                    <h5>Курсы не найдены</h5>
-                    <p>Попробуйте изменить параметры поиска или фильтры</p>
-                    <button class="btn-primary" onclick="resetFilters()">Сбросить фильтры</button>
+                <div class="no-results w-100 text-center py-5">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <h5 class="mt-3">Курсы не найдены</h5>
+                    <p class="text-muted">Попробуйте изменить параметры поиска или фильтры</p>
+                    <button class="btn btn-primary" onclick="resetFilters()">Сбросить фильтры</button>
                 </div>
             `;
             return;
         }
 
         let html = '';
-        for (let i = 0; i < courses.length; i++) {
-            const course = courses[i];
-            const formatText = formatMap[course.format_type] || 'Онлайн';
-            const badgeClass = formatBadgeClass[course.format_type] || 'badge-format-online';
-            const categoryName = course.category_name || 'Обучение';
+        if (view === 'grid') {
+            for (let i = 0; i < courses.length; i++) {
+                const course = courses[i];
+                const formatText = formatMap[course.format_type] || 'Онлайн';
+                const badgeClass = formatBadgeClass[course.format_type] || 'badge-format-online';
+                const categoryName = course.category_name || 'Обучение';
 
-            html += `
-                <div class="col-6 col-md-6 col-lg-4">
-                    <div class="course-card" style="animation-delay: ${i * 0.05}s;">
-                        <div class="format-badge">
-                            <span class="badge ${badgeClass}">${formatText}</span>
-                        </div>
-                        <div class="course-badge">
-                            <span class="badge">${escapeHtml(categoryName)}</span>
-                        </div>
-                        ${course.image_url ? 
-                            `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}" loading="lazy" decoding="async">` :
-                            `<div class="course-card-img d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);">
-                                <i class="bi bi-book" style="font-size: clamp(2rem, 5vw, 3rem); color: #1a4f7a; opacity: 0.4;"></i>
-                            </div>`
-                        }
-                        <div class="card-body">
-                            <h5 class="card-title">${escapeHtml(course.title)}</h5>
-                            <p class="card-text">${escapeHtml(course.short_description ? course.short_description.substring(0, 80) : (course.description ? course.description.substring(0, 80) : "Описание курса"))}...</p>
-                            <div class="course-meta">
-                                <span class="participants">
-                                    <i class="bi bi-people"></i> ${course.current_participants || 0}/${course.max_participants || 0}
-                                </span>
-                                <a href="/course/${course.id}" class="btn-course">
-                                    Подробнее <i class="bi bi-arrow-right"></i>
-                                </a>
+                html += `
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <article class="card h-100 shadow-sm course-card p-0" style="overflow:hidden;">
+                            ${course.image_url ? 
+                                `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}" loading="lazy" decoding="async">` :
+                                `<div class="course-card-img d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%); height:200px;">
+                                    <i class="bi bi-book" style="font-size: clamp(2rem, 5vw, 3rem); color: #1a4f7a; opacity: 0.5;"></i>
+                                </div>`
+                            }
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-light text-primary">${escapeHtml(categoryName)}</span>
+                                    <span class="text-muted small">${formatText}</span>
+                                </div>
+                                <h5 class="card-title mb-2">${escapeHtml(course.title)}</h5>
+                                <p class="card-text text-muted mb-3">${escapeHtml(course.short_description ? course.short_description.substring(0, 120) : (course.description ? course.description.substring(0, 120) : "Описание курса"))}...</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted small"><i class="bi bi-people me-1"></i> ${course.current_participants || 0} / ${course.max_participants || 0}</div>
+                                    <a href="/course/${course.id}" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                                </div>
                             </div>
-                        </div>
+                        </article>
                     </div>
-                </div>
-            `;
+                `;
+            }
+        } else { // list view
+            for (let i = 0; i < courses.length; i++) {
+                const course = courses[i];
+                const formatText = formatMap[course.format_type] || 'Онлайн';
+                const badgeClass = formatBadgeClass[course.format_type] || 'badge-format-online';
+                const categoryName = course.category_name || 'Обучение';
+
+                html += `
+                    <div class="col-12">
+                        <article class="card shadow-sm course-card p-0" style="overflow:hidden; flex-direction: row;">
+                            ${course.image_url ? 
+                                `<img src="${course.image_url}" class="course-card-img" alt="${escapeHtml(course.title)}" loading="lazy" decoding="async" style="width: 200px; height: 100%; object-fit: cover; flex-shrink: 0;">` :
+                                `<div class="d-flex align-items-center justify-content-center" style="width: 200px; height: 100%; min-height: 150px; background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%); flex-shrink: 0;">
+                                    <i class="bi bi-book" style="font-size: 3rem; color: #1a4f7a; opacity: 0.5;"></i>
+                                </div>`
+                            }
+                            <div class="card-body d-flex flex-column justify-content-between" style="flex:1;">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-light text-primary">${escapeHtml(categoryName)}</span>
+                                        <span class="text-muted small">${formatText}</span>
+                                    </div>
+                                    <h5 class="card-title mb-2">${escapeHtml(course.title)}</h5>
+                                    <p class="card-text text-muted mb-3">${escapeHtml(course.short_description ? course.short_description.substring(0, 200) : (course.description ? course.description.substring(0, 200) : "Описание курса"))}...</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-muted small"><i class="bi bi-people me-1"></i> ${course.current_participants || 0} / ${course.max_participants || 0}</div>
+                                    <a href="/course/${course.id}" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                `;
+            }
         }
 
         container.innerHTML = html;
@@ -308,12 +376,21 @@
             cb.checked = false;
         });
 
-        const formatIds = ['formatOnline', 'formatFullTime', 'formatPartTime', 'formatFullPartTime'];
+        const formatIds = ['formatOnline', 'formatFullTime', 'formatPartTime'];
         for (const id of formatIds) {
             const el = document.getElementById(id);
             if (el) el.checked = false;
         }
 
+        filterCourses();
+    }
+
+    function setView(view) {
+        currentView = view;
+        // обновить активные кнопки
+        document.getElementById('gridViewBtn')?.classList.toggle('active', view === 'grid');
+        document.getElementById('listViewBtn')?.classList.toggle('active', view === 'list');
+        // перерисовать с текущим фильтром
         filterCourses();
     }
 
@@ -326,11 +403,22 @@
             });
         }
 
-        const formats = ['formatOnline', 'formatFullTime', 'formatPartTime', 'formatFullPartTime'];
+        const formats = ['formatOnline', 'formatFullTime', 'formatPartTime'];
         for (const id of formats) {
             const el = document.getElementById(id);
             if (el) el.addEventListener('change', filterCourses);
         }
+
+        document.getElementById('gridViewBtn')?.addEventListener('click', function() {
+            setView('grid');
+        });
+        document.getElementById('listViewBtn')?.addEventListener('click', function() {
+            setView('list');
+        });
+
+        document.getElementById('sortSelect')?.addEventListener('change', function() {
+            filterCourses();
+        });
     });
 
     loadCategories();
@@ -338,6 +426,7 @@
 
     window.resetFilters = resetFilters;
     window.loadCourses = loadCourses;
+    window.filterCourses = filterCourses;
 })();
 </script>
 {% endblock %}

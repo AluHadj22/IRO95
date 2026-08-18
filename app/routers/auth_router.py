@@ -23,10 +23,10 @@ async def register(  # ← async def
 ):
     """
     Регистрация нового пользователя.
-    ✅ Rate limiting: 5 запросов в минуту с одного IP
-    ✅ Проверка на существующий email
-    ✅ Поддержка админ-кода
-    ✅ Выбор должности при регистрации
+         Rate limiting: 5 запросов в минуту с одного IP
+         Проверка на существующий email
+         Поддержка админ-кода
+         Выбор должности при регистрации
     """
     # Проверка на существующего пользователя (асинхронно)
     stmt = select(models.User).where(models.User.email == user.email)
@@ -100,10 +100,10 @@ async def login(  # ← async def
 ):
     """
     Вход в систему.
-    ✅ Rate limiting: 5 попыток в минуту с одного IP
-    ✅ Проверка пароля
-    ✅ Проверка блокировки
-    ✅ Возвращает JWT токен
+         Rate limiting: 5 попыток в минуту с одного IP
+         Проверка пароля
+         Проверка блокировки
+         Возвращает JWT токен
     """
     # Ищем пользователя по email (асинхронно)
     stmt = select(models.User).where(models.User.email == form_data.username)
@@ -112,7 +112,7 @@ async def login(  # ← async def
     
     # Проверяем пароль
     if not user or not auth.verify_password(form_data.password, user.hashed_password):
-        # ✅ Не уточняем, что именно неверно (email или пароль) - безопасность
+        #  Не уточняем, что именно неверно (email или пароль) - безопасность
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -148,8 +148,8 @@ async def get_current_user(  # ← async def
 ):
     """
     Получение данных текущего пользователя.
-    ✅ Требует валидный JWT токен
-    ✅ Возвращает только необходимые данные
+      Требует валидный JWT токен
+      Возвращает только необходимые данные
     """
     return {
         "id": current_user.id,

@@ -1,170 +1,550 @@
-{% extends "base.html" %}
 
-{% block title %}Личный кабинет - ГБУ ДПО «ИРО ЧР»{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Личный кабинет{% endblock %}
+{% block content %}
+<div class="container py-4 py-md-5">
+    <!-- Dashboard header -->
+    <div class="dashboard-header-card mb-4 p-4 p-md-5 rounded-4" style="background: linear-gradient(145deg, #f0f7ff, #ffffff); border: 1px solid var(--border); box-shadow: var(--shadow);">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-3 mb-1">
+                    <div class="avatar-circle d-flex align-items-center justify-content-center bg-primary text-white rounded-circle" style="width: 56px; height: 56px; font-size: 1.5rem; flex-shrink: 0;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <h1 class="h4 fw-bold mb-0" style="color: var(--dark);">Добро пожаловать, <span id="profileName">Загрузка...</span></h1>
+                        <p class="text-muted small mb-0" id="profileEmail">-</p>
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill"><i class="bi bi-calendar-check me-1"></i>Регистрация: <span id="registrationDate">-</span></span>
+                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill"><i class="bi bi-clock-history me-1"></i>Часов: <span id="totalHours">-</span></span>
+                </div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/courses" class="btn btn-primary btn-sm px-4"><i class="bi bi-search me-1"></i>Найти курс</a>
+                <!-- Кнопка выхода удалена по требованию -->
+            </div>
+        </div>
+    </div>
 
-{% block extra_css %}
-<link rel="stylesheet" href="/static/css/dashboard.css">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-xl-3 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 90px; overflow: hidden;">
+                <div class="card-body p-0">
+                    <div class="p-3 text-center border-bottom" style="background: var(--light-gray);">
+                        <div class="avatar-circle mx-auto mb-2 d-flex align-items-center justify-content-center bg-primary text-white rounded-circle" style="width: 72px; height: 72px; font-size: 2rem;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <h6 class="fw-bold mb-0" id="profileName">Загрузка...</h6>
+                        <p class="text-muted small mb-0" id="profileEmail">-</p>
+                    </div>
+                    <nav class="nav flex-column nav-pills-custom p-2" role="tablist">
+                        <a class="nav-link active d-flex align-items-center gap-2 rounded-3 px-3 py-2" href="#" onclick="showSection('profile'); return false;">
+                            <i class="bi bi-person" style="width: 1.2rem;"></i> Профиль
+                        </a>
+                        <a class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2" href="#" onclick="showSection('badges'); return false;">
+                            <i class="bi bi-award" style="width: 1.2rem;"></i> Достижения
+                        </a>
+                        <a class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2" href="#" onclick="showSection('courses'); return false;">
+                            <i class="bi bi-journal-bookmark-fill" style="width: 1.2rem;"></i> Мои курсы
+                        </a>
+                        <a class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2" href="#" onclick="showSection('favorites'); return false;">
+                            <i class="bi bi-star" style="width: 1.2rem;"></i> Избранное
+                        </a>
+                        <a class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2" href="#" onclick="showSection('watchlater'); return false;">
+                            <i class="bi bi-clock" style="width: 1.2rem;"></i> Посмотреть позже
+                        </a>
+                        <a class="nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2" href="#" onclick="showSection('moodle'); return false;">
+                            <i class="bi bi-box-arrow-up-right" style="width: 1.2rem;"></i> Moodle
+                        </a>
+                    </nav>
+                </div>
+                <!-- Блок с кнопкой "Редактировать профиль" удалён по требованию -->
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="col-xl-9 col-lg-8">
+            <!-- KPI row -->
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card card border-0 shadow-sm rounded-4 p-3 h-100">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                                <i class="bi bi-check2-circle"></i>
+                            </div>
+                            <div>
+                                <div class="stat-label text-muted small">Завершено</div>
+                                <div class="stat-number fw-bold fs-5" id="statCoursesCompleted">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card card border-0 shadow-sm rounded-4 p-3 h-100">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                                <i class="bi bi-activity"></i>
+                            </div>
+                            <div>
+                                <div class="stat-label text-muted small">В процессе</div>
+                                <div class="stat-number fw-bold fs-5" id="statCoursesInProgress">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card card border-0 shadow-sm rounded-4 p-3 h-100">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                                <i class="bi bi-award"></i>
+                            </div>
+                            <div>
+                                <div class="stat-label text-muted small">Достижений</div>
+                                <div class="stat-number fw-bold fs-5" id="statBadges">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="stat-card card border-0 shadow-sm rounded-4 p-3 h-100">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="stat-icon bg-secondary bg-opacity-10 text-secondary rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                            <div>
+                                <div class="stat-label text-muted small">Часов</div>
+                                <div class="stat-number fw-bold fs-5" id="statHours">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profileSection" class="mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-person-badge me-2 text-primary"></i>Личные данные</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-item d-flex align-items-center gap-3 p-2 rounded-3" style="background: var(--light-gray);">
+                                    <i class="bi bi-briefcase text-primary" style="font-size: 1.1rem;"></i>
+                                    <div>
+                                        <div class="info-label text-muted small">Должность</div>
+                                        <div class="info-value fw-medium" id="profilePosition">Не указана</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item d-flex align-items-center gap-3 p-2 rounded-3" style="background: var(--light-gray);">
+                                    <i class="bi bi-phone text-primary" style="font-size: 1.1rem;"></i>
+                                    <div>
+                                        <div class="info-label text-muted small">Телефон</div>
+                                        <div class="info-value fw-medium" id="profilePhone">Не указан</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item d-flex align-items-center gap-3 p-2 rounded-3" style="background: var(--light-gray);">
+                                    <i class="bi bi-building text-primary" style="font-size: 1.1rem;"></i>
+                                    <div>
+                                        <div class="info-label text-muted small">Организация</div>
+                                        <div class="info-value fw-medium" id="profileOrganization">Не указана</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item d-flex align-items-center gap-3 p-2 rounded-3" style="background: var(--light-gray);">
+                                    <i class="bi bi-envelope text-primary" style="font-size: 1.1rem;"></i>
+                                    <div>
+                                        <div class="info-label text-muted small">Email</div>
+                                        <div class="info-value fw-medium" id="profileEmailDetail">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Badges Section -->
+            <div id="badgesSection" style="display: none;" class="mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-award me-2 text-warning"></i>Мои достижения</h5>
+                        <div id="badgesList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Courses Section -->
+            <div id="coursesSection" style="display: none;" class="mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-journal-bookmark-fill me-2 text-primary"></i>Мои курсы</h5>
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3"><span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">В процессе</span></h6>
+                            <div id="inProgressCourses"></div>
+                        </div>
+                        <div>
+                            <h6 class="fw-semibold mb-3"><span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">Завершённые</span></h6>
+                            <div id="completedCourses"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favorites Section -->
+            <div id="favoritesSection" style="display: none;" class="mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-star me-2 text-warning"></i>Избранное</h5>
+                        <div id="favoritesList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Watch Later Section -->
+            <div id="watchlaterSection" style="display: none;" class="mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-clock me-2 text-secondary"></i>Посмотреть позже</h5>
+                        <div id="watchlaterList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Moodle Section -->
+            <div id="moodleSection" style="display: none;" class="mb-4">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3"><i class="bi bi-box-arrow-up-right me-2 text-primary"></i>Доступ к Moodle</h5>
+
+                        <div id="savedCredentialsBlock" style="display: none;" class="mb-4">
+                            <div class="bg-light rounded-4 p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="fw-semibold"><i class="bi bi-check-circle-fill text-success me-2"></i>Ваши данные для входа</div>
+                                    <span class="badge bg-white text-secondary border rounded-pill px-3 py-1 small">Безопасно</span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="small text-muted">Логин</div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-semibold" id="savedUsernameText">-</span>
+                                            <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyText('savedUsernameText')">копировать</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="small text-muted">Пароль</div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-semibold" id="savedPasswordText">••••••••</span>
+                                            <button class="btn btn-sm btn-outline-secondary password-reveal-btn" onclick="toggleSavedPassword()">Показать</button>
+                                            <button class="btn btn-sm btn-outline-secondary copy-btn" onclick="copyText('savedPasswordText')">копировать</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <a href="https://iro-lms.ru/login/" target="_blank" class="btn btn-primary btn-sm"><i class="bi bi-box-arrow-up-right me-1"></i>Перейти в Moodle</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="moodleStatusCard" class="mb-3">
+                            <div class="text-center py-4">
+                                <span class="spinner-border text-primary" style="width: 2rem; height: 2rem;"></span>
+                                <p class="mt-3 text-muted small">Проверка статуса...</p>
+                            </div>
+                        </div>
+
+                        <div id="moodleActionsCard" style="display: none;">
+                            <div class="alert alert-info d-flex align-items-center gap-2 border-0 rounded-4">
+                                <i class="bi bi-info-circle-fill fs-5"></i>
+                                <div><strong>Восстановление пароля Moodle</strong> — сбросьте пароль, если забыли или хотите обновить.</div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-outline-primary" id="resetMoodleBtn" onclick="resetMoodlePassword()"><i class="bi bi-arrow-repeat me-1"></i>Сбросить пароль</button>
+                                <a href="mailto:ipkro-chr@mail.ru" class="btn btn-outline-secondary"><i class="bi bi-envelope me-1"></i>Связаться с поддержкой</a>
+                            </div>
+                            <div id="resetResult" style="display: none; margin-top: 16px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
-    /* ===== MOODLE РАЗДЕЛ ===== */
-    .moodle-status-badge {
-        display: inline-block;
-        padding: 10px 24px;
+    /* Custom nav pills */
+    .nav-pills-custom .nav-link {
+        color: var(--gray);
+        font-weight: 500;
+        border-radius: 10px;
+        transition: var(--transition);
+        padding: 0.6rem 0.75rem;
+    }
+    .nav-pills-custom .nav-link:hover {
+        background: var(--secondary);
+        color: var(--primary);
+    }
+    .nav-pills-custom .nav-link.active {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(26,79,122,0.15);
+    }
+    .nav-pills-custom .nav-link i {
+        font-size: 1.1rem;
+    }
+
+    .stat-card {
+        transition: var(--transition);
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+    }
+
+    .info-item {
+        transition: var(--transition);
+    }
+    .info-item:hover {
+        background: #f1f5f9 !important;
+    }
+
+    /* Badge cards */
+    .badge-card {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #fff;
+        transition: var(--transition);
+    }
+    .badge-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    }
+    .badge-card .badge-icon {
+        font-size: 2rem;
+    }
+    .badge-card .badge-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    .badge-card .badge-desc {
+        font-size: 0.8rem;
+    }
+    .badge-card.gold .badge-icon { color: #d97706; }
+    .badge-card.silver .badge-icon { color: #94a3b8; }
+    .badge-card.bronze .badge-icon { color: #cd7b1f; }
+
+    /* Course cards in dashboard */
+    .course-card {
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        background: #fff;
+        transition: var(--transition);
+    }
+    .course-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        transform: translateY(-2px);
+    }
+    .course-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: var(--dark);
+    }
+    .course-status {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.2rem 0.6rem;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+    .course-status.status-completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    .course-status.status-in-progress {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .moodle-badge-small {
+        font-size: 0.6rem;
+        background: #eef2ff;
+        color: #4338ca;
+        padding: 0.15rem 0.5rem;
         border-radius: 12px;
         font-weight: 600;
-        font-size: 1rem;
+        margin-left: 0.4rem;
+    }
+
+    .moodle-progress-section {
+        background: var(--light-gray);
+        border-radius: 8px;
+        padding: 0.5rem 0.75rem;
+        margin-top: 0.5rem;
+    }
+    .moodle-progress-bar {
+        height: 6px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 4px;
+    }
+    .moodle-progress-bar .fill {
+        height: 100%;
+        background: var(--primary);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    .moodle-progress-bar .fill.completed { background: #10b981; }
+    .moodle-progress-bar .fill.in-progress { background: var(--primary); }
+
+    .moodle-progress-label {
+        font-size: 0.7rem;
+        color: var(--gray);
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .moodle-sync-btn {
+        background: transparent;
+        border: none;
+        color: var(--gray);
+        padding: 0 0.2rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .moodle-sync-btn:hover {
+        color: var(--primary);
+        transform: rotate(45deg);
+    }
+
+    .moodle-link-btn-sm {
+        border-radius: 8px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .moodle-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1.2rem;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
     }
     .moodle-status-badge.success {
         background: #d1fae5;
-        color: #059669;
-        border: 1px solid #a7f3d0;
-    }
-    .moodle-status-badge.success i {
-        color: #10b981;
-        margin-right: 8px;
+        color: #065f46;
     }
     .moodle-status-badge.warning {
         background: #fef3c7;
-        color: #d97706;
-        border: 1px solid #fde68a;
+        color: #92400e;
     }
-    .moodle-status-badge.warning i {
-        color: #f59e0b;
-        margin-right: 8px;
-    }
-    .moodle-credentials-box {
-        background: #f8fafc;
-        border-radius: 12px;
-        padding: 16px 20px;
-        border: 1px solid #e2e8f0;
-        margin: 12px 0;
-    }
-    .moodle-credentials-box .cred-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 6px 0;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 0.9rem;
-    }
-    .moodle-credentials-box .cred-row:last-child {
-        border-bottom: none;
-    }
-    .moodle-credentials-box .cred-label {
-        font-weight: 600;
-        color: #1a1a2e;
-    }
-    .moodle-credentials-box .cred-value {
-        color: #1a1a2e;
-        font-family: monospace;
-        background: #ffffff;
-        padding: 2px 10px;
-        border-radius: 4px;
-        border: 1px dashed #c9a13b;
-        font-size: 0.85rem;
-        word-break: break-all;
-    }
-    .moodle-credentials-box .cred-value.password {
-        color: #dc2626;
-        border-color: #dc2626;
-        background: #fef2f2;
-        font-weight: 600;
-    }
-    .password-reveal-btn {
-        background: none;
-        border: none;
-        color: var(--primary);
-        cursor: pointer;
-        font-size: 0.85rem;
-        padding: 4px 8px;
-        border-radius: 4px;
-        transition: all 0.3s ease;
-        font-weight: 500;
-    }
-    .password-reveal-btn:hover {
-        background: var(--secondary);
-    }
+
     .reset-result-box {
-        margin-top: 16px;
-        padding: 16px 20px;
+        padding: 1rem 1.2rem;
         border-radius: 12px;
-        animation: fadeIn 0.5s ease;
+        border: 1px solid var(--border);
+        background: #fff;
     }
     .reset-result-box.success {
+        border-color: #10b981;
         background: #f0fdf4;
-        border: 1px solid #bbf7d0;
     }
     .reset-result-box.error {
+        border-color: #fca5a5;
         background: #fef2f2;
-        border: 1px solid #fecaca;
     }
-    .reset-result-box.info {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
+
+    .moodle-credentials-box {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin-top: 0.5rem;
     }
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+    .cred-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.2rem 0;
     }
+    .cred-label {
+        font-weight: 500;
+        color: var(--gray);
+        font-size: 0.85rem;
+        min-width: 60px;
+    }
+    .cred-value {
+        font-weight: 600;
+        font-size: 0.9rem;
+        font-family: 'Inter', monospace;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .password-reveal-btn {
+        background: transparent;
+        border: none;
+        color: var(--primary);
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.1rem 0.3rem;
+        cursor: pointer;
+    }
+    .password-reveal-btn:hover {
+        text-decoration: underline;
+    }
+
     .moodle-link-btn {
-        display: inline-block;
-        padding: 8px 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
         background: var(--primary);
         color: #fff;
+        padding: 0.35rem 1rem;
         border-radius: 8px;
         text-decoration: none;
         font-weight: 500;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
+        font-size: 0.85rem;
+        transition: var(--transition);
     }
     .moodle-link-btn:hover {
         background: var(--primary-dark);
         color: #fff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(26, 79, 122, 0.2);
-    }
-    .btn-reset-moodle {
-        padding: 12px 24px;
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-    .btn-reset-moodle:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
-    }
-    .btn-reset-moodle:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none !important;
-    }
-    .moodle-section .moodle-info-text {
-        font-size: 0.85rem;
-        color: var(--gray);
-        margin-top: 8px;
+        transform: translateY(-1px);
     }
 
-    /* ===== КНОПКА КОПИРОВАНИЯ ===== */
-    .copy-btn {
-        background: none;
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 2px 10px;
+    .moodle-progress-empty {
         font-size: 0.7rem;
         color: var(--gray);
+    }
+
+    .empty-state {
+        padding: 2rem 0;
+    }
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #d1d5db;
+    }
+
+    /* Стили для кнопок "копировать" */
+    .copy-btn {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.6rem;
+        border-radius: 6px;
+        background: transparent;
+        border: 1px solid #dee2e6;
+        color: var(--gray);
+        transition: var(--transition);
         cursor: pointer;
-        transition: all 0.3s ease;
-        margin-left: 6px;
+        line-height: 1.4;
     }
     .copy-btn:hover {
         background: var(--secondary);
@@ -172,255 +552,17 @@
         color: var(--primary);
     }
     .copy-btn.copied {
-        border-color: #10b981;
-        color: #10b981;
         background: #d1fae5;
+        border-color: #10b981;
+        color: #065f46;
     }
 
-    /* ===== БЛОК С СОХРАНЁННЫМИ ДАННЫМИ ===== */
-    .saved-credentials-section {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 16px;
-    }
-    .saved-credentials-section .section-title {
-        font-weight: 600;
-        color: #065f46;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .saved-credentials-section .section-title i {
-        color: #10b981;
+    @media (max-width: 767.98px) {
+        .dashboard-header-card { padding: 1.25rem !important; }
+        .stat-card { padding: 0.75rem !important; }
+        .stat-number { font-size: 1.1rem !important; }
     }
 </style>
-{% endblock %}
-
-{% block content %}
-<div class="container py-4 dashboard-page">
-    <!-- Статистика -->
-    <div class="dashboard-stats">
-        <div class="row g-4">
-            <div class="col-md-3 col-6">
-                <div class="stat-item">
-                    <div class="stat-number" id="statCoursesCompleted">0</div>
-                    <div class="stat-label">Курсов завершено</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="stat-item">
-                    <div class="stat-number" id="statCoursesInProgress">0</div>
-                    <div class="stat-label">В процессе</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="stat-item">
-                    <div class="stat-number" id="statBadges">0</div>
-                    <div class="stat-label">Достижений</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="stat-item">
-                    <div class="stat-number" id="statHours">0</div>
-                    <div class="stat-label">Часов обучения</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <!-- Боковое меню -->
-        <div class="col-lg-3">
-            <div class="nav nav-pills-custom flex-column">
-                <a class="nav-link active" href="#" onclick="showSection('profile'); return false;">
-                    <i class="bi bi-person"></i> Профиль
-                </a>
-                <a class="nav-link" href="#" onclick="showSection('badges'); return false;">
-                    <i class="bi bi-award"></i> Достижения
-                </a>
-                <a class="nav-link" href="#" onclick="showSection('courses'); return false;">
-                    <i class="bi bi-journal-bookmark-fill"></i> Мои курсы
-                </a>
-                <a class="nav-link" href="#" onclick="showSection('favorites'); return false;">
-                    <i class="bi bi-star"></i> Избранное
-                </a>
-                <a class="nav-link" href="#" onclick="showSection('watchlater'); return false;">
-                    <i class="bi bi-clock"></i> Посмотреть позже
-                </a>
-                <a class="nav-link" href="#" onclick="showSection('moodle'); return false;">
-                    <i class="bi bi-box-arrow-up-right"></i> Moodle
-                </a>
-            </div>
-        </div>
-
-        <!-- Контент -->
-        <div class="col-lg-9">
-            <!-- Профиль -->
-            <div id="profileSection">
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <div class="profile-avatar">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
-                        <h3 class="profile-name" id="profileName">Загрузка...</h3>
-                        <p class="profile-email" id="profileEmail">-</p>
-                    </div>
-                    <div class="profile-body" id="profileInfo">
-                        <div class="text-center p-5">
-                            <div class="spinner-border" style="color: var(--primary);"></div>
-                            <p class="mt-3 text-muted">Загрузка данных...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Активность -->
-                <div class="profile-card mt-4">
-                    <div class="profile-body">
-                        <div class="info-row">
-                            <div class="info-label"><i class="bi bi-calendar-check me-2"></i>Дата регистрации</div>
-                            <div class="info-value" id="registrationDate">-</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label"><i class="bi bi-clock-history me-2"></i>Всего времени</div>
-                            <div class="info-value" id="totalHours">-</div>
-                        </div>
-                        <div class="info-row">
-                            <div class="info-label"><i class="bi bi-graph-up me-2"></i>Уровень активности</div>
-                            <div class="info-value">
-                                <span class="badge-gold" id="activityLevel">Начинающий</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Достижения -->
-            <div id="badgesSection" style="display: none;">
-                <h5 class="fw-bold mb-4" style="color: var(--dark); font-family: 'Playfair Display', serif;">
-                    <i class="bi bi-award me-2" style="color: var(--primary);"></i> Мои достижения
-                </h5>
-                <div id="badgesList"></div>
-            </div>
-
-            <!-- Мои курсы -->
-            <div id="coursesSection" style="display: none;">
-                <div class="mb-4">
-                    <h5 class="fw-bold mb-3" style="color: var(--dark); font-family: 'Playfair Display', serif;">
-                        <i class="bi bi-play-circle me-2" style="color: var(--primary);"></i> В процессе
-                    </h5>
-                    <div id="inProgressCourses"></div>
-                </div>
-                <div class="mb-4">
-                    <h5 class="fw-bold mb-3" style="color: var(--dark); font-family: 'Playfair Display', serif;">
-                        <i class="bi bi-check-circle me-2" style="color: var(--primary);"></i> Завершённые
-                    </h5>
-                    <div id="completedCourses"></div>
-                </div>
-            </div>
-
-            <!-- Избранное -->
-            <div id="favoritesSection" style="display: none;">
-                <h5 class="fw-bold mb-4" style="color: var(--dark); font-family: 'Playfair Display', serif;">
-                    <i class="bi bi-star me-2" style="color: var(--primary);"></i> Избранные курсы
-                </h5>
-                <div id="favoritesList"></div>
-            </div>
-
-            <!-- Посмотреть позже -->
-            <div id="watchlaterSection" style="display: none;">
-                <h5 class="fw-bold mb-4" style="color: var(--dark); font-family: 'Playfair Display', serif;">
-                    <i class="bi bi-clock me-2" style="color: var(--primary);"></i> Посмотреть позже
-                </h5>
-                <div id="watchlaterList"></div>
-            </div>
-
-            <!-- ===== РАЗДЕЛ MOODLE ===== -->
-            <div id="moodleSection" style="display: none;" class="moodle-section">
-                <h5 class="fw-bold mb-4" style="color: var(--dark); font-family: 'Playfair Display', serif;">
-                    <i class="bi bi-box-arrow-up-right me-2" style="color: var(--primary);"></i> Доступ к Moodle
-                </h5>
-
-                <!-- ===== БЛОК С СОХРАНЁННЫМИ ДАННЫМИ ===== -->
-                <div id="savedCredentialsBlock" style="display: none;">
-                    <div class="saved-credentials-section">
-                        <div class="section-title">
-                            <i class="bi bi-check-circle-fill"></i>
-                            Ваши данные для входа в Moodle
-                        </div>
-                        <div class="moodle-credentials-box">
-                            <div class="cred-row">
-                                <span class="cred-label"><i class="bi bi-globe2 me-1"></i>Ссылка:</span>
-                                <span class="cred-value" style="border: none; background: none; font-family: inherit;">
-                                    <a href="https://iro-lms.ru/" target="_blank" style="color: var(--primary); text-decoration: none;">https://iro-lms.ru/</a>
-                                </span>
-                            </div>
-                            <div class="cred-row">
-                                <span class="cred-label"><i class="bi bi-person me-1"></i>Логин:</span>
-                                <span class="cred-value" id="savedUsername" style="border: none; background: none; font-family: inherit; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                    <span id="savedUsernameText">-</span>
-                                    <button class="copy-btn" onclick="copyText('savedUsernameText')">
-                                        <i class="bi bi-clipboard"></i> Копировать логин
-                                    </button>
-                                </span>
-                            </div>
-                            <div class="cred-row">
-                                <span class="cred-label"><i class="bi bi-key me-1"></i>Пароль:</span>
-                                <span class="cred-value password" id="savedPassword" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                    <span id="savedPasswordText">••••••••</span>
-                                    <span style="display: flex; gap: 4px; flex-wrap: wrap;">
-                                        <button class="password-reveal-btn" onclick="toggleSavedPassword()">
-                                            <i class="bi bi-eye"></i> Показать
-                                        </button>
-                                        <button class="copy-btn" onclick="copyText('savedPasswordText')">
-                                            <i class="bi bi-clipboard"></i> Копировать пароль
-                                        </button>
-                                    </span>
-                                </span>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
-                            <a href="https://iro-lms.ru/login/" target="_blank" class="moodle-link-btn" style="font-size: 0.85rem; padding: 6px 16px;">
-                                <i class="bi bi-box-arrow-up-right me-1"></i> Перейти в Moodle
-                            </a>
-                        </div>
-                        <div class="moodle-info-text mt-2">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Данные сохранены после записи на курс. Если пароль не подходит, нажмите кнопку сброса ниже.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="profile-card" id="moodleStatusCard">
-                    <div class="profile-body text-center py-4">
-                        <div class="spinner-border" style="color: var(--primary);"></div>
-                        <p class="mt-3 text-muted">Проверка статуса...</p>
-                    </div>
-                </div>
-
-                <div class="profile-card mt-4" id="moodleActionsCard" style="display: none;">
-                    <div class="profile-body">
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>Восстановление пароля Moodle</strong><br>
-                            Если вы забыли пароль от Moodle, вы можете сбросить его.
-                            Новый пароль <strong>Password1!</strong> будет отправлен на вашу почту и показан ниже.
-                        </div>
-
-                        <button class="btn-reset-moodle" id="resetMoodleBtn" onclick="resetMoodlePassword()">
-                            <i class="bi bi-arrow-repeat"></i> Сбросить пароль от Moodle
-                        </button>
-
-                        <div id="resetResult" style="display: none; margin-top: 16px;"></div>
-                    </div>
-                </div>
-            </div>
-            <!-- ===== КОНЕЦ РАЗДЕЛА MOODLE ===== -->
-        </div>
-    </div>
-</div>
 
 <script>
     const token = localStorage.getItem('token');
@@ -447,25 +589,7 @@
         return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    function getTaskStatusBadge(status, isOverdue = false) {
-        const map = {
-            'passed': '<span class="task-status passed"><i class="bi bi-check-circle me-1"></i>Пройдено</span>',
-            'failed': '<span class="task-status failed"><i class="bi bi-x-circle me-1"></i>Не пройдено</span>',
-            'pending_teacher': '<span class="task-status pending"><i class="bi bi-clock-history me-1"></i>На проверке</span>',
-            'submitted': '<span class="task-status pending"><i class="bi bi-send me-1"></i>Отправлено</span>',
-            'retake': '<span class="task-status retake"><i class="bi bi-arrow-repeat me-1"></i>На пересдачу</span>',
-            'in_progress': '<span class="task-status not_started"><i class="bi bi-play-circle me-1"></i>В процессе</span>',
-            'not_started': '<span class="task-status not_started"><i class="bi bi-circle me-1"></i>Не начато</span>'
-        };
-
-        if (isOverdue) {
-            return '<span class="task-status overdue"><i class="bi bi-clock-history me-1"></i>Просрочено</span>';
-        }
-
-        return map[status] || map['not_started'];
-    }
-
-    // ========== КОПИРОВАНИЕ ==========
+    // ========== COPY ==========
     function copyText(elementId) {
         const el = document.getElementById(elementId);
         if (!el) return;
@@ -475,16 +599,16 @@
         navigator.clipboard.writeText(text).then(() => {
             const btn = el.parentElement.querySelector('.copy-btn');
             if (btn) {
+                btn.textContent = 'Скопировано';
                 btn.classList.add('copied');
-                btn.innerHTML = '<i class="bi bi-check"></i> Скопировано';
                 setTimeout(() => {
+                    btn.textContent = 'копировать';
                     btn.classList.remove('copied');
-                    btn.innerHTML = '<i class="bi bi-clipboard"></i> Копировать ' + (elementId === 'savedUsernameText' ? 'логин' : 'пароль');
                 }, 2000);
             }
             if (window.showToast) window.showToast('Скопировано!', 'success');
         }).catch(() => {
-            // Fallback
+            // Fallback для старых браузеров
             const range = document.createRange();
             range.selectNode(el);
             window.getSelection().removeAllRanges();
@@ -500,24 +624,23 @@
         const btn = textEl.parentElement.querySelector('.password-reveal-btn');
         if (passwordVisible) {
             textEl.textContent = '••••••••';
-            btn.innerHTML = '<i class="bi bi-eye"></i> Показать';
-            passwordVisible = false;
+            btn.textContent = 'Показать';
         } else {
             if (savedCredentials && savedCredentials.password) {
                 textEl.textContent = savedCredentials.password;
             } else {
                 textEl.textContent = 'Password1!';
             }
-            btn.innerHTML = '<i class="bi bi-eye-slash"></i> Скрыть';
+            btn.textContent = 'Скрыть';
             passwordVisible = true;
         }
     }
 
-    // ========== ФУНКЦИЯ ПЕРЕХОДА В MOODLE ==========
     function goToMoodle() {
         window.location.href = 'https://iro-lms.ru/login/';
     }
 
+    // ========== PROFILE ==========
     async function loadProfile() {
         try {
             const response = await fetch('/api/auth/me', {
@@ -525,24 +648,17 @@
             });
             userData = await response.json();
 
-            document.getElementById('profileName').innerText = userData.full_name;
-            document.getElementById('profileEmail').innerText = userData.email;
+            // Update all profile name/email occurrences
+            document.querySelectorAll('#profileName').forEach(el => el.innerText = userData.full_name);
+            document.querySelectorAll('#profileEmail').forEach(el => el.innerText = userData.email);
             document.getElementById('registrationDate').innerText = new Date(userData.created_at).toLocaleDateString();
 
-            document.getElementById('profileInfo').innerHTML = `
-                <div class="info-row">
-                    <div class="info-label"><i class="bi bi-briefcase me-2"></i>Должность</div>
-                    <div class="info-value">${escapeHtml(userData.position) || 'Не указана'}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label"><i class="bi bi-phone me-2"></i>Телефон</div>
-                    <div class="info-value">${escapeHtml(userData.phone) || 'Не указан'}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label"><i class="bi bi-building me-2"></i>Организация</div>
-                    <div class="info-value">${escapeHtml(userData.organization) || 'Не указана'}</div>
-                </div>
-            `;
+            // Additional profile fields
+            document.getElementById('profilePosition').innerText = userData.position || 'Не указана';
+            document.getElementById('profilePhone').innerText = userData.phone || 'Не указан';
+            document.getElementById('profileOrganization').innerText = userData.organization || 'Не указана';
+            document.getElementById('profileEmailDetail').innerText = userData.email;
+
         } catch (error) {
             console.error('Error loading profile:', error);
         }
@@ -559,18 +675,14 @@
             document.getElementById('statCoursesInProgress').innerText = userStats.in_progress_courses || 0;
             document.getElementById('statBadges').innerText = userStats.achievements_count || 0;
             document.getElementById('statHours').innerText = userStats.total_hours || 0;
-            document.getElementById('totalHours').innerText = `${userStats.total_hours || 0} часов`;
+            document.getElementById('totalHours').innerText = (userStats.total_hours || 0) + ' ч';
 
-            let activityLevel = 'Начинающий';
-            if (userStats.completed_courses >= 10) activityLevel = 'Эксперт';
-            else if (userStats.completed_courses >= 5) activityLevel = 'Продвинутый';
-            else if (userStats.completed_courses >= 2) activityLevel = 'Активный';
-            document.getElementById('activityLevel').innerHTML = activityLevel;
         } catch (error) {
             console.error('Error loading stats:', error);
         }
     }
 
+    // ========== ACHIEVEMENTS ==========
     async function loadAchievements() {
         try {
             const response = await fetch('/api/courses/my/achievements', {
@@ -582,11 +694,11 @@
 
             if (userAchievements.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state text-center">
                         <i class="bi bi-award"></i>
-                        <h5>Нет достижений</h5>
-                        <p>Завершайте курсы, чтобы получать достижения!</p>
-                        <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
+                        <h6 class="mt-2 fw-semibold">Нет достижений</h6>
+                        <p class="text-muted small">Завершайте курсы, чтобы получать достижения!</p>
+                        <a href="/courses" class="btn btn-primary btn-sm mt-2">Смотреть курсы</a>
                     </div>
                 `;
                 return;
@@ -599,17 +711,15 @@
             let html = '';
 
             if (gold.length > 0) {
-                html += `<h6 class="fw-bold mb-3" style="color: #d97706; font-family: 'Playfair Display', serif;"><i class="bi bi-trophy me-2"></i>Золотые достижения</h6><div class="row g-3 mb-4">`;
+                html += `<h6 class="fw-semibold mb-3 text-warning"><i class="bi bi-trophy me-2"></i>Золотые</h6><div class="row g-3 mb-4">`;
                 gold.forEach(ach => {
                     html += `
                         <div class="col-md-4 col-sm-6">
-                            <div class="badge-card gold">
-                                <div class="badge-icon">
-                                    <i class="bi ${ach.icon}"></i>
-                                </div>
+                            <div class="badge-card gold p-3 h-100">
+                                <div class="badge-icon mb-2"><i class="bi ${ach.icon}"></i></div>
                                 <h6 class="badge-title">${escapeHtml(ach.title)}</h6>
-                                <p class="badge-desc">${escapeHtml(ach.description)}</p>
-                                <div class="badge-progress"><i class="bi bi-calendar-check me-1"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
+                                <p class="badge-desc text-muted">${escapeHtml(ach.description)}</p>
+                                <div class="small text-muted"><i class="bi bi-calendar-check me-1"></i>${new Date(ach.earned_at).toLocaleDateString()}</div>
                             </div>
                         </div>
                     `;
@@ -618,17 +728,15 @@
             }
 
             if (silver.length > 0) {
-                html += `<h6 class="fw-bold mb-3" style="color: #94a3b8; font-family: 'Playfair Display', serif;"><i class="bi bi-award me-2"></i>Серебряные достижения</h6><div class="row g-3 mb-4">`;
+                html += `<h6 class="fw-semibold mb-3 text-secondary"><i class="bi bi-award me-2"></i>Серебряные</h6><div class="row g-3 mb-4">`;
                 silver.forEach(ach => {
                     html += `
                         <div class="col-md-4 col-sm-6">
-                            <div class="badge-card silver">
-                                <div class="badge-icon">
-                                    <i class="bi ${ach.icon}"></i>
-                                </div>
+                            <div class="badge-card silver p-3 h-100">
+                                <div class="badge-icon mb-2"><i class="bi ${ach.icon}"></i></div>
                                 <h6 class="badge-title">${escapeHtml(ach.title)}</h6>
-                                <p class="badge-desc">${escapeHtml(ach.description)}</p>
-                                <div class="badge-progress"><i class="bi bi-calendar-check me-1"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
+                                <p class="badge-desc text-muted">${escapeHtml(ach.description)}</p>
+                                <div class="small text-muted"><i class="bi bi-calendar-check me-1"></i>${new Date(ach.earned_at).toLocaleDateString()}</div>
                             </div>
                         </div>
                     `;
@@ -637,17 +745,15 @@
             }
 
             if (bronze.length > 0) {
-                html += `<h6 class="fw-bold mb-3" style="color: #cd7b1f; font-family: 'Playfair Display', serif;"><i class="bi bi-star me-2"></i>Бронзовые достижения</h6><div class="row g-3 mb-4">`;
+                html += `<h6 class="fw-semibold mb-3 text-warning" style="color: #cd7b1f;"><i class="bi bi-star me-2"></i>Бронзовые</h6><div class="row g-3 mb-4">`;
                 bronze.forEach(ach => {
                     html += `
                         <div class="col-md-4 col-sm-6">
-                            <div class="badge-card bronze">
-                                <div class="badge-icon">
-                                    <i class="bi ${ach.icon}"></i>
-                                </div>
+                            <div class="badge-card bronze p-3 h-100">
+                                <div class="badge-icon mb-2"><i class="bi ${ach.icon}"></i></div>
                                 <h6 class="badge-title">${escapeHtml(ach.title)}</h6>
-                                <p class="badge-desc">${escapeHtml(ach.description)}</p>
-                                <div class="badge-progress"><i class="bi bi-calendar-check me-1"></i> ${new Date(ach.earned_at).toLocaleDateString()}</div>
+                                <p class="badge-desc text-muted">${escapeHtml(ach.description)}</p>
+                                <div class="small text-muted"><i class="bi bi-calendar-check me-1"></i>${new Date(ach.earned_at).toLocaleDateString()}</div>
                             </div>
                         </div>
                     `;
@@ -661,54 +767,40 @@
         }
     }
 
-    // ========== ЗАГРУЗКА ПРОГРЕССА ИЗ MOODLE ==========
+    // ========== MOODLE PROGRESS ==========
     async function loadMoodleProgress(courseId, containerId) {
         try {
             const response = await fetch(`/api/courses/${courseId}/moodle-progress`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
 
-            if (!response.ok) {
-                console.warn('Moodle progress not available for course', courseId);
-                return;
-            }
+            if (!response.ok) return;
 
             const data = await response.json();
 
             if (data.has_moodle) {
                 moodleProgressCache[courseId] = data;
-
                 const progressContainer = document.getElementById(containerId);
                 if (progressContainer) {
                     const percent = data.progress_percent || 0;
                     const isCompleted = data.is_completed || false;
                     const total = data.total_activities || 0;
                     const completed = data.completed_activities || 0;
-
                     let statusText = isCompleted ? 'Завершён' : (percent > 0 ? 'В процессе' : 'Не начат');
                     let fillClass = isCompleted ? 'completed' : (percent > 0 ? 'in-progress' : '');
 
                     progressContainer.innerHTML = `
                         <div class="moodle-progress-section">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="moodle-progress-label">
-                                    <span><i class="bi bi-box-arrow-up-right me-1" style="color: var(--primary);"></i>Прогресс в Moodle</span>
-                                    <span>${percent}%</span>
-                                </span>
-                                <button class="moodle-sync-btn" onclick="refreshMoodleProgress(${courseId})" title="Обновить прогресс">
-                                    <i class="bi bi-arrow-repeat"></i>
-                                </button>
+                                <span class="moodle-progress-label"><i class="bi bi-box-arrow-up-right me-1" style="color: var(--primary);"></i>Прогресс в Moodle  ${percent}%</span>
+                                <button class="moodle-sync-btn" onclick="refreshMoodleProgress(${courseId})" title="Обновить"><i class="bi bi-arrow-repeat"></i></button>
                             </div>
                             <div class="moodle-progress-bar">
                                 <div class="fill ${fillClass}" style="width: ${percent}%"></div>
                             </div>
                             <div class="d-flex justify-content-between mt-1">
-                                <span class="moodle-progress-label" style="font-size: 0.6rem;">
-                                    <span>${statusText}</span>
-                                </span>
-                                <span class="moodle-progress-label" style="font-size: 0.6rem;">
-                                    ${completed}/${total} активностей
-                                </span>
+                                <span style="font-size:0.6rem;color:var(--gray);">${statusText}</span>
+                                <span style="font-size:0.6rem;color:var(--gray);">${completed}/${total}</span>
                             </div>
                         </div>
                     `;
@@ -720,20 +812,19 @@
     }
 
     async function refreshMoodleProgress(courseId) {
-        const progressContainer = document.getElementById(`moodle_progress_${courseId}`);
-        if (progressContainer) {
-            progressContainer.innerHTML = `
-                <div class="moodle-progress-section">
-                    <div class="text-center py-1">
-                        <span class="spinner-border spinner-border-sm" style="color: var(--primary); width: 1rem; height: 1rem;"></span>
-                        <span class="ms-2" style="font-size: 0.7rem; color: var(--gray);">Обновление...</span>
-                    </div>
+        const container = document.getElementById(`moodle_progress_${courseId}`);
+        if (container) {
+            container.innerHTML = `
+                <div class="moodle-progress-section text-center py-1">
+                    <span class="spinner-border spinner-border-sm text-primary" style="width:1rem;height:1rem;"></span>
+                    <span class="ms-2 small text-muted">Обновление...</span>
                 </div>
             `;
         }
         await loadMoodleProgress(courseId, `moodle_progress_${courseId}`);
     }
 
+    // ========== COURSES ==========
     async function loadUserCourses() {
         try {
             const response = await fetch('/api/courses/my/registrations', {
@@ -747,7 +838,6 @@
             renderCourses(inProgress, 'inProgressCourses', false);
             renderCourses(completed, 'completedCourses', true);
 
-            // Загружаем прогресс для курсов с Moodle
             userCourses.forEach(course => {
                 if (course.moodle_course_id) {
                     loadMoodleProgress(course.course_id, `moodle_progress_${course.course_id}`);
@@ -758,15 +848,14 @@
         }
     }
 
-    // ========== ФУНКЦИЯ РЕНДЕРИНГА КУРСОВ ==========
     function renderCourses(courses, containerId, isCompleted) {
         const container = document.getElementById(containerId);
 
         if (courses.length === 0) {
             container.innerHTML = `
-                <div class="empty-state py-4">
+                <div class="empty-state text-center">
                     <i class="bi bi-inbox"></i>
-                    <p class="mb-0">Нет курсов в этом разделе</p>
+                    <p class="text-muted small mt-2">Нет курсов в этом разделе</p>
                 </div>
             `;
             return;
@@ -782,69 +871,35 @@
             let moodleProgressHtml = '';
 
             if (course.moodle_course_id) {
-                moodleHtml = `
-                    <span class="moodle-badge-small" title="Курс привязан к Moodle">
-                        <i class="bi bi-box-arrow-up-right"></i> Moodle
-                    </span>
-                `;
-
-                moodleProgressHtml = `
-                    <div id="moodle_progress_${course.course_id}">
-                        <div class="moodle-progress-section">
-                            <div class="text-center py-1">
-                                <span class="spinner-border spinner-border-sm" style="color: var(--primary); width: 1rem; height: 1rem;"></span>
-                                <span class="ms-2" style="font-size: 0.7rem; color: var(--gray);">Загрузка прогресса...</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                moodleHtml = `<span class="moodle-badge-small"><i class="bi bi-box-arrow-up-right"></i> Moodle</span>`;
+                moodleProgressHtml = `<div id="moodle_progress_${course.course_id}"><div class="moodle-progress-section text-center py-1"><span class="spinner-border spinner-border-sm text-primary" style="width:1rem;height:1rem;"></span><span class="ms-2 small text-muted">Загрузка...</span></div></div>`;
             } else {
-                moodleProgressHtml = `
-                    <div class="moodle-progress-section">
-                        <span class="moodle-progress-empty"><i class="bi bi-info-circle me-1"></i>Прогресс недоступен</span>
-                    </div>
-                `;
-            }
-
-            let moodleLinkHtml = '';
-            if (course.moodle_course_id) {
-                moodleLinkHtml = `
-                    <button class="moodle-link-btn-sm" onclick="openMoodleCourse(${course.course_id}, this)">
-                        <i class="bi bi-box-arrow-up-right"></i> Перейти в Moodle
-                    </button>
-                `;
+                moodleProgressHtml = `<div class="moodle-progress-section"><span class="moodle-progress-empty"><i class="bi bi-info-circle me-1"></i>Прогресс недоступен</span></div>`;
             }
 
             html += `
                 <div class="col-md-6">
-                    <div class="course-card">
+                    <div class="course-card p-3 h-100">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="course-title mb-0">
-                                ${escapeHtml(course.course_title)}
-                                ${moodleHtml}
-                            </h6>
+                            <h6 class="course-title mb-0">${escapeHtml(course.course_title)} ${moodleHtml}</h6>
                             <span class="course-status ${statusClass}">${statusText}</span>
                         </div>
-                        <div class="course-meta">
-                            <i class="bi bi-calendar3 me-1"></i> Записан: ${new Date(course.registered_at).toLocaleDateString()}
-                        </div>
+                        <div class="small text-muted mb-2"><i class="bi bi-calendar3 me-1"></i>${new Date(course.registered_at).toLocaleDateString()}</div>
                         ${!isCompleted ? `
-                            <div class="course-progress">
+                            <div class="mb-2">
                                 <div class="d-flex justify-content-between small mb-1">
                                     <span>Прогресс</span>
-                                    <span>${progress}%</span>
+                                    <span class="fw-semibold">${progress}%</span>
                                 </div>
-                                <div class="progress">
-                                    <div class="progress-bar" style="width: ${progress}%"></div>
+                                <div class="progress" style="height:6px;border-radius:4px;overflow:hidden;">
+                                    <div class="progress-bar bg-primary" style="width:${progress}%;"></div>
                                 </div>
                             </div>
                         ` : ''}
                         ${moodleProgressHtml}
                         <div class="mt-3 d-flex gap-2 flex-wrap">
-                            <button onclick="goToMoodle()" class="btn btn-outline-primary">
-                                ${isCompleted ? 'Посмотреть детали' : 'Продолжить обучение'} <i class="bi bi-arrow-right"></i>
-                            </button>
-                            ${moodleLinkHtml}
+                            <button onclick="goToMoodle()" class="btn btn-primary btn-sm">${isCompleted ? 'Посмотреть детали' : 'Продолжить'} <i class="bi bi-arrow-right ms-1"></i></button>
+                            ${course.moodle_course_id ? `<button class="btn btn-outline-primary btn-sm moodle-link-btn-sm" onclick="openMoodleCourse(${course.course_id}, this)"><i class="bi bi-box-arrow-up-right"></i></button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -854,13 +909,9 @@
         container.innerHTML = html;
     }
 
-    // ========== ФУНКЦИЯ ОТКРЫТИЯ MOODLE ==========
     async function openMoodleCourse(courseId, element) {
         const token = localStorage.getItem('token');
-        if (!token) {
-            if (window.showToast) window.showToast('Войдите в систему', 'danger');
-            return;
-        }
+        if (!token) { if (window.showToast) window.showToast('Войдите в систему', 'danger'); return; }
 
         const originalText = element.innerHTML;
         element.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
@@ -873,11 +924,10 @@
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.detail || 'Ошибка получения ссылки');
+                throw new Error(error.detail || 'Ошибка');
             }
 
             const data = await response.json();
-
             if (data.has_moodle && data.moodle_course_url) {
                 window.open(data.moodle_course_url, '_blank');
                 if (window.showToast) window.showToast('Открываем курс в Moodle...', 'success');
@@ -891,54 +941,48 @@
 
         } catch (error) {
             console.error('Moodle link error:', error);
-            if (window.showToast) window.showToast(error.message || 'Ошибка при открытии Moodle', 'danger');
+            if (window.showToast) window.showToast(error.message || 'Ошибка', 'danger');
             element.innerHTML = originalText;
             element.disabled = false;
         }
     }
 
+    // ========== FAVORITES & WATCH LATER ==========
     async function loadFavorites() {
         try {
             const response = await fetch('/api/courses/my/favorites', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             const data = await response.json();
-
             const container = document.getElementById('favoritesList');
 
             if (data.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state text-center">
                         <i class="bi bi-star"></i>
-                        <h5>Нет избранных курсов</h5>
-                        <p>Добавляйте курсы в избранное, чтобы не потерять их</p>
-                        <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
+                        <h6 class="mt-2 fw-semibold">Нет избранных курсов</h6>
+                        <p class="text-muted small">Добавляйте курсы в избранное, чтобы не потерять их</p>
+                        <a href="/courses" class="btn btn-primary btn-sm mt-2">Смотреть курсы</a>
                     </div>
                 `;
-            } else {
-                let html = `<div class="row g-3">`;
-                data.forEach(course => {
-                    const moodleBadge = course.moodle_course_id ?
-                        `<span class="moodle-badge-small"><i class="bi bi-box-arrow-up-right"></i> Moodle</span>` : '';
-
-                    html += `
-                        <div class="col-md-6">
-                            <div class="course-card">
-                                <h6 class="course-title">${escapeHtml(course.title)} ${moodleBadge}</h6>
-                                ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height: 120px; object-fit: cover; width: 100%;">` : ''}
-                                <p class="course-meta">${escapeHtml(course.short_description || (course.description ? course.description.substring(0, 80) + '...' : 'Нет описания'))}</p>
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <button onclick="goToMoodle()" class="btn btn-primary">
-                                        Начать обучение <i class="bi bi-arrow-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-                container.innerHTML = html;
+                return;
             }
+
+            let html = `<div class="row g-3">`;
+            data.forEach(course => {
+                html += `
+                    <div class="col-md-6">
+                        <div class="course-card p-3 h-100">
+                            <h6 class="course-title mb-1">${escapeHtml(course.title)} ${course.moodle_course_id ? `<span class="moodle-badge-small"><i class="bi bi-box-arrow-up-right"></i> Moodle</span>` : ''}</h6>
+                            ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height:120px;object-fit:cover;width:100%;">` : ''}
+                            <p class="small text-muted mb-2">${escapeHtml(course.short_description || (course.description ? course.description.substring(0,80)+'...' : 'Нет описания'))}</p>
+                            <button onclick="goToMoodle()" class="btn btn-primary btn-sm">Начать обучение <i class="bi bi-arrow-right"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
         } catch (error) {
             console.error('Error loading favorites:', error);
         }
@@ -950,50 +994,41 @@
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             const data = await response.json();
-
             const container = document.getElementById('watchlaterList');
 
             if (data.length === 0) {
                 container.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state text-center">
                         <i class="bi bi-clock"></i>
-                        <h5>Нет отложенных курсов</h5>
-                        <p>Добавляйте курсы в "Посмотреть позже", чтобы вернуться к ним</p>
-                        <a href="/courses" class="btn btn-primary">Смотреть курсы</a>
+                        <h6 class="mt-2 fw-semibold">Нет отложенных курсов</h6>
+                        <p class="text-muted small">Добавляйте курсы в "Посмотреть позже"</p>
+                        <a href="/courses" class="btn btn-primary btn-sm mt-2">Смотреть курсы</a>
                     </div>
                 `;
-            } else {
-                let html = `<div class="row g-3">`;
-                data.forEach(course => {
-                    const moodleBadge = course.moodle_course_id ?
-                        `<span class="moodle-badge-small"><i class="bi bi-box-arrow-up-right"></i> Moodle</span>` : '';
-
-                    html += `
-                        <div class="col-md-6">
-                            <div class="course-card">
-                                <h6 class="course-title">${escapeHtml(course.title)} ${moodleBadge}</h6>
-                                ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height: 120px; object-fit: cover; width: 100%;">` : ''}
-                                <p class="course-meta">${escapeHtml(course.short_description || (course.description ? course.description.substring(0, 80) + '...' : 'Нет описания'))}</p>
-                                <div class="d-flex justify-content-between align-items-center mt-2">
-                                    <button onclick="goToMoodle()" class="btn btn-primary">
-                                        Начать обучение <i class="bi bi-arrow-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                html += `</div>`;
-                container.innerHTML = html;
+                return;
             }
+
+            let html = `<div class="row g-3">`;
+            data.forEach(course => {
+                html += `
+                    <div class="col-md-6">
+                        <div class="course-card p-3 h-100">
+                            <h6 class="course-title mb-1">${escapeHtml(course.title)} ${course.moodle_course_id ? `<span class="moodle-badge-small"><i class="bi bi-box-arrow-up-right"></i> Moodle</span>` : ''}</h6>
+                            ${course.image_url ? `<img src="${course.image_url}" class="img-fluid rounded mb-2" style="max-height:120px;object-fit:cover;width:100%;">` : ''}
+                            <p class="small text-muted mb-2">${escapeHtml(course.short_description || (course.description ? course.description.substring(0,80)+'...' : 'Нет описания'))}</p>
+                            <button onclick="goToMoodle()" class="btn btn-primary btn-sm">Начать обучение <i class="bi bi-arrow-right"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+            container.innerHTML = html;
         } catch (error) {
             console.error('Error loading watch later:', error);
         }
     }
 
-    // ============================================================
-    // ФУНКЦИЯ ЗАГРУЗКИ СОХРАНЁННЫХ ДАННЫХ MOODLE
-    // ============================================================
+    // ========== MOODLE CREDENTIALS & STATUS ==========
     async function loadSavedMoodleCredentials() {
         try {
             const response = await fetch('/api/profile/moodle-credentials', {
@@ -1028,10 +1063,6 @@
         }
     }
 
-    // ============================================================
-    // ФУНКЦИИ ДЛЯ РАЗДЕЛА MOODLE
-    // ============================================================
-
     async function loadMoodleStatus() {
         try {
             const response = await fetch('/api/profile/moodle-status', {
@@ -1047,43 +1078,28 @@
 
                 if (data.has_moodle_account) {
                     card.innerHTML = `
-                        <div class="profile-body text-center py-3">
-                            <div class="moodle-status-badge success">
-                                <i class="bi bi-check-circle-fill"></i>
-                                Аккаунт в Moodle найден
-                            </div>
-                            <p class="mt-3 mb-1">
-                                <strong>Логин:</strong> ${escapeHtml(data.username)}
-                            </p>
-                            <p class="text-muted small">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Пароль можно сбросить через кнопку ниже
-                            </p>
+                        <div class="text-center py-3">
+                            <div class="moodle-status-badge success"><i class="bi bi-check-circle-fill"></i> Аккаунт в Moodle найден</div>
+                            <p class="mt-3 mb-0"><strong>Логин:</strong> ${escapeHtml(data.username)}</p>
+                            <p class="text-muted small"><i class="bi bi-info-circle me-1"></i>Пароль можно сбросить ниже</p>
                         </div>
                     `;
                     actionsCard.style.display = 'block';
                 } else {
                     card.innerHTML = `
-                        <div class="profile-body text-center py-4">
-                            <div class="moodle-status-badge warning">
-                                <i class="bi bi-exclamation-triangle-fill"></i>
-                                Аккаунт в Moodle не найден
-                            </div>
-                            <p class="mt-3 text-muted">
-                                У вас нет аккаунта в Moodle.
-                                <br>Обратитесь в поддержку:
-                                <a href="mailto:ipkro-chr@mail.ru">ipkro-chr@mail.ru</a>
-                            </p>
+                        <div class="text-center py-4">
+                            <div class="moodle-status-badge warning"><i class="bi bi-exclamation-triangle-fill"></i> Аккаунт в Moodle не найден</div>
+                            <p class="mt-3 text-muted">У вас нет аккаунта в Moodle.<br>Обратитесь в поддержку: <a href="mailto:ipkro-chr@mail.ru">ipkro-chr@mail.ru</a></p>
                         </div>
                     `;
                     actionsCard.style.display = 'none';
                 }
             } else {
-                showToast('Ошибка проверки статуса Moodle', 'danger');
+                if (window.showToast) window.showToast('Ошибка проверки статуса Moodle', 'danger');
             }
         } catch (error) {
             console.error('Error loading Moodle status:', error);
-            showToast('Ошибка соединения с сервером', 'danger');
+            if (window.showToast) window.showToast('Ошибка соединения', 'danger');
         }
     }
 
@@ -1091,7 +1107,6 @@
         const btn = document.getElementById('resetMoodleBtn');
         const resultDiv = document.getElementById('resetResult');
 
-        // Блокируем кнопку
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Сброс...';
         resultDiv.style.display = 'none';
@@ -1105,7 +1120,6 @@
             const data = await response.json();
 
             if (data.success) {
-                // Обновляем сохранённые данные
                 savedCredentials = {
                     has_credentials: true,
                     username: data.username,
@@ -1116,59 +1130,38 @@
                 document.getElementById('savedCredentialsBlock').style.display = 'block';
                 passwordVisible = false;
 
-                // Показываем результат с паролем
                 let maskedPassword = '••••••••';
 
                 resultDiv.innerHTML = `
                     <div class="reset-result-box success">
                         <div class="d-flex align-items-start gap-2">
-                            <i class="bi bi-check-circle-fill" style="color: #10b981; font-size: 1.2rem; margin-top: 2px;"></i>
-                            <div class="flex-grow-1">
-                                <strong style="color: #065f46;">${data.message}</strong>
+                            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                            <div>
+                                <strong style="color:#065f46;">${data.message}</strong>
                                 <div class="moodle-credentials-box mt-2">
-                                    <div class="cred-row">
-                                        <span class="cred-label"><i class="bi bi-person me-1"></i>Логин:</span>
-                                        <span class="cred-value">${escapeHtml(data.username)}</span>
-                                    </div>
-                                    <div class="cred-row">
-                                        <span class="cred-label"><i class="bi bi-key me-1"></i>Пароль:</span>
-                                        <span class="cred-value password" id="passwordDisplay">
-                                            ${maskedPassword}
-                                            <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(data.password)}')">
-                                                <i class="bi bi-eye"></i> Показать
-                                            </button>
-                                        </span>
-                                    </div>
+                                    <div class="cred-row"><span class="cred-label"><i class="bi bi-person me-1"></i>Логин:</span><span class="cred-value">${escapeHtml(data.username)}</span></div>
+                                    <div class="cred-row"><span class="cred-label"><i class="bi bi-key me-1"></i>Пароль:</span><span class="cred-value" id="passwordDisplay">${maskedPassword} <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(data.password)}')">Показать</button></span></div>
                                 </div>
-                                <div class="moodle-info-text">
-                                    <i class="bi bi-envelope me-1"></i>
-                                    Пароль также отправлен на вашу почту.
-                                </div>
-                                <div class="mt-2">
-                                    <a href="https://iro-lms.ru/login/" target="_blank" class="moodle-link-btn">
-                                        <i class="bi bi-box-arrow-up-right me-1"></i> Перейти в Moodle
-                                    </a>
-                                </div>
+                                <div class="mt-2"><i class="bi bi-envelope me-1"></i>Пароль также отправлен на вашу почту.</div>
+                                <div class="mt-2"><a href="https://iro-lms.ru/login/" target="_blank" class="moodle-link-btn"><i class="bi bi-box-arrow-up-right me-1"></i>Перейти в Moodle</a></div>
                             </div>
                         </div>
                     </div>
                 `;
                 resultDiv.style.display = 'block';
-                showToast('Пароль сброшен! Проверьте почту или скопируйте пароль выше', 'success');
+                if (window.showToast) window.showToast('Пароль сброшен! Проверьте почту', 'success');
 
             } else {
                 resultDiv.innerHTML = `
                     <div class="reset-result-box error">
                         <div class="d-flex align-items-start gap-2">
-                            <i class="bi bi-exclamation-triangle-fill" style="color: #dc2626; font-size: 1.2rem; margin-top: 2px;"></i>
-                            <div>
-                                <strong style="color: #991b1b;">${data.message}</strong>
-                            </div>
+                            <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                            <div><strong style="color:#991b1b;">${data.message}</strong></div>
                         </div>
                     </div>
                 `;
                 resultDiv.style.display = 'block';
-                showToast(data.message, 'warning');
+                if (window.showToast) window.showToast(data.message, 'warning');
             }
 
         } catch (error) {
@@ -1176,121 +1169,73 @@
             resultDiv.innerHTML = `
                 <div class="reset-result-box error">
                     <div class="d-flex align-items-start gap-2">
-                        <i class="bi bi-exclamation-triangle-fill" style="color: #dc2626; font-size: 1.2rem; margin-top: 2px;"></i>
-                        <div>
-                            <strong style="color: #991b1b;">Ошибка соединения с сервером. Попробуйте позже.</strong>
-                        </div>
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                        <div><strong style="color:#991b1b;">Ошибка соединения. Попробуйте позже.</strong></div>
                     </div>
                 </div>
             `;
             resultDiv.style.display = 'block';
-            showToast('Ошибка соединения с сервером', 'danger');
+            if (window.showToast) window.showToast('Ошибка соединения', 'danger');
         }
 
-        // Разблокируем кнопку
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-arrow-repeat me-2"></i>Сбросить пароль от Moodle';
     }
 
-    // Функция показа/скрытия пароля
     function togglePasswordReveal(password) {
         const display = document.getElementById('passwordDisplay');
         if (display) {
             const currentText = display.textContent.trim();
             if (currentText.includes('••••••••')) {
-                display.innerHTML = `
-                    ${escapeHtml(password)}
-                    <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(password)}')">
-                        <i class="bi bi-eye-slash"></i> Скрыть
-                    </button>
-                `;
+                display.innerHTML = `${escapeHtml(password)} <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(password)}')">Скрыть</button>`;
             } else {
-                display.innerHTML = `
-                    ••••••••
-                    <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(password)}')">
-                        <i class="bi bi-eye"></i> Показать
-                    </button>
-                `;
+                display.innerHTML = `•••••••• <button class="password-reveal-btn" onclick="togglePasswordReveal('${escapeHtml(password)}')">Показать</button>`;
             }
         }
     }
 
-    // ============================================================
-    // ФУНКЦИЯ ПОКАЗА РАЗДЕЛОВ (ОБНОВЛЕНА)
-    // ============================================================
-
+    // ========== NAVIGATION ==========
     function showSection(section) {
-        document.getElementById('profileSection').style.display = 'none';
-        document.getElementById('badgesSection').style.display = 'none';
-        document.getElementById('coursesSection').style.display = 'none';
-        document.getElementById('favoritesSection').style.display = 'none';
-        document.getElementById('watchlaterSection').style.display = 'none';
-        document.getElementById('moodleSection').style.display = 'none';
-
-        document.querySelectorAll('.nav-pills-custom .nav-link').forEach(link => {
-            link.classList.remove('active');
+        const sections = ['profileSection','badgesSection','coursesSection','favoritesSection','watchlaterSection','moodleSection'];
+        sections.forEach(s => {
+            const el = document.getElementById(s);
+            if (el) el.style.display = 'none';
         });
 
-        const linkMap = {
-            'profile': 0,
-            'badges': 1,
-            'courses': 2,
-            'favorites': 3,
-            'watchlater': 4,
-            'moodle': 5
-        };
+        document.querySelectorAll('.nav-pills-custom .nav-link').forEach(link => link.classList.remove('active'));
 
+        const map = { 'profile':0,'badges':1,'courses':2,'favorites':3,'watchlater':4,'moodle':5 };
         const links = document.querySelectorAll('.nav-pills-custom .nav-link');
-        if (linkMap[section] !== undefined) {
-            links[linkMap[section]].classList.add('active');
-        }
+        if (links[map[section]]) links[map[section]].classList.add('active');
 
-        if (section === 'profile') {
-            document.getElementById('profileSection').style.display = 'block';
-            loadProfile();
-            loadStats();
-        } else if (section === 'badges') {
-            document.getElementById('badgesSection').style.display = 'block';
-            loadAchievements();
-        } else if (section === 'courses') {
-            document.getElementById('coursesSection').style.display = 'block';
-            loadUserCourses();
-            loadStats();
-        } else if (section === 'favorites') {
-            document.getElementById('favoritesSection').style.display = 'block';
-            loadFavorites();
-        } else if (section === 'watchlater') {
-            document.getElementById('watchlaterSection').style.display = 'block';
-            loadWatchLater();
-        } else if (section === 'moodle') {
-            document.getElementById('moodleSection').style.display = 'block';
-            loadSavedMoodleCredentials();
-            loadMoodleStatus();
-        }
+        const el = document.getElementById(section+'Section');
+        if (el) el.style.display = 'block';
+
+        if (section === 'profile') { loadProfile(); loadStats(); }
+        if (section === 'badges') { loadAchievements(); }
+        if (section === 'courses') { loadUserCourses(); loadStats(); }
+        if (section === 'favorites') { loadFavorites(); }
+        if (section === 'watchlater') { loadWatchLater(); }
+        if (section === 'moodle') { loadSavedMoodleCredentials(); loadMoodleStatus(); }
     }
 
-    // ========== ПРОВЕРКА, НУЖНО ЛИ ОТКРЫТЬ РАЗДЕЛ MOODLE ==========
+    // ========== MOODLE REDIRECT CHECK ==========
     (function checkMoodleRedirect() {
         const shouldOpenMoodle = localStorage.getItem('openMoodleSection');
         if (shouldOpenMoodle === 'true') {
             localStorage.removeItem('openMoodleSection');
-            // Небольшая задержка, чтобы страница успела загрузиться
-            setTimeout(() => {
-                showSection('moodle');
-            }, 300);
+            setTimeout(() => { showSection('moodle'); }, 300);
         }
     })();
 
-    // Обновляем прогресс из Moodle каждые 60 секунд
+    // ========== AUTO REFRESH ==========
     setInterval(() => {
         userCourses.forEach(course => {
-            if (course.moodle_course_id) {
-                refreshMoodleProgress(course.course_id);
-            }
+            if (course.moodle_course_id) { refreshMoodleProgress(course.course_id); }
         });
     }, 60000);
 
-    // Инициализация
+    // ========== INIT ==========
     loadProfile();
     loadStats();
     loadUserCourses();

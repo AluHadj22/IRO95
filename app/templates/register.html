@@ -3,18 +3,140 @@
 {% block title %}Регистрация - ИРО ЧР{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/register.css">
+<link rel="preload" href="/static/images/register.jpg" as="image">
+<style>
+:root { --card-radius: 16px; }
+.register-hero {
+    background: linear-gradient(135deg, rgba(26,79,122,0.06), rgba(42,111,168,0.03));
+    padding: 36px 0 8px;
+}
+.register-hero .hero-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(26,79,122,0.08);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+.register-hero h1 {
+    font-size: clamp(1.6rem, 3.6vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+.register-hero p { color: var(--gray); }
+
+.register-page { padding: 36px 0 80px; }
+.register-split { display:flex; gap: 28px; align-items: stretch; }
+
+.register-card { border-radius: var(--card-radius); overflow: hidden; border: 1px solid var(--border); box-shadow: 0 18px 50px rgba(10,20,30,0.06); flex: 1; }
+.register-card .card-header { background: linear-gradient(90deg, rgba(26,79,122,0.03), rgba(26,79,122,0.01)); padding: 22px; }
+.register-card .card-header h3 { margin: 0; font-weight: 800; color: var(--dark); }
+.register-card .card-header p { margin: 0; color: var(--gray); }
+.register-card .card-body { padding: 22px; }
+
+.btn-register { width: 100%; padding: 12px 16px; border-radius: 12px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); color: #fff; border: none; font-weight: 700; box-shadow: 0 8px 30px rgba(26,79,122,0.18); transition: var(--transition); }
+.btn-register:hover { transform: translateY(-3px); }
+
+.register-divider { text-align: center; margin: 16px 0; color: var(--gray); position: relative; }
+.register-divider::before, .register-divider::after { content: ''; position:absolute; top: 50%; width: 38%; height: 1px; background: var(--border); }
+.register-divider::before { left: 0; }
+.register-divider::after { right: 0; }
+
+.login-link a { color: var(--primary); font-weight: 700; text-decoration: none; }
+
+.register-art {
+    background: linear-gradient(180deg, rgba(42,111,168,0.06), rgba(26,79,122,0.03));
+    border-radius: var(--card-radius);
+    padding: 20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height: 360px;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 40px rgba(10,20,30,0.04);
+    flex: 1;
+}
+.register-art .art-title { font-weight:800; color:var(--dark); margin-bottom:8px; text-align:center; }
+.register-art .art-sub { color:var(--gray); text-align:center; margin-bottom:12px; }
+.register-art img { max-width: 100%; height: auto; border-radius: 10px; }
+
+.shape-blob { position:absolute; filter: blur(28px); opacity:0.12; z-index:0; }
+
+@media (min-width: 992px) {
+    .register-form-col { flex: 0 0 58%; max-width: 58%; }
+    .register-art-col { flex: 0 0 42%; max-width: 42%; }
+}
+@media (max-width: 991.98px) {
+    .register-split { flex-direction: column-reverse; }
+    .register-art { min-height: 220px; }
+}
+
+input:focus, button:focus { outline: 2px solid rgba(26,79,122,0.12); outline-offset: 2px; }
+
+/* ✅ ГАРАНТИРОВАННОЕ ИСПРАВЛЕНИЕ ПОЛЕЙ ВВОДА */
+.form-control,
+.input-group .form-control,
+#full_name, #email, #phone, #organization, #password, #confirm, #position_custom {
+    pointer-events: auto !important;
+    cursor: text !important;
+}
+.form-control::placeholder {
+    pointer-events: none !important;
+}
+
+/* Стили для требований к паролю */
+#passwordRequirements {
+    margin-top: 8px;
+    padding: 10px 14px;
+    background: rgba(26,79,122,0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(26,79,122,0.06);
+}
+.requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    font-size: 0.8rem;
+}
+.req-icon { display: inline-flex; align-items: center; justify-content: center; width: 18px; color: var(--gray); font-size: 0.7rem; }
+.req-icon.pending { color: var(--gray); }
+.req-icon.valid { color: #10b981; }
+.req-text { color: var(--gray); font-size: 0.8rem; transition: all 0.3s ease; }
+.req-text.valid { color: #10b981; }
+
+#passwordMatchHint { font-size: 0.8rem; margin-top: 6px; transition: all 0.3s ease; }
+.form-control.is-valid { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+.form-control.is-invalid { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+
+.position-group { margin-bottom: 1rem; }
+.position-group .help-text { font-size: 0.75rem; color: var(--gray); margin-top: 6px; display: block; }
+
+.security-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(26,79,122,0.04);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    border: 1px solid rgba(26,79,122,0.06);
+}
+.security-alert .shield-icon { font-size: 1.4rem; color: var(--primary); }
+.security-alert .security-text { font-size: 0.9rem; color: var(--dark); }
+.security-alert .security-text strong { color: var(--primary); }
+
+.form-check-label a { color: var(--primary); text-decoration: none; }
+.form-check-label a:hover { text-decoration: underline; }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция (светлая) -->
 <div class="register-hero">
     <div class="container text-center">
-        <div class="hero-icon">
-            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#1a4f7a" opacity="0.9"/>
-            </svg>
-        </div>
         <div class="hero-badge">Создание учётной записи</div>
         <h1 class="display-5 fw-bold">
             <span class="gold">Регистрация</span>
@@ -23,14 +145,11 @@
     </div>
 </div>
 
-<div class="container mt-4 mb-5 register-page">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card register-card">
+<div class="container register-page">
+    <div class="register-split position-relative">
+        <div class="register-form-col">
+            <div class="card register-card" data-aos="fade-up">
                 <div class="card-header text-center">
-                    <div class="header-icon">
-                        <i class="bi bi-person-plus"></i>
-                    </div>
                     <h3>Создание аккаунта</h3>
                     <p>Заполните все обязательные поля</p>
                 </div>
@@ -38,23 +157,22 @@
                     <form id="registerForm" novalidate>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label" for="full_name">
-                                    <i class="bi bi-person"></i> ФИО <span class="required">*</span>
+                                <label class="form-label fw-bold" for="full_name">
+                                    <i class="bi bi-person"></i> ФИО <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="full_name" placeholder="Иванов Иван Иванович" required autocomplete="name">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label" for="email">
-                                    <i class="bi bi-envelope"></i> Email <span class="required">*</span>
+                                <label class="form-label fw-bold" for="email">
+                                    <i class="bi bi-envelope"></i> Email <span class="text-danger">*</span>
                                 </label>
                                 <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required autocomplete="email">
                             </div>
                         </div>
 
-                        <!-- ===== ВЫБОР ДОЛЖНОСТИ ===== -->
                         <div class="position-group">
-                            <label class="form-label">
-                                <i class="bi bi-briefcase"></i> Ваша должность <span class="required">*</span>
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-briefcase"></i> Ваша должность <span class="text-danger">*</span>
                             </label>
                             <select class="form-select" id="position_type" required>
                                 <option value="">Выберите должность</option>
@@ -64,26 +182,26 @@
                                 <option value="Иное">Иное (ввести свою)</option>
                             </select>
                             <div id="position_custom_container" style="display: none; margin-top: 10px;">
-                                <label class="form-label" style="font-size: 0.8rem;">
-                                    Укажите вашу должность <span class="required">*</span>
+                                <label class="form-label fw-bold" style="font-size: 0.85rem;">
+                                    Укажите вашу должность <span class="text-danger">*</span>
                                 </label>
                                 <input type="text" class="form-control" id="position_custom" 
                                        placeholder="Например: Методист, Социальный педагог, Психолог...">
                             </div>
-                            <small class="help-text" style="font-size: 0.75rem; color: var(--gray); margin-top: 6px; display: block;">
+                            <small class="help-text">
                                 <i class="bi bi-info-circle"></i> Выберите свою должность или укажите свою
                             </small>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label" for="phone">
+                                <label class="form-label fw-bold" for="phone">
                                     <i class="bi bi-phone"></i> Телефон
                                 </label>
                                 <input type="tel" class="form-control" id="phone" placeholder="+7 (999) 123-45-67" autocomplete="tel">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label" for="organization">
+                                <label class="form-label fw-bold" for="organization">
                                     <i class="bi bi-building"></i> Организация
                                 </label>
                                 <input type="text" class="form-control" id="organization" placeholder="Школа №1" autocomplete="organization">
@@ -92,8 +210,8 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label" for="password">
-                                    <i class="bi bi-lock"></i> Пароль <span class="required">*</span>
+                                <label class="form-label fw-bold" for="password">
+                                    <i class="bi bi-lock"></i> Пароль <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="password" placeholder="Введите пароль" required autocomplete="new-password">
@@ -101,7 +219,6 @@
                                         <i class="bi bi-eye" id="passwordIcon"></i>
                                     </button>
                                 </div>
-                                <!-- Требования к паролю -->
                                 <div id="passwordRequirements">
                                     <div class="requirement-item">
                                         <span class="req-icon pending" id="reqLengthIcon"><i class="bi bi-circle"></i></span>
@@ -126,8 +243,8 @@
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label" for="confirm">
-                                    <i class="bi bi-shield-lock"></i> Подтверждение <span class="required">*</span>
+                                <label class="form-label fw-bold" for="confirm">
+                                    <i class="bi bi-shield-lock"></i> Подтверждение <span class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="confirm" placeholder="Повторите пароль" required autocomplete="new-password">
@@ -135,13 +252,12 @@
                                         <i class="bi bi-eye" id="confirmIcon"></i>
                                     </button>
                                 </div>
-                                <div id="passwordMatchHint" style="font-size: 0.8rem; margin-top: 6px; color: var(--gray);">
+                                <div id="passwordMatchHint">
                                     <i class="bi bi-info-circle me-1"></i> Пароли должны совпадать
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- ===== ЧЕКБОКСЫ СОГЛАСИЙ (БЕЗ ОФЕРТЫ) ===== -->
+
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agree_policy" required>
@@ -157,11 +273,8 @@
                             </div>
                         </div>
 
-                        <!-- Защита данных -->
                         <div class="security-alert">
-                            <div class="shield-icon">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
+                            <div class="shield-icon"><i class="bi bi-shield-check"></i></div>
                             <div class="security-text">
                                 <strong>Все данные защищены!</strong>
                                 <span>Используется надёжное шифрование данных.</span>
@@ -172,7 +285,10 @@
                             <i class="bi bi-person-plus me-2"></i>Зарегистрироваться
                         </button>
                     </form>
-                    <div class="mt-4 text-center">
+
+                    <div class="register-divider">или</div>
+
+                    <div class="text-center">
                         <p class="login-link">
                             Уже есть аккаунт? <a href="/login">Войдите в систему</a>
                         </p>
@@ -180,6 +296,19 @@
                 </div>
             </div>
         </div>
+
+        <div class="register-art-col">
+            <div class="register-art" data-aos="fade-left">
+                <div class="art-title">Начните свой путь</div>
+                <div class="art-sub">Присоединяйтесь к сообществу педагогов</div>
+                <img src="/static/images/learning-illustration.jpg" alt="Иллюстрация обучения" role="img" aria-hidden="false">
+            </div>
+        </div>
+
+        <svg class="shape-blob" width="320" height="240" style="left:-40px; top:-30px;" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M53 6C80 -6 129 -2 170 13C211 28 246 64 253 99C260 134 238 171 196 199C154 227 88 242 52 219C16 196 -4 143 10 100C24 57 26 41 53 6Z" fill="url(#g1)"/>
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1A4F7A" stop-opacity="0.25"/><stop offset="1" stop-color="#2A6FA8" stop-opacity="0.06"/></linearGradient></defs>
+        </svg>
     </div>
 </div>
 
@@ -208,7 +337,6 @@ document.getElementById('position_type').addEventListener('change', function() {
 document.getElementById('togglePassword').addEventListener('click', function() {
     const passwordInput = document.getElementById('password');
     const icon = document.getElementById('passwordIcon');
-    
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
         icon.className = 'bi bi-eye-slash';
@@ -221,7 +349,6 @@ document.getElementById('togglePassword').addEventListener('click', function() {
 document.getElementById('toggleConfirm').addEventListener('click', function() {
     const confirmInput = document.getElementById('confirm');
     const icon = document.getElementById('confirmIcon');
-    
     if (confirmInput.type === 'password') {
         confirmInput.type = 'text';
         icon.className = 'bi bi-eye-slash';
@@ -232,7 +359,7 @@ document.getElementById('toggleConfirm').addEventListener('click', function() {
 });
 
 // ============================================================
-// ПРОВЕРКА СИЛЫ ПАРОЛЯ В РЕАЛЬНОМ ВРЕМЕНИ
+// ПРОВЕРКА СИЛЫ ПАРОЛЯ
 // ============================================================
 const requirements = [
     { id: 'reqLength', text: 'reqLengthText', test: (p) => p.length >= 8, label: 'Минимум 8 символов' },
@@ -244,12 +371,10 @@ const requirements = [
 
 document.getElementById('password').addEventListener('input', function() {
     const password = this.value;
-    
     requirements.forEach(req => {
         const isValid = req.test(password);
         const icon = document.getElementById(req.id + 'Icon');
         const text = document.getElementById(req.text);
-        
         if (isValid) {
             icon.className = 'req-icon valid';
             icon.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
@@ -278,15 +403,14 @@ document.getElementById('confirm').addEventListener('input', function() {
         this.classList.remove('is-valid', 'is-invalid');
         return;
     }
-    
     if (password === confirm) {
-        hint.innerHTML = '<i class="bi bi-check-circle-fill me-1" style="color: var(--success);"></i> Пароли совпадают';
-        hint.style.color = 'var(--success)';
+        hint.innerHTML = '<i class="bi bi-check-circle-fill me-1" style="color: #10b981;"></i> Пароли совпадают';
+        hint.style.color = '#10b981';
         this.classList.remove('is-invalid');
         this.classList.add('is-valid');
     } else {
-        hint.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1" style="color: var(--danger);"></i> Пароли не совпадают';
-        hint.style.color = 'var(--danger)';
+        hint.innerHTML = '<i class="bi bi-exclamation-circle-fill me-1" style="color: #ef4444;"></i> Пароли не совпадают';
+        hint.style.color = '#ef4444';
         this.classList.remove('is-valid');
         this.classList.add('is-invalid');
     }
@@ -300,7 +424,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     
     const btn = document.getElementById('registerBtn');
     
-    // Проверка чекбоксов (только политика и согласие на обработку ПД)
     if (!document.getElementById('agree_policy').checked) {
         if (window.showToast) window.showToast('Необходимо принять Политику конфиденциальности', 'danger');
         return;
@@ -312,25 +435,18 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     
     const password = document.getElementById('password').value;
     const confirm = document.getElementById('confirm').value;
-    
     if (password !== confirm) {
         if (window.showToast) window.showToast('Пароли не совпадают', 'danger');
         return;
     }
-    
-    // Проверка требований к паролю
     const allValid = requirements.every(req => req.test(password));
     if (!allValid) {
         if (window.showToast) window.showToast('Пароль не соответствует требованиям безопасности', 'danger');
         return;
     }
     
-    // ============================================================
-    // ФОРМИРУЕМ ДАННЫЕ ДЛЯ ОТПРАВКИ
-    // ============================================================
     const positionType = document.getElementById('position_type').value;
     const positionCustom = document.getElementById('position_custom').value.trim();
-    
     let positionValue = null;
     if (positionType === 'Иное') {
         positionValue = positionCustom;
@@ -349,7 +465,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         position_custom: positionCustom || null
     };
     
-    // Блокируем кнопку
     btn.disabled = true;
     const originalHtml = btn.innerHTML;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Регистрация...';
@@ -360,7 +475,6 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-        
         if (response.ok) {
             const result = await response.json();
             if (window.showToast) {
@@ -383,19 +497,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     }
 });
 
-// ============================================================
-// AOS ДЛЯ АНИМАЦИЙ
-// ============================================================
-try {
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 600,
-            once: true,
-            offset: 30
-        });
-    }
-} catch(e) {
-    console.warn('AOS init error:', e);
-}
+// AOS
+try { if (typeof AOS !== 'undefined') AOS.init({ duration: 700, once: true, offset: 80 }); } catch(e){ }
 </script>
 {% endblock %}

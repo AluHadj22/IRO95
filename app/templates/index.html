@@ -5,49 +5,438 @@
 {% block extra_css %}
 <link rel="stylesheet" href="/static/css/index.css">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600;1,700&display=swap" rel="stylesheet">
+
+<style>
+    /* ============================================================
+       УЛУЧШЕННЫЙ ДИЗАЙН ГЛАВНОЙ СТРАНИЦЫ
+       ============================================================ */
+
+    /* ----- Общие улучшения ----- */
+    .section-title {
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+        color: var(--primary-dark);
+        font-family: 'Playfair Display', serif;
+    }
+    .section-subtitle {
+        font-size: 1.1rem;
+        color: var(--gray);
+        font-weight: 400;
+        margin-bottom: 1.5rem;
+    }
+    .section-badge {
+        display: inline-block;
+        background: rgba(26,79,122,0.08);
+        color: var(--primary);
+        padding: 0.3rem 1rem;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    /* ----- Категории (улучшенные карточки) ----- */
+    .category-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.8rem 1.2rem;
+        text-align: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .category-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .category-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(26,79,122,0.10);
+        border-color: rgba(26,79,122,0.15);
+    }
+    .category-card:hover::before {
+        opacity: 1;
+    }
+    .category-card .cat-icon {
+        font-size: 2.4rem;
+        color: var(--primary);
+        background: rgba(26,79,122,0.06);
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        margin-bottom: 0.8rem;
+        transition: all 0.3s ease;
+    }
+    .category-card:hover .cat-icon {
+        background: var(--primary-gradient);
+        color: #fff;
+        transform: scale(1.05) rotate(-4deg);
+        box-shadow: 0 8px 24px rgba(26,79,122,0.15);
+    }
+    .category-card h5 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.4rem;
+        color: var(--dark);
+    }
+    .category-card p {
+        font-size: 0.9rem;
+        color: var(--gray);
+        margin-bottom: 0.8rem;
+        flex-grow: 1;
+        line-height: 1.5;
+    }
+    .category-card .btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: transparent;
+        border-radius: 30px;
+        padding: 0.3rem 1.2rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .category-card .btn-outline-primary:hover {
+        background: var(--primary);
+        color: #fff;
+        transform: translateX(4px);
+    }
+    .category-card .btn-outline-primary i {
+        transition: transform 0.3s ease;
+    }
+    .category-card .btn-outline-primary:hover i {
+        transform: translateX(4px);
+    }
+
+    /* ----- Карточки курсов (улучшенные) ----- */
+    .course-card {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: #fff;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .course-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 60px rgba(26,79,122,0.10);
+        border-color: rgba(26,79,122,0.12);
+    }
+    .course-card-img {
+        height: 200px;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .course-card:hover .course-card-img {
+        transform: scale(1.03);
+    }
+    .course-card-placeholder {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f0f6fc, #e8f0fe);
+        color: var(--gray);
+        font-size: 3rem;
+    }
+    .course-card .card-body {
+        padding: 1.4rem 1.2rem 1.2rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .course-card .card-body .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1.3;
+        color: var(--dark);
+    }
+    .course-card .card-body .card-text {
+        font-size: 0.9rem;
+        color: var(--gray);
+        line-height: 1.6;
+        flex-grow: 1;
+        margin-bottom: 0.8rem;
+    }
+    .course-card .card-body .course-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .course-card .card-body .course-meta .badge-category {
+        background: rgba(26,79,122,0.07);
+        color: var(--primary);
+        padding: 0.25rem 0.8rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .course-card .card-body .course-meta .badge-new {
+        background: linear-gradient(135deg, #ff7a7a, #ff5e5e);
+        color: #fff;
+        padding: 0.2rem 0.7rem;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .course-card .card-body .btn-primary {
+        border-radius: 30px;
+        padding: 0.4rem 1.4rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px rgba(26,79,122,0.15);
+    }
+    .course-card .card-body .btn-primary:hover {
+        transform: translateX(4px);
+        box-shadow: 0 6px 24px rgba(26,79,122,0.25);
+    }
+    .course-card .card-body .btn-primary i {
+        transition: transform 0.3s ease;
+    }
+    .course-card .card-body .btn-primary:hover i {
+        transform: translateX(4px);
+    }
+
+    /* ----- Блок "Почему выбирают нас" (преимущества) ----- */
+    .advantages-section {
+        background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
+        padding: 3rem 0;
+        border-radius: 24px;
+        margin: 2rem 0;
+        /* Центрирование самой секции */
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+    }
+
+    /* Центрирование содержимого карточек преимуществ */
+    .advantage-item {
+        text-align: center;            /* <-- добавлено для центрирования текста */
+        padding: 1.5rem 1rem;
+        border-radius: 16px;
+        background: #fff;
+        border: 1px solid var(--border);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .advantage-item:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(26,79,122,0.08);
+        border-color: rgba(26,79,122,0.1);
+    }
+    .advantage-item .adv-icon {
+        font-size: 2.8rem;
+        color: var(--primary);
+        background: rgba(26,79,122,0.06);
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin: 0 auto 0.8rem;
+        transition: all 0.3s ease;
+    }
+    .advantage-item:hover .adv-icon {
+        background: var(--primary-gradient);
+        color: #fff;
+        transform: scale(1.05) rotate(-4deg);
+        box-shadow: 0 8px 24px rgba(26,79,122,0.15);
+    }
+    .advantage-item h5 {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.4rem;
+        color: var(--dark);
+    }
+    .advantage-item p {
+        font-size: 0.9rem;
+        color: var(--gray);
+        margin-bottom: 0;
+        line-height: 1.5;
+    }
+
+    /* ----- Блок об институте (улучшенный) ----- */
+    .about-block {
+        background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
+        border-radius: 24px;
+        padding: 2.5rem 2rem;
+        border: 1px solid var(--border);
+        box-shadow: 0 8px 32px rgba(26,79,122,0.04);
+        transition: all 0.3s ease;
+    }
+    .about-block:hover {
+        box-shadow: 0 12px 48px rgba(26,79,122,0.08);
+    }
+    .about-block .info-heading {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        color: var(--primary-dark);
+        margin-bottom: 0.8rem;
+    }
+    .about-block .info-text {
+        font-size: 1.05rem;
+        color: var(--gray);
+        line-height: 1.7;
+        max-width: 680px;
+    }
+    .about-block .stat-box {
+        background: #fff;
+        border-radius: 20px;
+        padding: 1.5rem 1.8rem;
+        box-shadow: 0 4px 20px rgba(26,79,122,0.06);
+        border: 1px solid var(--border);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    .about-block .stat-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 32px rgba(26,79,122,0.10);
+    }
+    .about-block .stat-box .stat-number {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--primary);
+        line-height: 1.2;
+        font-family: 'Playfair Display', serif;
+    }
+    .about-block .stat-box .stat-label {
+        font-size: 0.95rem;
+        color: var(--gray);
+        font-weight: 500;
+    }
+
+    /* ----- Секция с партнерами / логотипами ----- */
+    .partners-section {
+        padding: 1.5rem 0;
+    }
+    .partners-section .partner-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        padding: 0.5rem;
+        text-decoration: none;
+        color: inherit;
+    }
+    .partners-section .partner-item:hover {
+        transform: scale(1.02);
+    }
+    .partners-section .partner-item img.partner-logo {
+        max-height: 70px;
+        width: auto;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+    .partners-section .partner-item:hover img.partner-logo {
+        transform: scale(1.05);
+    }
+
+    /* ----- Адаптивность ----- */
+    @media (max-width: 991.98px) {
+        .about-block .row {
+            flex-direction: column;
+            text-align: center;
+        }
+        .about-block .info-text {
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .about-block .stat-box {
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 280px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .advantages-section {
+            padding: 2rem 0;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .category-card {
+            padding: 1.2rem 0.8rem;
+        }
+        .category-card .cat-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.8rem;
+        }
+        .category-card h5 {
+            font-size: 0.95rem;
+        }
+        .course-card-img {
+            height: 160px;
+        }
+        .about-block {
+            padding: 1.5rem 1rem;
+        }
+        .about-block .stat-box .stat-number {
+            font-size: 2.2rem;
+        }
+        .partners-section .partner-item img.partner-logo {
+            max-height: 50px;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция -->
-<section class="hero-section" aria-label="Главный баннер">
-    <div class="container text-center position-relative hero-content">
-        <div class="hero-icon" aria-hidden="true">
-            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" fill="#1a4f7a" opacity="0.9"/>
-            </svg>
-        </div>
-        <div class="accent-badge mb-3">Система дистанционного обучения</div>
-        <h1 class="hero-title mb-3">
-            Добро пожаловать в <span class="accent">ГБУ ДПО "ИРО ЧР"</span>
-        </h1>
-        <p class="hero-subtitle mb-2">Пространство профессионального роста</p>
-        <p class="hero-region mb-4">Чеченской Республики</p>
-        <div class="d-flex justify-content-center gap-3 flex-wrap hero-actions">
-            <a href="/courses" class="btn btn-primary btn-lg btn-italic px-5">
-                <i class="bi bi-book me-2" aria-hidden="true"></i>Каталог курсов
-            </a>
-            <a href="/register" class="btn btn-outline-primary btn-lg btn-italic px-4">
-                <i class="bi bi-person-plus me-2" aria-hidden="true"></i>Регистрация
-            </a>
-        </div>
-    </div>
-    <div class="hero-waves" aria-hidden="true"></div>
-</section>
+{# Hero is shown in base.html on the homepage #}
 
-<!-- Категории -->
+<!-- ============================== -->
+<!-- 1. КАТЕГОРИИ                   -->
+<!-- ============================== -->
 <section class="container mt-4 mt-md-5" aria-labelledby="categories-heading">
     <div class="text-center mb-4 mb-md-5" data-aos="fade-up">
+        <span class="section-badge">Направления</span>
         <h2 id="categories-heading" class="section-title">Популярные направления</h2>
         <p class="section-subtitle">Выберите интересующую вас категорию</p>
     </div>
     <div class="row g-3 g-md-4">
         {% for category in categories %}
         <div class="col-6 col-md-4 col-lg-3" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
-            <article class="category-card h-100">
-                <i class="bi bi-folder-fill" aria-hidden="true"></i>
-                <h5 class="mt-3">{{ category.name }}</h5>
+            <article class="category-card">
+                <div class="cat-icon" aria-hidden="true">
+                    <i class="bi bi-folder-fill"></i>
+                </div>
+                <h5>{{ category.name }}</h5>
                 <p>{{ category.description[:60] if category.description else 'Курсы повышения квалификации' }}</p>
-                <a href="/courses?category={{ category.id }}" class="btn btn-outline-primary btn-sm mt-2">
+                <a href="/courses?category={{ category.id }}" class="btn btn-outline-primary btn-sm">
                     Подробнее <i class="bi bi-arrow-right" aria-hidden="true"></i>
                 </a>
             </article>
@@ -56,36 +445,73 @@
     </div>
 </section>
 
-<!-- Новые курсы -->
+<!-- ============================== -->
+<!-- 2. ПРЕИМУЩЕСТВА (ЦЕНТРИРОВАННАЯ СЕКЦИЯ) -->
+<!-- ============================== -->
+<section class="container advantages-section" aria-labelledby="advantages-heading">
+    <div class="text-center mb-4" data-aos="fade-up">
+        <span class="section-badge">Почему мы</span>
+        <h2 id="advantages-heading" class="section-title">Преимущества обучения у нас</h2>
+        <p class="section-subtitle">Создаем комфортные условия для профессионального роста</p>
+    </div>
+    <div class="row g-3 g-md-4 justify-content-center">
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="advantage-item">
+                <div class="adv-icon" aria-hidden="true"><i class="bi bi-laptop"></i></div>
+                <h5>Дистанционные технологии</h5>
+                <p>Обучение с применением современных электронных платформ и дистанционных технологий.</p>
+            </div>
+        </div>
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="advantage-item">
+                <div class="adv-icon" aria-hidden="true"><i class="bi bi-people"></i></div>
+                <h5>Опытные преподаватели</h5>
+                <p>Высококвалифицированные педагоги и эксперты в области образования.</p>
+            </div>
+        </div>
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="advantage-item">
+                <div class="adv-icon" aria-hidden="true"><i class="bi bi-clock-history"></i></div>
+                <h5>Гибкий график</h5>
+                <p>Возможность совмещать обучение с работой благодаря удобному расписанию.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================== -->
+<!-- 3. НОВЫЕ КУРСЫ                 -->
+<!-- ============================== -->
 <section class="container mt-4 mt-md-5 mb-4 mb-md-5" aria-labelledby="courses-heading">
     <div class="text-center mb-4 mb-md-5" data-aos="fade-up">
+        <span class="section-badge">Актуально</span>
         <h2 id="courses-heading" class="section-title">Новые курсы</h2>
         <p class="section-subtitle">Актуальные программы повышения квалификации</p>
     </div>
     <div class="row g-3 g-md-4">
         {% for course in courses %}
         <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 80 }}">
-            <article class="card h-100">
+            <article class="course-card">
                 {% if course.image_url %}
                 <img src="{{ course.image_url }}" class="course-card-img" alt="{{ course.title }}" loading="lazy" width="400" height="200">
                 {% else %}
-                <div class="course-card-img course-card-placeholder" aria-hidden="true">
-                    <i class="bi bi-book fs-1"></i>
+                <div class="course-card-placeholder" aria-hidden="true">
+                    <i class="bi bi-book"></i>
                 </div>
                 {% endif %}
                 <div class="card-body">
-                    <span class="badge badge-primary mb-2">{{ course.category.name if course.category else "Обучение" }}</span>
                     <h5 class="card-title">{{ course.title }}</h5>
                     <p class="card-text">
                         {{ course.short_description[:80] if course.short_description else (course.description[:80] if course.description else "Описание курса") }}...
                     </p>
-                    <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="course-meta">
+                        <span class="badge-category">{{ course.category.name if course.category else "Обучение" }}</span>
+                        <span class="badge-new"><i class="bi bi-clock" aria-hidden="true"></i> Новый</span>
+                    </div>
+                    <div class="mt-3">
                         <a href="/course/{{ course.id }}" class="btn btn-primary btn-sm">
                             Подробнее <i class="bi bi-arrow-right" aria-hidden="true"></i>
                         </a>
-                        <span class="badge-new">
-                            <i class="bi bi-clock" aria-hidden="true"></i> Новый
-                        </span>
                     </div>
                 </div>
             </article>
@@ -93,15 +519,17 @@
         {% endfor %}
     </div>
     <div class="text-center mt-4 mt-md-5" data-aos="fade-up">
-        <a href="/courses" class="btn btn-primary btn-lg px-4 px-md-5 btn-italic">
+        <a href="/courses" class="btn btn-primary btn-lg px-4 px-md-5">
             Все курсы <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
         </a>
     </div>
 </section>
 
-<!-- Информация об институте -->
+<!-- ============================== -->
+<!-- 4. ОБ ИНСТИТУТЕ                -->
+<!-- ============================== -->
 <section class="container mt-3 mt-md-4 mb-4 mb-md-5" data-aos="fade-up" aria-labelledby="about-heading">
-    <div class="info-card-block">
+    <div class="about-block">
         <div class="row align-items-center">
             <div class="col-lg-8">
                 <h3 id="about-heading" class="info-heading">ГБУ ДПО «Институт развития образования Чеченской Республики»</h3>
@@ -112,12 +540,40 @@
                 </p>
             </div>
             <div class="col-lg-4 text-center mt-4 mt-lg-0">
-                <div class="stat-box d-inline-block w-100">
-                    <div class="stat-number">{{ courses|length }}+</div>
+                <div class="stat-box">
+                    <div class="stat-number">{{ courses|length }}</div>
                     <div class="stat-label">активных курсов</div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- ============================== -->
+<!-- 5. ПАРТНЕРЫ / ЛОГОТИПЫ        -->
+<!-- ============================== -->
+<section class="container partners-section" aria-labelledby="partners-heading">
+    <div class="text-center mb-3" data-aos="fade-up">
+        <span class="section-badge">Партнеры</span>
+        
+    </div>
+    <div class="row align-items-center justify-content-center g-3 g-md-4" data-aos="fade-up">
+        <div class="col-6 col-md-4 col-lg-3 text-center">
+            <a class="partner-item" href="https://mon95.ru/" target="_blank" rel="noopener noreferrer" aria-label="Сайт Министерства образования и науки Чеченской Республики">
+                <img src="/static/images/mon95.svg" alt="Министерство образования и науки Чеченской Республики" class="partner-logo" loading="lazy">
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 text-center">
+            <a class="partner-item" href="https://znanierussia.ru/" target="_blank" rel="noopener noreferrer" aria-label="Сайт Российского общества «Знание»">
+                <img src="/static/images/znani.jpg" alt="Российское общество «Знание»" class="partner-logo" loading="lazy">
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-3 text-center">
+            <a class="partner-item" href="https://cnppmpr.ru/" target="_blank" rel="noopener noreferrer" aria-label="Сайт ЦНППМ">
+                <img src="/static/images/navbar-logo.png" alt="ЦНППМ" class="partner-logo" loading="lazy">
+            </a>
+        </div>
+    </div>
+</section>
+
 {% endblock %}

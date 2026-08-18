@@ -1,85 +1,175 @@
 {% extends "base.html" %}
 
-{% block title %}Вход - ИРО ЧР{% endblock %}
+{% block title %}Вход — ГБУ ДПО «ИРО ЧР»{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="/static/css/login.css">
+<link rel="preload" href="/static/images/learning-illustration.svg" as="image">
+<style>
+:root { --card-radius: 16px; }
+.login-hero {
+    background: linear-gradient(135deg, rgba(26,79,122,0.06), rgba(42,111,168,0.03));
+    padding: 36px 0 8px;
+}
+.login-hero .hero-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(26,79,122,0.08);
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+.login-hero h1 {
+    font-size: clamp(1.6rem, 3.6vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+.login-hero p { color: var(--gray); }
+
+.login-page { padding: 36px 0 80px; }
+.login-split { display:flex; gap: 28px; align-items: center; }
+
+.login-card { border-radius: var(--card-radius); overflow: hidden; border: 1px solid var(--border); box-shadow: 0 18px 50px rgba(10,20,30,0.06); }
+.login-card .card-header { background: linear-gradient(90deg, rgba(26,79,122,0.03), rgba(26,79,122,0.01)); padding: 22px; }
+.login-card .card-header h3 { margin: 0; font-weight: 800; color: var(--dark); }
+.login-card .card-header p { margin: 0; color: var(--gray); }
+.login-card .card-body { padding: 22px; }
+
+.btn-login { width: 100%; padding: 12px 16px; border-radius: 12px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); color: #fff; border: none; font-weight: 700; box-shadow: 0 8px 30px rgba(26,79,122,0.18); transition: var(--transition); }
+.btn-login:hover { transform: translateY(-3px); }
+
+.login-divider { text-align: center; margin: 16px 0; color: var(--gray); position: relative; }
+.login-divider::before, .login-divider::after { content: ''; position:absolute; top: 50%; width: 38%; height: 1px; background: var(--border); }
+.login-divider::before { left: 0; }
+.login-divider::after { right: 0; }
+
+.register-link a { color: var(--primary); font-weight: 700; text-decoration: none; }
+.demo-hint { color: var(--gray); font-size: 0.95rem; display:flex; gap:8px; align-items:center; justify-content:center; }
+
+.login-art {
+    background: linear-gradient(180deg, rgba(42,111,168,0.06), rgba(26,79,122,0.03));
+    border-radius: var(--card-radius);
+    padding: 20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height: 360px;
+    border: 1px solid var(--border);
+    box-shadow: 0 12px 40px rgba(10,20,30,0.04);
+}
+.login-art .art-title { font-weight:800; color:var(--dark); margin-bottom:8px; text-align:center; }
+.login-art .art-sub { color:var(--gray); text-align:center; margin-bottom:12px; }
+.login-art img { max-width: 100%; height: auto; border-radius: 10px; }
+
+.shape-blob { position:absolute; filter: blur(28px); opacity:0.12; z-index:0; }
+
+@media (min-width: 992px) {
+    .login-split { align-items: stretch; }
+    .login-form-col { flex: 0 0 48%; max-width: 48%; }
+    .login-art-col { flex: 0 0 52%; max-width: 52%; }
+}
+@media (max-width: 991.98px) {
+    .login-split { flex-direction: column-reverse; }
+    .login-art { min-height: 220px; }
+}
+
+input:focus, button:focus { outline: 2px solid rgba(26,79,122,0.12); outline-offset: 2px; }
+
+/* ===== ✅ ГАРАНТИРОВАННОЕ ИСПРАВЛЕНИЕ ПОЛЕЙ ВВОДА ===== */
+/* Перебиваем любые стили из login.css, которые могли установить pointer-events: none */
+.form-control,
+.input-group .form-control,
+#email,
+#password {
+    pointer-events: auto !important;
+    cursor: text !important;
+}
+/* Плейсхолдер не должен перехватывать клик */
+.form-control::placeholder {
+    pointer-events: none !important;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Герой-секция (светлая) -->
 <div class="login-hero">
     <div class="container text-center">
-        <div class="hero-badge">Система дистанционного обучения</div>
-        <h1 class="display-5 fw-bold">
-            <span class="gold">Вход</span> в систему
-        </h1>
-        <p class="lead mb-0">ГБУ ДПО «Институт развития образования Чеченской Республики»</p>
+        <div class="hero-badge">Дистанционное обучение</div>
+        <h1 class="display-5 fw-bold">Войдите и начните обучение</h1>
+        <p class="lead mb-0">Доступ к курсам и материалам ГБУ ДПО "ИРО ЧР"</p>
     </div>
 </div>
 
-<div class="container mt-4 mb-5 login-page">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card login-card">
+<div class="container login-page">
+    <div class="login-split position-relative">
+        <div class="login-form-col">
+            <div class="card login-card" data-aos="fade-up">
                 <div class="card-header text-center">
                     <h3>Добро пожаловать</h3>
                     <p>Войдите в свою учётную запись</p>
                 </div>
                 <div class="card-body">
                     <form id="loginForm" novalidate>
-                        <!-- Поле Email - черный текст -->
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-dark" for="email">Email</label>
-                            <input type="email" class="form-control text-dark" id="email" placeholder="example@mail.ru" required autocomplete="email" inputmode="email">
+                            <label class="form-label fw-bold" for="email">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="example@mail.ru" required autocomplete="email">
                         </div>
-                        
-                        <!-- Поле Пароль - черный текст -->
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-dark" for="password">Пароль</label>
+                            <label class="form-label fw-bold" for="password">Пароль</label>
                             <div class="input-group">
-                                <input type="password" class="form-control text-dark" id="password" placeholder="••••••" required autocomplete="current-password">
+                                <input type="password" class="form-control" id="password" placeholder="••••••" required autocomplete="current-password">
                                 <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Показать/скрыть пароль">
                                     <i class="bi bi-eye" id="passwordIcon"></i>
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- Ссылка "Забыли пароль?" - черный текст -->
-                        <div class="forgot-link text-end mb-3">
-                            <a href="/forgot-password" class="fw-bold text-dark" style="font-size: 1.1rem; text-decoration: none;">Забыли пароль?</a>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">Запомнить меня</label>
+                            </div>
+                            <div>
+                                <a href="/forgot-password" class="text-decoration-none" style="color:var(--primary);">Забыли пароль?</a>
+                            </div>
                         </div>
-                        
-                        <!-- Кнопка "Войти" - черный текст -->
-                        <button type="submit" class="btn-login text-dark fw-bold" id="loginBtn" style="background-color: #f0f0f0; border: 2px solid #333;">Войти</button>
+
+                        <button type="submit" class="btn-login" id="loginBtn">Войти</button>
                     </form>
-                    
+
                     <div class="login-divider">или</div>
-                    
+
                     <div class="text-center">
-                        <p class="register-link">
-                            Нет аккаунта? <a href="/register">Зарегистрируйтесь</a>
-                        </p>
-                    </div>
-                    
-                    <div class="demo-hint mt-3">
-                        <i class="bi bi-info-circle"></i>
-                        <span>Для входа используйте email и пароль, указанные при регистрации.</span>
+                        <p class="register-link">Нет аккаунта? <a href="/register">Зарегистрируйтесь</a></p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div class="login-art-col">
+            <div class="login-art" data-aos="fade-left">
+                <div class="art-title">Учитесь в удобное время</div>
+                <div class="art-sub">Пространство профессионального роста</div>
+                <img src="/static/images/learning-illustration.jpg" alt="Иллюстрация дистанционного обучения" role="img" aria-hidden="false">
+            </div>
+        </div>
+
+        <svg class="shape-blob" width="320" height="240" style="left:-40px; top:-30px;" viewBox="0 0 320 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M53 6C80 -6 129 -2 170 13C211 28 246 64 253 99C260 134 238 171 196 199C154 227 88 242 52 219C16 196 -4 143 10 100C24 57 26 41 53 6Z" fill="url(#g1)"/>
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1A4F7A" stop-opacity="0.25"/><stop offset="1" stop-color="#2A6FA8" stop-opacity="0.06"/></linearGradient></defs>
+        </svg>
     </div>
 </div>
 
 <script>
-// ============================================================
 // ПОКАЗ/СКРЫТИЕ ПАРОЛЯ
-// ============================================================
 document.getElementById('togglePassword').addEventListener('click', function() {
     const passwordInput = document.getElementById('password');
     const icon = document.getElementById('passwordIcon');
-    
+    if (!passwordInput) return;
     if (passwordInput.type === 'password') {
         passwordInput.type = 'text';
         icon.className = 'bi bi-eye-slash';
@@ -89,97 +179,56 @@ document.getElementById('togglePassword').addEventListener('click', function() {
     }
 });
 
-// ============================================================
 // ОТПРАВКА ФОРМЫ
-// ============================================================
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const btn = document.getElementById('loginBtn');
-    
+
     if (!email || !password) {
         if (window.showToast) window.showToast('Заполните все поля', 'warning');
         return;
     }
-    
+
     btn.disabled = true;
     const originalHtml = btn.innerHTML;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Вход...';
-    
+
     try {
         const formData = new URLSearchParams();
         formData.append('username', email);
         formData.append('password', password);
-        
-        const response = await fetch('/api/auth/login', { 
-            method: 'POST', 
+
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
             body: formData,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('token', data.access_token);
             localStorage.setItem('role', data.role);
-            
-            if (window.showToast) {
-                window.showToast('Вход выполнен успешно!', 'success');
-            }
-            
+            if (window.showToast) window.showToast('Вход выполнен успешно!', 'success');
             btn.disabled = false;
             btn.innerHTML = originalHtml;
-            
-            setTimeout(() => {
-                window.location.href = data.role === 'admin' ? '/admin' : '/dashboard';
-            }, 1000);
+            setTimeout(() => { window.location.href = data.role === 'admin' ? '/admin' : '/dashboard'; }, 700);
         } else {
-            const error = await response.json();
-            if (window.showToast) {
-                window.showToast(error.detail || 'Неверный email или пароль', 'danger');
-            }
+            const error = await response.json().catch(() => ({}));
+            if (window.showToast) window.showToast(error.detail || 'Неверный email или пароль', 'danger');
             btn.disabled = false;
             btn.innerHTML = originalHtml;
         }
-    } catch (error) {
-        console.error('Login error:', error);
-        if (window.showToast) {
-            window.showToast('Ошибка соединения с сервером', 'danger');
-        }
+    } catch (err) {
+        console.error('Login error:', err);
+        if (window.showToast) window.showToast('Ошибка соединения с сервером', 'danger');
         btn.disabled = false;
         btn.innerHTML = originalHtml;
     }
 });
 
-// ============================================================
-// ВХОД ПО ENTER
-// ============================================================
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        const form = document.getElementById('loginForm');
-        if (form && document.activeElement && 
-            (document.activeElement.id === 'email' || document.activeElement.id === 'password')) {
-            form.dispatchEvent(new Event('submit'));
-        }
-    }
-});
-
-// ============================================================
-// AOS ДЛЯ АНИМАЦИЙ (если подключён)
-// ============================================================
-try {
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 600,
-            once: true,
-            offset: 30
-        });
-    }
-} catch(e) {
-    console.warn('AOS init error:', e);
-}
+// AOS
+try { if (typeof AOS !== 'undefined') AOS.init({ duration: 700, once: true, offset: 80 }); } catch(e){ }
 </script>
 {% endblock %}

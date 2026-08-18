@@ -389,7 +389,126 @@
         
         .toast-item.success { background: #198754; }
         .toast-item.error { background: #dc3545; }
-        
+
+        /* Accessibility toolbar */
+        .accessibility-toggle {
+            position: fixed;
+            left: 24px;
+            top: 120px;
+            width: 58px;
+            height: 58px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 14px 32px rgba(26, 79, 122, 0.38);
+            z-index: 1200;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+        }
+
+        .accessibility-toggle:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 18px 36px rgba(26, 79, 122, 0.38);
+        }
+
+        .accessibility-toggle:active {
+            cursor: grabbing;
+        }
+
+        .accessibility-toggle i {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .accessibility-panel {
+            position: fixed;
+            left: 96px;
+            top: 120px;
+            width: min(260px, calc(100vw - 32px));
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(26, 79, 122, 0.12);
+            border-radius: 18px;
+            box-shadow: 0 24px 50px rgba(16, 24, 40, 0.16);
+            z-index: 1199;
+            padding: 14px 12px 12px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-8px) scale(0.98);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+
+        .accessibility-panel.open {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .accessibility-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 10px;
+            color: var(--dark);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .accessibility-panel-header span:last-child {
+            color: var(--primary);
+            font-size: 0.7rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .accessibility-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .accessibility-btn {
+            border: 1px solid rgba(26, 79, 122, 0.15);
+            background: #f8fafc;
+            color: var(--dark);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .accessibility-btn:hover {
+            background: var(--secondary);
+            border-color: rgba(26, 79, 122, 0.3);
+            color: var(--primary);
+        }
+
+        .accessibility-btn:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .accessibility-scale {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            color: var(--gray);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
         @media (prefers-reduced-motion: no-preference) {
             .toast-item { animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
             @keyframes slideIn {
@@ -522,6 +641,29 @@
     </div>
 </nav>
 
+<!-- ===== HERO SECTION - ТОЛЬКО НА ГЛАВНОЙ ===== -->
+{% if request.path == '/' %}
+<section class="hero-section" aria-labelledby="site-hero-title">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 id="site-hero-title">Платформа дистанционного обучения "Института развития образования" <span class="accent">Чеченской Республики</span></h1>
+                <p class="lead text-muted">Курсы, программы и элементы обучения.</p>
+                <div class="d-flex flex-wrap gap-3 mt-3">
+                    <a href="/courses" class="btn btn-primary btn-lg">Просмотреть курсы</a>
+                    <a href="/register" class="btn btn-outline-primary btn-lg">Записаться</a>
+                </div>
+                <p class="mt-3 text-muted">Нужна помощь? Откройте <a href="/api/ai/chat">ИИ-помощника</a> прямо сейчас.</p>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <img src="\static\images\photo.jpg" alt="Иллюстрация обучения" class="img-fluid rounded-4 shadow" loading="lazy">
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
 <main id="main-content">
     {% block content %}{% endblock %}
 </main>
@@ -586,6 +728,22 @@
         </div>
     </div>
 </footer>
+
+<div id="accessibilityPanel" class="accessibility-panel" aria-hidden="true">
+    <div class="accessibility-panel-header">
+        <span>Спец. возможности</span>
+        <span id="accessibilityScaleLabel">1.0x</span>
+    </div>
+    <div class="accessibility-actions">
+        <button type="button" class="accessibility-btn" id="fontDecreaseBtn" aria-label="Уменьшить шрифт">A-</button>
+        <button type="button" class="accessibility-btn" id="fontIncreaseBtn" aria-label="Увеличить шрифт">A+</button>
+    </div>
+    <div class="accessibility-scale">Размер текста</div>
+</div>
+
+<button id="accessibilityToggle" class="accessibility-toggle" type="button" aria-label="Открыть панель специальных возможностей" aria-expanded="false" title="Панель специальных возможностей">
+    <i class="bi bi-person-standing" aria-hidden="true"></i>
+</button>
 
 <!-- ===== ЧАТ-БОТ ===== -->
 <div class="chatbot-container" id="chatbotContainer">
@@ -697,6 +855,193 @@
 <script defer src="/static/js/profile_check.js"></script>
 
 <script>
+    (function initAccessibilityToolbar() {
+        const STORAGE_KEY = 'iro_accessibility_settings';
+        const DEFAULT_SETTINGS = { fontScale: 1, toolbarOpen: false, x: 24, y: 120 };
+
+        function clamp(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        }
+
+        function readSettings() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return { ...DEFAULT_SETTINGS };
+                const parsed = JSON.parse(raw);
+                const safeScale = clamp(Number(parsed.fontScale) || 1, 0.9, 1.6);
+                return {
+                    fontScale: Number(safeScale.toFixed(2)),
+                    toolbarOpen: Boolean(parsed.toolbarOpen),
+                    x: Number(parsed.x) || DEFAULT_SETTINGS.x,
+                    y: Number(parsed.y) || DEFAULT_SETTINGS.y
+                };
+            } catch (e) {
+                return { ...DEFAULT_SETTINGS };
+            }
+        }
+
+        function saveSettings(settings) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+            } catch (e) {}
+        }
+
+        function applyFontScale(scale) {
+            const normalized = clamp(Number(scale) || 1, 0.9, 1.6);
+            const baseRootSize = 16;
+            document.documentElement.style.fontSize = (baseRootSize * normalized) + 'px';
+            const label = document.getElementById('accessibilityScaleLabel');
+            if (label) label.textContent = normalized.toFixed(1) + 'x';
+            document.body.dataset.fontScale = normalized.toFixed(2);
+            return normalized;
+        }
+
+        function updateToolbarState(isOpen) {
+            const toggle = document.getElementById('accessibilityToggle');
+            const panel = document.getElementById('accessibilityPanel');
+            if (!toggle || !panel) return;
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            toggle.classList.toggle('active', isOpen);
+            panel.classList.toggle('open', isOpen);
+            panel.setAttribute('aria-hidden', String(!isOpen));
+        }
+
+        function positionButtonAndPanel(x, y) {
+            const toggle = document.getElementById('accessibilityToggle');
+            const panel = document.getElementById('accessibilityPanel');
+            if (!toggle || !panel) return;
+
+            const maxX = Math.max(12, window.innerWidth - toggle.offsetWidth - 12);
+            const maxY = Math.max(12, window.innerHeight - toggle.offsetHeight - 12);
+            const safeX = clamp(x, 12, maxX);
+            const safeY = clamp(y, 12, maxY);
+            toggle.style.left = safeX + 'px';
+            toggle.style.top = safeY + 'px';
+
+            const panelWidth = Math.min(260, window.innerWidth - 32);
+            const panelHeight = panel.offsetHeight || 120;
+            const left = safeX + toggle.offsetWidth + 16 > window.innerWidth - panelWidth - 12
+                ? safeX - panelWidth - 16
+                : safeX + toggle.offsetWidth + 16;
+            const top = safeY + toggle.offsetHeight + 16 > window.innerHeight - panelHeight - 12
+                ? Math.max(12, window.innerHeight - panelHeight - 12)
+                : safeY;
+
+            panel.style.left = clamp(left, 12, Math.max(12, window.innerWidth - panelWidth - 12)) + 'px';
+            panel.style.top = clamp(top, 12, Math.max(12, window.innerHeight - panelHeight - 12)) + 'px';
+        }
+
+        function syncAccessibilityState() {
+            const settings = readSettings();
+            const fontScale = applyFontScale(settings.fontScale);
+            updateToolbarState(Boolean(settings.toolbarOpen));
+            positionButtonAndPanel(settings.x, settings.y);
+            return { ...settings, fontScale };
+        }
+
+        function setToolbarOpen(isOpen) {
+            const settings = readSettings();
+            settings.toolbarOpen = Boolean(isOpen);
+            saveSettings(settings);
+            updateToolbarState(settings.toolbarOpen);
+        }
+
+        function setFontScale(nextScale) {
+            const settings = readSettings();
+            settings.fontScale = clamp(Number(nextScale) || settings.fontScale, 0.9, 1.6);
+            saveSettings(settings);
+            applyFontScale(settings.fontScale);
+            document.getElementById('accessibilityScaleLabel').textContent = settings.fontScale.toFixed(1) + 'x';
+        }
+
+        function registerDragBehavior() {
+            const toggle = document.getElementById('accessibilityToggle');
+            if (!toggle) return;
+
+            let dragging = false;
+            let startPointerX = 0;
+            let startPointerY = 0;
+            let startLeft = 0;
+            let startTop = 0;
+            let moved = false;
+
+            toggle.addEventListener('pointerdown', function(event) {
+                if (event.button !== 0) return;
+                dragging = true;
+                moved = false;
+                startPointerX = event.clientX;
+                startPointerY = event.clientY;
+                startLeft = parseFloat(toggle.style.left || '24');
+                startTop = parseFloat(toggle.style.top || '120');
+                toggle.setPointerCapture(event.pointerId);
+            });
+
+            toggle.addEventListener('pointermove', function(event) {
+                if (!dragging) return;
+                const deltaX = event.clientX - startPointerX;
+                const deltaY = event.clientY - startPointerY;
+                if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) moved = true;
+                const nextX = startLeft + deltaX;
+                const nextY = startTop + deltaY;
+                positionButtonAndPanel(nextX, nextY);
+            });
+
+            toggle.addEventListener('pointerup', function(event) {
+                if (!dragging) return;
+                dragging = false;
+                const settings = readSettings();
+                settings.x = parseFloat(toggle.style.left || settings.x);
+                settings.y = parseFloat(toggle.style.top || settings.y);
+                saveSettings(settings);
+                toggle.releasePointerCapture(event.pointerId);
+            });
+
+            toggle.addEventListener('click', function(event) {
+                if (moved) {
+                    moved = false;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                const settings = readSettings();
+                settings.toolbarOpen = !settings.toolbarOpen;
+                saveSettings(settings);
+                updateToolbarState(settings.toolbarOpen);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            syncAccessibilityState();
+            registerDragBehavior();
+
+            const fontDecreaseBtn = document.getElementById('fontDecreaseBtn');
+            const fontIncreaseBtn = document.getElementById('fontIncreaseBtn');
+
+            if (fontDecreaseBtn) {
+                fontDecreaseBtn.addEventListener('click', function() {
+                    const settings = readSettings();
+                    settings.fontScale = clamp(Number((settings.fontScale - 0.1).toFixed(2)), 0.9, 1.6);
+                    saveSettings(settings);
+                    applyFontScale(settings.fontScale);
+                });
+            }
+
+            if (fontIncreaseBtn) {
+                fontIncreaseBtn.addEventListener('click', function() {
+                    const settings = readSettings();
+                    settings.fontScale = clamp(Number((settings.fontScale + 0.1).toFixed(2)), 0.9, 1.6);
+                    saveSettings(settings);
+                    applyFontScale(settings.fontScale);
+                });
+            }
+
+            window.addEventListener('resize', function() {
+                const settings = readSettings();
+                positionButtonAndPanel(settings.x, settings.y);
+            });
+        });
+    })();
+
     // ============================================================
     // 1. AOS INIT
     // ============================================================

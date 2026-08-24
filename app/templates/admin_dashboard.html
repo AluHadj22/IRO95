@@ -1831,6 +1831,7 @@
             </div>
             <div class="modal-body">
                 <form id="createCourseForm">
+                    <input type="hidden" id="course_id">
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label class="form-label">Название <span class="text-danger">*</span></label>
@@ -2586,7 +2587,7 @@
             var html = '';
             for (var i = 0; i < pageData.length; i++) {
                 var c = pageData[i];
-                html += '<tr><td><span class="badge-gold">' + c.id + '</span></td><td><i class="bi bi-book me-2" style="color: var(--primary);"></i>' + c.title + '</td><td>' + (c.category_name || '-') + '</td><td><span class="badge-info">' + (formatMap[c.format_type] || 'Онлайн') + '</span></td><td><span id="participants_' + c.id + '">' + c.current_participants + '</span>/' + c.max_participants + '</td><td>' + (c.moodle_course_id ? '<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ' + c.moodle_course_id + '</span>' : '<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>') + '</td><td><span class="' + (c.is_active ? 'badge-success' : 'badge-danger') + '">' + (c.is_active ? 'Активен' : 'Неактивен') + '</span></td><td><button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(' + c.id + ')" title="Регистрации"><i class="bi bi-people"></i></button><button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(' + c.id + ', ' + (!c.is_active) + ')" title="Изменить статус"><i class="bi bi-power"></i></button><button class="btn btn-sm btn-danger" onclick="deleteCourseItem(' + c.id + ')" title="Удалить"><i class="bi bi-trash"></i></button></td></tr>';
+                html += '<tr><td><span class="badge-gold">' + c.id + '</span></td><td><i class="bi bi-book me-2" style="color: var(--primary);"></i>' + c.title + '</td><td>' + (c.category_name || '-') + '</td><td><span class="badge-info">' + (formatMap[c.format_type] || 'Онлайн') + '</span></td><td><span id="participants_' + c.id + '">' + c.current_participants + '</span>/' + c.max_participants + '</td><td>' + (c.moodle_course_id ? '<span class="badge-moodle"><i class="bi bi-check-circle-fill" style="color: #10b981;"></i> ID: ' + c.moodle_course_id + '</span>' : '<span class="badge-moodle" style="opacity: 0.5;"><i class="bi bi-dash-circle" style="color: #999;"></i> Не привязан</span>') + '</td><td><span class="' + (c.is_active ? 'badge-success' : 'badge-danger') + '">' + (c.is_active ? 'Активен' : 'Неактивен') + '</span></td><td><button class="btn btn-sm btn-info me-1" onclick="viewCourseRegistrations(' + c.id + ')" title="Регистрации"><i class="bi bi-people"></i></button><button class="btn btn-sm btn-secondary me-1" onclick="showEditCourseModal(' + c.id + ')" title="Редактировать"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-warning me-1" onclick="toggleCourseStatusItem(' + c.id + ', ' + (!c.is_active) + ')" title="Изменить статус"><i class="bi bi-power"></i></button><button class="btn btn-sm btn-danger" onclick="deleteCourseItem(' + c.id + ')" title="Удалить"><i class="bi bi-trash"></i></button></td></tr>';
             }
             tbody.innerHTML = html;
         }
@@ -3049,26 +3050,101 @@
             end_date: document.getElementById('end_date').value || null,
             is_open_ended: document.getElementById('is_open_ended').checked,
             moodle_course_id: moodleCourseId ? parseInt(moodleCourseId, 10) : null,
-            speakers: speakersList.filter(function(s) { return s.full_name.trim(); })
+            speakers: speakersList.filter(function(s) { return s.full_name && s.full_name.trim(); })
         };
-        var response = await fetch('/api/courses/', {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        if (response.ok) {
-            showToast('Курс успешно создан' + (data.moodle_course_id ? ' и привязан к Moodle!' : ''), 'success');
-            bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
-            document.getElementById('createCourseForm').reset();
-            speakersList = [];
-            renderSpeakers();
-            await loadCourses(currentCoursesPage, true);
-            await loadStats();
-        } else {
-            var error = await response.json();
-            showToast(error.detail || 'Ошибка при создании курса', 'danger');
+        var courseId = document.getElementById('course_id').value;
+        var method = courseId ? 'PUT' : 'POST';
+        var url = courseId ? '/api/admin/courses/' + courseId : '/api/courses/';
+
+        try {
+            var response = await fetch(url, {
+                method: method,
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showToast(courseId ? 'Курс успешно обновлён' : 'Курс успешно создан' + (data.moodle_course_id ? ' и привязан к Moodle!' : ''), 'success');
+                bootstrap.Modal.getInstance(document.getElementById('createCourseModal')).hide();
+                document.getElementById('createCourseForm').reset();
+                speakersList = [];
+                renderSpeakers();
+                document.getElementById('course_id').value = '';
+                // сбросить заголовок и кнопку
+                var modalTitle = document.querySelector('#createCourseModal .modal-title');
+                if (modalTitle) modalTitle.innerHTML = '<i class="bi bi-book-plus me-2"></i>Создать курс';
+                var submitBtn = document.querySelector('#createCourseForm button[type="submit"]');
+                if (submitBtn) submitBtn.textContent = 'Создать курс';
+
+                await loadCourses(currentCoursesPage, true);
+                await loadStats();
+            } else {
+                var error = await response.json();
+                showToast(error.detail || (courseId ? 'Ошибка при обновлении курса' : 'Ошибка при создании курса'), 'danger');
+            }
+        } catch (err) {
+            console.error('Course save error:', err);
+            showToast('Ошибка соединения с сервером', 'danger');
         }
     });
+
+    async function showEditCourseModal(courseId) {
+        try {
+            // Получаем курс и категории параллельно
+            var [catsRes, courseRes] = await Promise.all([
+                fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } }),
+                fetch('/api/admin/courses/' + courseId, { headers: { 'Authorization': 'Bearer ' + token } })
+            ]);
+
+            if (!catsRes.ok) throw new Error('Ошибка загрузки категорий');
+            if (!courseRes.ok) throw new Error('Ошибка загрузки курса');
+
+            var categories = await catsRes.json();
+            var course = await courseRes.json();
+
+            // Заполнение селекта категорий
+            var select = document.getElementById('course_category_id');
+            if (select) {
+                var opts = '<option value="">-- Выберите категорию --</option>';
+                for (var i = 0; i < categories.length; i++) {
+                    opts += '<option value="' + categories[i].id + '">' + categories[i].name + '</option>';
+                }
+                select.innerHTML = opts;
+            }
+
+            // Заполняем поля
+            document.getElementById('course_id').value = course.id || '';
+            document.getElementById('course_title').value = course.title || '';
+            document.getElementById('course_short_desc').value = course.short_description || '';
+            document.getElementById('course_desc').value = course.description || '';
+            document.getElementById('course_max').value = course.max_participants || 30;
+            document.getElementById('course_image_url').value = course.image_url || '';
+            if (course.image_url) document.getElementById('course_image_preview').innerHTML = '<img src="' + course.image_url + '" class="image-preview" alt="Preview">'; else document.getElementById('course_image_preview').innerHTML = '';
+            document.getElementById('course_video').value = course.video_url || '';
+            document.getElementById('course_hashtags').value = course.hashtags || '';
+            document.getElementById('course_format').value = course.format_type || 'online';
+            document.getElementById('video_platform').value = course.video_platform || 'youtube';
+            document.getElementById('start_date').value = course.start_date || '';
+            document.getElementById('end_date').value = course.end_date || '';
+            document.getElementById('is_open_ended').checked = !!course.is_open_ended;
+            document.getElementById('moodle_course_id').value = course.moodle_course_id || '';
+            if (select && course.category_id) select.value = course.category_id;
+
+            speakersList = course.speakers || [];
+            renderSpeakers();
+
+            // Показать модалку и поменять заголовок/кнопку
+            var modalTitle = document.querySelector('#createCourseModal .modal-title');
+            if (modalTitle) modalTitle.innerHTML = '<i class="bi bi-pencil me-2"></i>Редактировать курс';
+            var submitBtn = document.querySelector('#createCourseForm button[type="submit"]');
+            if (submitBtn) submitBtn.textContent = 'Сохранить изменения';
+
+            new bootstrap.Modal(document.getElementById('createCourseModal')).show();
+        } catch (error) {
+            console.error('showEditCourseModal error:', error);
+            showToast(error.message || 'Ошибка при загрузке курса', 'danger');
+        }
+    }
 
     function showSection(section) {
         currentSection = section;
@@ -3110,12 +3186,20 @@
 
     function showCreateCourseModal() {
         document.getElementById('createCourseForm').reset();
+        // очистить id (режим создания)
+        document.getElementById('course_id').value = '';
         speakersList = [];
         renderSpeakers();
         document.getElementById('course_image_url').value = '';
         document.getElementById('course_image_preview').innerHTML = '';
         document.getElementById('moodle_course_id').value = '';
         document.getElementById('moodleCoursesList').style.display = 'none';
+
+        // сбросить заголовок и кнопку подтверждения
+        var modalTitle = document.querySelector('#createCourseModal .modal-title');
+        if (modalTitle) modalTitle.innerHTML = '<i class="bi bi-book-plus me-2"></i>Создать курс';
+        var submitBtn = document.querySelector('#createCourseForm button[type="submit"]');
+        if (submitBtn) submitBtn.textContent = 'Создать курс';
 
         fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + token } })
             .then(function(res) { return res.json(); })
@@ -3865,6 +3949,7 @@
     window.showSection = showSection;
     window.showCreateCategoryModal = showCreateCategoryModal;
     window.showCreateCourseModal = showCreateCourseModal;
+    window.showEditCourseModal = showEditCourseModal;
     window.loadUserData = loadUserData;
     window.loadUserDataWithSearch = loadUserDataWithSearch;
     window.renderUserData = renderUserData;

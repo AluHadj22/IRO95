@@ -215,6 +215,7 @@ class CourseUpdate(BaseModel):
     is_open_ended: Optional[bool] = None
     is_active: Optional[bool] = None
     moodle_course_id: Optional[int] = None
+    speakers: Optional[List[SpeakerCreate]] = None  # <-- ДОБАВЛЕНО
 
     @field_validator('end_date')
     @classmethod

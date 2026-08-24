@@ -12,6 +12,8 @@ from app.services.document_export_service import DocumentExportService
 from app.services.moodle_service import MoodleService
 from app.services.cache_service import cached, cache_service
 from app.services.password_reminder_service import PasswordReminderService
+# Импорт нужных функций из courses_router
+from app.routers.courses_router import get_course_data_from_db, convert_video_url
 from typing import List, Optional
 import os
 import shutil
@@ -352,6 +354,110 @@ async def get_all_courses(
     }
 
 
+# ============================================================
+# ✅ НОВЫЙ ЭНДПОИНТ: получение курса для админки (редактирование)
+# ============================================================
+@router.get("/courses/{course_id}")
+async def get_course_for_admin(
+        course_id: int,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Получение полных данных курса для редактирования в админ-панели.
+    """
+    course_data = await get_course_data_from_db(course_id, db)
+    if not course_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Курс не найден"
+        )
+    return course_data
+
+
+# ============================================================
+# ✅ ИСПРАВЛЕННЫЙ ЭНДПОИНТ: обновление курса (админ)
+# ============================================================
+@router.put("/courses/{course_id}")
+async def admin_update_course(
+        course_id: int,
+        course_update: schemas.CourseUpdate,
+        db: AsyncSession = Depends(get_async_db),
+        current_user: models.User = Depends(auth.get_current_admin)
+):
+    """
+    Обновление данных курса администратором.
+    """
+    # Явно загружаем спикеров и категорию, чтобы избежать MissingGreenlet
+    stmt = select(models.Course).options(
+        selectinload(models.Course.speakers),
+        joinedload(models.Course.category)
+    ).where(models.Course.id == course_id)
+    result = await db.execute(stmt)
+    db_course = result.unique().scalar_one_or_none()
+
+    if not db_course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Курс не найден"
+        )
+
+    # Получаем данные для обновления
+    update_data = course_update.model_dump(exclude_unset=True)
+
+    # Исключаем speakers из общего цикла, обработаем отдельно
+    speakers_data = update_data.pop("speakers", None)
+
+    # Обновляем основные поля (кроме speakers)
+    for key, value in update_data.items():
+        if key == "video_url" and value:
+            # Определяем платформу: если в запросе есть video_platform, используем её, иначе берём существующую
+            platform = course_update.video_platform if hasattr(course_update, 'video_platform') and course_update.video_platform else db_course.video_platform
+            value = convert_video_url(value, platform or "youtube")
+        setattr(db_course, key, value)
+
+    # Обновление спикеров (если переданы)
+    if speakers_data is not None:
+        # Удаляем старых спикеров
+        for speaker in db_course.speakers:
+            await db.delete(speaker)
+
+        # Создаём новых спикеров и добавляем их в сессию
+        for speaker_data in speakers_data:
+            # Проверяем, является ли speaker_data словарём или объектом Pydantic
+            if isinstance(speaker_data, dict):
+                db_speaker = models.CourseSpeaker(
+                    course_id=course_id,
+                    full_name=speaker_data.get('full_name', ''),
+                    bio=speaker_data.get('bio', ''),
+                    photo_url=speaker_data.get('photo_url', ''),
+                    position=speaker_data.get('position', '')
+                )
+            else:
+                # Если это объект Pydantic, используем его атрибуты
+                db_speaker = models.CourseSpeaker(
+                    course_id=course_id,
+                    full_name=getattr(speaker_data, 'full_name', ''),
+                    bio=getattr(speaker_data, 'bio', ''),
+                    photo_url=getattr(speaker_data, 'photo_url', ''),
+                    position=getattr(speaker_data, 'position', '')
+                )
+            # Добавляем объект в сессию (НЕ в коллекцию, чтобы избежать ошибки с dict)
+            db.add(db_speaker)
+
+    await db.commit()
+
+    # Очищаем кэш
+    await cache_service.delete_pattern("courses_list*")
+    await cache_service.delete(f"course_detail:{course_id}")
+    await cache_service.delete("admin_stats")
+
+    return {"message": "Курс успешно обновлён"}
+
+
+# ============================================================
+# УДАЛЕНИЕ КУРСА (уже есть)
+# ============================================================
 @router.delete("/courses/{course_id}")
 async def admin_delete_course(
         course_id: int,
@@ -474,9 +580,7 @@ async def get_course_registrations(
     }
 
 
-
 # НОВЫЙ ЭНДПОИНТ: СКАЧИВАНИЕ ДОКУМЕНТОВ ЗАРЕГИСТРИРОВАННЫХ НА КУРС
-
 @router.get("/courses/{course_id}/registrations/documents")
 async def download_course_registrations_documents(
         course_id: int,
@@ -782,9 +886,7 @@ async def export_course_registrations(
     )
 
 
-
 #  ИСПРАВЛЕННЫЙ ЭНДПОИНТ /users С ПОДДЕРЖКОЙ ПОИСКА
-
 @router.get("/users")
 async def get_users(
         limit: int = Query(50, ge=1, le=200),
@@ -1054,9 +1156,7 @@ async def change_user_role(
     }
 
 
-
 #  ИСПРАВЛЕННЫЙ ЭНДПОИНТ /users/list С ПОДДЕРЖКОЙ ПОИСКА
-
 @router.get("/users/list")
 async def get_users_with_data(
         limit: int = Query(50, ge=1, le=200),

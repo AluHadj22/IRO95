@@ -1,7 +1,7 @@
 # app/routers/courses_router.py
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_, func
+from sqlalchemy import select, or_, and_, func, delete
 from sqlalchemy.orm import selectinload, joinedload
 from app import models, schemas, auth
 from app.database import get_async_db, SessionLocal
@@ -182,10 +182,16 @@ async def get_courses_from_db(
 
 
 async def get_course_data_from_db(course_id: int, db: AsyncSession) -> Optional[dict]:
-    """Вспомогательная функция для получения данных курса из БД"""
+    """
+    Вспомогательная функция для получения данных курса из БД.
+    Явно загружаем все связи, чтобы избежать MissingGreenlet.
+    """
     stmt = select(models.Course).options(
         joinedload(models.Course.category),
-        selectinload(models.Course.speakers)
+        selectinload(models.Course.speakers),
+        # Если есть другие связи, которые могут понадобиться, добавляем их:
+        # joinedload(models.Course.created_by_user),  # если есть
+        # selectinload(models.Course.registrations),  # если будут использоваться
     ).where(models.Course.id == course_id)
 
     result = await db.execute(stmt)
@@ -387,18 +393,41 @@ async def update_course(
         db: AsyncSession = Depends(get_async_db),
         current_user: models.User = Depends(auth.get_current_admin)
 ):
-    stmt = select(models.Course).where(models.Course.id == course_id)
+    # Загружаем курс с явной загрузкой связей, чтобы избежать MissingGreenlet при commit/refresh
+    stmt = select(models.Course).options(
+        joinedload(models.Course.category),
+        selectinload(models.Course.speakers)
+    ).where(models.Course.id == course_id)
     result = await db.execute(stmt)
-    db_course = result.scalar_one_or_none()
+    db_course = result.unique().scalar_one_or_none()
 
     if not db_course:
         raise HTTPException(status_code=404, detail="Course not found")
 
+    # Обновляем основные поля
     for key, value in course.model_dump(exclude_unset=True).items():
         if key == "video_url" and value:
             platform = course.video_platform if hasattr(course, 'video_platform') else db_course.video_platform
             value = convert_video_url(value, platform or "youtube")
         setattr(db_course, key, value)
+
+    # Обновление спикеров (если переданы)
+    if course.speakers is not None:
+        # Удаляем старых спикеров
+        await db.execute(
+            delete(models.CourseSpeaker).where(models.CourseSpeaker.course_id == course_id)
+        )
+
+        # Создаём новых спикеров
+        for speaker_data in course.speakers:
+            db_speaker = models.CourseSpeaker(
+                course_id=course_id,
+                full_name=speaker_data.full_name,
+                bio=speaker_data.bio,
+                photo_url=speaker_data.photo_url,
+                position=speaker_data.position
+            )
+            db.add(db_speaker)
 
     await db.commit()
 

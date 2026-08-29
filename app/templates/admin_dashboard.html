@@ -1651,6 +1651,13 @@
                             <i class="bi bi-x-circle"></i>
                         </button>
                     </div>
+                    <div class="filters-wrap" style="margin-left:8px; display:inline-block; vertical-align:middle;">
+                        <select id="usersProfileStatusFilter" onchange="loadUsers(1)" style="padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0;">
+                            <option value="">Все статусы профиля</option>
+                            <option value="complete">Заполнен</option>
+                            <option value="incomplete">Не заполнен</option>
+                        </select>
+                    </div>
                     <button class="btn-refresh-users" onclick="loadUsers(currentUsersPage)">
                         <i class="bi bi-arrow-repeat"></i> Обновить
                     </button>
@@ -1691,7 +1698,7 @@
                 </div>
 
                 <div class="export-actions">
-                    <div class="search-wrapper">
+                    <div class="search-wrapper" style="display:inline-block; vertical-align:middle;">
                         <input type="text" class="form-control" id="userSearchInput"
                                placeholder="Поиск по ФИО, email..."
                                oninput="handleUserSearch(this.value)">
@@ -1699,6 +1706,13 @@
                         <button class="clear-search" onclick="clearSearch()">
                             <i class="bi bi-x-circle"></i>
                         </button>
+                    </div>
+                    <div style="display:inline-block; margin-left:12px; vertical-align:middle;">
+                        <select id="userDataProfileStatusFilter" onchange="loadUserData(1)" style="padding:6px 8px; border-radius:6px; border:1px solid #e2e8f0;">
+                            <option value="">Все статусы профиля</option>
+                            <option value="complete">Заполнен</option>
+                            <option value="incomplete">Не заполнен</option>
+                        </select>
                     </div>
                     <button class="btn-export-all" onclick="exportAllUsers()">
                         <i class="bi bi-download me-2"></i>Экспорт всех
@@ -2097,7 +2111,8 @@
         }
 
         var html = '';
-        html += '<button class="page-btn" onclick="' + onPageChange + '(' + (currentPage - 1) + ')" ' + (currentPage <= 1 ? 'disabled' : '') + '><i class="bi bi-chevron-left"></i></button>';
+        // Prev button
+        html += '<button class="page-btn" data-page="' + (currentPage - 1) + '" ' + (currentPage <= 1 ? 'disabled' : '') + '><i class="bi bi-chevron-left"></i></button>';
 
         var pages = [];
         if (totalPages <= 7) {
@@ -2117,12 +2132,35 @@
             if (p === 'gap') {
                 html += '<span class="page-btn pagination-gap">…</span>';
             } else {
-                html += '<button class="page-btn ' + (p === currentPage ? 'active' : '') + '" onclick="' + onPageChange + '(' + p + ')">' + p + '</button>';
+                html += '<button class="page-btn ' + (p === currentPage ? 'active' : '') + '" data-page="' + p + '">' + p + '</button>';
             }
         }
 
-        html += '<button class="page-btn" onclick="' + onPageChange + '(' + (currentPage + 1) + ')" ' + (currentPage >= totalPages ? 'disabled' : '') + '><i class="bi bi-chevron-right"></i></button>';
+        // Next button
+        html += '<button class="page-btn" data-page="' + (currentPage + 1) + '" ' + (currentPage >= totalPages ? 'disabled' : '') + '><i class="bi bi-chevron-right"></i></button>';
         controls.innerHTML = html;
+
+        // Attach click handlers that support either a function or a global function name string
+        var buttons = controls.querySelectorAll('.page-btn');
+        buttons.forEach(function(btn) {
+            var pageAttr = btn.getAttribute('data-page');
+            if (!pageAttr) return;
+            // If button is disabled, skip
+            if (btn.disabled) return;
+            btn.addEventListener('click', function(e) {
+                var p = parseInt(this.getAttribute('data-page'), 10);
+                if (typeof onPageChange === 'function') {
+                    try { onPageChange(p); } catch (err) { console.error('onPageChange function error', err); }
+                } else if (typeof onPageChange === 'string' && typeof window[onPageChange] === 'function') {
+                    try { window[onPageChange](p); } catch (err) { console.error('onPageChange window function error', err); }
+                } else if (typeof onPageChange === 'string') {
+                    // Fallback: try evaluating as expression
+                    try { eval(onPageChange + '(' + p + ')'); } catch (err) { console.error('onPageChange eval error', err); }
+                } else {
+                    console.warn('renderPagination: invalid onPageChange', onPageChange);
+                }
+            });
+        });
     }
 
     // ============================================================
@@ -2170,6 +2208,11 @@
             var offset = (page - 1) * PAGE_SIZE;
             var url = '/api/admin/users?limit=' + PAGE_SIZE + '&offset=' + offset;
 
+            var profileFilter = document.getElementById('usersProfileStatusFilter') ? document.getElementById('usersProfileStatusFilter').value : '';
+            if (profileFilter) {
+                url += '&profile_status=' + encodeURIComponent(profileFilter);
+            }
+
             if (searchQuery && searchQuery.trim()) {
                 url += '&search=' + encodeURIComponent(searchQuery.trim());
             }
@@ -2208,7 +2251,10 @@
 
         try {
             var offset = (page - 1) * PAGE_SIZE;
-            var response = await fetch('/api/admin/users?limit=' + PAGE_SIZE + '&offset=' + offset, {
+            var profileFilter = document.getElementById('usersProfileStatusFilter') ? document.getElementById('usersProfileStatusFilter').value : '';
+            var fetchUrl = '/api/admin/users?limit=' + PAGE_SIZE + '&offset=' + offset;
+            if (profileFilter) fetchUrl += '&profile_status=' + encodeURIComponent(profileFilter);
+            var response = await fetch(fetchUrl, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             if (!response.ok) throw new Error('Ошибка загрузки пользователей');
@@ -2294,6 +2340,11 @@
             var offset = (page - 1) * PAGE_SIZE;
             var url = '/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset;
 
+            var profileFilter = document.getElementById('userDataProfileStatusFilter') ? document.getElementById('userDataProfileStatusFilter').value : '';
+            if (profileFilter) {
+                url += '&profile_status=' + encodeURIComponent(profileFilter);
+            }
+
             if (searchQuery && searchQuery.trim()) {
                 url += '&search=' + encodeURIComponent(searchQuery.trim());
             }
@@ -2345,7 +2396,10 @@
 
         try {
             var offset = (page - 1) * PAGE_SIZE;
-            var response = await fetch('/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset, {
+            var profileFilter = document.getElementById('userDataProfileStatusFilter') ? document.getElementById('userDataProfileStatusFilter').value : '';
+            var fetchUrl = '/api/admin/users/list?limit=' + PAGE_SIZE + '&offset=' + offset;
+            if (profileFilter) fetchUrl += '&profile_status=' + encodeURIComponent(profileFilter);
+            var response = await fetch(fetchUrl, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             if (!response.ok) throw new Error('Ошибка загрузки данных');

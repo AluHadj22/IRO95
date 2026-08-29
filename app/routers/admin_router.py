@@ -892,6 +892,7 @@ async def get_users(
         limit: int = Query(50, ge=1, le=200),
         offset: int = Query(0, ge=0),
         search: Optional[str] = Query(None, description="Поиск по ФИО, email или ID"),
+        profile_status: Optional[str] = Query(None, description="Статус профиля: 'complete' или 'incomplete'"),
         db: AsyncSession = Depends(get_async_db),
         current_user: models.User = Depends(auth.get_current_admin)
 ):
@@ -906,109 +907,131 @@ async def get_users(
 
     # === ПОИСК (если передан) ===
     if search:
-        search_term = f"%{search}%"
+        s = search.strip()
         # Проверяем, не является ли search числом (поиск по ID)
         is_numeric = False
         try:
-            int(search)
+            int(s)
             is_numeric = True
         except ValueError:
             pass
 
         if is_numeric:
             # Поиск по ID
-            stmt = stmt.where(models.User.id == int(search))
+            stmt = stmt.where(models.User.id == int(s))
         else:
-            # Поиск по ФИО (составные части) и email
-            search_parts = search.strip().split()
+            # Если введён email — искать точное совпадение по почте (без подстановок)
+            if "@" in s:
+                stmt = stmt.where(func.lower(models.User.email) == s.lower())
+            else:
+                parts = s.split()
+                # Если введено полное ФИО (3 и более частей) — искать точное совпадение по full_name (регистронезависимо)
+                if len(parts) >= 3:
+                    stmt = stmt.where(func.lower(models.User.full_name) == s.lower())
+                elif len(parts) == 2:
+                    # Должны присутствовать обе части имени (в любом поле), используем AND из двух OR-условий
+                    part1_cond = or_(
+                        models.User.last_name.ilike(f"%{parts[0]}%"),
+                        models.User.first_name.ilike(f"%{parts[0]}%"),
+                        models.User.middle_name.ilike(f"%{parts[0]}%")
+                    )
+                    part2_cond = or_(
+                        models.User.last_name.ilike(f"%{parts[1]}%"),
+                        models.User.first_name.ilike(f"%{parts[1]}%"),
+                        models.User.middle_name.ilike(f"%{parts[1]}%")
+                    )
+                    stmt = stmt.where(and_(part1_cond, part2_cond))
+                else:
+                    # Одна часть — частичный поиск по фамилии/имени/отчеству, full_name и email
+                    p = f"%{parts[0]}%"
+                    name_conditions = [
+                        models.User.last_name.ilike(p),
+                        models.User.first_name.ilike(p),
+                        models.User.middle_name.ilike(p),
+                        models.User.full_name.ilike(p),
+                        models.User.email.ilike(p)
+                    ]
+                    stmt = stmt.where(or_(*name_conditions))
 
-            # Строим условия для поиска по ФИО
-            name_conditions = []
-
-            # Ищем по полному ФИО (full_name)
-            name_conditions.append(models.User.full_name.ilike(search_term))
-
-            # Ищем по отдельным частям (фамилия, имя, отчество)
-            if len(search_parts) >= 1:
-                name_conditions.append(models.User.last_name.ilike(f"%{search_parts[0]}%"))
-                name_conditions.append(models.User.first_name.ilike(f"%{search_parts[0]}%"))
-                name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[0]}%"))
-
-            if len(search_parts) >= 2:
-                name_conditions.append(models.User.last_name.ilike(f"%{search_parts[1]}%"))
-                name_conditions.append(models.User.first_name.ilike(f"%{search_parts[1]}%"))
-                name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[1]}%"))
-
-            if len(search_parts) >= 3:
-                name_conditions.append(models.User.last_name.ilike(f"%{search_parts[2]}%"))
-                name_conditions.append(models.User.first_name.ilike(f"%{search_parts[2]}%"))
-                name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[2]}%"))
-
-            # Также ищем по email
-            name_conditions.append(models.User.email.ilike(search_term))
-
-            # Применяем все условия через OR
-            if name_conditions:
-                stmt = stmt.where(or_(*name_conditions))
-
-    # Пагинация
-    stmt = stmt.offset(offset).limit(limit)
-
-    result = await db.execute(stmt)
-    users = result.unique().scalars().all()
-
-    # Общее количество (с учётом поиска)
-    count_stmt = select(func.count()).select_from(models.User)
-
-    # Повторяем условия поиска для подсчёта
-    if search:
-        search_term = f"%{search}%"
-        is_numeric = False
-        try:
-            int(search)
-            is_numeric = True
-        except ValueError:
-            pass
-
-        if is_numeric:
-            count_stmt = count_stmt.where(models.User.id == int(search))
+    # Если указан фильтр по статусу профиля — сперва получаем все записи по текущему фильтру (без пагинации)
+    # и фильтруем на уровне Python, чтобы корректно учитывать вычисляемое состояние профиля.
+    users = []
+    total = 0
+    if 'profile_status' in locals() and profile_status in ("complete", "incomplete"):
+        result_all = await db.execute(stmt)
+        users_all = result_all.unique().scalars().all()
+        if profile_status == "complete":
+            filtered = [u for u in users_all if u.is_profile_complete()]
         else:
-            search_parts = search.strip().split()
-            name_conditions = []
+            filtered = [u for u in users_all if not u.is_profile_complete()]
+        total = len(filtered)
+        users = filtered[offset: offset + limit]
+    else:
+        # Пагинация
+        stmt = stmt.offset(offset).limit(limit)
 
-            name_conditions.append(models.User.full_name.ilike(search_term))
+        result = await db.execute(stmt)
+        users = result.unique().scalars().all()
 
-            if len(search_parts) >= 1:
-                name_conditions.append(models.User.last_name.ilike(f"%{search_parts[0]}%"))
-                name_conditions.append(models.User.first_name.ilike(f"%{search_parts[0]}%"))
-                name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[0]}%"))
+        # Общее количество (с учётом поиска)
+        count_stmt = select(func.count()).select_from(models.User)
 
-            if len(search_parts) >= 2:
-                name_conditions.append(models.User.last_name.ilike(f"%{search_parts[1]}%"))
-                name_conditions.append(models.User.first_name.ilike(f"%{search_parts[1]}%"))
-                name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[1]}%"))
+        # Повторяем условия поиска для подсчёта
+        if search:
+            s = search.strip()
+            is_numeric = False
+            try:
+                int(s)
+                is_numeric = True
+            except ValueError:
+                pass
 
-            if len(search_parts) >= 3:
-                name_conditions.append(models.User.last_name.ilike(f"%{search_parts[2]}%"))
-                name_conditions.append(models.User.first_name.ilike(f"%{search_parts[2]}%"))
-                name_conditions.append(models.User.middle_name.ilike(f"%{search_parts[2]}%"))
+            if is_numeric:
+                count_stmt = count_stmt.where(models.User.id == int(s))
+            else:
+                if "@" in s:
+                    count_stmt = count_stmt.where(func.lower(models.User.email) == s.lower())
+                else:
+                    parts = s.split()
+                    if len(parts) >= 3:
+                        count_stmt = count_stmt.where(func.lower(models.User.full_name) == s.lower())
+                    elif len(parts) == 2:
+                        part1_cond = or_(
+                            models.User.last_name.ilike(f"%{parts[0]}%"),
+                            models.User.first_name.ilike(f"%{parts[0]}%"),
+                            models.User.middle_name.ilike(f"%{parts[0]}%")
+                        )
+                        part2_cond = or_(
+                            models.User.last_name.ilike(f"%{parts[1]}%"),
+                            models.User.first_name.ilike(f"%{parts[1]}%"),
+                            models.User.middle_name.ilike(f"%{parts[1]}%")
+                        )
+                        count_stmt = count_stmt.where(and_(part1_cond, part2_cond))
+                    else:
+                        p = f"%{parts[0]}%"
+                        name_conditions = [
+                            models.User.last_name.ilike(p),
+                            models.User.first_name.ilike(p),
+                            models.User.middle_name.ilike(p),
+                            models.User.full_name.ilike(p),
+                            models.User.email.ilike(p)
+                        ]
+                        count_stmt = count_stmt.where(or_(*name_conditions))
 
-            name_conditions.append(models.User.email.ilike(search_term))
+        count_result = await db.execute(count_stmt)
+        total = count_result.scalar() or 0
 
-            if name_conditions:
-                count_stmt = count_stmt.where(or_(*name_conditions))
-
-    count_result = await db.execute(count_stmt)
-    total = count_result.scalar() or 0
-
-    return [{
-        "id": u.id,
-        "email": u.email,
-        "full_name": u.full_name,
-        "role": u.role.value,
-        "is_blocked": u.is_blocked,
-        "registrations_count": len(u.registrations)
-    } for u in users]
+    return {
+        "items": [{
+            "id": u.id,
+            "email": u.email,
+            "full_name": u.full_name,
+            "role": u.role.value,
+            "is_blocked": u.is_blocked,
+            "registrations_count": len(u.registrations)
+        } for u in users],
+        "total": total
+    }
 
 
 @router.post("/users/{user_id}/block")
@@ -1162,6 +1185,7 @@ async def get_users_with_data(
         limit: int = Query(50, ge=1, le=200),
         offset: int = Query(0, ge=0),
         search: Optional[str] = Query(None, description="Поиск по ФИО, email или ID"),
+        profile_status: Optional[str] = Query(None, description="Статус профиля: 'complete' или 'incomplete'"),
         current_user: models.User = Depends(auth.get_current_admin)
 ):
     """
@@ -1226,6 +1250,44 @@ async def get_users_with_data(
                     from sqlalchemy import or_
                     query = query.filter(or_(*name_conditions))
 
+        # Если указан фильтр profile_status — нужно отфильтровать по вычисляемому состоянию профиля на уровне Python
+        if profile_status in ("complete", "incomplete"):
+            # Получаем все подходящие записи для корректной фильтрации (без пагинации на уровне БД)
+            all_matching = query.all()
+            desired = True if profile_status == "complete" else False
+            filtered = [u for u in all_matching if u.is_profile_complete() == desired]
+
+            total = len(filtered)
+            # Применяем смещение и лимит уже к отфильтрованному списку
+            start = offset or 0
+            end = start + (limit or len(filtered))
+            users = filtered[start:end]
+
+            # Получаем данные только для выбранных пользователей
+            export_service = ExcelExportService(sync_db)
+            users_data = export_service._get_user_export_data_batch(users)
+
+            result = []
+            for user in users:
+                data = users_data.get(user.id, {})
+                full_name = f"{user.last_name or ''} {user.first_name or ''} {user.middle_name or ''}".strip()
+                if not full_name:
+                    full_name = user.full_name or ""
+
+                result.append({
+                    "id": user.id,
+                    "email": export_service._escape_excel_string(user.email),
+                    "role": user.role.value if user.role else "teacher",
+                    "is_blocked": user.is_blocked,
+                    "created_at": user.created_at.strftime("%d.%m.%Y %H:%M") if user.created_at else "",
+                    "full_name": export_service._escape_excel_string(full_name),
+                    "data": data,
+                    "has_complete_profile": user.is_profile_complete()
+                })
+
+            return {"total": total, "items": result}
+
+        # Без фильтра profile_status — выполняем пагинацию на уровне БД
         total = query.count()
 
         if limit is not None:
